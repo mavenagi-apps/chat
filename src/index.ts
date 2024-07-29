@@ -1,5 +1,5 @@
 export default {
   handleRequest() {
-    return new Response('Hello, world!');
+    return new Response('Hello, world!!!');
   },
 };
