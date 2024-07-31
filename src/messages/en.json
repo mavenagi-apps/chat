@@ -1,0 +1,1181 @@
+{
+  "global": {
+    "mavenagi": "Maven AGI",
+    "loading": "Loading...",
+    "login": "Login",
+    "logout": "Logout",
+    "signup": "Sign Up",
+    "items": "{numItems, plural, =1 {1 item} other {# items}}",
+    "sign_out": "Sign out",
+    "no_items": "There are no items to display.",
+    "remove": "Remove",
+    "error": "There was an error!",
+    "try_again": "Try again",
+    "org_settings": "Org Settings",
+    "support": "Support"
+  },
+  "signup": {
+    "get_started": "Get started for free",
+    "org_name": "Organization name",
+    "org_name_placeholder": "Acme",
+    "org_name_error": "Organization name is required",
+    "org_friendly_id": "Organization ID",
+    "org_friendly_id_placeholder": "acme",
+    "org_friendly_id_error": "Organization ID is required",
+    "email": "Work email",
+    "email_placeholder": "name@acme.com",
+    "email_error": "Work email is required",
+    "password": "Password",
+    "password_error": "Password is required",
+    "terms": "I accept the <a class='font-medium text-primary-600 hover:underline dark:text-primary-500' target='_blank' href='https://www.mavenagi.com/terms-of-service'>terms of service</a> and <a class='font-medium text-primary-600 hover:underline dark:text-primary-500' target='_blank' href='https://www.mavenagi.com/privacy-policy'>privacy policy</a>",
+    "email_signup": "I’d like to receive emails about news & updates from Maven AGI.",
+    "already_have_account": "Already have an account?",
+    "login": "Login here",
+    "create_account": "Create an account",
+    "email_where": "We've sent a verification email to",
+    "email_click": "Click the button in your email to activate your account. Not Seeing the email?",
+    "resend": "Resend"
+  },
+  "agents": {
+    "AddAgent": {
+      "title": "Add agent",
+      "name": "Name",
+      "brand_color": "Brand color",
+      "brand_font_color": "Brand font color",
+      "friendly_id": "Friendly ID",
+      "cancel": "Cancel",
+      "add": "Add"
+    },
+    "AgentCard": {
+      "configure": "Configure",
+      "rename": "Rename"
+    },
+    "EditAgent": {
+      "rename": "Rename agent",
+      "agent_name": "Agent name",
+      "friendly_id": "Friendly ID",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "AgentsPage": {
+      "title": "Agents",
+      "add": "Add"
+    },
+    "AgentNavItems": {
+      "insights": "Insights",
+      "conversations": "Conversations",
+      "feedback": "Feedback",
+      "train": "Train",
+      "knowledge_base": "Knowledge",
+      "inbox": "Inbox",
+      "evaluate": "Evaluate",
+      "integrate": "Integrate",
+      "actions": "Actions",
+      "settings": "Settings",
+      "playground": "Playground",
+      "users": "Users",
+      "event_triggers": "Event Triggers"
+    }
+  },
+  "tickets": {
+    "TicketsPage": {
+      "date_time": "Date/Time",
+      "integration": "Integration",
+      "subject": "Subject",
+      "quality": "Quality",
+      "coverage": "Coverage",
+      "quality_reason": "Quality reason",
+      "sentiment": "Customer sentiment",
+      "resolution": "Resolution",
+      "agent_response": "Agent response",
+      "category": "Category",
+      "created_by": "Created by",
+      "updated_by": "Updated by",
+      "tags": "Tags",
+      "languages": "Languages",
+      "ticket": "Ticket",
+      "agents_involved": "Agents involved",
+      "agents_with_inserts": "Inserted by",
+      "predicted_nps": "Predicted NPS",
+      "first_response_time": "First response time",
+      "handle_time": "Handle time",
+      "user_context_name": "Customer context name",
+      "user_context_email": "Customer context email",
+      "user_context_additional": "Additional customer context",
+      "conversations": "Conversations",
+      "export": "Export"
+    },
+    "TicketFilters": {
+      "created_at": "Created at"
+    },
+    "TicketPage": {
+      "conversations": "Conversations",
+      "ignored_ticket": "Ignored ticket",
+      "translated_to": "Translated to {language}",
+      "undo": "Undo",
+      "actions": "Actions",
+      "add_to_reference_set": "Add to reference set",
+      "open_in_playground": "Open in playground",
+      "summary": "Summary",
+      "user_request": "Customer request",
+      "agent_response": "Agent response",
+      "resolution_status": "Resolution status",
+      "agents_involved": "Agents involved",
+      "agents_with_inserts": "Inserted by",
+      "sentiment": "Customer sentiment",
+      "quality": "Quality",
+      "tags": "Tags",
+      "metadata": "Metadata",
+      "languages": "Languages",
+      "translate_to": "Translate to {language}",
+      "created": "Created",
+      "first_response_time": "First response time",
+      "handle_time": "Handle time",
+      "integration": "Integration",
+      "category": "Category",
+      "feedback": "Feedback",
+      "external_id": "External ID",
+      "user_information": "Customer information",
+      "contextual_ticket": "Contextual ticket",
+      "followup_ticket": "Followup ticket",
+      "handoff_info": "Handoff info",
+      "handoff_ticket": "Handoff ticket",
+      "predicted_nps": "Predicted NPS",
+      "original_ticket": "Original ticket",
+      "handoff_count": "Handoff count"
+    },
+    "AddTicketEval": {
+      "title": "Add question to eval",
+      "body": "Please <link>create a reference set</link> first",
+      "cancel": "Cancel",
+      "reference_set": "Reference set",
+      "question": "Question",
+      "answer": "Answer",
+      "add_question": "Add question",
+      "save": "Save"
+    },
+    "AddTicketMessageDoc": {
+      "add_knowledge": "Add knowledge",
+      "body": "Please <link>create a manual knowledge base</link> first",
+      "cancel": "Cancel",
+      "add_question_to_eval": "Add question to eval",
+      "knowledge_base": "Knowledge base",
+      "title": "Title",
+      "source_url": "Source URL",
+      "content": "Content",
+      "save": "Save"
+    },
+    "FeedbackModal": {
+      "title": "Why did you select this feedback?",
+      "down_placeholder": "Let us know how the response can be improved.",
+      "up_placeholder": "Let us know what you liked about the response.",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "MessageRow": {
+      "maven_agent_suggestion": "Maven agent suggestion",
+      "user_message": "Customer message",
+      "maven_agent_response": "Maven agent response",
+      "external_system_message": "External system message",
+      "action_response": "Action response",
+      "human_agent": "Human agent {name}",
+      "no_documents": "No knowledge found, answer generated with general intelligence available about the customer.",
+      "feedback": "Feedback",
+      "no_feedback": "No textual feedback",
+      "view_less": "View less",
+      "view_details": "View details",
+      "inserted": "Inserted",
+      "add_to_kb": "Add to knowledge base",
+      "handoff_triggered": "Handoff triggered",
+      "no_title": "No title",
+      "canceled_by_user": "Canceled by user",
+      "rejected_by_bot": "Rejected",
+      "untitled_action": "Untitled action",
+      "action_shown": "Action form shown",
+      "actions_considered": "Actions considered"
+    }
+  },
+  "members": {
+    "MembersPage": {
+      "title": "Members",
+      "invitations": "Invitations",
+      "actions": "Actions",
+      "change_role": "Change role",
+      "remove": "Remove",
+      "invite": "Invite member",
+      "add": "Add member",
+      "no_members": "There are no items to display."
+    },
+    "AddMember": {
+      "title": "Invite",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "cancel": "Cancel",
+      "invite": "Invite"
+    },
+    "ChangeRole": {
+      "title": "Change role for {name} ({email})",
+      "role": "Role",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "RemoveMember": {
+      "title": "Are you sure you want to remove \"{name}\"?",
+      "description": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "remove": "Remove"
+    },
+    "invitations": {
+      "InvitationsPage": {
+        "title": "Invitations",
+        "actions": "Actions",
+        "remove": "Remove",
+        "members": "Members",
+        "invite_member": "Invite member",
+        "no_invitations": "There are no items to display."
+      },
+      "RemoveInvitation": {
+        "title": "Are you sure you want to remove {email}?",
+        "description": "This action cannot be undone.",
+        "error": "Error deleting member",
+        "cancel": "Cancel",
+        "remove": "Remove"
+      }
+    }
+  },
+  "settings": {
+    "SettingsPage": {
+      "org_details": "Organization details",
+      "edit": "Edit",
+      "name": "Organization name",
+      "id": "Organization ID",
+      "language": "Language",
+      "agent": "Default agent",
+      "delete": "Delete Organization"
+    },
+    "IntegratePage": {
+      "title": "Settings",
+      "branding": "Branding",
+      "edit": "Edit",
+      "brand_color": "Brand color",
+      "brand_font_color": "Brand font color",
+      "square_logo": "Square logo",
+      "horizontal_logo": "Horizontal logo",
+      "agent_logo": "Agent logo",
+      "response_customization": "Response customization",
+      "persona": "Persona",
+      "default": "Default",
+      "strict_mode": "Only return answers for existing knowledge",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "additional_persona_instructions": "Additional persona instructions",
+      "popular_questions": "Popular questions",
+      "none_provided": "None provided",
+      "handoff": "Handoff",
+      "conversation_processing": "Conversation processing",
+      "ignored_tags": "Ignored conversation tags",
+      "none": "None",
+      "delete_agent": "Delete agent",
+      "none_specified": "None specified"
+    },
+    "DeleteOrg": {
+      "title": "Are you sure you want to delete {name}?",
+      "description": "This action cannot be undone.",
+      "confirm_label": "Type {phrase} to continue",
+      "confirm_error": "You must type \"{phrase}\"",
+      "confirm_phrase": "DELETE",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "EditOrg": {
+      "title": "Edit organization",
+      "name": "Organization name",
+      "id": "Organization ID",
+      "agent": "Default agent",
+      "language": "Language",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "DeleteAgent": {
+      "title": "Are you sure you want to delete {name}?",
+      "description": "This action cannot be undone.",
+      "confirm_label": "Type {phrase} to continue",
+      "confirm_error": "You must type \"{phrase}\"",
+      "confirm_phrase": "DELETE",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "EditTicketProcessingConfig": {
+      "title": "Customize conversation processing",
+      "ignored_conversation_tag": "Ignored conversation tag {i}",
+      "add_tag": "Add a tag",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "AgentSelector": {
+      "create_agent": "Create agent",
+      "agents": "Agents"
+    }
+  },
+  "insights": {
+    "MetricsPage": {
+      "title": "Insights",
+      "top_categories": "Top categories",
+      "top_tags": "Top tags",
+      "top_agents": "Top agents"
+    },
+    "InsightsTableCard": {
+      "count": "Count",
+      "inserts": "Inserts",
+      "ticket_inserts": "Tickets with inserts",
+      "coverage": "Coverage",
+      "average_response_time": "Avg response time",
+      "average_user_interactions": "Avg user interactions",
+      "average_predicted_nps": "Avg predicted NPS",
+      "no_results": "There are no items to display.",
+      "export": "Export"
+    },
+    "charts": {
+      "conversations": "Conversations",
+      "user_interactions": "Customer interactions",
+      "sentiment": "Customer sentiment",
+      "quality": "Maven quality",
+      "coverage": "Maven resolvable coverage",
+      "coverage_tooltip": "Coverage is the percent of conversations that Maven handled well",
+      "overall_quality": "Overall Maven quality",
+      "quality_reasons": "Quality improvement opportunities",
+      "overall_sentiment": "Overall customer sentiment",
+      "inserts": "Agent co-Pilot insert usage",
+      "first_response": "Hours to first response",
+      "total_conversations": "Total conversations",
+      "predicted_nps": "Average predicted NPS",
+      "maven_handoffs": "Handoff to human agent rate",
+      "handle_time_subtitle": "Overall average handle time for entire time window",
+      "handle_time_tooltip": "Handle time is the length of time it took to answer the user's question",
+      "handle_time_title": "Average Handle Time"
+    }
+  },
+  "actions": {
+    "ActionPage": {
+      "loading_error": "Loading error",
+      "actions": "Actions",
+      "description": "Description",
+      "description_override": "Description Override",
+      "button_name": "Button name",
+      "parameter_name": "Parameter name",
+      "validation": "Validation",
+      "required": "Required",
+      "search_status": "Status",
+      "edit": "Edit"
+    },
+    "EditActionPage": {
+      "title": "Edit Action",
+      "actions": "Actions",
+      "description_override": "Description Override",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "ActionsPage": {
+      "actions": "Actions",
+      "add_actions": "Install an action provider from the App Marketplace",
+      "app_id": "App",
+      "name": "Name",
+      "description": "Description",
+      "userInteractionRequired": "User interaction required",
+      "interaction_required": "Yes",
+      "interaction_not_required": "No",
+      "exclude": "Exclude",
+      "include": "Include",
+      "pin": "Pin",
+      "search_status": "Status"
+    },
+    "EditSearchStatus": {
+      "title": "Change action search status",
+      "body": "Activated or pinned actions will be used to train your agent. Deactivated documents will not be used.",
+      "PIN_body": "Pinned actions will be available on all questions.",
+      "INCLUDE_body": "Include actions will be available on all questions which are similar to the action name or description.",
+      "EXCLUDE_body": "Exclude actions will not be used to answer questions.",
+      "PIN_button_single": "Pin this action",
+      "INCLUDE_button_single": "Include this action",
+      "EXCLUDE_button_single": "Exclude this action",
+      "PIN_button_n": "Pin these {n} actions",
+      "INCLUDE_button_n": "Include these {n} actions",
+      "EXCLUDE_button_n": "Exclude these {n} actions",
+      "cancel": "Cancel"
+    }
+  },
+  "eval": {
+    "EvaluatePage": {
+      "created": "Created",
+      "evaluate": "Evaluate",
+      "add": "Add",
+      "add_reference_set": "Add reference set",
+      "name": "Name",
+      "source": "Source"
+    },
+    "EvaluateResultsPage": {
+      "view": "View",
+      "evaluate": "Evaluate",
+      "no_items": "There are no items to display.",
+      "question": "Question",
+      "expected_answer": "Expected answer",
+      "actual_answer": "Actual answer",
+      "quality": "Quality",
+      "action": "Action",
+      "export": "Export"
+    },
+    "ReferenceSessionPage": {
+      "loading_error": "Loading error",
+      "evaluate": "Evaluate",
+      "session": "Session",
+      "edit": "Edit",
+      "question": "Question",
+      "expected_answer": "Expected answer"
+    },
+    "ReferenceSetPage": {
+      "evaluate": "Evaluate",
+      "actions": "Actions",
+      "rename": "Rename",
+      "delete": "Delete",
+      "add": "Add",
+      "no_items": "There are no items to display.",
+      "add_questions": "Add questions"
+    },
+    "AddReferenceSet": {
+      "title": "Add reference set",
+      "name": "Name",
+      "type": "Type",
+      "manual": "Manual",
+      "csv": "CSV",
+      "csv_file": "CSV file",
+      "cancel": "Cancel",
+      "add": "Add"
+    },
+    "AddReferenceSession": {
+      "title": "Add question",
+      "question": "Question",
+      "answer": "Answer",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "DeleteReferenceSet": {
+      "title": "Are you sure you want to delete reference set {name}?",
+      "description": "This action cannot be undone.",
+      "confirm_label": "Type {phrase} to continue",
+      "confirm_error": "You must type \"{phrase}\"",
+      "confirm_phrase": "DELETE",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "RenameReferenceSet": {
+      "title": "Rename reference set",
+      "name": "Name",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "EvalResultSetsCard": {
+      "title": "Eval results",
+      "no_items": "There are no items to display.",
+      "no_items_description": "Test your agent by TBD",
+      "run_eval": "Run eval"
+    },
+    "RunEval": {
+      "title": "Run evaluation",
+      "name": "Name",
+      "run": "Run",
+      "cancel": "Cancel"
+    },
+    "EditReferenceSession": {
+      "title": "Edit questions",
+      "question": "Question",
+      "answer": "Answer",
+      "add_question": "Add question",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "save": "Save"
+    }
+  },
+  "playground": {
+    "TicketsPanel": {
+      "playground": "Playground",
+      "no_items": "There are no items to display.",
+      "new_conversation": "New conversation",
+      "date_time": "Date/Time",
+      "subject": "Subject",
+      "surface": "Surface",
+      "persona": "Persona",
+      "created_by": "Created by",
+      "import": "Import",
+      "export": "Export",
+      "hide": "Delete",
+      "coverage_of_selected_tickets": "Coverage"
+    },
+    "HideTicketsModal": {
+      "title": "Are you sure you want to delete {items_string}?",
+      "description": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "DELETE"
+    },
+    "SingleTicketView": {
+      "conversation": "Conversation",
+      "new_run": "New run",
+      "integration": "Integration",
+      "persona": "Persona",
+      "subject": "Subject",
+      "user_question": "Customer question",
+      "user_name": "Customer name",
+      "user_email": "Customer email",
+      "additional_context": "Additional context",
+      "add_additional_context": "Add additional context",
+      "additional_persona_instructions": "Additional persona instructions",
+      "use_agent_default": "Use agent default",
+      "include_agent_knowledge": "Include agent's current knowledge",
+      "include_agent_knowledge_tooltip": "If checked, the run will draw from the agent's current knowledge (i.e., active knowledge bases), which may be refined below.",
+      "include_additional_corpora": "Also include",
+      "include_additional_corpora_tooltip": "Also include the following inactive knowledge bases, which are not part of the agent's current knowledge.",
+      "updated_at": "Updated at",
+      "run": "Run",
+      "default_state_title": "To start, click the \"Run\" button within your configuration panel",
+      "default_state_subtitle": "This will generate a response from the Maven agent.",
+      "maven_agent_response": "Maven agent response"
+    },
+    "ImportQuestionList": {
+      "import": "Import",
+      "title": "Import questions",
+      "csv_file": "CSV file",
+      "cancel": "Cancel",
+      "in_progress": "Import in progress..."
+    }
+  },
+  "users": {
+    "AgentUserPage": {
+      "agent_user": "App User Profiles",
+      "agent_users": "Users",
+      "all_agent_users": "All Users",
+      "app_profiles": "App Profiles",
+      "app_profile_ids": "Apps",
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "email_identifiers": "Emails",
+      "identifiers": "Identifiers",
+      "maven_app_id": "App ID",
+      "metadata": "User Data",
+      "metadata_key": "User Data Keys",
+      "metadata_value": "User Data Values",
+      "phone_identifiers": "Phone Numbers"
+    }
+  },
+  "feedback": {
+    "FeedbackPage": {
+      "actions": "Actions",
+      "all_feedback": "All feedback",
+      "date": "Date",
+      "export": "Export",
+      "feedback": "Feedback",
+      "feedback_text": "Feedback text",
+      "maven_answer": "Maven answer",
+      "none_provided": "None provided",
+      "open_ticket": "Open ticket",
+      "ticket": "Ticket",
+      "type": "Type",
+      "user_message": "Customer message",
+      "view": "View",
+      "view_ticket": "View ticket"
+    }
+  },
+  "inbox": {
+    "refresh": "Refresh",
+    "actions": "Actions",
+    "unresolved": "Unresolved",
+    "resolved": "Resolved",
+    "ignored": "Ignored"
+  },
+  "event_triggers": {
+    "list_title": "Event Triggers"
+  },
+  "integrate": {
+    "IntegratePage": {
+      "integrate": "Integrate",
+      "install": "Install",
+      "default_setup_caption": "Setup agent co-pilot and knowledge",
+      "chat": {
+        "title": "Chat",
+        "caption": "Integrate the chat widget"
+      },
+      "instant_answers": {
+        "title": "Instant Answers",
+        "caption": "Integrate the instant answers widget"
+      },
+      "api": {
+        "title": "API",
+        "caption": "Integrate using the Maven AGI API"
+      },
+      "app_marketplace": {
+        "title": "App marketplace",
+        "caption": "Install Maven Apps from the App Marketplace"
+      },
+      "search": "Search"
+    },
+    "ChatSettingsPage": {
+      "integrate": "Integrate",
+      "chat": "Chat",
+      "welcome_message": "Welcome message",
+      "edit": "Edit",
+      "no_welcome_message_title": "There is nothing to display.",
+      "no_welcome_message_subtitle": "Add a welcome message to display in your agent.",
+      "add": "Add",
+      "integration": "Integration",
+      "widget_instructions": "Include the following code snippet in your website to embed a chat widget.",
+      "widget_methods": "You can manually open and close the chat widget using the following methods:",
+      "preview_widget": "Preview widget"
+    },
+    "InstantSettingsPage": {
+      "integrate": "Integrate",
+      "instant_answers": "Instant Answers",
+      "integration": "Integration",
+      "instructions": "Include the following code snippet in your website to embed a instant answers widget.",
+      "preview_widget": "Preview widget"
+    },
+    "ExternalIntegrationPage": {
+      "integrate": "integrate",
+      "title": "Integrate with {integration}",
+      "subtitle": "Connect to {integration} to use agent co-pilot or to make knowledge bases from {integration} articles.",
+      "setup_copilot": "Setup {integration} copilot",
+      "agent_api_key": "Agent API Key"
+    },
+    "IntegrationCard": {
+      "settings": "Settings",
+      "preview": "Preview",
+      "default_caption": "Try out the experience here"
+    },
+    "IntegrationConfigCard": {
+      "save": "Save",
+      "account_information": "{integration} account information",
+      "connection_failed": "Connection failed",
+      "connection_success": "Connection success"
+    },
+    "AppMarketplacePage": {
+      "all_apps": "All apps",
+      "app_id": "App ID",
+      "app_marketplace": "App Marketplace",
+      "app_name": "App name",
+      "created_by_maven": "Created by Maven AGI",
+      "developer_organization_id": "Developer organization ID",
+      "developer_organization_name": "Developer organization Name",
+      "install": "Install",
+      "installable_apps": "Installable apps",
+      "installed_apps": "Installed apps",
+      "no_apps_installable": "No Apps available",
+      "no_apps_installed": "No Apps are installed",
+      "integrate": "Integrate",
+      "uninstall": "Uninstall"
+    },
+    "ApiPage": {
+      "integrate": "Integrate",
+      "application_programming_interface": "API"
+    },
+    "ApiCard": {
+      "title": "API Keys",
+      "agent_api_key": "Agent API key",
+      "agent_api_secret": "Agent API secret"
+    },
+    "EditBranding": {
+      "title": "Edit branding",
+      "brand_color": "Brand color",
+      "brand_font_color": "Brand font color",
+      "square_logo": "Square logo",
+      "horizontal_logo": "Horizontal logo",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "EditResponseConfig": {
+      "title": "Customize agent responses",
+      "conversation_persona": "Conversation persona",
+      "strict_mode": "Only return answers for existing knowledge",
+      "additional_instructions": "Additional persona instruction",
+      "popular_questions": "Popular questions {i}",
+      "add_popular_question": "Add popular question",
+      "handoff_type": "Handoff type",
+      "handoff_integration": "Handoff integration",
+      "handoff_text": "Handoff text",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "EditWelcomeMessage": {
+      "title": "Welcome message",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "IntegrationError": {
+      "danger": "Danger",
+      "retry": "Retry"
+    }
+  },
+  "knowledge": {
+    "CorpusPage": {
+      "train": "Train",
+      "unnamed_content": "Unnamed content",
+      "edit": "Edit",
+      "URL": "URL",
+      "language": "Language",
+      "detected": "(detected)",
+      "content": "Content",
+      "source": "Source",
+      "created": "Created",
+      "updated": "Updated",
+      "external_link": "External link",
+      "actions": "Actions",
+      "refresh": "Refresh",
+      "add": "Add",
+      "delete": "Delete",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "creating_knowledge_base": "Your knowledge base is being created.",
+      "no_items_title": "There are no items to display.",
+      "no_items_description": "Build your agent's knowledge base by adding individual pieces of content.",
+      "add_content": "Add content",
+      "change_status_button": "Change status",
+      "status": "Status",
+      "documents": "Documents",
+      "title_content": "Title/Content",
+      "created_header": "Created on",
+      "updated_header": "Last updated",
+      "language_header": "Lang",
+      "cancel_processing": "Cancel processing"
+    },
+    "DocumentPage": {
+      "actions": "Actions",
+      "collapse": "Collapse",
+      "created": "Created",
+      "detected": "(detected)",
+      "edit": "Edit",
+      "exclude_doc_setting": "Exclude this document from my knowledge base",
+      "language": "Language",
+      "last_updated": "Last updated",
+      "settings": "Settings",
+      "source": "Source",
+      "status": "Status",
+      "summary": "Summary",
+      "train": "Train",
+      "unnamed_content": "Unnamed content",
+      "url": "URL"
+    },
+    "DocumentStatus": {
+      "INCLUDE": "Active",
+      "EXCLUDE_ALWAYS": "Inactive",
+      "PROCESSING": "Processing",
+      "kb_inactive": "KB Inactive"
+    },
+    "FeedbackPage": {
+      "train": "Train",
+      "name": "Name",
+      "created": "Created",
+      "updated": "Updated",
+      "source": "Source",
+      "rows": "Rows",
+      "status": "Status",
+      "tags": "Tags",
+      "add": "Add",
+      "no_kb_message": "Build your agent's knowledge base by adding a public website, individual pieces of content, or bulk upload a CSV.",
+      "add_kb": "Add knowledge base"
+    },
+    "EntryPage": {
+      "train": "Train",
+      "knowledge_bases": "Knowledge Bases",
+      "documents": "Documents",
+      "title_header": "TITLE/CONTENT",
+      "created_header": "CREATED ON",
+      "updated_header": "LAST UPDATED",
+      "name_header": "NAME",
+      "language_header": "LANG",
+      "status_header": "STATUS",
+      "source_header": "SOURCE",
+      "rows": "Rows",
+      "tags": "Tags",
+      "add": "Add",
+      "no_kb_message": "Build your agent's knowledge base by adding a public website, individual pieces of content, or bulk upload a CSV.",
+      "add_kb": "Add knowledge base",
+      "status": "Status"
+    },
+    "AddCorpus": {
+      "title": "Add knowledge base",
+      "name_prefix": "Name prefix",
+      "name": "Name",
+      "type": "Type",
+      "URL": "URL",
+      "file_upload": "File upload",
+      "external_kb": "External knowledge base",
+      "manual": "Manual",
+      "integration": "Integration",
+      "advanced": "Advanced",
+      "url_exclusion_pattern": "URL exclusion pattern {i}",
+      "add_exclusion_pattern": "Add a URL exclusion pattern",
+      "css_elements_to_remove": "CSS elements to remove",
+      "max_crawl_depth": "Max crawl depth",
+      "max_crawl_pages": "Max crawl Pages",
+      "html_transformer": "HTML transformer (internal only)",
+      "readable_text_with_fallback": "Readable text with fallback:",
+      "readable_text": "Readable text",
+      "extractus": "extractus",
+      "none": "None",
+      "cancel": "Cancel",
+      "add": "Add",
+      "refresh_frequency": "Refresh frequency",
+      "use_sitemaps": "Use sitemaps"
+    },
+    "AddCorpusContent": {
+      "add_content": "Add content",
+      "title": "Title",
+      "source_url": "Source URL",
+      "content": "Content",
+      "cancel": "Cancel",
+      "add": "Add"
+    },
+    "ChangeCorpusActivation": {
+      "activate_kb": "Activate knowledge base",
+      "deactivate_kb": "Deactivate knowledge base",
+      "error": "Error saving knowledge base",
+      "cancel": "Cancel",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "single_kb": "this knowledge base",
+      "multiple_kbs": "these {n} knowledge bases",
+      "confirm_activate": "Are you sure you want to activate {name}?",
+      "confirm_deactivate": "Are you sure you want to deactivate {name}?"
+    },
+    "CancelCorpus": {
+      "title": "Cancel processing",
+      "error": "Error: unable to cancel processing",
+      "confirm_cancel": "Are you sure you want to cancel the processing of {name}?",
+      "cancel_action": "Cancel processing",
+      "do_not_cancel": "Do not cancel"
+    },
+    "DeleteCorpus": {
+      "confirm_phrase": "DELETE",
+      "confirm_label": "Type {phrase} to continue",
+      "confirm_error": "You must type \"{phrase}\"",
+      "confirm_title": "Are you sure you want to delete knowledge base {name}?",
+      "confirm_description": "This action cannot be undone.",
+      "cancel": "Cancel"
+    },
+    "EditCorpus": {
+      "title": "Edit knowledge base",
+      "name": "Name",
+      "advanced": "Advanced",
+      "corpus_url_exclusion_pattern": "Corpus URL exclusion pattern",
+      "add_url_exclusion_pattern": "Add URL exclusion pattern",
+      "corpus_tag": "Corpus tag",
+      "add_tag": "Add tag",
+      "css_elements_to_remove": "CSS elements to remove",
+      "max_crawl_depth": "Max crawl depth",
+      "max_crawl_pages": "Max crawl pages",
+      "html_transformer": "HTML transformer (internal only)",
+      "readable_text_with_fallback": "Readable text with fallback",
+      "readable_text": "Readable text",
+      "extractus": "Extractus",
+      "none": "None",
+      "cancel": "Cancel",
+      "save": "Save",
+      "refresh_frequency": "Refresh frequency",
+      "use_sitemaps": "Use sitemaps"
+    },
+    "EditDocument": {
+      "title": "Edit content details",
+      "title_placeholder": "Title",
+      "source_url": "Source URL",
+      "language": "Language",
+      "content": "Content",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "EditDocumentPolicy": {
+      "title": "Change document status",
+      "body": "Activated documents will be used to train your agent. Deactivated documents will not be used.",
+      "activate_body": "Activated documents will be used to train your agent.",
+      "deactivate_body": "Deactivated documents will not be used to train your agent.",
+      "activate_n_documents": "Activate these {n} documents",
+      "deactivate_n_documents": "Deactivate these {n} documents",
+      "activate": "Activate this document",
+      "deactivate": "Deactivate this document",
+      "INCLUDE": "Activate this document",
+      "EXCLUDE_ALWAYS": "Deactivate this document",
+      "cancel": "Cancel"
+    }
+  },
+  "chat": {
+    "Copilot": {
+      "copied_to_clipboard": "Copied to clipboard",
+      "ticket_summary": "Ticket summary",
+      "interactions": "Interactions",
+      "category": "Category",
+      "resolution_status": "Resolution status",
+      "user_request": "Customer request",
+      "agent_response": "Agent response",
+      "suggested_response": "Suggested response",
+      "related_links": "Related links",
+      "insert": "Insert",
+      "copy": "Copy",
+      "no_access_error": "Maven does not have access to sync this ticket",
+      "generate_answer_error": "Unfortunately, we couldn't generate an answer.",
+      "bot_answer_error": "Unfortunately, we can't find the answer you are looking for.",
+      "generic_error": "An error occurred. Please try again."
+    },
+    "ChatPage": {
+      "default_welcome_message": "How can we help you? You can start a conversation below or start with popular questions:",
+      "default_error_message": "An error occurred. Please try again.",
+      "related_links": "Related links",
+      "powered_by": "Powered by"
+    },
+    "ChatMessage": {
+      "call_action_error": "Error submitting form",
+      "call_action_success": "Saved! Can I help with anything else?",
+      "save": "Save"
+    },
+    "ChatButton": {
+      "get_help": "Get Help"
+    },
+    "BailoutFormDisplay": {
+      "unable_to_answer": "I am unable to answer this question.",
+      "default_bailout_text": "Please try another question or contact a support agent for more assistance.",
+      "integration_bailout_text": "I think you need a support agent to answer this question. Please try another question, or let me create a support ticket for you.",
+      "name": "Name",
+      "email": "Email",
+      "question": "Question",
+      "ticket_created_title": "Support ticket successfully created",
+      "ticket_created_description": "An agent will get back to you within 24-48 hours",
+      "send": "Send"
+    },
+    "ChatInput": {
+      "see_more": "See more",
+      "see_less": "See less"
+    },
+    "FeedbackForm": {
+      "submit_error": "Error submitting feedback",
+      "submit_success": "Thanks for your feedback!",
+      "thumbs_up": "Thumbs up",
+      "thumbs_down": "Thumbs down",
+      "human_agent_requested": "Human agent requested",
+      "copied_to_clipboard": "Copied to clipboard",
+      "copy_to_clipboard": "Copy to clipboard",
+      "speak_to_agent": "Speak to agent",
+      "feedback_reason": "Why did you select this feedback?",
+      "down_placeholder": "Let us know how the response can be improved.",
+      "up_placeholder": "What did you like about the response?",
+      "submit": "Submit"
+    },
+    "DisplayTranslatedSuggestion": {
+      "translate_to": "Translate to",
+      "loading": "Loading translation...",
+      "show_translation": "Show translation",
+      "hide_translation": "Hide translation",
+      "edit_suggestion": "Edit suggestion",
+      "copy_to_clipboard": "Copy to clipboard"
+    },
+    "EditTranslatedSuggestion": {
+      "title": "Edit suggested response",
+      "cancel": "Cancel",
+      "translate": "Translate"
+    }
+  },
+  "search": {
+    "search": "Search",
+    "clear": "Clear",
+    "select_filter": "Select or type filter",
+    "SearchPage": {
+      "title": "How can we help?",
+      "description": "You can ask any question or start with a popular question",
+      "powered_by": "Powered by",
+      "related_links": "Related links"
+    },
+    "TableFilter": {
+      "filter": "Filter",
+      "reset": "Reset",
+      "show_results": "Show results"
+    },
+    "LoadingAnswerAnimation": {
+      "loading": "Loading...",
+      "searching": "Searching knowledge base...",
+      "identifying": "Identifying relevant knowledge...",
+      "personalizing": "Personalizing results...",
+      "generating": "Generating results..."
+    }
+  },
+  "instant_answer": {
+    "Page": {
+      "title": "Maven Instant Answer",
+      "related_links": "Related links",
+      "powered_by": "Powered by",
+      "error": "An error occurred. Please try again."
+    },
+    "SearchResult": {
+      "result": "Result"
+    }
+  },
+  "errors": {
+    "not_found_title": "404 Page not found",
+    "not_found_description": "Whoops! That page doesn't exist.",
+    "bad_request": "Bad request",
+    "page_not_found": "Page not found",
+    "internal_server_error": "Internal server error",
+    "error": "Error",
+    "sign_out": "Sign out",
+    "generic_error": "An error occurred.",
+    "helpful_links": "Here are some helpful links:",
+    "home": "Home",
+    "contact_us": "Contact us"
+  },
+  "enums": {
+    "role": {
+      "OWNER": "Owner",
+      "ADMIN": "Admin",
+      "MEMBER": "Member",
+      "READER": "Reader"
+    },
+    "quality": {
+      "PERFECT": "Perfect",
+      "GREAT": "Great",
+      "OK": "Okay",
+      "POOR": "Needs improvement",
+      "GOOD": "Good",
+      "UNKNOWN": "Ineligible",
+      "MISSING_GENERAL_KNOWLEDGE": "Missing knowledge",
+      "MISSING_USER_CONTEXT": "Missing customer data",
+      "CANT_TAKE_ACTION": "Can't take action",
+      "NEEDS_USER_CLARIFICATION": "Needs clarification",
+      "UNSUPPORTED_QUESTION_FORMAT": "Unsupported format",
+      "GREAT_ANSWER": "Great answer",
+      "UNRESOLVED": "Unresolved",
+      "UNSUPPORTED_USER_BEHAVIOR": "Unsupported user behavior"
+    },
+    "sentiment": {
+      "POSITIVE": "Positive",
+      "NEGATIVE": "Negative",
+      "NEUTRAL": "Neutral",
+      "MIXED": "Mixed",
+      "UNKNOWN": "Unknown"
+    },
+    "feedback": {
+      "THUMBS_UP": "Thumbs up",
+      "THUMBS_DOWN": "Thumbs down",
+      "INSERT": "Inserted",
+      "HANDOFF": "Handoff"
+    },
+    "llm_usage_context": {
+      "UNKNOWN": "Unknown",
+      "SUMMARIZATION": "Summarization",
+      "QUALITY_ANALYSIS": "Quality analysis",
+      "TEXT_CATEGORIZATION": "Text categorization",
+      "QA_SMS": "Q&A sms",
+      "QA_COPILOT": "Q&A copilot",
+      "QA_CHAT": "Q&A chat",
+      "QA_SEARCH": "Q&A search"
+    },
+    "llm_persona": {
+      "ANY": "Any (Wildcard)",
+      "CONCISE_EXPERT": "Concise expert",
+      "ENTHUSIASTIC_HELPER": "Enthusiastic helper",
+      "CASUAL_BUDDY": "Casual buddy",
+      "FORMAL_PROFESSIONAL": "Formal professional",
+      "PATIENT_EDUCATOR": "Patient educator",
+      "EMPATHETIC_SUPPORTER": "Empathetic supporter",
+      "PIRATE": "Pirate"
+    },
+    "surface": {
+      "WEB": "Smart Search",
+      "CHATBOT": "Chat",
+      "SMS": "SMS",
+      "SLACK": "Slack",
+      "WHATSAPP": "WhatsApp",
+      "COPILOT": "Co-pilot",
+      "COPILOT_CHAT": "Co-pilot Chat",
+      "INTERNAL": "Internal",
+      "INSTANT_ANSWER": "Instant Answer",
+      "PLAYGROUND": "Playground",
+      "UNKNOWN": "Unknown"
+    },
+    "integration": {
+      "SALESFORCE": "Salesforce",
+      "ZENDESK": "Zendesk",
+      "FRESHDESK": "Freshdesk",
+      "SLACK_QA_BOT": "Slack Bot",
+      "TWILIO": "Twilio"
+    },
+    "salesStatus": {
+      "LIVE": "Live",
+      "ONBOARDING": "Onboarding",
+      "PROSPECT": "Prospect",
+      "TESTING": "Testing",
+      "Z_INACTIVE": "Inactive"
+    },
+    "insightsCategory": {
+      "CATEGORY": "Category",
+      "TAG": "Tag",
+      "HUMAN_AGENT": "Agent"
+    },
+    "corpusType": {
+      "URL": "URL",
+      "MANUAL": "Manual",
+      "FILE_UPLOAD": "File Upload",
+      "EXTERNAL_INTEGRATION": "External knowledge base",
+      "MAVEN_API": "Maven app",
+      "FRESHDESK_KB": "Freshdesk KB",
+      "ZENDESK_KB": "Zendesk KB",
+      "SALESFORCE_KB": "Salesforce KB",
+      "CSV": "CSV",
+      "RSS": "RSS",
+      "UNKNOWN": "Unknown"
+    },
+    "corpusPolicy": {
+      "INCLUDE": "Active",
+      "EXCLUDE_ALWAYS": "Inactive"
+    },
+    "knowledgeStatus": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "PROCESSING": "Processing",
+      "FAILED": "Failed"
+    },
+    "corpusRefreshFrequency": {
+      "NONE": "Do not refresh automatically",
+      "DAILY": "Daily",
+      "WEEKLY": "Weekly",
+      "MONTHLY": "Monthly"
+    },
+    "inboxItemSeverity": {
+      "HIGH": "High Priority",
+      "MEDIUM": "Medium Priority",
+      "LOW": "Low Priority"
+    },
+    "inboxItemStatus": {
+      "OPEN": "Unresolved",
+      "USER_RESOLVED": "User Resolved",
+      "SYSTEM_RESOLVED": "System Resolved",
+      "REGRESSED": "Regressed",
+      "IGNORED": "Ignored",
+      "PENDING": "Pending"
+    },
+    "inboxItemType": {
+      "DUPLICATE_DOCUMENT": "Duplicate Document",
+      "DUPLICATE_CORPUS": "Duplicate Corpus",
+      "BAD_DOCUMENT": "Bad Document",
+      "MISSING_KNOWLEDGE": "Missing Knowledge"
+    },
+    "inboxItemFixType": {
+      "DEACTIVATE_CORPUS": "Deactivate Knowledge Base",
+      "REMOVE_DOCUMENT": "Deactivate Knowledge Document",
+      "EDIT_DOCUMENT": "Edit Knowledge Document",
+      "ADD_DOCUMENT": "Add Knowledge Document"
+    },
+    "triggerType": {
+      "CONVERSATION_CREATED": "Conversation created",
+      "FEEDBACK_CREATED": "Feedback created"
+    },
+    "actionSearchStatus": {
+      "INCLUDE": "Included",
+      "EXCLUDE": "Excluded",
+      "PIN": "Pinned"
+    }
+  }
+}
