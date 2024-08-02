@@ -2,7 +2,7 @@
 
 import {agentImage} from '@/app/urls'
 import {Logo} from '@/components/Logo'
-import {ReactMarkdown} from '@/components/ReactMarkdown.tsx'
+import {ReactMarkdown} from '@/components/ReactMarkdown'
 import Spinner from '@/components/Spinner'
 import BailoutFormDisplay from '@/components/chat/BailoutFormDisplay'
 import Chat from '@/components/chat/Chat'
@@ -38,14 +38,14 @@ export default function ChatPage({params}: Props) {
   const defaultAgentId = React.useContext(DefaultAgentIdContext)
   const agentId = params.id && params.id.length === 1 ? params.id[0] : defaultAgentId
 
-  const agent = rpc.agent.get.useSuspenseQuery({agentId}).data
+  // const agent = rpc.agent.get.useSuspenseQuery({agentId}).data
 
-  const analytics = useAnalytics()
-  useEffect(() => {
-    analytics.logEvent(MagiEvent.chatHomeView, {agentId: agent.id})
-  }, [agent.id])
+  // const analytics = useAnalytics()
+  // useEffect(() => {
+  //   analytics.logEvent(MagiEvent.chatHomeView, {agentId: agent.id})
+  // }, [agent.id])
 
-  const chatConfig = rpc.agent.configs.chat.useSuspenseQuery({agentId}).data
+  // const chatConfig = rpc.agent.configs.chat.useSuspenseQuery({agentId}).data
 
   const {messages, isLoading, isResponseAvailable, askQuestion, ticketId} = useChat({
     ask: ({question, signal}) =>
@@ -59,7 +59,7 @@ export default function ChatPage({params}: Props) {
   })
 
   const ask = async (question: string) => {
-    analytics.logEvent(MagiEvent.chatAskClick, {agentId: agent.id, ticketId: ticketId || ''})
+    // analytics.logEvent(MagiEvent.chatAskClick, {agentId: agent.id, ticketId: ticketId || ''})
     askQuestion({
       text: question,
       type: 'USER',
@@ -78,25 +78,25 @@ export default function ChatPage({params}: Props) {
         <div className="text-md flex p-5 font-medium text-gray-950">
           {/* TODO(doll): Many of our customer images are SVGs which NextJs doesn't support well by default */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img alt="Logo" src={agentImage(agent.id, AgentFields.LOGO)} className="h-7" />
+          {/* <img alt="Logo" src={agentImage(agent.id, AgentFields.LOGO)} className="h-7" /> */}
         </div>
       </div>
 
-      <Chat brandColor={agent.brandColor} messages={messages} askFn={ask}>
+      <Chat brandColor='#000000' messages={messages} askFn={ask}>
         <div className="flex flex-1 flex-col overflow-auto text-xs">
           <div className="mx-auto w-full max-w-3xl flex-1 text-gray-800 sm:mt-5 sm:px-5">
             <ChatBubble direction="full">
               <div className="flex flex-col">
                 <div className="mb-2 whitespace-pre-wrap">
                   <ReactMarkdown linkTargetInNewTab>
-                    {chatConfig.welcomeMessage || t('default_welcome_message')}
+                    {t('default_welcome_message')}
                   </ReactMarkdown>
                 </div>
-                {agent.popularQuestions.slice(0, 3).map((question, index) => (
+                {/* {agent.popularQuestions.slice(0, 3).map((question, index) => (
                   <div className="my-1 cursor-pointer underline" key={index} onClick={() => ask(question)}>
                     {question}
                   </div>
-                ))}
+                ))} */}
               </div>
             </ChatBubble>
 
@@ -129,13 +129,14 @@ export default function ChatPage({params}: Props) {
                     </div>
                   ) : (
                     <div className="prose max-w-full text-xs">
-                      <BailoutFormDisplay
+                      Bailout goes here
+                      {/* <BailoutFormDisplay
                         agent={agent}
                         message={value.text}
                         ticketId={value.ticketId}
                         ticketMessageId={value.id}
                         showForm={index === messages.length - 1}
-                      />
+                      /> */}
                     </div>
                   )}
 
@@ -157,17 +158,17 @@ export default function ChatPage({params}: Props) {
                     </div>
                   )}
 
-                  <FeedbackForm
+                  {/* <FeedbackForm
                     message={value}
                     showBailoutButton={showBotAnswer({message: value}) && index === messages.length - 1}
                     bailoutAgent={agent}
-                  />
+                  /> */}
                 </ChatBubble>
               )
             )}
             {isLoading && !isResponseAvailable && (
               <div className="my-5">
-                <Spinner color={agent.brandColor} />
+                <Spinner color={'#000000'} />
               </div>
             )}
           </div>

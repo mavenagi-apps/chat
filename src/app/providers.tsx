@@ -17,22 +17,20 @@ import { QueryParamProvider } from "use-query-params";
 import Spinner from "@/components/Spinner";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import { CookieProvider } from "@/components/CookieProvider";
-import { type MagiProduct } from "@/lib/analytics/events";
+import { MagiProduct } from "@/lib/analytics/events";
 import { rpc } from "@/rpc/react";
 import { Fetcher } from "@magi/fetcher";
 
 function InnerProviders({
-  product,
   children,
 }: {
-  product: MagiProduct;
   children: React.ReactNode;
 }) {
   const profile = rpc.users.me.profile.useQuery(undefined);
 
   return (
     <AnalyticsProvider
-      product={product}
+      product={MagiProduct.chat}
       userId={profile.data?.id}
       email={profile.data?.email}
     >
@@ -44,11 +42,9 @@ function InnerProviders({
 export default function Providers({
   cookie,
   children,
-  product,
 }: {
   cookie?: string;
   children: React.ReactNode;
-  product: MagiProduct;
 }) {
   const t = useTranslations("global");
   const [queryClient] = React.useState(
@@ -120,7 +116,7 @@ export default function Providers({
               >
                 <QueryParamProvider adapter={NextAdapterApp}>
                   <FetcherProvider fetcher={fetcher}>
-                    <InnerProviders product={product}>
+                    <InnerProviders>
                       {children}
                     </InnerProviders>
                   </FetcherProvider>
