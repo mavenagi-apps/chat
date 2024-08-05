@@ -2,6 +2,11 @@
   "name": "chat",
   "version": "0.1.0",
   "private": true,
+  "config": {
+    "mavenagi": {
+      "appType": "next"
+    }
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

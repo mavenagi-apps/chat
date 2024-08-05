@@ -1,10 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  config: {
-    mavenagi: {
-      appType: 'next',
-    }
-  }
-};
+const nextConfig = {};
 
 export default nextConfig;
