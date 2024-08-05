@@ -1,5 +1,5 @@
 import {ReactMarkdown} from '@/components/ReactMarkdown'
-import Spinner from '@/components/Spinner.tsx'
+import Spinner from '@/components/Spinner'
 import {rpc} from '@/rpc/react'
 import {useTranslations} from 'next-intl'
 import React, {useState} from 'react'

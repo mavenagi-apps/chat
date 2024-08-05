@@ -10,7 +10,7 @@ import { Suspense } from "react";
 
 import { MonitoringHeadScript } from "@/components/monitoring";
 import "@/app/globals.css";
-import Providers from "@/app/providers";
+// import Providers from "@/app/providers";
 import { TzCookieSetter } from "@/app/tz-cookie-setter";
 
 const font = Inter({ subsets: ["latin"] });
@@ -35,25 +35,25 @@ export default async function RootLayout({
   const messages = await getMessages(locale);
 
   return (
-    <UserProvider>
+    // <UserProvider>
       <html lang={locale}>
         <head>
-          <MonitoringHeadScript />
+          {/* <MonitoringHeadScript /> */}
         </head>
         <body className={font.className}>
-          <NextIntlClientProvider
+          {/* <NextIntlClientProvider
             locale={locale}
             messages={messages}
             timeZone={cookies().get("tz")?.value || "UTC"}
-          >
-            <Providers cookie={headers().get("cookie") ?? undefined}>
+          > */}
+            {/* <Providers cookie={headers().get("cookie") ?? undefined}> */}
               <Suspense fallback={<Spinner />}>{children}</Suspense>
-            </Providers>
-          </NextIntlClientProvider>
-          <Toaster richColors />
-          <TzCookieSetter />
+            {/* </Providers> */}
+          {/* </NextIntlClientProvider> */}
+          {/* <Toaster richColors /> */}
+          {/* <TzCookieSetter /> */}
         </body>
       </html>
-    </UserProvider>
+    // </UserProvider>
   );
 }

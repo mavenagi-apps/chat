@@ -2,7 +2,7 @@ import {MagiProduct} from '@/lib/analytics/events'
 import {rpc} from '@/rpc/server'
 import {type Metadata} from 'next'
 
-import Providers from '../../providers'
+// import Providers from '../providers'
 
 export async function generateMetadata({
   params: {orgFriendlyId},
@@ -18,5 +18,5 @@ export async function generateMetadata({
 }
 
 export default function Layout({children}: {children: React.ReactNode}) {
-  return <Providers product={MagiProduct.chat}>{children}</Providers>
+  return <div>{children}</div>
 }

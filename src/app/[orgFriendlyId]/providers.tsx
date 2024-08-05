@@ -10,8 +10,8 @@ export default function Providers({product, children}: {product: MagiProduct; ch
   const profile = rpc.users.me.profile.useQuery(undefined)
 
   return (
-    <AnalyticsProvider product={product} userId={profile.data?.id} email={profile.data?.email}>
+    // <AnalyticsProvider product={product} userId={profile.data?.id} email={profile.data?.email}>
       <Suspense fallback={<Spinner />}>{children}</Suspense>
-    </AnalyticsProvider>
+    // </AnalyticsProvider>
   )
 }

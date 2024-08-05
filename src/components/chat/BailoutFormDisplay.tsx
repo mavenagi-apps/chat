@@ -1,4 +1,4 @@
-import {ReactMarkdown} from '@/components/ReactMarkdown.tsx'
+import {ReactMarkdown} from '@/components/ReactMarkdown'
 import {rpc} from '@/rpc/react'
 import {CheckCircleIcon} from '@heroicons/react/16/solid'
 import {useTranslations} from 'next-intl'

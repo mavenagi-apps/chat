@@ -2,6 +2,11 @@
   "name": "chat",
   "version": "0.1.0",
   "private": true,
+  "config": {
+    "mavenagi": {
+      "appType": "next"
+    }
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -16,6 +21,7 @@
     "@hookform/error-message": "^2.0.1",
     "@hookform/resolvers": "^3.9.0",
     "@sentry/nextjs": "^8.20.0",
+    "@storybook/react": "^8.2.7",
     "@tanstack/react-query": "^5.51.15",
     "@tanstack/react-query-next-experimental": "^5.51.15",
     "@tanstack/react-table": "^8.19.3",
@@ -23,6 +29,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "highlight.js": "^11.10.0",
+    "mavenagi": "^0.0.0-alpha.11",
     "next": "14.2.5",
     "next-intl": "^3.17.2",
     "next-query-params": "^5.0.0",
@@ -41,6 +48,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@tanstack/eslint-plugin-query": "^5.51.15",
     "@types/node": "20.14.11",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
