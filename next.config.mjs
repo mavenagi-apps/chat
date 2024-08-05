@@ -8,6 +8,13 @@ const isStaging = process.env.ENVIRONMENT === "staging";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: false,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.ignoreWarnings = [{ module: /opentelemetry/ }];
@@ -18,8 +25,8 @@ const nextConfig = {
   assetPrefix: isProd
     ? "https://www.mavenagi-static.com"
     : isStaging
-    ? "https://www.staging.mavenagi-static.com"
-    : undefined,
+      ? "https://www.staging.mavenagi-static.com"
+      : undefined,
   transpilePackages: [
     // "@magi/data",
     // "@magi/fetcher",

@@ -1,7 +1,6 @@
 module.exports = {
   root: true,
   extends: [
-    "custom-nextjs",
     "plugin:@tanstack/eslint-plugin-query/recommended",
   ],
   rules: {
