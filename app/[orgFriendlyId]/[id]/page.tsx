@@ -55,19 +55,17 @@ export default function ChatPage({ params }: Props) {
   const latestQuestionRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let timer;
+    let timer: NodeJS.Timeout;
 
     const resetTimer = () => {
       clearTimeout(timer);
       timer = setTimeout(() => {
         setIsIdle(true);
-        console.log('30 second timeout');
       }, 30000); // 30 seconds
     };
 
     const handleUserActivity = () => {
       setIsIdle(false);
-      console.log('resetting timer');
       resetTimer();
     };
 
