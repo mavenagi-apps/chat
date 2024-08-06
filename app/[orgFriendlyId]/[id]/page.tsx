@@ -22,7 +22,7 @@ import { getSources, showBotAnswer } from '@/lib/chat/chat-helpers';
 interface Props {
   params: {
     orgFriendlyId: string; // Organization ID
-    id?: string[]; // Agent ID
+    id: string; // Agent ID
   };
 }
 
@@ -30,8 +30,7 @@ export default function ChatPage({ params }: Props) {
   const t = useTranslations('chat.ChatPage')
   const { messages, isLoading, isResponseAvailable, askQuestion } =
     useChat({
-      orgFriendlyId: params.orgFriendlyId,
-      id: params.id && params.id.length === 1 ? params.id[0] : '',
+      ...params,
     });
 
   const ask = async (question: string) => {
