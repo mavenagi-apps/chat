@@ -61,11 +61,13 @@ export default function ChatPage({ params }: Props) {
       clearTimeout(timer);
       timer = setTimeout(() => {
         setIsIdle(true);
+        console.log('30 second timeout');
       }, 30000); // 30 seconds
     };
 
     const handleUserActivity = () => {
       setIsIdle(false);
+      console.log('resetting timer');
       resetTimer();
     };
 
