@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 /* eslint-disable i18next/no-literal-string */
 /* eslint-disable react/jsx-curly-brace-presence */
@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { HiArrowNarrowRight } from 'react-icons/hi';
 import { HiOutlineExclamationCircle } from 'react-icons/hi2';
-import {useTranslations} from 'next-intl'
+import { useTranslations } from 'next-intl';
 
 import Chat from '@magi/components/chat/Chat';
 import { BotMessage, UserMessage } from '@magi/components/chat/ChatMessage';
@@ -27,29 +27,66 @@ interface Props {
 }
 
 export default function ChatPage({ params }: Props) {
-  const t = useTranslations('chat.ChatPage')
-  const { messages, isLoading, isResponseAvailable, askQuestion } =
-    useChat({
-      ...params,
-    });
+  const [isIdle, setIsIdle] = useState(false);
+
+  const t = useTranslations('chat.ChatPage');
+  const { messages, isLoading, isResponseAvailable, askQuestion } = useChat({
+    ...params,
+  });
 
   const ask = async (question: string) => {
     // analytics.logEvent(MagiEvent.chatAskClick, {agentId: agent.id, ticketId: ticketId || ''})
     askQuestion({
       text: question,
       type: 'USER',
-    })
+    });
     setTimeout(
-      () => latestQuestionRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-        inline: 'nearest'
-      }),
+      () =>
+        latestQuestionRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest',
+        }),
       0
-    )
-  }
+    );
+  };
 
   const latestQuestionRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let timer;
+
+    const resetTimer = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        setIsIdle(true);
+      }, 30000); // 30 seconds
+    };
+
+    const handleUserActivity = () => {
+      setIsIdle(false);
+      resetTimer();
+    };
+
+    window.addEventListener('mousemove', handleUserActivity);
+    window.addEventListener('keypress', handleUserActivity);
+
+    resetTimer();
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keypress', handleUserActivity);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isIdle) {
+      console.log(
+        'Thank you for reaching out. Can you please fill out this survey to tell us about your experience? https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId'
+      );
+    }
+  }, [isIdle]);
 
   return (
     <main className="flex h-screen flex-col bg-gray-50">
@@ -68,7 +105,7 @@ export default function ChatPage({ params }: Props) {
               <div className="flex flex-col">
                 <div className="mb-2 whitespace-pre-wrap">
                   <ReactMarkdown linkTargetInNewTab>
-                    {t("default_welcome_message")}
+                    {t('default_welcome_message')}
                   </ReactMarkdown>
                 </div>
                 {/* {agent.popularQuestions.slice(0, 3).map((question, index) => (
@@ -102,8 +139,8 @@ export default function ChatPage({ params }: Props) {
                     <div className="ml-3 flex-1 content-center">
                       {value.text !== ''
                         ? value.text
-                        // : t("default_error_message")}
-                        : 'Default error message goes here'}
+                        : // : t("default_error_message")}
+                          'Default error message goes here'}
                     </div>
                   </div>
                 </ChatBubble>
