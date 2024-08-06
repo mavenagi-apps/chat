@@ -1,0 +1,31 @@
+import {ColorItem, ColorPalette, Meta} from '@storybook/blocks'
+
+<Meta title="Colors" />
+
+<ColorPalette>
+  <ColorItem
+    title="Foreground"
+    subtitle="text-*"
+    colors={{'fg-brand': '#6C2BD9', 'fg-primary': '#111928', 'fg-secondary': '#374151', 'fg-tertiary': '#9CA3AF'}}
+  />
+  <ColorItem
+    title="Foreground State"
+    subtitle="text-*"
+    colors={{'fg-success': '#057A55', 'fg-danger': '#E02424', 'fg-warning': '#9F580A', 'fg-info': '#1C64F2'}}
+  />
+  <ColorItem
+    title="Inverse"
+    subtitle="text-inverse-*"
+    colors={{'fg-inverse-primary': '#FFFFFF', 'fg-inverse-secondary': '#9CA3AF', 'fg-inverse-accent': '#6C2BD9'}}
+  />
+  <ColorItem
+    title="Background"
+    subtitle="bg-*"
+    colors={{'bg-primary': '#FFFFFF', 'bg-secondary': '#F3F4F6', 'bg-tertiary': '#E5E7EB', 'bg-accent': '#6C2BD9'}}
+  />
+  <ColorItem
+    title="Background State"
+    subtitle="bg-*"
+    colors={{'bg-success': '#DEF7EC', 'bg-danger': '#FDE8E8', 'bg-warning': '#FDF6B2', 'bg-info': '#E1EFFE'}}
+  />
+</ColorPalette>

@@ -14,19 +14,53 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "@amplitude/analytics-browser": "^2.10.0",
+    "@headlessui/react": "^2.1.2",
+    "@heroicons/react": "^2.1.5",
+    "@hookform/error-message": "^2.0.1",
+    "@hookform/resolvers": "^3.9.0",
+    "@sentry/nextjs": "^8.23.0",
+    "@tanstack/react-query": "^5.51.21",
+    "@tanstack/react-table": "8.19.3",
+    "@typescript-eslint/eslint-plugin": "7.17.0",
+    "@typescript-eslint/parser": "7.17.0",
+    "@vercel/functions": "1.4.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "mavenagi": "^0.0.0-alpha.11",
+    "nanoid": "^5.0.7",
     "next": "14.2.5",
-    "@vercel/functions": "1.4.0"
+    "next-intl": "^3.17.2",
+    "react": "18.3.1",
+    "react-day-picker": "8.10.1",
+    "react-dom": "18.3.1",
+    "react-hook-form": "^7.52.2",
+    "react-icons": "^5.2.1",
+    "react-markdown": "^9.0.1",
+    "react-resizable-panels": "^2.0.22",
+    "rehype-highlight": "^7.0.0",
+    "sonner": "^1.5.0",
+    "tailwind-merge": "^2.4.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "typescript": "5.5.3",
+    "@storybook/react": "^8.2.7",
+    "@tanstack/eslint-plugin-query": "^5.51.15",
     "@types/node": "20.14.11",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
     "eslint": "^8",
-    "eslint-config-next": "14.2.5"
+    "eslint-config-next": "14.2.5",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-i18next": "^6.0.9",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-testing-library": "^6.2.2",
+    "postcss": "^8",
+    "prettier": "^3.3.3",
+    "tailwindcss": "^3.4.1",
+    "typescript": "5.5.3"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
