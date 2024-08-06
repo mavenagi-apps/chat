@@ -4,6 +4,7 @@
 /* eslint-disable react/jsx-curly-brace-presence */
 
 import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { HiArrowNarrowRight } from 'react-icons/hi';
 import { HiOutlineExclamationCircle } from 'react-icons/hi2';
 import { useTranslations } from 'next-intl';
