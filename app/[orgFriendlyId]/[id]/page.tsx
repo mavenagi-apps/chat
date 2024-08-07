@@ -34,13 +34,19 @@ export default function ChatPage({ params }: Props) {
   const [idleMessageDisplayed, setIdleMessageDisplayed] = useState(false);
 
   const t = useTranslations('chat.ChatPage');
-  const { messages, setMessages, isLoading, isResponseAvailable, askQuestion } =
-    useChat({
-      ...params,
-    });
+  const {
+    messages,
+    setMessages,
+    isLoading,
+    isResponseAvailable,
+    askQuestion,
+    conversationId,
+  } = useChat({
+    ...params,
+  });
 
   const ask = async (question: string) => {
-    // analytics.logEvent(MagiEvent.chatAskClick, {agentId: agent.id, ticketId: ticketId || ''})
+    // analytics.logEvent(MagiEvent.chatAskClick, {agentId: agent.id, conversationId: conversationId || ''})
     askQuestion({
       text: question,
       type: 'USER',
@@ -88,7 +94,7 @@ export default function ChatPage({ params }: Props) {
   useEffect(() => {
     if (isIdle && !idleMessageDisplayed) {
       const idleMessage: ChatMessage = {
-        text: 'Thank you for reaching out. Can you please fill out this [survey](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId) to tell us about your experience? [(https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId)](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId)',
+        text: `Thank you for reaching out. Can you please fill out this [survey](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=${conversationId}) to tell us about your experience? [(https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=${conversationId})](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=${conversationId})`,
         type: 'ERROR',
       };
       setMessages([...messages, idleMessage]);
@@ -100,6 +106,7 @@ export default function ChatPage({ params }: Props) {
     messages,
     setIdleMessageDisplayed,
     idleMessageDisplayed,
+    conversationId,
   ]);
 
   return (
