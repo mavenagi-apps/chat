@@ -92,9 +92,10 @@ export default function ChatPage({ params }: Props) {
         type: 'USER',
       };
 
-      setMessages((messages): ChatMessage[] => [...messages, idleMessage]);
+      setMessages([...messages, idleMessage]);
+    });
     }
-  }, [isIdle, setMessages]);
+  }, [isIdle, setMessages, messages]);
 
   return (
     <main className="flex h-screen flex-col bg-gray-50">
