@@ -14,6 +14,7 @@ import { BotMessage, UserMessage } from '@magi/components/chat/ChatMessage';
 import { ChatBubble } from '@magi/components/chat/ChatCard';
 import { ChatInput } from '@magi/components/chat/ChatInput';
 import { useChat } from '@magi/components/chat/use-chat';
+import { useIdleTimeout } from '@magi/components/chat/use-idle-timeout';
 import { ReactMarkdown } from '@magi/components/ReactMarkdown';
 import Spinner from '@magi/components/Spinner';
 import { Logo } from '@magi/components/Logo';
@@ -30,7 +31,6 @@ interface Props {
 }
 
 export default function ChatPage({ params }: Props) {
-  const [isIdle, setIsIdle] = useState(false);
   const [idleMessageDisplayed, setIdleMessageDisplayed] = useState(false);
 
   const t = useTranslations('chat.ChatPage');
@@ -63,33 +63,8 @@ export default function ChatPage({ params }: Props) {
   };
 
   const latestQuestionRef = React.useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-
-    const resetTimer = () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        setIsIdle(true);
-      }, 30000); // 30 seconds
-    };
-
-    const handleUserActivity = () => {
-      setIsIdle(false);
-      resetTimer();
-    };
-
-    window.addEventListener('mousemove', handleUserActivity);
-    window.addEventListener('keypress', handleUserActivity);
-
-    resetTimer();
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('mousemove', handleUserActivity);
-      window.removeEventListener('keypress', handleUserActivity);
-    };
-  }, []);
+  const idleTimeoutMilliseconds = 30000; // 30 seconds
+  const isIdle = useIdleTimeout(idleTimeoutMilliseconds); // Use the custom hook with a 30-second timeout
 
   useEffect(() => {
     if (isIdle && !idleMessageDisplayed) {
