@@ -21,6 +21,7 @@ import { TextAnchor } from '@magi/ui';
 import { getSources, showBotAnswer } from '@/lib/chat/chat-helpers';
 
 import { type ChatMessage } from '@magi/components/chat/Chat';
+import { MessageType } from '@magi/types/data';
 
 interface Props {
   params: {
@@ -88,7 +89,7 @@ export default function ChatPage({ params }: Props) {
     if (isIdle) {
       const idleMessage: ChatMessage = {
         text: 'Thank you for reaching out. Can you please fill out this survey to tell us about your experience? https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId',
-        type: 'HUMAN_AGENT',
+        type: MessageType.BOT_RESPONSE,
       };
 
       setMessages((prevMessages: ChatMessage[]) => [
