@@ -92,7 +92,7 @@ export default function ChatPage({ params }: Props) {
         type: 'USER',
       };
 
-      setMessages((prevMessages) => {
+      setMessages((prevMessages: ChatMessage[]) => {
         const updatedMessages = [...prevMessages, idleMessage];
         return updatedMessages;
       });
