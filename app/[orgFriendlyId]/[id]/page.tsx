@@ -91,9 +91,7 @@ export default function ChatPage({ params }: Props) {
         text: 'Thank you for reaching out. Can you please fill out this survey to tell us about your experience? https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId',
         type: 'USER',
       };
-
       setMessages([...messages, idleMessage]);
-    });
     }
   }, [isIdle, setMessages, messages]);
 
