@@ -2,7 +2,17 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-First, run the development server:
+Local Development:
+
+Add the env variables from [Vercel](https://vercel.com/mavenagi/mavenagi-developer-app-production-internal-snowflake-query/settings/environment-variables) into a .env.local file:
+* MAVENAGI_APP_ID
+* MAVENAGI_APP_SECRET
+
+Install the dependences
+
+`yarn install`
+
+Run the development server:
 
 ```bash
 npm run dev
