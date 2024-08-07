@@ -88,7 +88,7 @@ export default function ChatPage({ params }: Props) {
   useEffect(() => {
     if (isIdle && !idleMessageDisplayed) {
       const idleMessage: ChatMessage = {
-        text: 'Thank you for reaching out. Can you please fill out this <a href="https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId">survey</a> to tell us about your experience? https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId',
+        text: 'Thank you for reaching out. Can you please fill out this [survey](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId) to tell us about your experience? [(https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId)](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId)',
         type: 'ERROR',
       };
       setMessages([...messages, idleMessage]);
