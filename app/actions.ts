@@ -1,34 +1,34 @@
-'use server'
+'use server';
 
-import { MavenAGIClient } from "mavenagi";
-import { nanoid } from "nanoid";
+import { MavenAGIClient } from 'mavenagi';
+import { nanoid } from 'nanoid';
 
 export async function create({
   orgFriendlyId,
   id,
   question,
-  ticketId,
-}:{
-  orgFriendlyId: string,
-  id: string,
-  question: string,
-  ticketId: string,
+  conversationId,
+}: {
+  orgFriendlyId: string;
+  id: string;
+  question: string;
+  conversationId: string;
 }) {
-  "use server";
+  'use server';
 
   const client = new MavenAGIClient({
     organizationId: orgFriendlyId,
     agentId: id,
   });
 
-  const response = await client.conversation.ask(ticketId, {
+  const response = await client.conversation.ask(conversationId, {
     conversationMessageId: {
       referenceId: nanoid(),
     },
     text: question,
   });
 
-  console.log(response)
+  console.log(response);
 
   return response;
 }
