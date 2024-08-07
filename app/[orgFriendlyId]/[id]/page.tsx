@@ -151,10 +151,12 @@ export default function ChatPage({ params }: Props) {
                       <HiOutlineExclamationCircle className="size-5 text-red-500" />
                     </div>
                     <div className="ml-3 flex-1 content-center">
-                      {value.text !== ''
-                        ? value.text
-                        : // : t("default_error_message")}
-                          'Default error message goes here'}
+                      <ReactMarkdown linkTargetInNewTab>
+                        {value.text !== ''
+                          ? value.text
+                          : // : t("default_error_message")}
+                            'Default error message goes here'}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 </ChatBubble>
