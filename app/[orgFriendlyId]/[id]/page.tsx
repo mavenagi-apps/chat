@@ -21,7 +21,6 @@ import { TextAnchor } from '@magi/ui';
 import { getSources, showBotAnswer } from '@/lib/chat/chat-helpers';
 
 import { type ChatMessage } from '@magi/components/chat/Chat';
-import { MessageType } from '@magi/types/data';
 
 interface Props {
   params: {
@@ -89,8 +88,8 @@ export default function ChatPage({ params }: Props) {
   useEffect(() => {
     if (isIdle && !idleMessageDisplayed) {
       const idleMessage: ChatMessage = {
-        text: 'Thank you for reaching out. Can you please fill out this survey to tell us about your experience? https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId',
-        type: 'USER',
+        text: 'Thank you for reaching out. Can you please fill out this <a href="https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId">survey</a> to tell us about your experience? https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId',
+        type: 'ERROR',
       };
       setMessages([...messages, idleMessage]);
       setIdleMessageDisplayed(true);
