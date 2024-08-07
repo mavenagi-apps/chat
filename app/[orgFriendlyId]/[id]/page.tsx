@@ -31,9 +31,10 @@ export default function ChatPage({ params }: Props) {
   const [isIdle, setIsIdle] = useState(false);
 
   const t = useTranslations('chat.ChatPage');
-  const { messages, isLoading, isResponseAvailable, askQuestion } = useChat({
-    ...params,
-  });
+  const { messages, setMessages, isLoading, isResponseAvailable, askQuestion } =
+    useChat({
+      ...params,
+    });
 
   const ask = async (question: string) => {
     // analytics.logEvent(MagiEvent.chatAskClick, {agentId: agent.id, ticketId: ticketId || ''})
@@ -83,11 +84,16 @@ export default function ChatPage({ params }: Props) {
 
   useEffect(() => {
     if (isIdle) {
-      console.log(
-        'Thank you for reaching out. Can you please fill out this survey to tell us about your experience? https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId'
-      );
+      const idleMessage: ChatMessage = {
+        text: 'Thank you for reaching out. Can you please fill out this survey to tell us about your experience? https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId',
+        type: 'BOT',
+      };
+      setMessages((prevMessages: ChatMessage[]) => [
+        ...prevMessages,
+        idleMessage,
+      ]);
     }
-  }, [isIdle]);
+  }, [isIdle, setMessages]);
 
   return (
     <main className="flex h-screen flex-col bg-gray-50">
