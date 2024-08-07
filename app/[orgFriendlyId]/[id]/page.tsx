@@ -89,7 +89,7 @@ export default function ChatPage({ params }: Props) {
     if (isIdle) {
       const idleMessage: ChatMessage = {
         text: 'Thank you for reaching out. Can you please fill out this survey to tell us about your experience? https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId',
-        type: 'User',
+        type: 'USER',
       };
 
       setMessages((prevMessages: ChatMessage[]) => {
