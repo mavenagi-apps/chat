@@ -95,7 +95,13 @@ export default function ChatPage({ params }: Props) {
       setMessages([...messages, idleMessage]);
       setIdleMessageDisplayed(true);
     }
-  }, [isIdle, setMessages, messages]);
+  }, [
+    isIdle,
+    setMessages,
+    messages,
+    setIdleMessageDisplayed,
+    idleMessageDisplayed,
+  ]);
 
   return (
     <main className="flex h-screen flex-col bg-gray-50">
