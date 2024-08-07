@@ -1,16 +1,9 @@
-import * as Sentry from '@sentry/nextjs';
-import { useMutation } from '@tanstack/react-query';
 import React from 'react';
 import { nanoid } from 'nanoid';
-
-import { type TicketMessage } from '@magi/types/data';
 
 import { type ChatMessage } from './Chat';
 import { create } from '@/app/actions';
 
-// type UseChatOptions = {
-//   ask: (props: {question: string; signal: AbortSignal}) => AsyncGenerator<TicketMessage>
-// }
 
 type UseChatOptions = {
   orgFriendlyId: string;
@@ -20,48 +13,44 @@ type UseChatOptions = {
 export function useChat({ orgFriendlyId, id }: UseChatOptions) {
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [conversationId, setConversationId] = React.useState<string>(nanoid());
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [abortController, setAbortController] = React.useState(
     new AbortController()
   );
 
-  // const mutation = useMutation({
-  //   mutationFn: async ({question, signal}: {question: string; signal: AbortSignal}) => {
-  //     create({orgFriendlyId, id, question, conversationId})
-  //     // const reader = apiAsk({question, signal})
-  //     // for await (const message of reader) {
-  //     //   if (signal.aborted) {
-  //     //     break
-  //     //   }
-  //     //   if (message.conversationId) {
-  //     //     setConversationId(message.conversationId)
-  //     //   }
-  //     //   setMessages(messages => {
-  //     //     if (messages.length === 0 || messages[messages.length - 1].type === 'USER') {
-  //     //       return [...messages, message]
-  //     //     } else {
-  //     //       return [...messages.slice(0, -1), message]
-  //     //     }
-  //     //   })
-  //     // }
-  //   },
-  //   onError: error => {
-  //     Sentry.captureException(error)
-  //     setMessages(messages => [...messages, {text: error.message, type: 'ERROR'}])
-  //   },
-  // })
-
-  const ask = (messages: ChatMessage[]) => {
+  const ask = async (messages: ChatMessage[]) => {
+    setIsLoading(true);
     abortController.abort();
     const newAbortController = new AbortController();
     setAbortController(newAbortController);
+
     if (messages.length > 0 && messages[messages.length - 1].type === 'USER') {
-      // mutation.mutate({question: messages[messages.length - 1].text, signal: newAbortController.signal})
-      create({
-        orgFriendlyId,
-        id,
-        question: messages[messages.length - 1].text,
-        conversationId: conversationId,
-      });
+      try {
+        const reader = await create({
+          orgFriendlyId,
+          id,
+          question: messages[messages.length - 1].text,
+          conversationId: conversationId,
+        });
+        setIsLoading(false)
+        for (const message of reader.messages) {
+          if (newAbortController.signal.aborted) {
+            break;
+          }
+          // @ts-ignore
+          setMessages((messages) => {
+            if (messages.length === 0 || messages[messages.length - 1].type === 'USER') {
+              console.log("appending message last one is user", message);
+              return [...messages, message];
+            } else {
+              console.log("appending message other", message);
+              return [...messages.slice(0, -1), message];
+            }
+          })
+        }
+      } catch(error) {
+        console.log(error)
+      }
     }
   };
 
@@ -76,9 +65,7 @@ export function useChat({ orgFriendlyId, id }: UseChatOptions) {
       setMessages(newMessages);
       ask(newMessages);
     },
-    // isLoading: mutation.isPending,
-    // isResponseAvailable: !mutation.isPending || (messages.length > 0 && messages[messages.length - 1].type !== 'USER'),
-    isLoading: false,
+    isLoading: isLoading,
     isResponseAvailable:
       messages.length > 0 && messages[messages.length - 1].type !== 'USER',
     conversationId: conversationId,

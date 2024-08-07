@@ -177,7 +177,17 @@ export interface Ticket extends AuditedEntity, Serializable, ExternallyIngestibl
     originalTicketId?: string;
 }
 
+export interface ConversationMessageId {
+    agentId: string;
+    appId: string;
+    organizationId: string;
+    referenceId: string;
+    type: string;
+}
+
 export interface TicketMessage extends AuditedEntity, Serializable, ExternallyIngestible {
+    responses: any;
+    conversationMessageId: ConversationMessageId;
     id: string;
     externalId?: string;
     mavenAppId?: string;

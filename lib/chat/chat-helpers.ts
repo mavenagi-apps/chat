@@ -2,7 +2,7 @@ import {type Source, type TicketMessage, TicketMessageStatus} from '@magi/types/
 
 export function showBotAnswer({message}: {message: TicketMessage | null}) {
   return (
-    message?.id === null || message?.status === TicketMessageStatus.RECEIVING || (message?.botContext?.score || 0) > 0
+    message?.conversationMessageId?.referenceId !== null
   )
 }
 
