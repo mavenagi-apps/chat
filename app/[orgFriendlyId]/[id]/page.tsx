@@ -20,6 +20,8 @@ import { Logo } from '@magi/components/Logo';
 import { TextAnchor } from '@magi/ui';
 import { getSources, showBotAnswer } from '@/lib/chat/chat-helpers';
 
+import {type ChatMessage} from '@magi/components/chat/Chat';
+
 interface Props {
   params: {
     orgFriendlyId: string; // Organization ID
@@ -88,6 +90,7 @@ export default function ChatPage({ params }: Props) {
         text: 'Thank you for reaching out. Can you please fill out this survey to tell us about your experience? https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=insertTicketId',
         type: 'BOT',
       };
+      
       setMessages((prevMessages: ChatMessage[]) => [
         ...prevMessages,
         idleMessage,
