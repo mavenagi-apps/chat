@@ -31,6 +31,7 @@ export function useChat({ orgFriendlyId, id }: UseChatOptions) {
           id,
           question: messages[messages.length - 1].text,
           conversationId: conversationId,
+          initialize: messages.length <= 1,
         });
         setIsLoading(false)
         for (const message of reader.messages) {
