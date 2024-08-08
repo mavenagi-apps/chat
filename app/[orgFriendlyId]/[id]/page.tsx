@@ -116,7 +116,7 @@ export default function ChatPage({ params }: Props) {
               value.type === 'HUMAN_AGENT' || value.type === 'USER' ? (
                 <ChatBubble
                   direction="right"
-                  className="bg-[--brand-color] text-white"
+                  className="bg-[--brand-color] text-[--brand-text-color]"
                   key={index}
                   ref={index === messages.length - 1 ? latestQuestionRef : null}
                 >

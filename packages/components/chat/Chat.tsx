@@ -27,7 +27,6 @@ export const ChatContext = React.createContext<{
 export default function Chat({
   messages,
   askFn,
-  brandColor = '#6C2BD9',
   className,
   children,
 }: React.PropsWithChildren<ChatProps>) {
@@ -49,7 +48,8 @@ export default function Chat({
         className={clsx(className, 'flex w-full flex-1 flex-col overflow-auto')}
         style={{
           // @ts-expect-error css variable
-          '--brand-color': brandColor || '#6C2BD9',
+          '--brand-color': '#004f32',
+          '--brand-text-color': '#FFFFFF',
         }}
       >
         {children}
