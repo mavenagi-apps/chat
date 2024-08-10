@@ -1,7 +1,7 @@
 import { getMavenAGIClient } from './app';
 import { escalationTopics } from "@/lib/actions";
 
-const Chat = {
+export default {
 
     async postInstall({
                           organizationId,
@@ -36,8 +36,4 @@ const Chat = {
 
         console.log("Escalate action created", result);
     },
-
-
 };
-
-export default Chat;
