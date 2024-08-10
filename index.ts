@@ -1,9 +1,7 @@
 import { getMavenAGIClient } from './app';
-import {queriesSet} from "@/lib/queries";
-import {actionsSet} from "@/lib/actions";
+import { escalationTopics } from "@/lib/actions";
 
 const Chat = {
-    async preInstall() {},
 
     async postInstall({
                           organizationId,
@@ -14,40 +12,30 @@ const Chat = {
     }) {
         const client = getMavenAGIClient(organizationId, agentId);
 
-        for (const query of queriesSet) {
-            await client.actions.createOrUpdate({
-                actionId: {
-                    referenceId: query.id,
+        // Escalate action
+        await client.actions.createOrUpdate({
+            actionId: {
+                referenceId: 'escalate',
+            },
+            name: 'Escalate to a human support agent',
+            description: `Escalate to a human support agent\nThis action requires a topic type in order to escalate the users issue to a human agent. Please figure out the topic from the type of questions the user has asked. Must be one of: "${escalationTopics.join(
+                '", "'
+            )}". If the topic is unclear or isn't exactly one of those options, set the topic to "Unclear Topic"`,
+            userInteractionRequired: false,
+            preconditions: { requiredUserContextFieldNames: new Set() },
+            userFormParameters: [
+                {
+                    description: `The topic type of the conversation.`,
+                    id: 'topic',
+                    label: 'Escalation Topic',
+                    required: true,
                 },
-                name: query.id,
-                description: query.description,
-                userInteractionRequired: false,
-                preconditions: { requiredUserContextFieldNames: new Set() },
-                userFormParameters: [],
-                buttonName: 'Submit',
-            });
-        }
-
-        for (const action of actionsSet) {
-            await client.actions.createOrUpdate({
-                actionId: {
-                    referenceId: action.id,
-                },
-                name: action.name,
-                description: action.description,
-                userInteractionRequired: false,
-                preconditions: {requiredUserContextFieldNames: new Set()},
-                userFormParameters: action.userFormParameters,
-                buttonName: action.buttonName,
-            });
-        }
+            ],
+            buttonName: 'Submit',
+        });
     },
 
-    async executeAction({ actionId, parameters }) {
-        if (actionId === 'escalate') {
-            console.log('Escalating to live chat', parameters);
-        }
-    }
+
 };
 
 export default Chat;

@@ -1,4 +1,4 @@
-const escalationTopics = [
+export const escalationTopics = [
     'Managing your business listing',
     'Growing your business',
     'Managing reviews & responses',
