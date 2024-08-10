@@ -13,7 +13,7 @@ const Chat = {
         const client = getMavenAGIClient(organizationId, agentId);
 
         // Escalate action
-        await client.actions.createOrUpdate({
+        const result = await client.actions.createOrUpdate({
             actionId: {
                 referenceId: 'escalate',
             },
@@ -33,6 +33,8 @@ const Chat = {
             ],
             buttonName: 'Submit',
         });
+
+        console.log("Escalate action created", result);
     },
 
 
