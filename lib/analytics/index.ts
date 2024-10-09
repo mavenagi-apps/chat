@@ -5,10 +5,12 @@ import {type MagiEvent, type MagiProduct} from './events'
 export class Analytics extends AbstractAnalytics {
   static _instance: Analytics
   _providers: AbstractAnalytics[]
+  amplitudeApiKey: string;
 
-  constructor() {
+  constructor(amplitudeApiKey: string) {
     super()
-    this._providers = [new AmplitudeAnalytics()]
+    this._providers = [new AmplitudeAnalytics(amplitudeApiKey)]
+    this.amplitudeApiKey = amplitudeApiKey;
   }
 
   public init(product: MagiProduct, userId?: string | undefined, email?: string | undefined): AbstractAnalytics {
@@ -32,9 +34,9 @@ export class Analytics extends AbstractAnalytics {
     return this
   }
 
-  static getInstance() {
+  static getInstance(amplitudeApiKey: string) {
     if (!Analytics._instance) {
-      Analytics._instance = new Analytics()
+      Analytics._instance = new Analytics(amplitudeApiKey)
     }
     return Analytics._instance
   }

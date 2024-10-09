@@ -39,11 +39,13 @@ class FilterEventsPlugin implements EnrichmentPlugin {
 }
 
 export class AmplitudeAnalytics extends AbstractAnalytics {
-  filterEventsPlugin: FilterEventsPlugin | null
+  filterEventsPlugin: FilterEventsPlugin | null;
+  amplitudeApiKey: string;
 
-  constructor() {
-    super()
-    this.filterEventsPlugin = null
+  constructor(amplitudeApiKey: string) {
+    super();
+    this.filterEventsPlugin = null;
+    this.amplitudeApiKey = amplitudeApiKey;
   }
 
   // Amplitude setup
@@ -53,9 +55,9 @@ export class AmplitudeAnalytics extends AbstractAnalytics {
     email?: string | undefined
   ): AbstractAnalytics {
     if (!this.isInitialized) {
-      super.init(product, userId)
+      super.init(product, userId);
       typeof window !== 'undefined' &&
-        amplitude.init(process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY!, userId, {
+        amplitude.init(this.amplitudeApiKey!, userId, {
           logLevel: amplitude.Types.LogLevel.Warn,
           defaultTracking: {
             attribution: true,
@@ -66,35 +68,39 @@ export class AmplitudeAnalytics extends AbstractAnalytics {
           },
           identityStorage: 'localStorage',
           userId: userId,
-        })
-      this.filterEventsPlugin = new FilterEventsPlugin(product)
-      typeof window !== 'undefined' && amplitude.add(this.filterEventsPlugin)
+        });
+      this.filterEventsPlugin = new FilterEventsPlugin(product);
+      typeof window !== 'undefined' && amplitude.add(this.filterEventsPlugin);
     } else {
-      console.debug('AmplitudeAnalytics: init: already initialized')
-      console.debug('Setting product to: ', product)
-      this.product = product
-      this.filterEventsPlugin?.setProduct(product)
-      typeof userId !== 'undefined' && this.setUserId(userId)
+      console.debug('AmplitudeAnalytics: init: already initialized');
+      console.debug('Setting product to: ', product);
+      this.product = product;
+      this.filterEventsPlugin?.setProduct(product);
+      typeof userId !== 'undefined' && this.setUserId(userId);
     }
-    email && this.setEmail(email)
-    return this
+    email && this.setEmail(email);
+    return this;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public override logEvent(eventName: MagiEvent, eventData?: Record<string, any> | undefined): AmplitudeAnalytics {
-    super.logEvent(eventName, eventData)
-    typeof window !== 'undefined' && amplitude.logEvent(eventName, eventData)
-    return this
+  public override logEvent(
+    eventName: MagiEvent,
+    eventData?: Record<string, any> | undefined
+  ): AmplitudeAnalytics {
+    super.logEvent(eventName, eventData);
+    typeof window !== 'undefined' && amplitude.logEvent(eventName, eventData);
+    return this;
   }
 
   public override setUserId(userId: string): AbstractAnalytics {
-    super.setUserId(userId)
-    typeof window !== 'undefined' && amplitude.setUserId(userId)
-    return this
+    super.setUserId(userId);
+    typeof window !== 'undefined' && amplitude.setUserId(userId);
+    return this;
   }
   public override setEmail(email: string): AbstractAnalytics {
-    super.setEmail(email)
-    typeof window !== 'undefined' && amplitude.identify(new amplitude.Identify().set('email', email))
-    return this
+    super.setEmail(email);
+    typeof window !== 'undefined' &&
+      amplitude.identify(new amplitude.Identify().set('email', email));
+    return this;
   }
 }

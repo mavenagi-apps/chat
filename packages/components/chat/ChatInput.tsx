@@ -47,7 +47,7 @@ export const ChatInput = ({isSubmitting, questionPlaceholder, ...props}: ChatInp
                     void ask(question)
                   }}
                 >
-                  <HiArrowNarrowRight className="mr-2 hidden h-4 w-4 sm:block" />
+                  <HiArrowNarrowRight className="mr-2 hidden size-4 sm:block" />
                   {question}
                 </button>
                 {!seeMoreFollowupQuestions && followUpQuestions.length > 1 && (
@@ -76,19 +76,20 @@ export const ChatInput = ({isSubmitting, questionPlaceholder, ...props}: ChatInp
         <Form.Form {...methods} className="flex items-center">
           <HeadlessInput
             {...props}
-            aria-label="Question box"
-            placeholder={questionPlaceholder}
+            aria-label={t('aria_question_box')}
+            placeholder={t(questionPlaceholder)}
             className="w-0 grow resize-none border-0 p-2 text-xs outline-none focus:shadow-none focus:ring-0"
             {...methods.register('question')}
+            autoComplete="off"
           />
           <button
             type="submit"
-            aria-label="Submit question"
-            disabled={isSubmitting}
+            aria-label={t('aria_submit_question')}
+            disabled={isSubmitting || !methods.formState.isDirty}
             data-testid="submit-question"
-            className="focus:ring-primary-300 flex h-7 w-7 items-center justify-center rounded-full bg-[--brand-color] bg-gradient-to-r text-xs font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4"
+            className="focus:ring-primary-300 flex size-7 items-center justify-center rounded-full bg-[--brand-color] bg-gradient-to-r text-xs font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4"
           >
-            <HiArrowNarrowRight className="h-3.5 w-3.5" />
+            <HiArrowNarrowRight className="size-3.5" />
           </button>
         </Form.Form>
       </div>

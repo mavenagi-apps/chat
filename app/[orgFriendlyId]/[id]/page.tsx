@@ -1,27 +1,34 @@
 'use client';
 
-/* eslint-disable i18next/no-literal-string */
-/* eslint-disable react/jsx-curly-brace-presence */
-
 import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { HiArrowNarrowRight } from 'react-icons/hi';
-import { HiOutlineExclamationCircle } from 'react-icons/hi2';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 
 import Chat from '@magi/components/chat/Chat';
-import { BotMessage, UserMessage } from '@magi/components/chat/ChatMessage';
+import Animation from '@magi/components/Animation';
+import typingIndicator from '@magi/components/chat/typing-indicator.json';
+import { ChatMessage } from '@magi/components/chat/ChatMessage';
 import { ChatBubble } from '@magi/components/chat/ChatCard';
 import { ChatInput } from '@magi/components/chat/ChatInput';
 import { useChat } from '@magi/components/chat/use-chat';
 import { useIdleTimeout } from '@magi/components/chat/use-idle-timeout';
+import { useSalesforceChat } from '@magi/components/chat/use-salesforce-chat';
+import { useUnverifiedUserInfo } from '@magi/components/chat/use-unverified-user-info';
 import { ReactMarkdown } from '@magi/components/ReactMarkdown';
 import Spinner from '@magi/components/Spinner';
 import { Logo } from '@magi/components/Logo';
-import { TextAnchor } from '@magi/ui';
-import { getSources, showBotAnswer } from '@/lib/chat/chat-helpers';
+import { MagiEvent } from '@/lib/analytics/events';
+import { useAnalytics } from '@/lib/use-analytics';
 
-import { type ChatMessage } from '@magi/components/chat/Chat';
+import { SalesforceChatInput } from '@magi/components/chat/SalesforceChatInput';
+
+import {
+  isChatUserMessage,
+  type Message,
+  type SalesforceChatMessage,
+  type SimulatedChatMessage,
+  type UserChatMessage,
+} from '@/types';
 
 interface Props {
   params: {
@@ -31,195 +38,264 @@ interface Props {
 }
 
 export default function ChatPage({ params }: Props) {
-  const [idleMessageDisplayed, setIdleMessageDisplayed] = useState(false);
+  // Analytics
+  const analytics = useAnalytics();
 
+  // i18n
   const t = useTranslations('chat.ChatPage');
+  const POPULAR_QUESTIONS = [
+    t('popular_question_1'),
+    t('popular_question_2'),
+    t('popular_question_3'),
+  ];
+
+  // Unverified user info
+  const unverifiedUserInfo = useUnverifiedUserInfo();
+
+  // Maven chat logic
   const {
     messages,
-    setMessages,
     isLoading,
     isResponseAvailable,
     askQuestion,
     conversationId,
   } = useChat({
     ...params,
+    unverifiedUserInfo,
   });
 
-  const ask = async (question: string) => {
-    // analytics.logEvent(MagiEvent.chatAskClick, {agentId: agent.id, conversationId: conversationId || ''})
-    askQuestion({
-      text: question,
-      type: 'USER',
-    });
+  // UI scrolling logic
+  const latestChatBubbleRef = React.useRef<HTMLDivElement>(null);
+  const scrollLatestChatBubbleIntoView = () => {
     setTimeout(
       () =>
-        latestQuestionRef.current?.scrollIntoView({
+        latestChatBubbleRef.current?.scrollIntoView({
           behavior: 'smooth',
           block: 'start',
           inline: 'nearest',
         }),
-      0
+      100
     );
   };
 
-  const latestQuestionRef = React.useRef<HTMLDivElement>(null);
+  // First user message (for Salesforce chat subject)
+  const [initialUserChatMessage, setInitialUserChatMessage] =
+    useState<UserChatMessage | null>(null);
+  useEffect(() => {
+    // get the first user message
+    const firstUserMessage: UserChatMessage | undefined = messages.find(
+      (message) => isChatUserMessage(message)
+    );
+    if (firstUserMessage) {
+      setInitialUserChatMessage(firstUserMessage);
+    }
+  }, [messages]);
+
+  const displayIdleMessage = useCallback(
+    (onSalesforceExit = false) => {
+      const IDLE_MESSAGE = (conversationId: string): SimulatedChatMessage => ({
+        text: t('idle_message_with_survey', {
+          conversationId,
+          additionalUrlParams: `&agentConnected=${onSalesforceExit ? 'Yes' : 'No'}`,
+        }),
+        type: 'SIMULATED',
+      });
+
+      askQuestion(IDLE_MESSAGE(conversationId));
+      setShowIdleMessage(true);
+      analytics.logEvent(MagiEvent.idleMessageDisplay, {
+        agentId: params.id,
+        conversationId: conversationId || '',
+        onSalesforceExit,
+      });
+    },
+    [conversationId, params.id, askQuestion, t, analytics]
+  );
+
+  // Salesforce chat logic
+  const {
+    isSalesforceChatMode,
+    salesforceChatMessages,
+    agentName,
+    handleSalesforceChatMode,
+    handleEndSalesforceChatMode,
+    askSalesForce,
+    showTypingIndicator,
+  } = useSalesforceChat(
+    params,
+    conversationId,
+    initialUserChatMessage,
+    unverifiedUserInfo,
+    messages,
+    () => {
+      displayIdleMessage(true)
+      setShowIdleMessage(true);
+    }
+  );
+
+  const [combinedMessages, setCombinedMessages] = useState<(Message | SalesforceChatMessage)[]>([]);
+
+  const [hasUserSentFirstMessage, setHasUserSentFirstMessage] = useState(false);
+
   const idleTimeoutMilliseconds = 30000; // 30 seconds
-  const isIdle = useIdleTimeout(idleTimeoutMilliseconds); // Use the custom hook with a 30-second timeout
+  const { isIdle } = useIdleTimeout({
+    timeout: idleTimeoutMilliseconds,
+    isSalesforceChatMode,
+    isWaitingForChatResponse: isLoading,
+    hasUserSentFirstMessage,
+  });
+
+  const ask = async (question: string) => {
+    setHasUserSentFirstMessage(true);
+    analytics.logEvent(MagiEvent.chatAskClick, {
+      agentId: params.id,
+      conversationId: conversationId || '',
+    });
+    askQuestion({
+      text: question,
+      type: 'USER',
+    });
+    scrollLatestChatBubbleIntoView();
+  };
 
   useEffect(() => {
-    if (isIdle && !idleMessageDisplayed) {
-      const idleMessage: ChatMessage = {
-        text: `Thank you for reaching out. Can you please fill out this [survey](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=${conversationId}) to tell us about your experience? [(https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=${conversationId})](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey=${conversationId})`,
-        type: 'ERROR',
-      };
-      setMessages([...messages, idleMessage]);
-      setIdleMessageDisplayed(true);
+    analytics.logEvent(MagiEvent.chatHomeView, { agentId: params.id });
+  }, [params.id, analytics]);
+
+  useEffect(() => {
+    setCombinedMessages(
+      [...messages, ...salesforceChatMessages]
+        .filter(({ timestamp }) => !!timestamp)
+        .sort(
+          (a, b) => (a.timestamp || 0) - (b.timestamp || 0)
+        )
+    );
+    scrollLatestChatBubbleIntoView();
+  }, [messages, salesforceChatMessages, setCombinedMessages]);
+
+  // Idle logic
+  const [showIdleMessage, setShowIdleMessage] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isIdle && !showIdleMessage) {
+      displayIdleMessage();
     }
   }, [
+    displayIdleMessage,
     isIdle,
-    setMessages,
-    messages,
-    setIdleMessageDisplayed,
-    idleMessageDisplayed,
-    conversationId,
+    showIdleMessage,
   ]);
 
   return (
-    <main className="flex h-screen flex-col bg-gray-50">
-      <div className="border-b border-gray-300 bg-white md:block">
-        <div className="text-md flex p-5 font-medium text-gray-950">
+    <main className='flex h-screen flex-col bg-gray-50'>
+      <div className='border-b border-gray-300 bg-white md:block'>
+        <div className='text-md flex p-5 font-medium text-gray-950'>
           {/* TODO(doll): Many of our customer images are SVGs which NextJs doesn't support well by default */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          {/* <img alt="Logo" src={agentImage(agent.id, AgentFields.LOGO)} className="h-7" /> */}
+          <img
+            alt='Logo'
+            src='https://app.mavenagi.com/api/v1/files/age_CSMoGtyyQNzJyoJdFkdPfOXw/logo?1723509365729&w=256&q=75'
+            className='h-7'
+          />
         </div>
       </div>
 
-      <Chat brandColor="#000000" messages={messages} askFn={ask}>
-        <div className="flex flex-1 flex-col overflow-auto text-xs">
-          <div className="mx-auto w-full max-w-3xl flex-1 text-gray-800 sm:mt-5 sm:px-5">
-            <ChatBubble direction="full">
-              <div className="flex flex-col">
-                <div className="mb-2 whitespace-pre-wrap">
+      <Chat brandColor='#004f32' messages={messages} askFn={ask}>
+        <div className='flex flex-1 flex-col overflow-auto text-xs'>
+          <div className='mx-auto w-full max-w-3xl flex-1 text-gray-800 sm:mt-5 sm:px-5'>
+            <ChatBubble direction='full' key='popular_questions'>
+              <div className='flex flex-col'>
+                <div className='mb-2 whitespace-pre-wrap'>
                   <ReactMarkdown linkTargetInNewTab>
                     {t('default_welcome_message')}
                   </ReactMarkdown>
                 </div>
-                {/* {agent.popularQuestions.slice(0, 3).map((question, index) => (
-                   <div className="my-1 cursor-pointer underline" key={index} onClick={() => ask(question)}>
-                     {question}
-                   </div>
-                 ))} */}
+                {POPULAR_QUESTIONS.slice(0, 3).map((question, index) => (
+                  <div
+                    className='my-1 cursor-pointer underline'
+                    key={index}
+                    onClick={() => {
+                      analytics.logEvent(MagiEvent.popularQuestionClick, {
+                        agentId: params.id,
+                        conversationId: conversationId || '',
+                        question,
+                      });
+                      void ask(question);
+                    }}
+                  >
+                    {question}
+                  </div>
+                ))}
               </div>
             </ChatBubble>
 
-            {messages.map((value, index) =>
-              value.type === 'HUMAN_AGENT' || value.type === 'USER' ? (
-                <ChatBubble
-                  direction="right"
-                  className="bg-[--brand-color] text-[--brand-text-color]"
-                  key={index}
-                  ref={index === messages.length - 1 ? latestQuestionRef : null}
-                >
-                  <UserMessage text={value.text} linkTargetInNewTab />
-                </ChatBubble>
-              ) : value.type === 'ERROR' ? (
-                <ChatBubble
-                  direction="left"
-                  className="border-red-500 bg-red-50 text-xs"
-                  key={index}
-                >
-                  <div className="flex items-center">
-                    <div>
-                      <HiOutlineExclamationCircle className="size-5 text-red-500" />
-                    </div>
-                    <div className="ml-3 flex-1 content-center">
-                      <ReactMarkdown linkTargetInNewTab>
-                        {value.text !== ''
-                          ? value.text
-                          : // : t("default_error_message")}
-                            'Default error message goes here'}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-                </ChatBubble>
-              ) : (
-                <ChatBubble direction="left" key={index}>
-                  {showBotAnswer({ message: value }) ? (
-                    <div className="max-w-full">
-                      <BotMessage message={value} linkTargetInNewTab />
-                    </div>
-                  ) : (
-                    <div className="prose max-w-full text-xs">
-                      {/* <BailoutFormDisplay
-                         agent={agent}
-                         message={value.text}
-                         ticketId={value.ticketId}
-                         ticketMessageId={value.id}
-                         showForm={index === messages.length - 1}
-                       /> */}
-                    </div>
-                  )}
+            {combinedMessages.map((message, index) => (
+              <ChatMessage
+                key={index}
+                message={message}
+                isLastMessage={index === combinedMessages.length - 1}
+                latestChatBubbleRef={latestChatBubbleRef}
+                conversationId={conversationId}
+                unverifiedUserInfo={unverifiedUserInfo}
+                onSalesforceChatMode={() => {
+                  handleSalesforceChatMode();
+                  analytics.logEvent(MagiEvent.bailoutActionClick, {
+                    agentId: params.id,
+                    conversationId: conversationId || '',
+                  });
+                }}
+              />
+            ))}
 
-                  {getSources({ message: value }).length > 0 && (
-                    <div className="flex flex-col">
-                      <div className="text-gray-500">
-                        {/* {t("related_links")} */}
-                        Related links goes here
-                      </div>
-                      <ul className="mt-2 space-y-2">
-                        {getSources({ message: value }).map((source, index) => (
-                          <li
-                            key={index}
-                            className="flex items-center space-x-3"
-                          >
-                            <HiArrowNarrowRight className="h-3.5 w-3.5" />
-                            <span className="flex-1">
-                              <TextAnchor
-                                key={index}
-                                href={source.url}
-                                target="_blank"
-                              >
-                                {source.title || source.url}
-                              </TextAnchor>
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* <FeedbackForm
-                     message={value}
-                     showBailoutButton={showBotAnswer({message: value}) && index === messages.length - 1}
-                     bailoutAgent={agent}
-                   /> */}
-                </ChatBubble>
-              )
-            )}
             {isLoading && !isResponseAvailable && (
-              <div className="my-5">
+              <div className='my-5'>
                 <Spinner color={'#000000'} />
               </div>
             )}
+
+            {isSalesforceChatMode && agentName && showTypingIndicator && (
+              <div className='my-5 flex items-center h-auto'>
+                <div className='shrink-0 p-0 m-0'>
+                  <Animation
+                    animationData={typingIndicator}
+                    alignLeft={true}
+                    height={'24px'}
+                    width={'40px'}
+                  />
+                </div>
+                <span className='ml-2'>{t('agent_typing')}</span>
+              </div>
+            )}
           </div>
-          {messages.length === 0 && !isLoading && (
-            <div className="flex h-20 w-full items-center text-center">
-              <div className="mx-auto flex items-center text-xs text-gray-400">
-                {/* {t("powered_by")}{" "} */}
-                Powered by text goes here{' '}
-                <a href="https://www.mavenagi.com" target="_blank">
-                  <Logo className="ml-1 h-6" width={82} height={24} />
+          {combinedMessages.length === 0 && !isLoading && (
+            <div className='flex h-20 w-full items-center text-center'>
+              <div className='mx-auto flex items-center text-xs text-gray-400'>
+                Powered by{' '}
+                <a href='https://www.mavenagi.com' target='_blank'>
+                  <Logo className='ml-1 h-6' width={82} height={24} />
                 </a>
               </div>
             </div>
           )}
         </div>
-        <ChatInput
-          questionPlaceholder="Ask a question..."
-          isSubmitting={isLoading}
-          data-testid="chat-input"
-        />
+        {!isSalesforceChatMode ? (
+          <ChatInput
+            questionPlaceholder={'question_placeholder'}
+            isSubmitting={isLoading}
+            data-testid='chat-input'
+          />
+        ) : (
+          <SalesforceChatInput
+            questionPlaceholder={'question_placeholder'}
+            isSubmitting={isLoading}
+            askFn={askSalesForce}
+            data-testid='chat-input'
+            agentName={agentName || null}
+            handleEndChat={handleEndSalesforceChatMode}
+          />
+        )}
       </Chat>
     </main>
   );
 }
+

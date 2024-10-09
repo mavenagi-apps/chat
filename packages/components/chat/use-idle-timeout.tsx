@@ -1,35 +1,58 @@
-// Custom hook for managing idle timeouts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
-export function useIdleTimeout(timeout: number) {
-    const [isIdle, setIsIdle] = useState(false);
+interface UseIdleTimeoutProps {
+  timeout: number;
+  isSalesforceChatMode: boolean;
+  isWaitingForChatResponse: boolean;
+  hasUserSentFirstMessage: boolean;
+}
 
-    useEffect(() => {
-        let timer: NodeJS.Timeout;
+export function useIdleTimeout({
+  timeout,
+  isSalesforceChatMode,
+  isWaitingForChatResponse,
+  hasUserSentFirstMessage,
+}: UseIdleTimeoutProps) {
+  const [isIdle, setIsIdle] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout>();
 
-        const resetTimer = () => {
-            clearTimeout(timer);
-            timer = setTimeout(() => {
-                setIsIdle(true);
-            }, timeout);
-        };
+  const resetTimer = useCallback(() => {
+    if (isIdle) return; // Don't reset if already idle
 
-        const handleUserActivity = () => {
-            setIsIdle(false);
-            resetTimer();
-        };
+    clearTimeout(timerRef.current);
+    if (hasUserSentFirstMessage && !isSalesforceChatMode && !isWaitingForChatResponse) {
+      timerRef.current = setTimeout(() => {
+        setIsIdle(true);
+      }, timeout);
+    }
+  }, [timeout, isSalesforceChatMode, isWaitingForChatResponse, hasUserSentFirstMessage, isIdle]);
 
-        window.addEventListener('mousemove', handleUserActivity);
-        window.addEventListener('keypress', handleUserActivity);
+  const handleUserActivity = useCallback(() => {
+    if (!isIdle) {
+      resetTimer();
+    }
+  }, [resetTimer, isIdle]);
 
-        resetTimer();
+  useEffect(() => {
+    if (isIdle) return; // Don't set up listeners if already idle
 
-        return () => {
-            clearTimeout(timer);
-            window.removeEventListener('mousemove', handleUserActivity);
-            window.removeEventListener('keypress', handleUserActivity);
-        };
-    }, [timeout]);
+    window.addEventListener('mousemove', handleUserActivity);
+    window.addEventListener('keypress', handleUserActivity);
 
-    return isIdle;
+    resetTimer();
+
+    return () => {
+      clearTimeout(timerRef.current);
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keypress', handleUserActivity);
+    };
+  }, [handleUserActivity, resetTimer, isIdle]);
+
+  useEffect(() => {
+    if (!isIdle) {
+      resetTimer();
+    }
+  }, [isSalesforceChatMode, isWaitingForChatResponse, hasUserSentFirstMessage, resetTimer, isIdle]);
+
+  return { isIdle, resetIdleTimer: resetTimer };
 }

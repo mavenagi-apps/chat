@@ -1,88 +1,66 @@
 'use server';
 
-import { MavenAGIClient } from 'mavenagi';
+import { getMavenAGIClient } from '@/app/index';
+import { type MavenAGIClient, type MavenAGI } from 'mavenagi';
+import { type FeedbackType } from 'mavenagi/api';
 import { nanoid } from 'nanoid';
-import {getMavenAGIClient} from "@/app/index";
 
-
-
-// Function to fetch user data using the userToken
-async function fetchUserData(userToken: string) {
-  // Replace with actual API call
-  return {
-    user_email: {
-      data: {
-        email: 'someemail@gmail.com',
-      },
-    },
-    user_profile_information: {
-      data: {
-        legal_first_name: 'John',
-        preferred_name: 'Johnny',
-      },
-    },
-  };
+interface CreateOrUpdateFeedbackProps {
+  orgFriendlyId: string;
+  agentId: string;
+  feedbackId: string | undefined;
+  conversationId: string;
+  conversationMessageId: string;
+  feedbackType?: FeedbackType;
+  feedbackText?: string;
 }
 
-export async function create({
+export async function createOrUpdateFeedback({
   orgFriendlyId,
-  id,
-  question,
+  agentId,
+  feedbackId,
   conversationId,
-  initialize
-}: {
-  orgFriendlyId: string;
-  id: string;
-  question: string;
-  conversationId: string;
-  initialize: boolean;
-}) {
-  'use server';
+  conversationMessageId,
+  feedbackType,
+  feedbackText,
+}: CreateOrUpdateFeedbackProps) {
+  const client: MavenAGIClient = getMavenAGIClient(
+    orgFriendlyId,
+    agentId
+  );
 
-  const client: MavenAGIClient = getMavenAGIClient(orgFriendlyId, id);
-
-  // Replace with real Tripadvisor user data
-  const userId = 'tripadvisor-user-123';
-  const userToken = 'triptoken123';
-  const userData = await fetchUserData(userToken);
-
-  if (initialize) {
-      const init = await client.conversation.initialize({
-        conversationId: {
-          referenceId: conversationId,
-        },
-        messages: [
-          {
-            conversationMessageId: {
-              referenceId: crypto.randomUUID(),
-            },
-            text: `Today's date ${new Date().toLocaleDateString()}`,
-            userMessageType: 'EXTERNAL_SYSTEM',
-          },
-        ],
-        context: {
-          metadata: {
-            userId,
-            userToken,
-          },
-          createdBy: {
-            email: userData.user_email.data.email,
-            name:
-                userData.user_profile_information.data.preferred_name ||
-                userData.user_profile_information.data.legal_first_name,
-          },
-        },
-        responseConfig: {
-          responseLength: 'SHORT',
-        },
-      });
-    }
-
-  return await client.conversation.ask(conversationId, {
-    conversationMessageId: {
-      referenceId: nanoid(),
+  const feedbackRequest = {
+    feedbackId: {
+      referenceId: feedbackId || nanoid(),
     },
-    text: question,
-  });
+    conversationId: {
+      referenceId: conversationId,
+    },
+    conversationMessageId: {
+      referenceId: conversationMessageId,
+    },
+    type: feedbackType,
+    text: feedbackText,
+  };
 
+  try {
+    const {
+      feedbackId: { referenceId },
+    } = await client.conversation.createFeedback(
+      feedbackRequest as MavenAGI.FeedbackRequest
+    );
+    return referenceId;
+  } catch (error) {
+    return { error: (error as any)?.message || 'Unknown error' };
+  }
+}
+
+export async function getPublicAppSettings(
+  orgFriendlyId: string,
+  agentId: string
+) {
+  const client = getMavenAGIClient(orgFriendlyId, agentId);
+
+  const { amplitudeApiKey } = await client.appSettings.get();
+  return { amplitudeApiKey } as Partial<AppSettings>;
 }

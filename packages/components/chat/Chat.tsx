@@ -1,18 +1,10 @@
 import clsx from 'clsx'
 import React, {useEffect, useState} from 'react'
 
-import {type TicketMessage} from '@magi/types/data'
-
-export type ChatMessage =
-  | {text: string; type: 'USER'}
-  | {
-      text: string
-      type: 'ERROR'
-    }
-  | TicketMessage
+import { type Message, isBotMessage } from '@/types';
 
 export interface ChatProps {
-  messages: ChatMessage[]
+  messages: Message[]
   askFn: (question: string) => Promise<void>
   brandColor?: string
   className?: string
@@ -21,8 +13,7 @@ export interface ChatProps {
 export const ChatContext = React.createContext<{
   followUpQuestions: string[]
   ask: (question: string) => Promise<void>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}>({} as any)
+}>({ followUpQuestions: [], ask: async () => {} })
 
 export default function Chat({
   messages,
@@ -34,8 +25,9 @@ export default function Chat({
   useEffect(() => {
     if (messages.length > 0) {
       const lastMsg = messages[messages.length - 1]
-      if ('botContext' in lastMsg && lastMsg.botContext !== undefined) {
-        setFollowUpQuestions(lastMsg.botContext.followUpQuestions || [])
+
+      if (isBotMessage(lastMsg)) {
+        setFollowUpQuestions(lastMsg.metadata?.followupQuestions || [])
         return
       }
     }

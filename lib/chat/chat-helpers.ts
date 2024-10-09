@@ -1,15 +1,33 @@
-import {type Source, type TicketMessage, TicketMessageStatus} from '@magi/types/data'
+import { type Source } from 'mavenagi/api';
+import { type Message, isActionChatMessage, isBotMessage } from '@/types'
 
-export function showBotAnswer({message}: {message: TicketMessage | null}) {
+export function showBotAnswer({
+  message,
+}: {
+  message: Message;
+}) {
   return (
-    message?.conversationMessageId?.referenceId !== null
-  )
+    isActionChatMessage(message) ||
+    (isBotMessage(message) && message.responses.length > 0)
+  );
 }
 
-export function getFollowUpQuestions({message, count = 3}: {message: TicketMessage | null; count?: number}): string[] {
-  return showBotAnswer({message: message}) ? message?.botContext?.followUpQuestions?.slice(0, count) || [] : []
+export function showActionForm({
+  message,
+}: {
+  message: Message;
+}) {
+  return isActionChatMessage(message);
 }
 
-export function getSources({message}: {message: TicketMessage | null}): Source[] {
-  return showBotAnswer({message: message}) ? message?.botContext?.sources?.slice(0, 3) || [] : []
+export function getFollowUpQuestions({message, count = 3}: {message: Message; count?: number}): string[] {
+  return isBotMessage(message)
+    ? message?.metadata?.followupQuestions?.slice(0, count) || []
+    : [];
+}
+
+export function getSources({message}: {message: Message }): Source[] {
+  return isBotMessage(message)
+    ? message?.metadata?.sources?.slice(0, 3) || []
+    : [];
 }

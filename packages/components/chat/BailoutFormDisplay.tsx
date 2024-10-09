@@ -1,87 +1,53 @@
-// import {ReactMarkdown} from '@/components/ReactMarkdown'
-// import {rpc} from '@/rpc/react'
-// import {CheckCircleIcon} from '@heroicons/react/16/solid'
-// import {useTranslations} from 'next-intl'
-// import React, {useEffect} from 'react'
+import {useTranslations} from 'next-intl';
+import React, {useState} from 'react';
+import { IoChatbubbleEllipsesOutline } from 'react-icons/io5';
 
-// import {type Agent, type BailoutForm, BailoutType, FeedbackType} from '@magi/types/data'
-// import {Alert, AlertDescription, AlertTitle, FieldGroup, Input, Label, Textarea, useForm} from '@magi/ui'
+import {Alert, AlertDescription, AlertTitle, FieldGroup, useForm} from '@magi/ui';
 
-// export interface BailoutFormProps {
-//   showForm?: boolean
-//   agent: Agent
-//   message?: string
-//   ticketId: string
-//   ticketMessageId: string
-// }
+export interface BailoutFormProps {
+  onSalesforceChatMode: () => void;
+}
 
-// export default function BailoutFormDisplay({
-//   showForm = true,
-//   agent,
-//   message,
-//   ticketId,
-//   ticketMessageId,
-// }: BailoutFormProps) {
-//   const t = useTranslations('chat.BailoutFormDisplay')
-//   const submitBailout = rpc.agent.bailout.useMutation()
+export default function BailoutFormDisplay({onSalesforceChatMode}: BailoutFormProps) {
+  const t = useTranslations('chat.BailoutFormDisplay');
+  const [error, setError] = useState<string | null>(null);
 
-//   const sendBailoutFeedbackMutation = rpc.ticketMessage.createFeedback.useMutation()
+  const {Form, ...methods} = useForm<{}>({
+    onSubmit: async (_data) => {
+      try {
+        onSalesforceChatMode();
+      } catch (error) {
+        console.error('Error initiating chat session:', error);
+        setError('Failed to initiate chat session. Please try again.');
+      }
+      console.log('Bailout form submitted');
+    },
+  });
 
-//   // Send Handoff feedback every time the bailout form is shown
-//   useEffect(() => {
-//     void sendBailoutFeedbackMutation.mutateAsync({
-//       ticketMessageId,
-//       data: {
-//         type: FeedbackType.HANDOFF,
-//       },
-//     })
-//   }, [])
+  if (methods.formState.isSubmitSuccessful) {
+    return null;
+  }
 
-//   const {Form, ...methods} = useForm<BailoutForm>({
-//     onSubmit: data => submitBailout.mutateAsync({ticketId: ticketId, data}),
-//   })
-
-//   return (
-//     <div className="space-y-4">
-//       <ReactMarkdown>{message || t('unable_to_answer')}</ReactMarkdown>
-
-//       {showForm && agent.bailoutType !== BailoutType.INTEGRATION && (
-//         <ReactMarkdown linkTargetInNewTab>{agent.bailoutText || t('default_bailout_text')}</ReactMarkdown>
-//       )}
-
-//       {showForm && agent.bailoutType === BailoutType.INTEGRATION && (
-//         <>
-//           <p>{t('integration_bailout_text')}</p>
-
-//           <Form.Form {...methods}>
-//             <FieldGroup>
-//               <div className="grid grid-cols-2 items-stretch gap-2">
-//                 <Form.Field controlId="name">
-//                   <Label>{t('name')}</Label>
-//                   <Input required />
-//                 </Form.Field>
-//                 <Form.Field controlId="email">
-//                   <Label>{t('email')}</Label>
-//                   <Input required type="email" />
-//                 </Form.Field>
-//               </div>
-//               <Form.Field controlId="question">
-//                 <Label>{t('question')}</Label>
-//                 <Textarea rows={2} required />
-//               </Form.Field>
-//               {submitBailout.data ? (
-//                 <Alert variant="success">
-//                   <CheckCircleIcon />
-//                   <AlertTitle>{t('ticket_created_title')}</AlertTitle>
-//                   <AlertDescription>{t('ticket_created_description')}</AlertDescription>
-//                 </Alert>
-//               ) : (
-//                 <Form.SubmitButton variant="secondary">{t('send')}</Form.SubmitButton>
-//               )}
-//             </FieldGroup>
-//           </Form.Form>
-//         </>
-//       )}
-//     </div>
-//   )
-// }
+  return (
+    <div>
+      {error ? (
+        <Alert variant='warning'>
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : (
+        <Form.Form {...methods}>
+          <FieldGroup>
+            <Form.SubmitButton
+              variant='primary'
+              className='w-full bg-[--brand-color]'
+            >
+              <IoChatbubbleEllipsesOutline />
+              {t('connect_to_live_agent')}
+            </Form.SubmitButton>
+          </FieldGroup>
+        </Form.Form>
+      )}
+    </div>
+  );
+}

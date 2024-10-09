@@ -52,8 +52,8 @@ export const buttonStyles = {
   colors: {
     solid: {
       primary: [
-        'text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.violet.600)] [--btn-border:theme(colors.violet.700/90%)]',
-        '[--btn-icon:theme(colors.violet.300)] data-[active]:[--btn-icon:theme(colors.violet.200)] data-[hover]:[--btn-icon:theme(colors.violet.200)]',
+        'text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:var(--brand-color)] [--btn-border:var(--brand-color)]',
+        '[--btn-icon:var(--brand-color)] hover:[--btn-bg:color-mix(in_srgb,var(--brand-color),black_10%)] active:[--btn-bg:color-mix(in_srgb,var(--brand-color),black_20%)]',
       ],
       secondary: [
         'text-zinc-950 [--btn-bg:white] [--btn-border:theme(colors.zinc.950/10%)] [--btn-hover-overlay:theme(colors.zinc.950/2.5%)] data-[active]:[--btn-border:theme(colors.zinc.950/15%)] data-[hover]:[--btn-border:theme(colors.zinc.950/15%)]',
@@ -129,7 +129,7 @@ export const buttonStyles = {
       ],
     },
   },
-}
+};
 
 export type ButtonProps = (
   | {outline?: never; plain?: never; link?: never}

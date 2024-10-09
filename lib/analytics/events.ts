@@ -9,6 +9,8 @@ export enum MagiProduct {
 }
 
 export enum MagiEvent {
+  askClick = 'ask-click',
+  bailoutActionClick = 'bailout-action-click',
   chatAskClick = 'chat-ask-click',
   chatHomeView = 'chat-home-view',
   copilotAskClick = 'copilot-ask-click',
@@ -16,9 +18,12 @@ export enum MagiEvent {
   copilotFeedbackClick = 'copilot-feedback-click',
   copilotHomeView = 'copilot-home-view',
   copilotInsertClick = 'copilot-insert-click',
+  endChatClick = 'end-chat-click',
+  feedbackSubmit = 'feedback-submit',
+  idleMessageDisplay = 'idle-message-display',
+  instantAnswerHomeView = 'instant-answer-home-view',
+  manualBailoutClick = 'manual-bailout-click',
+  popularQuestionClick = 'popular-question-click',
   searchAskClick = 'search-ask-click',
   searchHomeView = 'search-home-view',
-  instantAnswerHomeView = 'instant-answer-home-view',
-  askClick = 'ask-click',
-  manualBailoutClick = 'manual-bailout-click',
 }

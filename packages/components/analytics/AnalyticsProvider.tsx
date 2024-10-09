@@ -1,8 +1,9 @@
 'use client'
 
-import {Analytics} from '@/lib/analytics'
 import {type MagiProduct} from '@/lib/analytics/events'
 import React, {useEffect} from 'react'
+
+import { useAnalytics } from '@/lib/use-analytics';
 
 export function AnalyticsProvider({
   children,
@@ -15,9 +16,10 @@ export function AnalyticsProvider({
   userId?: string
   email?: string
 }) {
+  const analytics = useAnalytics();
+
   useEffect(() => {
-    const analytics = Analytics.getInstance()
     analytics.init(product, userId === 'anonymous' ? undefined : userId, email)
-  }, [product, userId])
+  }, [product, userId, analytics])
   return <>{children}</>
 }
