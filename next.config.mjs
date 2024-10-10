@@ -7,7 +7,7 @@ const nextConfig = {
   reactStrictMode: false,
   experimental: {
     serverActions: {
-      allowedOrigins: ['chat-ta.onmaven.app'],
+      allowedOrigins: ['chat-v2.onmaven.app'],
     },
   },
   logging: {

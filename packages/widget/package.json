@@ -1,0 +1,24 @@
+{
+  "name": "@magi/widget",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "preact": "10.23.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@preact/preset-vite": "^2.9.0",
+    "@types/babel__core": "^7",
+    "concurrently": "8.2.2",
+    "fs": "^0.0.1-security",
+    "nodemon": "3.1.4",
+    "path": "^0.12.7",
+    "typescript": "5.5.4",
+    "vite": "^5.4.3",
+    "wrangler": "3.72.3"
+  }
+}
