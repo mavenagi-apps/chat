@@ -52,7 +52,7 @@ const ChatButton = (props: {
         '-moz-user-select': 'none',
         '-ms-user-select': 'none',
         userSelect: 'none',
-      }}
+      } as React.CSSProperties}
       onClick={props.onClick}
     >
       {!props.isOpen ? (
@@ -195,6 +195,7 @@ export async function load({
   }
 
   render(
+    // @ts-expect-error Server Component
     <App
       ref={appRef}
       iframeUrl={iframeUrl}
@@ -203,7 +204,6 @@ export async function load({
       horizontalPosition={horizontalPosition}
       verticalPosition={verticalPosition}
     />,
-    document.body,
     placeholder
   );
 }

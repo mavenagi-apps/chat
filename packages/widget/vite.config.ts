@@ -1,6 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
 import preact from '@preact/preset-vite';
 import { defineConfig } from 'vite';
 
@@ -19,8 +16,6 @@ export default defineConfig({
         dir: '../../public/js',
         // output js file to ../../public/js/widget.js
         entryFileNames: 'widget.js',
-        manualChuncks: null,
-        manualPublicPath: true,
       },
     },
   },

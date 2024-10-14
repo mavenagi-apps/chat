@@ -37,7 +37,7 @@ interface Props {
   };
 }
 
-export function ChatPage({ params }: Props) {
+function ChatPage({ params }: Props) {
   // Analytics
   const analytics = useAnalytics();
 
