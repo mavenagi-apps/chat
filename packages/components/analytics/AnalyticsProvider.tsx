@@ -20,6 +20,6 @@ export function AnalyticsProvider({
 
   useEffect(() => {
     analytics.init(product, userId === 'anonymous' ? undefined : userId, email)
-  }, [product, userId, analytics])
+  }, [product, userId, analytics, email])
   return <>{children}</>
 }

@@ -37,7 +37,7 @@ interface Props {
   };
 }
 
-export default function ChatPage({ params }: Props) {
+export function ChatPage({ params }: Props) {
   // Analytics
   const analytics = useAnalytics();
 
@@ -299,3 +299,28 @@ export default function ChatPage({ params }: Props) {
   );
 }
 
+export default function ChatPageWrapper(props: Props) {
+  const [loading, setLoading] = useState(true);
+  const { orgFriendlyId, id } = props.params;
+
+  useEffect(() => {
+    const isInIframe = () => {
+      try {
+        return window.self !== window.top;
+      } catch (e) {
+        return true;
+      }
+    };
+    if (!isInIframe()) {
+      window.location.href = `/demo/${orgFriendlyId}/${id}`;
+    } else {
+      setLoading(false);
+    }
+  }, [orgFriendlyId, id]);
+
+  if (loading) {
+    return null;
+  }
+
+  return <ChatPage {...props} />;
+}
