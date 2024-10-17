@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import Script from 'next/script';
 
 import Chat from '@magi/components/chat/Chat';
 import Animation from '@magi/components/Animation';
@@ -322,5 +323,10 @@ export default function ChatPageWrapper(props: Props) {
     return null;
   }
 
-  return <ChatPage {...props} />;
+  return (
+    <>
+      <Script src='/js/zendesk-chat-web-sdk.js' strategy='lazyOnload' />
+      <ChatPage {...props} />
+    </>
+  );
 }
