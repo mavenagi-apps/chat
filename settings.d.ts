@@ -5,6 +5,9 @@ declare global {
     salesforceDeploymentId: string;
     salesforceOrgId: string;
     salesforceEswLiveAgentDevName: string;
+    zendeskChatAccountKey: string;
+    amplitudeApiKey: string;
+    preferredLiveAgentProvider: string;
   }
 }
 

@@ -61,6 +61,6 @@ export async function getPublicAppSettings(
 ) {
   const client = getMavenAGIClient(orgFriendlyId, agentId);
 
-  const { amplitudeApiKey } = await client.appSettings.get();
-  return { amplitudeApiKey } as Partial<AppSettings>;
+  const { amplitudeApiKey, preferredLiveAgentProvider, zendeskChatAccountKey } = await client.appSettings.get();
+  return { amplitudeApiKey, preferredLiveAgentProvider, zendeskChatAccountKey } as Partial<AppSettings>;
 }
