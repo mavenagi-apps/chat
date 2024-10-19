@@ -1,18 +1,31 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAnalytics } from '@/lib/use-analytics';
 import { MagiEvent } from '@/lib/analytics/events';
 import {
-  type UserChatMessage,
   type ZendeskChatMessage,
+  type Message,
+  isBotMessage,
+  isChatUserMessage,
 } from '@/types';
+
+declare global {
+  interface Window {
+    zChat: {
+      init: (config: any) => void;
+      sendChatMsg: (message: string, callback?: (err?: string) => void) => void;
+      on: (event: string, callback: (data: any) => void) => void;
+      setVisitorInfo: (visitorInfo: any, callback?: (err?: string) => void) => void;
+      getAccountStatus: () => any;
+    };
+  }
+}
 
 export const useZendeskChat = (
   params: { id: string, orgFriendlyId: string },
   conversationId: string | null,
-  initialUserChatMessage: UserChatMessage | null,
   unverifiedUserInfo: Record<string, string>,
-  messages: any[],
+  messages: Message[],
   onZendeskExit: () => void
 ) => {
   // Init dependencies
@@ -24,10 +37,48 @@ export const useZendeskChat = (
   const isZendeskChatModeRef = useRef(isZendeskChatMode);
   const zendeskPollingAbortController = useRef<AbortController | null>(null);
   const [zendeskChatSessionParams, setZendeskChatSessionParams] = useState<any | null>(null);
-  const [connectingToZendesk, setConnectingToZendesk] = useState(false);
   const [connectedToZendesk, setConnectedToZendesk] = useState(false);
   const zendeskChatAck = useRef<number>(-1);
   const [zendeskError, setZendeskError] = useState<string | null>(null);
+
+  const messagesForZendesk = useMemo(() => {
+    return messages.filter((message) => ['USER', 'bot'].includes(message.type)).map((message) => {
+      return {
+        author: {
+          type: isChatUserMessage(message) ? 'user' : 'business',
+        },
+        content: {
+          type: 'text',
+          text: isChatUserMessage(message)
+            ? message.text
+            : isBotMessage(message)
+              ? message.responses.map((response: any) => response.text).join('')
+              : '',
+        },
+      }
+    });
+  }, [messages]);
+
+  const initializeZendeskChat = useCallback(async () => {
+    const response = await fetch('/api/zendesk/conversations', {
+      method: 'POST',
+      body: JSON.stringify({
+        orgFriendlyId: params.orgFriendlyId,
+        agentId: params.id,
+        unverifiedUserInfo,
+        messages: messagesForZendesk,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to initialize Zendesk chat');
+    }
+
+    const { conversationId: zendeskConversationId } = await response.json();
+    setZendeskChatSessionParams({
+      zendeskConversationId,
+    });
+  }, [params.orgFriendlyId, params.id, unverifiedUserInfo, messagesForZendesk])
 
   // Zendesk chat messages
   const [zendeskChatMessages, setZendeskChatMessages] = useState<
@@ -38,51 +89,22 @@ export const useZendeskChat = (
 
   const handleZendeskChatMode = async () => {
     setIsZendeskChatMode(true);
-    setConnectingToZendesk(true);
+    // setConnectingToZendesk(true);
     createConnectingToAgentMessage();
 
-    const userData = {
-      userAgent: navigator.userAgent,
-      screenResolution: `${window.screen.width}x${window.screen.height}`,
-      subject: initialUserChatMessage?.text || 'How can I help you today?',
-      firstName: unverifiedUserInfo?.firstName || '',
-      lastName: unverifiedUserInfo?.lastName || '',
-      email: unverifiedUserInfo?.email || '',
-    };
-
     try {
-      const chatSessionRequest = await fetch('/api/zendesk', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userData,
-          orgFriendlyId: params.orgFriendlyId,
-          agentId: params.id,
-        }),
-      });
+      await initializeZendeskChat();
 
-      if (!chatSessionRequest.ok) {
-        throw new Error(`Failed to initiate chat session: ${chatSessionRequest.statusText}`);
-      }
-
-      const chatSessionData = await chatSessionRequest.json();
-      setZendeskChatSessionParams(chatSessionData);
-      setConnectedToZendesk(true);
-      setZendeskError(null);
-
-      void pollMessages(chatSessionData);
     } catch (error) {
       console.error('Error starting Zendesk chat:', error);
       setZendeskError('Failed to start chat session');
-      setConnectingToZendesk(false);
+      // setConnectingToZendesk(false);
     }
   };
 
   const handleEndZendeskChatMode = async () => {
     setIsZendeskChatMode(false);
-    setConnectingToZendesk(false);
+    // setConnectingToZendesk(false);
     setConnectedToZendesk(false);
     zendeskPollingAbortController.current?.abort();
     zendeskChatAck.current = -1;
@@ -166,51 +188,6 @@ export const useZendeskChat = (
         agentId: '',
       },
     });
-  };
-
-  const pollMessages = async (chatSessionData: any) => {
-    const url = '/api/zendesk/messages';
-    zendeskPollingAbortController.current = new AbortController();
-    try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-ZENDESK-SESSION-ID': chatSessionData.sessionId,
-        },
-        signal: zendeskPollingAbortController.current.signal,
-      });
-      zendeskPollingAbortController.current = null;
-
-      if (!response.ok) {
-        console.error('Done polling messages:', response);
-        setConnectedToZendesk(false);
-        return;
-      }
-
-      const { messages: retrievedZendeskMessages, sequence } = await response.json();
-
-      if (sequence > zendeskChatAck.current) {
-        zendeskChatAck.current = sequence;
-      }
-
-      if (retrievedZendeskMessages.length > 0) {
-        setZendeskChatMessages((prevMessages) => [
-          ...prevMessages,
-          ...retrievedZendeskMessages,
-        ]);
-      }
-
-      if (isZendeskChatModeRef.current) {
-        setTimeout(() => void pollMessages(chatSessionData), 3000); // Poll every 3 seconds
-      }
-    } catch (error: unknown) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        console.log('Polling aborted');
-      } else {
-        throw error;
-      }
-    }
   };
 
   useEffect(() => {

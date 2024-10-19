@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { getAppSettings, sendChatMessage } from '@/app/api/salesforce/utils';
+import { getAppSettings, sendChatMessage } from '@/app/api/utils';
 
 import type { ChatSessionResponse } from '@/lib/salesforce/types';
 

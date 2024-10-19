@@ -16,11 +16,13 @@ type Message = (
 };
 
 export type ZendeskChatMessage = {
-  id: string;
-  body: string;
-  author_id: string;
-  created_at: string;
-  type: 'comment' | 'event';
+  id?: string;
+  type: string;
+  message?: {
+    text: string;
+    name?: string;
+    agentId?: string;
+  };
   event_name?: string;
   event_timestamp?: string;
 };

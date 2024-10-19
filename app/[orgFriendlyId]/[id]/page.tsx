@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import Script from 'next/script';
 
 import Chat from '@magi/components/chat/Chat';
 import Animation from '@magi/components/Animation';
@@ -13,7 +12,7 @@ import { ChatBubble } from '@magi/components/chat/ChatCard';
 import { ChatInput } from '@magi/components/chat/ChatInput';
 import { useChat } from '@magi/components/chat/use-chat';
 import { useIdleTimeout } from '@magi/components/chat/use-idle-timeout';
-import { useSalesforceChat } from '@magi/components/chat/use-salesforce-chat';
+import { useZendeskChat } from '@magi/components/chat/use-zendesk-chat';
 import { useUnverifiedUserInfo } from '@magi/components/chat/use-unverified-user-info';
 import { ReactMarkdown } from '@magi/components/ReactMarkdown';
 import Spinner from '@magi/components/Spinner';
@@ -24,11 +23,10 @@ import { useAnalytics } from '@/lib/use-analytics';
 import { SalesforceChatInput } from '@magi/components/chat/SalesforceChatInput';
 
 import {
-  isChatUserMessage,
   type Message,
   type SalesforceChatMessage,
+  type ZendeskChatMessage,
   type SimulatedChatMessage,
-  type UserChatMessage,
 } from '@/types';
 
 interface Props {
@@ -79,19 +77,6 @@ function ChatPage({ params }: Props) {
     );
   };
 
-  // First user message (for Salesforce chat subject)
-  const [initialUserChatMessage, setInitialUserChatMessage] =
-    useState<UserChatMessage | null>(null);
-  useEffect(() => {
-    // get the first user message
-    const firstUserMessage: UserChatMessage | undefined = messages.find(
-      (message) => isChatUserMessage(message)
-    );
-    if (firstUserMessage) {
-      setInitialUserChatMessage(firstUserMessage);
-    }
-  }, [messages]);
-
   const displayIdleMessage = useCallback(
     (onSalesforceExit = false) => {
       const IDLE_MESSAGE = (conversationId: string): SimulatedChatMessage => ({
@@ -113,19 +98,21 @@ function ChatPage({ params }: Props) {
     [conversationId, params.id, askQuestion, t, analytics]
   );
 
-  // Salesforce chat logic
+  // Zendesk chat logic
   const {
-    isSalesforceChatMode,
-    salesforceChatMessages,
-    agentName,
-    handleSalesforceChatMode,
-    handleEndSalesforceChatMode,
-    askSalesForce,
-    showTypingIndicator,
-  } = useSalesforceChat(
+    isZendeskChatMode,
+    // connectedToZendesk,
+    zendeskChatMessages,
+    agentName: zendeskAgentName,
+    handleZendeskChatMode,
+    // handleEndZendeskChatMode,
+    askZendesk,
+    showTypingIndicator: showZendeskTypingIndicator,
+    // createConnectingToAgentMessage: zendeskCreateConnectingToAgentMessage,
+    // zendeskError,
+  } = useZendeskChat(
     params,
     conversationId,
-    initialUserChatMessage,
     unverifiedUserInfo,
     messages,
     () => {
@@ -134,14 +121,14 @@ function ChatPage({ params }: Props) {
     }
   );
 
-  const [combinedMessages, setCombinedMessages] = useState<(Message | SalesforceChatMessage)[]>([]);
+  const [combinedMessages, setCombinedMessages] = useState<(Message | SalesforceChatMessage | ZendeskChatMessage)[]>([]);
 
   const [hasUserSentFirstMessage, setHasUserSentFirstMessage] = useState(false);
 
   const idleTimeoutMilliseconds = 30000; // 30 seconds
   const { isIdle } = useIdleTimeout({
     timeout: idleTimeoutMilliseconds,
-    isSalesforceChatMode,
+    isExternalProviderChatMode: isZendeskChatMode,
     isWaitingForChatResponse: isLoading,
     hasUserSentFirstMessage,
   });
@@ -165,14 +152,14 @@ function ChatPage({ params }: Props) {
 
   useEffect(() => {
     setCombinedMessages(
-      [...messages, ...salesforceChatMessages]
+      [...messages, ...zendeskChatMessages]
         .filter(({ timestamp }) => !!timestamp)
         .sort(
           (a, b) => (a.timestamp || 0) - (b.timestamp || 0)
         )
     );
     scrollLatestChatBubbleIntoView();
-  }, [messages, salesforceChatMessages, setCombinedMessages]);
+  }, [messages, zendeskChatMessages, setCombinedMessages]);
 
   // Idle logic
   const [showIdleMessage, setShowIdleMessage] = useState<boolean>(false);
@@ -195,7 +182,10 @@ function ChatPage({ params }: Props) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             alt='Logo'
-            src='https://app.mavenagi.com/api/v1/files/age_CSMoGtyyQNzJyoJdFkdPfOXw/logo?1723509365729&w=256&q=75'
+            // src='https://app.mavenagi.com/api/v1/files/age_CSMoGtyyQNzJyoJdFkdPfOXw/logo?1723509365729&w=256&q=75'
+            src={
+              'https://upload.wikimedia.org/wikipedia/commons/0/02/Ibex-global-logo.png'
+            }
             className='h-7'
           />
         </div>
@@ -239,7 +229,7 @@ function ChatPage({ params }: Props) {
                 conversationId={conversationId}
                 unverifiedUserInfo={unverifiedUserInfo}
                 onSalesforceChatMode={() => {
-                  handleSalesforceChatMode();
+                  void handleZendeskChatMode();
                   analytics.logEvent(MagiEvent.bailoutActionClick, {
                     agentId: params.id,
                     conversationId: conversationId || '',
@@ -254,7 +244,7 @@ function ChatPage({ params }: Props) {
               </div>
             )}
 
-            {isSalesforceChatMode && agentName && showTypingIndicator && (
+            {isZendeskChatMode && zendeskAgentName && showZendeskTypingIndicator && (
               <div className='my-5 flex items-center h-auto'>
                 <div className='shrink-0 p-0 m-0'>
                   <Animation
@@ -279,7 +269,7 @@ function ChatPage({ params }: Props) {
             </div>
           )}
         </div>
-        {!isSalesforceChatMode ? (
+        {!isZendeskChatMode ? (
           <ChatInput
             questionPlaceholder={'question_placeholder'}
             isSubmitting={isLoading}
@@ -289,10 +279,10 @@ function ChatPage({ params }: Props) {
           <SalesforceChatInput
             questionPlaceholder={'question_placeholder'}
             isSubmitting={isLoading}
-            askFn={askSalesForce}
+            askFn={askZendesk}
             data-testid='chat-input'
-            agentName={agentName || null}
-            handleEndChat={handleEndSalesforceChatMode}
+            agentName={zendeskAgentName || null}
+            handleEndChat={handleZendeskChatMode}
           />
         )}
       </Chat>
@@ -323,10 +313,5 @@ export default function ChatPageWrapper(props: Props) {
     return null;
   }
 
-  return (
-    <>
-      <Script src='/js/zendesk-chat-web-sdk.js' strategy='lazyOnload' />
-      <ChatPage {...props} />
-    </>
-  );
+  return <ChatPage {...props} />;
 }

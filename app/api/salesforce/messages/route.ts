@@ -7,7 +7,7 @@ import {
   SALESFORCE_API_BASE_HEADERS,
   sendChatMessage,
   getAppSettings,
-} from '@/app/api/salesforce/utils';
+} from '@/app/api/utils';
 
 const SALESFORCE_CHAT_PROMPT_MESSAGE_NAMES = ['Management Center', 'Management Center with Maven'];
 const SALESFORCE_CHAT_PROMPT_MESSAGE_TEXTS = ['Please enter the subject'];

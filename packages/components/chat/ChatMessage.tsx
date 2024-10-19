@@ -13,13 +13,14 @@ import {
   type ActionChatMessage,
   type Message,
   type SalesforceChatMessage,
+  type ZendeskChatMessage,
   type UserChatMessage,
 } from '@/types';
 import { type ConversationMessageResponse } from 'mavenagi/api';
 import { useTranslations } from 'next-intl';
 
 export interface MessageProps {
-  message: Message | SalesforceChatMessage;
+  message: Message | SalesforceChatMessage | ZendeskChatMessage;
   linkTargetInNewTab?: boolean;
   isLastMessage?: boolean;
   latestChatBubbleRef?: React.RefObject<HTMLDivElement>;
