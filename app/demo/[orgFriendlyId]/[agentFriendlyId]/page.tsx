@@ -1,11 +1,15 @@
 import { headers } from 'next/headers';
+import { faker } from '@faker-js/faker';
+import { getPublicAppSettings } from '@/app/actions';
 
 export default async function Page({
   params: { orgFriendlyId, agentFriendlyId },
 }: {
-  params: { orgFriendlyId: string, agentFriendlyId: string };
+  params: { orgFriendlyId: string; agentFriendlyId: string };
 }) {
   const envPrefix = headers().get('x-magi-env-prefix') ?? '';
+  const settings = await getPublicAppSettings(orgFriendlyId, agentFriendlyId);
+  const brandColor = settings?.brandColor;
 
   return (
     <div>
@@ -106,15 +110,12 @@ addEventListener("load", function () {
     envPrefix: "${envPrefix}",
     orgFriendlyId: "${orgFriendlyId}",
     agentFriendlyId: "${agentFriendlyId}",
-    bgColor: "#004f32",
+    bgColor: "${brandColor || '#00202b'}",
     unverifiedUserInfo: {
-      firstName: "David",
-      lastName: "Bowie",
-      userId: "user-115",
-      email: "david.bowie@example.com",
-      businessName: "Stardust Hotel",
-      locationId: "location-115",
-      locationType: "Hotel",
+      firstName: "${faker.person.firstName()}",
+      lastName: "${faker.person.lastName()}",
+      userId: "${faker.string.uuid()}",
+      email: "${faker.internet.email()}",
     },
   })
 });`,

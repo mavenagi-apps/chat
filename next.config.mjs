@@ -7,8 +7,19 @@ const nextConfig = {
   reactStrictMode: false,
   experimental: {
     serverActions: {
-      allowedOrigins: ['chat-v2.onmaven.app'],
+      allowedOrigins: [
+        'private-ibex-chat-zendesk.onmaven.app',
+        'app.mavenagi.com',
+        'zendesk-handoff.onmaven.app',
+      ],
     },
+  },
+  images: {
+    remotePatterns: [
+      {
+        hostname: '*',
+      },
+    ],
   },
   logging: {
     fetches: {

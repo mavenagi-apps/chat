@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import {NextIntlClientProvider} from 'next-intl'
-import {unstable_setRequestLocale} from 'next-intl/server'
-import {getMessages} from '@/i18n'
-import { AnalyticsProvider } from '@/packages/components/analytics/AnalyticsProvider';
-import { MagiProduct } from '@/lib/analytics/events';
+import { NextIntlClientProvider } from 'next-intl'
+import { unstable_setRequestLocale } from 'next-intl/server'
+import { getMessages } from '@/i18n'
+import ClientLayout from './ClientLayout';
 
 export const metadata: Metadata = {
   title: "Support Chat",
@@ -20,16 +19,14 @@ export default async function ChatLayout({
   const messages = await getMessages(locale)
 
   return (
-    <NextIntlClientProvider
-      locale={locale}
-      messages={messages}
-      timeZone={'UTC'}
-    >
-      <AnalyticsProvider
-        product={MagiProduct.chat}
+      <NextIntlClientProvider
+        locale={locale}
+        messages={messages}
+        timeZone={'UTC'}
       >
-        {children}
-      </AnalyticsProvider>
-    </NextIntlClientProvider>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
+      </NextIntlClientProvider>
   );
 }

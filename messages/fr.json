@@ -2,9 +2,6 @@
     "chat": {
       "ChatPage": {
         "default_welcome_message": "Comment pouvons-nous vous aider ? Vous pouvez commencer une conversation ci-dessous ou commencer par des questions populaires :",
-        "popular_question_1": "Comment puis-je contester un avis ?",
-        "popular_question_2": "Comment puis-je mettre à jour les informations de mon entreprise ?",
-        "popular_question_3": "Je pense que mon entreprise est répertoriée au mauvais endroit, que dois-je faire ?",
         "default_error_message": "Une erreur s'est produite. Veuillez réessayer.",
         "related_links": "Liens connexes",
         "powered_by": "Propulsé par",

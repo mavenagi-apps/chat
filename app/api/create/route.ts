@@ -38,6 +38,9 @@ async function initializeConversation(
       isCopilot: false,
       responseLength: MavenAGI.ResponseLength.Medium,
     },
+    metadata: {
+      escalation_action_enabled: 'true',
+    },
   } as MavenAGI.ConversationRequest;
 
   if (userData.firstName) {

@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import React, {useEffect, useState} from 'react'
 
 import { type Message, isBotMessage } from '@/types';
+import { useSettings } from '@/app/providers/SettingsProvider';
 
 export interface ChatProps {
   messages: Message[]
@@ -22,6 +23,7 @@ export default function Chat({
   children,
 }: React.PropsWithChildren<ChatProps>) {
   const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([])
+  const { brandColor } = useSettings();
   useEffect(() => {
     if (messages.length > 0) {
       const lastMsg = messages[messages.length - 1]
@@ -35,17 +37,17 @@ export default function Chat({
   }, [messages])
 
   return (
-    <ChatContext.Provider value={{followUpQuestions, ask: askFn}}>
+    <ChatContext.Provider value={{ followUpQuestions, ask: askFn }}>
       <div
         className={clsx(className, 'flex w-full flex-1 flex-col overflow-auto')}
         style={{
           // @ts-expect-error css variable
-          '--brand-color': '#004f32',
+          '--brand-color': brandColor,
           '--brand-text-color': '#FFFFFF',
         }}
       >
         {children}
       </div>
     </ChatContext.Provider>
-  )
+  );
 }

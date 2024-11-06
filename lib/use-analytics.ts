@@ -1,12 +1,11 @@
 import { Analytics } from '@/lib/analytics';
-import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { getPublicAppSettings } from '@/app/actions';
+import { useSettings } from '@/app/providers/SettingsProvider';
 import type { MagiProduct, MagiEvent } from '@/lib/analytics/events';
 
 export function useAnalytics() {
-  const { orgFriendlyId, id: agentFriendlyId } = useParams();
-  const [amplitudeApiKey, setAmplitudeApiKey] = useState<string | null>(null);
+  const { amplitudeApiKey } = useSettings();
+  const [analyticsReady, setAnalyticsReady] = useState(false);
   const [logEventsQueue, setLogEventsQueue] = useState<
     { event: MagiEvent; properties: Record<string, any> }[]
   >([]);
@@ -46,53 +45,25 @@ export function useAnalytics() {
   });
 
   useEffect(() => {
-    console.log('Analytics called');
-    console.log(orgFriendlyId, agentFriendlyId);
-    const fetchSettings = async () => {
-      const publicAppSettings = (await getPublicAppSettings(
-        orgFriendlyId as string,
-        agentFriendlyId as string
-      )) as Partial<AppSettings> & { amplitudeApiKey: string };
-
-      console.log({ publicAppSettings });
-
-      if (publicAppSettings.amplitudeApiKey) {
-        setAmplitudeApiKey(publicAppSettings.amplitudeApiKey);
-        const analytics = Analytics.getInstance(
-          publicAppSettings.amplitudeApiKey
-        );
-        setAnalytics(analytics);
-      }
-
-      if (initQueue.length > 0) {
-        initQueue.forEach(({ product, userId, email }) => {
-          analytics.init(product, userId, email);
-        });
-        setInitQueue([]);
-      }
-
-      if (logEventsQueue.length > 0) {
-        logEventsQueue.forEach((event) => {
-          analytics.logEvent(event.event, event.properties);
-        });
-        setLogEventsQueue([]);
-      }
-    };
-
-    if (orgFriendlyId && agentFriendlyId && !amplitudeApiKey) {
-      fetchSettings()
-        .then()
-        .catch((error) => {
-          console.error('Error fetching settings:', error);
-        });
+    if (amplitudeApiKey) {
+      setAnalytics(Analytics.getInstance(amplitudeApiKey));
+      setAnalyticsReady(true);
     }
-  }, [
-    orgFriendlyId,
-    agentFriendlyId,
-    amplitudeApiKey,
-    analytics,
-    logEventsQueue,
-  ]);
+  }, [amplitudeApiKey]);
+
+  useEffect(() => {
+    if (analyticsReady) {
+      initQueue.forEach(({ product, userId, email }) => {
+        analytics.init(product, userId, email);
+      });
+      setInitQueue([]);
+
+      logEventsQueue.forEach((event) => {
+        analytics.logEvent(event.event, event.properties);
+      });
+      setLogEventsQueue([]);
+    }
+  }, [analyticsReady]);
 
   return analytics;
 }

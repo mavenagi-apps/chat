@@ -2,9 +2,6 @@
     "chat": {
       "ChatPage": {
         "default_welcome_message": "¿Cómo podemos ayudarte? Puedes iniciar una conversación a continuación o comenzar con preguntas populares:",
-        "popular_question_1": "¿Cómo puedo disputar una reseña?",
-        "popular_question_2": "¿Cómo actualizo la información de mi negocio?",
-        "popular_question_3": "Creo que mi negocio está listado en la ubicación incorrecta, ¿qué debo hacer?",
         "default_error_message": "Ocurrió un error. Por favor, inténtalo de nuevo.",
         "related_links": "Enlaces relacionados",
         "powered_by": "Desarrollado por",

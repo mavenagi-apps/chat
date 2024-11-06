@@ -13,13 +13,14 @@ import {
   type ActionChatMessage,
   type Message,
   type SalesforceChatMessage,
+  type ZendeskChatMessage,
   type UserChatMessage,
 } from '@/types';
 import { type ConversationMessageResponse } from 'mavenagi/api';
 import { useTranslations } from 'next-intl';
 
 export interface MessageProps {
-  message: Message | SalesforceChatMessage;
+  message: Message | SalesforceChatMessage | ZendeskChatMessage;
   linkTargetInNewTab?: boolean;
   isLastMessage?: boolean;
   latestChatBubbleRef?: React.RefObject<HTMLDivElement>;
@@ -48,7 +49,7 @@ export function ChatMessage({
             ref={isLastMessage ? latestChatBubbleRef : null}
           >
             <UserMessage
-              text={message.text}
+              text={'text' in message ? message.text : ''}
               linkTargetInNewTab={linkTargetInNewTab}
             />
           </ChatBubble>
@@ -61,7 +62,7 @@ export function ChatMessage({
             ref={isLastMessage ? latestChatBubbleRef : null}
           >
             <ErrorMessage
-              text={message.text}
+              text={'text' in message ? message.text : ''}
               linkTargetInNewTab={linkTargetInNewTab}
             />
           </ChatBubble>
@@ -73,7 +74,7 @@ export function ChatMessage({
             ref={isLastMessage ? latestChatBubbleRef : null}
           >
             <SimulatedMessage
-              text={message.text}
+              text={'text' in message ? message.text : ''}
               linkTargetInNewTab={linkTargetInNewTab}
             />
           </ChatBubble>
