@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface UseIdleTimeoutProps {
   timeout: number;
-  isSalesforceChatMode: boolean;
+  isExternalProviderChatMode: boolean;
   isWaitingForChatResponse: boolean;
   hasUserSentFirstMessage: boolean;
 }
 
 export function useIdleTimeout({
   timeout,
-  isSalesforceChatMode,
+  isExternalProviderChatMode,
   isWaitingForChatResponse,
   hasUserSentFirstMessage,
 }: UseIdleTimeoutProps) {
@@ -20,12 +20,12 @@ export function useIdleTimeout({
     if (isIdle) return; // Don't reset if already idle
 
     clearTimeout(timerRef.current);
-    if (hasUserSentFirstMessage && !isSalesforceChatMode && !isWaitingForChatResponse) {
+    if (hasUserSentFirstMessage && !isExternalProviderChatMode && !isWaitingForChatResponse) {
       timerRef.current = setTimeout(() => {
         setIsIdle(true);
       }, timeout);
     }
-  }, [timeout, isSalesforceChatMode, isWaitingForChatResponse, hasUserSentFirstMessage, isIdle]);
+  }, [timeout, isExternalProviderChatMode, isWaitingForChatResponse, hasUserSentFirstMessage, isIdle]);
 
   const handleUserActivity = useCallback(() => {
     if (!isIdle) {
@@ -52,7 +52,7 @@ export function useIdleTimeout({
     if (!isIdle) {
       resetTimer();
     }
-  }, [isSalesforceChatMode, isWaitingForChatResponse, hasUserSentFirstMessage, resetTimer, isIdle]);
+  }, [isExternalProviderChatMode, isWaitingForChatResponse, hasUserSentFirstMessage, resetTimer, isIdle]);
 
   return { isIdle, resetIdleTimer: resetTimer };
 }

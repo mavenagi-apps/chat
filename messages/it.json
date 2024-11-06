@@ -2,9 +2,6 @@
     "chat": {
       "ChatPage": {
         "default_welcome_message": "Come possiamo aiutarti? Puoi iniziare una conversazione qui sotto o iniziare con domande popolari:",
-        "popular_question_1": "Come posso contestare una recensione?",
-        "popular_question_2": "Come posso aggiornare le informazioni della mia attività?",
-        "popular_question_3": "Penso che la mia attività sia elencata nella posizione sbagliata, cosa devo fare?",
         "default_error_message": "Si è verificato un errore. Per favore riprova.",
         "related_links": "Link correlati",
         "powered_by": "Offerto da",

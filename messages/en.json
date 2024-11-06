@@ -2,16 +2,13 @@
   "chat": {
     "ChatPage": {
       "default_welcome_message": "How can we help you? You can start a conversation below or start with popular questions:",
-      "popular_question_1": "How do I dispute a review?",
-      "popular_question_2": "How do I update the information for my business?",
-      "popular_question_3": "I think my business is listed in the wrong location, what do I do?",
       "default_error_message": "An error occurred. Please try again.",
       "related_links": "Related links",
       "powered_by": "Powered by",
       "connecting_to_agent": "Connecting you with a live agent...",
       "agent_typing": "Agent is typing...",
       "idle_message": "We are here to help you. Please ask a question.",
-      "idle_message_with_survey": "Thank you for reaching out. Can you please fill out this [survey](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey={conversationId}{additionalUrlParams}) to tell us about your experience?",
+      "idle_message_with_survey": "Thank you for reaching out. Can you please fill out this [survey]({url}{urlParams}) to tell us about your experience?",
       "chat_has_ended": "Chat has ended",
       "chat_transferred": "Agent {name} has joined the chat",
       "chat_queue_position": "You are in position {position} in the queue. You will be connected to an agent shortly.",

@@ -15,6 +15,18 @@ type Message = (
   timestamp?: number;
 };
 
+export type ZendeskChatMessage = {
+  id?: string;
+  type: string;
+  message?: {
+    text: string;
+    name?: string;
+    agentId?: string;
+  };
+  event_name?: string;
+  event_timestamp?: string;
+};
+
 const isBotMessage = (
   message: Message
 ): message is ConversationMessageResponse.Bot => message.type === 'bot';

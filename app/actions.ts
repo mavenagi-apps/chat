@@ -61,6 +61,35 @@ export async function getPublicAppSettings(
 ) {
   const client = getMavenAGIClient(orgFriendlyId, agentId);
 
-  const { amplitudeApiKey } = await client.appSettings.get();
-  return { amplitudeApiKey } as Partial<AppSettings>;
+  try {
+    const {
+      amplitudeApiKey,
+      preferredLiveAgentProvider,
+      zendeskChatAccountKey,
+      zendeskChatIntegrationId,
+      zendeskSubdomain,
+      escalationTopics,
+      logoUrl,
+      popularQuestions,
+      defaultAgentName,
+      brandColor,
+      surveyLink,
+    } = await client.appSettings.get();
+    return {
+      amplitudeApiKey,
+      preferredLiveAgentProvider,
+      zendeskChatAccountKey,
+      zendeskChatIntegrationId,
+      zendeskSubdomain,
+      escalationTopics,
+      logoUrl,
+      popularQuestions,
+      defaultAgentName,
+      brandColor,
+      surveyLink,
+    } as Partial<AppSettings>;
+  } catch (error) {
+    console.error('Error fetching app settings', error);
+    return null;
+  }
 }

@@ -1,8 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 import Chat from '@magi/components/chat/Chat';
 import Animation from '@magi/components/Animation';
@@ -12,22 +13,22 @@ import { ChatBubble } from '@magi/components/chat/ChatCard';
 import { ChatInput } from '@magi/components/chat/ChatInput';
 import { useChat } from '@magi/components/chat/use-chat';
 import { useIdleTimeout } from '@magi/components/chat/use-idle-timeout';
-import { useSalesforceChat } from '@magi/components/chat/use-salesforce-chat';
+import { useZendeskChat } from '@magi/components/chat/use-zendesk-chat';
 import { useUnverifiedUserInfo } from '@magi/components/chat/use-unverified-user-info';
 import { ReactMarkdown } from '@magi/components/ReactMarkdown';
 import Spinner from '@magi/components/Spinner';
 import { Logo } from '@magi/components/Logo';
 import { MagiEvent } from '@/lib/analytics/events';
 import { useAnalytics } from '@/lib/use-analytics';
+import { useSettings } from '@/app/providers/SettingsProvider';
 
 import { SalesforceChatInput } from '@magi/components/chat/SalesforceChatInput';
 
 import {
-  isChatUserMessage,
   type Message,
   type SalesforceChatMessage,
+  type ZendeskChatMessage,
   type SimulatedChatMessage,
-  type UserChatMessage,
 } from '@/types';
 
 interface Props {
@@ -43,11 +44,14 @@ function ChatPage({ params }: Props) {
 
   // i18n
   const t = useTranslations('chat.ChatPage');
-  const POPULAR_QUESTIONS = [
-    t('popular_question_1'),
-    t('popular_question_2'),
-    t('popular_question_3'),
-  ];
+  const { popularQuestions: popularQuestionsJSON, brandColor, logoUrl, surveyLink } = useSettings();
+  const popularQuestions: string[] = useMemo(() => {
+    try {
+      return JSON.parse(popularQuestionsJSON || '[]');
+    } catch (error) {
+      return [];
+    }
+  }, [popularQuestionsJSON]);
 
   // Unverified user info
   const unverifiedUserInfo = useUnverifiedUserInfo();
@@ -78,25 +82,12 @@ function ChatPage({ params }: Props) {
     );
   };
 
-  // First user message (for Salesforce chat subject)
-  const [initialUserChatMessage, setInitialUserChatMessage] =
-    useState<UserChatMessage | null>(null);
-  useEffect(() => {
-    // get the first user message
-    const firstUserMessage: UserChatMessage | undefined = messages.find(
-      (message) => isChatUserMessage(message)
-    );
-    if (firstUserMessage) {
-      setInitialUserChatMessage(firstUserMessage);
-    }
-  }, [messages]);
-
   const displayIdleMessage = useCallback(
     (onSalesforceExit = false) => {
       const IDLE_MESSAGE = (conversationId: string): SimulatedChatMessage => ({
         text: t('idle_message_with_survey', {
-          conversationId,
-          additionalUrlParams: `&agentConnected=${onSalesforceExit ? 'Yes' : 'No'}`,
+          url: surveyLink,
+          urlParams: `?conversationId=${conversationId}`,
         }),
         type: 'SIMULATED',
       });
@@ -109,22 +100,24 @@ function ChatPage({ params }: Props) {
         onSalesforceExit,
       });
     },
-    [conversationId, params.id, askQuestion, t, analytics]
+    [conversationId, params.id, askQuestion, t, analytics, surveyLink]
   );
 
-  // Salesforce chat logic
+  // Zendesk chat logic
   const {
-    isSalesforceChatMode,
-    salesforceChatMessages,
-    agentName,
-    handleSalesforceChatMode,
-    handleEndSalesforceChatMode,
-    askSalesForce,
-    showTypingIndicator,
-  } = useSalesforceChat(
+    isZendeskChatMode,
+    // connectedToZendesk,
+    zendeskChatMessages,
+    agentName: zendeskAgentName,
+    handleZendeskChatMode,
+    handleEndZendeskChatMode,
+    askZendesk,
+    showTypingIndicator: showZendeskTypingIndicator,
+    // createConnectingToAgentMessage: zendeskCreateConnectingToAgentMessage,
+    // zendeskError,
+  } = useZendeskChat(
     params,
     conversationId,
-    initialUserChatMessage,
     unverifiedUserInfo,
     messages,
     () => {
@@ -133,14 +126,14 @@ function ChatPage({ params }: Props) {
     }
   );
 
-  const [combinedMessages, setCombinedMessages] = useState<(Message | SalesforceChatMessage)[]>([]);
+  const [combinedMessages, setCombinedMessages] = useState<(Message | SalesforceChatMessage | ZendeskChatMessage)[]>([]);
 
   const [hasUserSentFirstMessage, setHasUserSentFirstMessage] = useState(false);
 
   const idleTimeoutMilliseconds = 30000; // 30 seconds
   const { isIdle } = useIdleTimeout({
     timeout: idleTimeoutMilliseconds,
-    isSalesforceChatMode,
+    isExternalProviderChatMode: isZendeskChatMode,
     isWaitingForChatResponse: isLoading,
     hasUserSentFirstMessage,
   });
@@ -164,14 +157,14 @@ function ChatPage({ params }: Props) {
 
   useEffect(() => {
     setCombinedMessages(
-      [...messages, ...salesforceChatMessages]
+      [...messages, ...zendeskChatMessages]
         .filter(({ timestamp }) => !!timestamp)
         .sort(
           (a, b) => (a.timestamp || 0) - (b.timestamp || 0)
         )
     );
     scrollLatestChatBubbleIntoView();
-  }, [messages, salesforceChatMessages, setCombinedMessages]);
+  }, [messages, zendeskChatMessages, setCombinedMessages]);
 
   // Idle logic
   const [showIdleMessage, setShowIdleMessage] = useState<boolean>(false);
@@ -190,17 +183,19 @@ function ChatPage({ params }: Props) {
     <main className='flex h-screen flex-col bg-gray-50'>
       <div className='border-b border-gray-300 bg-white md:block'>
         <div className='text-md flex p-5 font-medium text-gray-950'>
-          {/* TODO(doll): Many of our customer images are SVGs which NextJs doesn't support well by default */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
+            src={
+              logoUrl ||
+              'https://app.mavenagi.com/_next/image?url=%2Fapi%2Fv1%2Ffiles%2Fage_CSMoGtyyQNJ0z8XzyMXK2Jbk%2Flogo%3F1730414949621&w=256&q=75'
+            }
             alt='Logo'
-            src='https://app.mavenagi.com/api/v1/files/age_CSMoGtyyQNzJyoJdFkdPfOXw/logo?1723509365729&w=256&q=75'
-            className='h-7'
+            width={98}
+            height={24}
           />
         </div>
       </div>
 
-      <Chat brandColor='#004f32' messages={messages} askFn={ask}>
+      <Chat brandColor={brandColor} messages={messages} askFn={ask}>
         <div className='flex flex-1 flex-col overflow-auto text-xs'>
           <div className='mx-auto w-full max-w-3xl flex-1 text-gray-800 sm:mt-5 sm:px-5'>
             <ChatBubble direction='full' key='popular_questions'>
@@ -210,7 +205,7 @@ function ChatPage({ params }: Props) {
                     {t('default_welcome_message')}
                   </ReactMarkdown>
                 </div>
-                {POPULAR_QUESTIONS.slice(0, 3).map((question, index) => (
+                {popularQuestions.slice(0, 3).map((question, index) => (
                   <div
                     className='my-1 cursor-pointer underline'
                     key={index}
@@ -238,7 +233,7 @@ function ChatPage({ params }: Props) {
                 conversationId={conversationId}
                 unverifiedUserInfo={unverifiedUserInfo}
                 onSalesforceChatMode={() => {
-                  handleSalesforceChatMode();
+                  void handleZendeskChatMode();
                   analytics.logEvent(MagiEvent.bailoutActionClick, {
                     agentId: params.id,
                     conversationId: conversationId || '',
@@ -253,19 +248,21 @@ function ChatPage({ params }: Props) {
               </div>
             )}
 
-            {isSalesforceChatMode && agentName && showTypingIndicator && (
-              <div className='my-5 flex items-center h-auto'>
-                <div className='shrink-0 p-0 m-0'>
-                  <Animation
-                    animationData={typingIndicator}
-                    alignLeft={true}
-                    height={'24px'}
-                    width={'40px'}
-                  />
+            {isZendeskChatMode &&
+              zendeskAgentName &&
+              showZendeskTypingIndicator && (
+                <div className='my-5 flex items-center h-auto'>
+                  <div className='shrink-0 p-0 m-0'>
+                    <Animation
+                      animationData={typingIndicator}
+                      alignLeft={true}
+                      height={'24px'}
+                      width={'40px'}
+                    />
+                  </div>
+                  <span className='ml-2'>{t('agent_typing')}</span>
                 </div>
-                <span className='ml-2'>{t('agent_typing')}</span>
-              </div>
-            )}
+              )}
           </div>
           {combinedMessages.length === 0 && !isLoading && (
             <div className='flex h-20 w-full items-center text-center'>
@@ -278,7 +275,7 @@ function ChatPage({ params }: Props) {
             </div>
           )}
         </div>
-        {!isSalesforceChatMode ? (
+        {!isZendeskChatMode ? (
           <ChatInput
             questionPlaceholder={'question_placeholder'}
             isSubmitting={isLoading}
@@ -288,10 +285,10 @@ function ChatPage({ params }: Props) {
           <SalesforceChatInput
             questionPlaceholder={'question_placeholder'}
             isSubmitting={isLoading}
-            askFn={askSalesForce}
+            askFn={askZendesk}
             data-testid='chat-input'
-            agentName={agentName || null}
-            handleEndChat={handleEndSalesforceChatMode}
+            agentName={zendeskAgentName || null}
+            handleEndChat={handleEndZendeskChatMode}
           />
         )}
       </Chat>
