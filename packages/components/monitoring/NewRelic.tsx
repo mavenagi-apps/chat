@@ -1,9 +1,13 @@
-import Script from 'next/script'
+import Script from "next/script";
 
-const NEWRELIC_BROWSER_ACCOUNT_ID = process.env.NEXT_PUBLIC_NEWRELIC_BROWSER_ACCOUNT_ID!
-const NEWRELIC_BROWSER_AGENT_ID = process.env.NEXT_PUBLIC_NEWRELIC_BROWSER_AGENT_ID!
-const NEWRELIC_BROWSER_LICENSE_KEY = process.env.NEXT_PUBLIC_NEWRELIC_BROWSER_LICENSE_KEY!
-const NEWRELIC_BROWSER_APPLICATION_ID = process.env.NEXT_PUBLIC_NEWRELIC_BROWSER_APPLICATION_ID!
+const NEWRELIC_BROWSER_ACCOUNT_ID =
+  process.env.NEXT_PUBLIC_NEWRELIC_BROWSER_ACCOUNT_ID!;
+const NEWRELIC_BROWSER_AGENT_ID =
+  process.env.NEXT_PUBLIC_NEWRELIC_BROWSER_AGENT_ID!;
+const NEWRELIC_BROWSER_LICENSE_KEY =
+  process.env.NEXT_PUBLIC_NEWRELIC_BROWSER_LICENSE_KEY!;
+const NEWRELIC_BROWSER_APPLICATION_ID =
+  process.env.NEXT_PUBLIC_NEWRELIC_BROWSER_APPLICATION_ID!;
 
 const configScript = `
   window.NREUM || (NREUM = {});
@@ -34,7 +38,7 @@ const configScript = `
     applicationID: "${NEWRELIC_BROWSER_APPLICATION_ID}",
     sa: 1
   };
-`
+`;
 
 export const NewRelicHeadScript = () => {
   return (
@@ -52,5 +56,5 @@ export const NewRelicHeadScript = () => {
         src="https://js-agent.newrelic.com/nr-loader-spa-current.min.js"
       />
     </>
-  )
-}
+  );
+};

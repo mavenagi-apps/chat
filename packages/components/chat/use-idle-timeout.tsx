@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface UseIdleTimeoutProps {
   timeout: number;
@@ -20,12 +20,22 @@ export function useIdleTimeout({
     if (isIdle) return; // Don't reset if already idle
 
     clearTimeout(timerRef.current);
-    if (hasUserSentFirstMessage && !isSalesforceChatMode && !isWaitingForChatResponse) {
+    if (
+      hasUserSentFirstMessage &&
+      !isSalesforceChatMode &&
+      !isWaitingForChatResponse
+    ) {
       timerRef.current = setTimeout(() => {
         setIsIdle(true);
       }, timeout);
     }
-  }, [timeout, isSalesforceChatMode, isWaitingForChatResponse, hasUserSentFirstMessage, isIdle]);
+  }, [
+    timeout,
+    isSalesforceChatMode,
+    isWaitingForChatResponse,
+    hasUserSentFirstMessage,
+    isIdle,
+  ]);
 
   const handleUserActivity = useCallback(() => {
     if (!isIdle) {
@@ -36,15 +46,15 @@ export function useIdleTimeout({
   useEffect(() => {
     if (isIdle) return; // Don't set up listeners if already idle
 
-    window.addEventListener('mousemove', handleUserActivity);
-    window.addEventListener('keypress', handleUserActivity);
+    window.addEventListener("mousemove", handleUserActivity);
+    window.addEventListener("keypress", handleUserActivity);
 
     resetTimer();
 
     return () => {
       clearTimeout(timerRef.current);
-      window.removeEventListener('mousemove', handleUserActivity);
-      window.removeEventListener('keypress', handleUserActivity);
+      window.removeEventListener("mousemove", handleUserActivity);
+      window.removeEventListener("keypress", handleUserActivity);
     };
   }, [handleUserActivity, resetTimer, isIdle]);
 
@@ -52,7 +62,13 @@ export function useIdleTimeout({
     if (!isIdle) {
       resetTimer();
     }
-  }, [isSalesforceChatMode, isWaitingForChatResponse, hasUserSentFirstMessage, resetTimer, isIdle]);
+  }, [
+    isSalesforceChatMode,
+    isWaitingForChatResponse,
+    hasUserSentFirstMessage,
+    resetTimer,
+    isIdle,
+  ]);
 
   return { isIdle, resetIdleTimer: resetTimer };
 }

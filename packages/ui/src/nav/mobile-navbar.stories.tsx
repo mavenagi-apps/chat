@@ -1,5 +1,5 @@
-import type {Meta, StoryObj} from '@storybook/react'
-import {HiAcademicCap, HiCamera} from 'react-icons/hi'
+import type { Meta, StoryObj } from "@storybook/react";
+import { HiAcademicCap, HiCamera } from "react-icons/hi";
 
 import {
   MobileNavbar,
@@ -7,21 +7,21 @@ import {
   MobileNavbarCollapse,
   MobileNavbarItem,
   type MobileNavbarProps,
-} from './mobile-navbar'
+} from "./mobile-navbar";
 
 const meta: Meta<typeof MobileNavbar> = {
-  title: 'Nav/MobileNavbar',
+  title: "Nav/MobileNavbar",
   component: MobileNavbar,
-  tags: ['autodocs'],
-}
-export default meta
-type Story = StoryObj<typeof MobileNavbar>
+  tags: ["autodocs"],
+};
+export default meta;
+type Story = StoryObj<typeof MobileNavbar>;
 
 export const Default: Story = {
   render: (args: MobileNavbarProps) => (
     <div className="h-[500px] w-[300px] border bg-gray-50">
       <MobileNavbar {...args}>
-        {({open}) => (
+        {({ open }) => (
           <>
             <MobileNavbarBrand>Logo</MobileNavbarBrand>
             <MobileNavbarCollapse open={open}>
@@ -43,4 +43,4 @@ export const Default: Story = {
       </MobileNavbar>
     </div>
   ),
-}
+};

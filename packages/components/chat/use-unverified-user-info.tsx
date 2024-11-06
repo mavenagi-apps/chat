@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export const useUnverifiedUserInfo = () => {
   const [unverifiedUserInfo, setUnverifiedUserInfo] = useState<
@@ -9,12 +9,12 @@ export const useUnverifiedUserInfo = () => {
 
   useEffect(() => {
     const unverifiedUserInfoString: string | null =
-      searchParams.get('unverifiedUserInfo');
+      searchParams.get("unverifiedUserInfo");
     if (unverifiedUserInfoString) {
       try {
         setUnverifiedUserInfo(JSON.parse(unverifiedUserInfoString));
       } catch (error) {
-        console.log('Failed to parse unverifiedUserInfo:', error);
+        console.log("Failed to parse unverifiedUserInfo:", error);
       }
     }
   }, [searchParams]);

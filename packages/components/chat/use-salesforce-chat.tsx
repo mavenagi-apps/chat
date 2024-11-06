@@ -1,23 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
-import { useTranslations } from 'next-intl';
-import { useAnalytics } from '@/lib/use-analytics';
-import { MagiEvent } from '@/lib/analytics/events';
+import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
+import { useAnalytics } from "@/lib/use-analytics";
+import { MagiEvent } from "@/lib/analytics/events";
 import {
   type UserChatMessage,
   type SalesforceChatMessage,
   isChatTransferredMessage,
-} from '@/types';
+} from "@/types";
 
 export const useSalesforceChat = (
-  params: { id: string, orgFriendlyId: string },
+  params: { id: string; orgFriendlyId: string },
   conversationId: string | null,
   initialUserChatMessage: UserChatMessage | null,
   unverifiedUserInfo: Record<string, string>,
   messages: any[],
-  onSalesforceExit: () => void
+  onSalesforceExit: () => void,
 ) => {
   // Init dependencies
-  const t = useTranslations('chat.ChatPage');
+  const t = useTranslations("chat.ChatPage");
   const analytics = useAnalytics();
 
   // Salesforce connection states
@@ -50,18 +50,18 @@ export const useSalesforceChat = (
     salesforceChatAck.current = -1;
     if (salesforceChatSessionParams) {
       try {
-        await fetch('/api/salesforce', {
-          method: 'DELETE',
+        await fetch("/api/salesforce", {
+          method: "DELETE",
           headers: {
-            'Content-Type': 'application/json',
-            'X-LIVEAGENT-AFFINITY': salesforceChatSessionParams.affinityToken,
-            'X-LIVEAGENT-SESSION-KEY': salesforceChatSessionParams.key,
-            'X-ORGANIZATION-ID': params.orgFriendlyId,
-            'X-AGENT-ID': params.id,
-          }
+            "Content-Type": "application/json",
+            "X-LIVEAGENT-AFFINITY": salesforceChatSessionParams.affinityToken,
+            "X-LIVEAGENT-SESSION-KEY": salesforceChatSessionParams.key,
+            "X-ORGANIZATION-ID": params.orgFriendlyId,
+            "X-AGENT-ID": params.id,
+          },
         });
-      } catch(error) {
-        console.error('Error ending salesforce chat:', error);
+      } catch (error) {
+        console.error("Error ending salesforce chat:", error);
       }
     }
     setSalesforceChatSessionParams(null);
@@ -69,7 +69,7 @@ export const useSalesforceChat = (
     createDisconnectedFromSalesforceMessage();
     analytics.logEvent(MagiEvent.endChatClick, {
       agentId: params.id,
-      conversationId: conversationId || '',
+      conversationId: conversationId || "",
     });
     onSalesforceExit();
   };
@@ -79,17 +79,17 @@ export const useSalesforceChat = (
       setSalesforceChatMessages((prevMessages) => [
         ...prevMessages,
         {
-          type: 'USER',
+          type: "USER",
           text: question,
         },
       ]);
 
-      await fetch('/api/salesforce/messages', {
-        method: 'POST',
+      await fetch("/api/salesforce/messages", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-LIVEAGENT-AFFINITY': salesforceChatSessionParams.affinityToken,
-          'X-LIVEAGENT-SESSION-KEY': salesforceChatSessionParams.key,
+          "Content-Type": "application/json",
+          "X-LIVEAGENT-AFFINITY": salesforceChatSessionParams.affinityToken,
+          "X-LIVEAGENT-SESSION-KEY": salesforceChatSessionParams.key,
         },
         body: JSON.stringify({
           text: question,
@@ -98,33 +98,30 @@ export const useSalesforceChat = (
         }),
       });
     } catch (error) {
-      console.error('Error asking salesforce:', error);
+      console.error("Error asking salesforce:", error);
     }
   };
 
   const createSalesforceChatMessage = (message: SalesforceChatMessage) => {
-    setSalesforceChatMessages((prevMessages) => [
-      ...prevMessages,
-      message,
-    ]);
+    setSalesforceChatMessages((prevMessages) => [...prevMessages, message]);
   };
 
   const createConnectingToAgentMessage = () => {
     createSalesforceChatMessage({
-      type: 'ChatEstablished',
+      type: "ChatEstablished",
       message: {
-        text: t('connecting_to_agent'),
+        text: t("connecting_to_agent"),
       },
     });
   };
 
   const createDisconnectedFromSalesforceMessage = () => {
     createSalesforceChatMessage({
-      type: 'ChatEnded',
+      type: "ChatEnded",
       message: {
-        text: t('chat_has_ended'),
-        name: '',
-        agentId: '',
+        text: t("chat_has_ended"),
+        name: "",
+        agentId: "",
         schedule: {
           responseDelayMilliseconds: 0,
         },
@@ -140,24 +137,24 @@ export const useSalesforceChat = (
         agentId: params.id,
       });
       if (userData.subject) {
-        pollMessagesParams.append('subject', userData.subject);
+        pollMessagesParams.append("subject", userData.subject);
       }
       const url = `/api/salesforce/messages?${pollMessagesParams.toString()}`;
       salesforcePollingAbortController.current = new AbortController();
       try {
         const response = await fetch(url, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
-            'X-LIVEAGENT-AFFINITY': chatSessionData.affinityToken,
-            'X-LIVEAGENT-SESSION-KEY': chatSessionData.key,
+            "Content-Type": "application/json",
+            "X-LIVEAGENT-AFFINITY": chatSessionData.affinityToken,
+            "X-LIVEAGENT-SESSION-KEY": chatSessionData.key,
           },
           signal: salesforcePollingAbortController.current.signal,
         });
         salesforcePollingAbortController.current = null;
 
         if (!response.ok) {
-          console.error('Done polling messages:', response);
+          console.error("Done polling messages:", response);
           setConnectedToSalesforce(false);
           return;
         }
@@ -174,7 +171,7 @@ export const useSalesforceChat = (
 
         // Find the last message of type ChatTransferred
         const chatTransferredMessage = retrievedSalesforceMessages.findLast(
-          isChatTransferredMessage
+          isChatTransferredMessage,
         );
         if (chatTransferredMessage) {
           setAgentName(chatTransferredMessage.message?.name);
@@ -183,10 +180,10 @@ export const useSalesforceChat = (
         const chatFailedToConnectMessageIndex =
           retrievedSalesforceMessages.findIndex(
             (message) =>
-              (message.type === 'ChatMessage' &&
+              (message.type === "ChatMessage" &&
                 message.message.text ===
-                  'Click the close button to end this chat') ||
-              message.type === 'ChatEnded'
+                  "Click the close button to end this chat") ||
+              message.type === "ChatEnded",
           );
         if (chatFailedToConnectMessageIndex !== -1) {
           void handleEndSalesforceChatMode();
@@ -204,8 +201,8 @@ export const useSalesforceChat = (
           void pollMessages(userData, chatSessionData);
         }
       } catch (error: unknown) {
-        if (error instanceof Error && error.name === 'AbortError') {
-          console.log('Polling aborted');
+        if (error instanceof Error && error.name === "AbortError") {
+          console.log("Polling aborted");
         } else {
           throw error;
         }
@@ -221,19 +218,19 @@ export const useSalesforceChat = (
         userAgent: navigator.userAgent,
         screenResolution: `${window.screen.width}x${window.screen.height}`,
         subject:
-          initialUserChatMessage?.text || 'How can I remove a fake review?',
-        question: '',
-        firstName: unverifiedUserInfo?.firstName || '',
-        lastName: unverifiedUserInfo?.lastName || '',
-        email: unverifiedUserInfo?.email || '',
+          initialUserChatMessage?.text || "How can I remove a fake review?",
+        question: "",
+        firstName: unverifiedUserInfo?.firstName || "",
+        lastName: unverifiedUserInfo?.lastName || "",
+        email: unverifiedUserInfo?.email || "",
       };
 
       // initialize the chat session
       // const chatSessionData = await startChatSession(data);
-      const chatSessionRequest = await fetch('/api/salesforce', {
-        method: 'POST',
+      const chatSessionRequest = await fetch("/api/salesforce", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userData,
@@ -244,7 +241,9 @@ export const useSalesforceChat = (
       });
 
       if (!chatSessionRequest.ok) {
-        throw new Error(`Failed to initiate chat session: ${chatSessionRequest.statusText}`);
+        throw new Error(
+          `Failed to initiate chat session: ${chatSessionRequest.statusText}`,
+        );
       }
 
       const chatSessionData = await chatSessionRequest.json();
@@ -253,7 +252,7 @@ export const useSalesforceChat = (
       setSalesforceError(null);
 
       void pollMessages(userData, chatSessionData);
-    }
+    };
 
     if (
       isSalesforceChatMode &&
@@ -281,7 +280,7 @@ export const useSalesforceChat = (
       prevMessages.map((m) => ({
         timestamp,
         ...m,
-      }))
+      })),
     );
   }, [salesforceChatMessages.length, setSalesforceChatMessages]);
 
@@ -301,9 +300,9 @@ export const useSalesforceChat = (
       salesforceChatMessages[salesforceChatMessages.length - 1];
     if (
       lastMessage &&
-      ['AgentTyping', 'AgentNotTyping'].includes(lastMessage.type)
+      ["AgentTyping", "AgentNotTyping"].includes(lastMessage.type)
     ) {
-      setShowTypingIndicator(lastMessage.type === 'AgentTyping');
+      setShowTypingIndicator(lastMessage.type === "AgentTyping");
     }
   }, [salesforceChatMessages]);
 

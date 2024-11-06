@@ -1,19 +1,19 @@
-import clsx from 'clsx'
-import React, {useEffect, useState} from 'react'
+import clsx from "clsx";
+import React, { useEffect, useState } from "react";
 
-import { type Message, isBotMessage } from '@/types';
+import { type Message, isBotMessage } from "@/types";
 
 export interface ChatProps {
-  messages: Message[]
-  askFn: (question: string) => Promise<void>
-  brandColor?: string
-  className?: string
+  messages: Message[];
+  askFn: (question: string) => Promise<void>;
+  brandColor?: string;
+  className?: string;
 }
 
 export const ChatContext = React.createContext<{
-  followUpQuestions: string[]
-  ask: (question: string) => Promise<void>
-}>({ followUpQuestions: [], ask: async () => {} })
+  followUpQuestions: string[];
+  ask: (question: string) => Promise<void>;
+}>({ followUpQuestions: [], ask: async () => {} });
 
 export default function Chat({
   messages,
@@ -21,31 +21,31 @@ export default function Chat({
   className,
   children,
 }: React.PropsWithChildren<ChatProps>) {
-  const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([])
+  const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
   useEffect(() => {
     if (messages.length > 0) {
-      const lastMsg = messages[messages.length - 1]
+      const lastMsg = messages[messages.length - 1];
 
       if (isBotMessage(lastMsg)) {
-        setFollowUpQuestions(lastMsg.metadata?.followupQuestions || [])
-        return
+        setFollowUpQuestions(lastMsg.metadata?.followupQuestions || []);
+        return;
       }
     }
-    setFollowUpQuestions([])
-  }, [messages])
+    setFollowUpQuestions([]);
+  }, [messages]);
 
   return (
-    <ChatContext.Provider value={{followUpQuestions, ask: askFn}}>
+    <ChatContext.Provider value={{ followUpQuestions, ask: askFn }}>
       <div
-        className={clsx(className, 'flex w-full flex-1 flex-col overflow-auto')}
+        className={clsx(className, "flex w-full flex-1 flex-col overflow-auto")}
         style={{
           // @ts-expect-error css variable
-          '--brand-color': '#004f32',
-          '--brand-text-color': '#FFFFFF',
+          "--brand-color": "#004f32",
+          "--brand-text-color": "#FFFFFF",
         }}
       >
         {children}
       </div>
     </ChatContext.Provider>
-  )
+  );
 }

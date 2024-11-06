@@ -1,24 +1,31 @@
-import type {Meta, StoryObj} from '@storybook/react'
-import React from 'react'
+import type { Meta, StoryObj } from "@storybook/react";
+import React from "react";
 
-import {PageBody, PageContainer, PageHeader, PageHeaderTools, PageSubtitle, PageTitle} from './page'
+import {
+  PageBody,
+  PageContainer,
+  PageHeader,
+  PageHeaderTools,
+  PageSubtitle,
+  PageTitle,
+} from "./page";
 
 const meta: Meta = {
-  title: 'Page',
+  title: "Page",
   component: React.Fragment,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
-    pageTitle: 'Page Title',
-    pageSubtitle: 'Page Subtitle',
+    pageTitle: "Page Title",
+    pageSubtitle: "Page Subtitle",
   },
-}
-export default meta
+};
+export default meta;
 
 export const Default: StoryObj<{
-  pageTitle: string
-  pageSubtitle: string
+  pageTitle: string;
+  pageSubtitle: string;
 }> = {
-  render: args => (
+  render: (args) => (
     <React.Fragment>
       <div className="h-[500px] w-[800px] border border-red-500">
         <PageContainer>
@@ -41,4 +48,4 @@ export const Default: StoryObj<{
       </div>
     </React.Fragment>
   ),
-}
+};

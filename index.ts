@@ -1,12 +1,11 @@
-import { getMavenAGIClient } from './app';
-import {escalationTopics} from "@/lib/actions";
+import { getMavenAGIClient } from "./app";
+import { escalationTopics } from "@/lib/actions";
 
 const defaultModule = {
-
   async postInstall({
-                      organizationId,
-                      agentId,
-                    }: {
+    organizationId,
+    agentId,
+  }: {
     organizationId: string;
     agentId: string;
   }) {
@@ -15,9 +14,9 @@ const defaultModule = {
     // Escalate action
     const result = await client.actions.createOrUpdate({
       actionId: {
-        referenceId: 'escalate',
+        referenceId: "escalate",
       },
-      name: 'Escalate to a human support agent',
+      name: "Escalate to a human support agent",
       description: `This action escalates the conversation to a human support agent via live chat. This will show a button to the user which the user must click to be connected to live chat.
 
 # **Response Instructions for \`escalate\`**
@@ -29,41 +28,40 @@ const defaultModule = {
 - When determining a category, use the entire conversation history to select a topic, with the last user message given higher importance. 
 - If the topic is unclear or isn't exactly one of those options, set the topic to "Unclear Topic"
 - You must use a category from this list:
-    ${escalationTopics.map(topic => `- "${topic}"`).join('\n')}
+    ${escalationTopics.map((topic) => `- "${topic}"`).join("\n")}
       `,
       userInteractionRequired: true,
       userFormParameters: [
         {
           description: `The topic type of the conversation.`,
-          id: 'topic',
-          label: 'Escalation Topic',
+          id: "topic",
+          label: "Escalation Topic",
           required: true,
         },
       ],
-      buttonName: 'Submit',
+      buttonName: "Submit",
     });
 
     console.log("Escalate action created", result);
   },
 
   async executeAction({
-                        actionId,
-                        parameters,
-                      }: {
+    actionId,
+    parameters,
+  }: {
     actionId: string;
     parameters: Record<string, any>;
   }) {
-    console.log('GOT EXECUTE ACTION:', actionId, parameters);
-
+    console.log("GOT EXECUTE ACTION:", actionId, parameters);
 
     // TODO: Add Salesforce escalation logic here
-    if (actionId === 'escalate') {
-      console.log('Got an escalation request for ' + parameters.topic);
+    if (actionId === "escalate") {
+      console.log("Got an escalation request for " + parameters.topic);
 
-      return 'Escalation is coming soon! No human agents currently available.';
+      return "Escalation is coming soon! No human agents currently available.";
     }
 
-    return 'unsupported action';
+    return "unsupported action";
   },
 };
 

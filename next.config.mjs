@@ -1,13 +1,13 @@
 /** @type {import('next').NextConfig} */
-import createNextIntlPlugin from 'next-intl/plugin';
+import createNextIntlPlugin from "next-intl/plugin";
 
-const withNextIntl = createNextIntlPlugin('./i18n.ts');
+const withNextIntl = createNextIntlPlugin("./i18n.ts");
 
 const nextConfig = {
   reactStrictMode: false,
   experimental: {
     serverActions: {
-      allowedOrigins: ['chat-v2.onmaven.app'],
+      allowedOrigins: ["chat-v2.onmaven.app"],
     },
   },
   logging: {

@@ -1,7 +1,7 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import { type MavenAGIClient, MavenAGI, MavenAGIError } from 'mavenagi';
-import { nanoid } from 'nanoid';
-import { getMavenAGIClient } from '@/app';
+import { type NextRequest, NextResponse } from "next/server";
+import { type MavenAGIClient, MavenAGI, MavenAGIError } from "mavenagi";
+import { nanoid } from "nanoid";
+import { getMavenAGIClient } from "@/app";
 
 interface CreateOptions {
   orgFriendlyId: string;
@@ -14,7 +14,7 @@ interface CreateOptions {
 
 async function createOrUpdateUser(
   client: MavenAGIClient,
-  conversationId: string
+  conversationId: string,
 ) {
   return client.users.createOrUpdate({
     userId: {
@@ -28,7 +28,7 @@ async function createOrUpdateUser(
 async function initializeConversation(
   client: MavenAGIClient,
   conversationId: string,
-  userData: Record<string, string>
+  userData: Record<string, string>,
 ) {
   const conversationInitializationPayload = {
     conversationId: { referenceId: conversationId },
@@ -45,9 +45,9 @@ async function initializeConversation(
       conversationMessageId: {
         referenceId: nanoid(),
       },
-      userId: { referenceId: 'system' },
-      text: `Customer's Name: ${[userData.firstName, userData.lastName].join(' ')}, Customer's Email: ${userData.email}, Business Name: ${userData.businessName}, Customer's ID: ${userData.userId}`,
-      userMessageType: 'EXTERNAL_SYSTEM',
+      userId: { referenceId: "system" },
+      text: `Customer's Name: ${[userData.firstName, userData.lastName].join(" ")}, Customer's Email: ${userData.email}, Business Name: ${userData.businessName}, Customer's ID: ${userData.userId}`,
+      userMessageType: "EXTERNAL_SYSTEM",
     });
   }
 
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!response) {
-      return NextResponse.json('No response from server', { status: 500 });
+      return NextResponse.json("No response from server", { status: 500 });
     }
 
     console.log(response);
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
 
             // Send the chunk to the client as a data event
             controller.enqueue(
-              new TextEncoder().encode(`data: ${chunkString}\n\n`)
+              new TextEncoder().encode(`data: ${chunkString}\n\n`),
             );
 
             // Log the chunk for debugging purposes
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
           // End the stream when done
           controller.close();
         } catch (err) {
-          console.error('Stream error:', err);
+          console.error("Stream error:", err);
           controller.error(err);
         }
       },
@@ -114,9 +114,9 @@ export async function POST(req: NextRequest) {
 
     return new Response(stream, {
       headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
       },
     });
   } catch (error) {
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof MavenAGIError) {
       return NextResponse.json(error.body, { status: error.statusCode });
     }
-    return NextResponse.json('Error fetching response', { status: 500 });
+    return NextResponse.json("Error fetching response", { status: 500 });
   }
 }
 

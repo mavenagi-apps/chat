@@ -1,61 +1,61 @@
 {
-    "chat": {
-      "ChatPage": {
-        "default_welcome_message": "¿Cómo podemos ayudarte? Puedes iniciar una conversación a continuación o comenzar con preguntas populares:",
-        "popular_question_1": "¿Cómo puedo disputar una reseña?",
-        "popular_question_2": "¿Cómo actualizo la información de mi negocio?",
-        "popular_question_3": "Creo que mi negocio está listado en la ubicación incorrecta, ¿qué debo hacer?",
-        "default_error_message": "Ocurrió un error. Por favor, inténtalo de nuevo.",
-        "related_links": "Enlaces relacionados",
-        "powered_by": "Desarrollado por",
-        "connecting_to_agent": "Conectándote con un agente en vivo...",
-        "agent_typing": "El agente está escribiendo...",
-        "idle_message": "Estamos aquí para ayudarte. Por favor, haz una pregunta.",
-        "idle_message_with_survey": "Gracias por contactarnos. ¿Podrías llenar esta [encuesta](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey={conversationId}{additionalUrlParams}) para contarnos sobre tu experiencia?",
-        "chat_has_ended": "El chat ha finalizado",
-        "chat_transferred": "El agente {name} se ha unido al chat",
-        "chat_queue_position": "Estás en la posición {position} en la cola. Serás conectado con un agente en breve.",
-        "chat_queue_position_next": "Eres el siguiente en la cola. Tu agente estará contigo en breve.",
-        "chat_queue_position_in_queue": "Estás en la cola. Por favor, espera al siguiente agente disponible.",
-        "chat_queue_position_estimated_wait_time": "Tu tiempo estimado de espera es de {estimatedWaitTime} segundos.",
-        "chat_queue_position_estimated_wait_time_singular": "Tu tiempo estimado de espera es de {estimatedWaitTime} segundo."
-      },
-      "BailoutFormDisplay": {
-        "unable_to_answer": "No puedo responder a esta pregunta.",
-        "default_bailout_text": "Por favor, intenta con otra pregunta o contacta a un agente de soporte para más asistencia.",
-        "integration_bailout_text": "Por favor, haz clic en el botón de abajo para conectarte con un agente, o haz otra pregunta.",
-        "name": "Nombre",
-        "email": "Correo electrónico",
-        "question": "Pregunta",
-        "connect_to_live_agent": "Conectar con un agente en vivo",
-        "connection_to_live_agent_success_title": "Ahora estás conectando con un agente en vivo",
-        "connection_to_live_agent_success_description": "Por favor, espera a que el agente responda.",
-        "ticket_created_title": "Ticket de soporte creado con éxito",
-        "ticket_created_description": "Un agente te responderá en 24-48 horas",
-        "send": "Enviar"
-      },
-      "ChatInput": {
-        "see_more": "Ver más",
-        "see_less": "Ver menos",
-        "question_placeholder": "Haz una pregunta...",
-        "speaking_with_agent": "Hablando con el agente",
-        "end_chat": "Terminar chat",
-        "aria_submit_question": "Enviar pregunta",
-        "aria_question_box": "Caja de preguntas"
-      },
-      "FeedbackForm": {
-        "submit_error": "Error al enviar comentarios",
-        "submit_success": "¡Gracias por tus comentarios!",
-        "thumbs_up": "Pulgar arriba",
-        "thumbs_down": "Pulgar abajo",
-        "human_agent_requested": "Agente humano solicitado",
-        "copied_to_clipboard": "Copiado al portapapeles",
-        "copy_to_clipboard": "Copiar al portapapeles",
-        "speak_to_agent": "Hablar con un agente",
-        "feedback_reason": "¿Por qué seleccionaste este comentario?",
-        "down_placeholder": "Haznos saber cómo se puede mejorar la respuesta.",
-        "up_placeholder": "¿Qué te gustó de la respuesta?",
-        "submit": "Enviar"
-      }
+  "chat": {
+    "ChatPage": {
+      "default_welcome_message": "¿Cómo podemos ayudarte? Puedes iniciar una conversación a continuación o comenzar con preguntas populares:",
+      "popular_question_1": "¿Cómo puedo disputar una reseña?",
+      "popular_question_2": "¿Cómo actualizo la información de mi negocio?",
+      "popular_question_3": "Creo que mi negocio está listado en la ubicación incorrecta, ¿qué debo hacer?",
+      "default_error_message": "Ocurrió un error. Por favor, inténtalo de nuevo.",
+      "related_links": "Enlaces relacionados",
+      "powered_by": "Desarrollado por",
+      "connecting_to_agent": "Conectándote con un agente en vivo...",
+      "agent_typing": "El agente está escribiendo...",
+      "idle_message": "Estamos aquí para ayudarte. Por favor, haz una pregunta.",
+      "idle_message_with_survey": "Gracias por contactarnos. ¿Podrías llenar esta [encuesta](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey={conversationId}{additionalUrlParams}) para contarnos sobre tu experiencia?",
+      "chat_has_ended": "El chat ha finalizado",
+      "chat_transferred": "El agente {name} se ha unido al chat",
+      "chat_queue_position": "Estás en la posición {position} en la cola. Serás conectado con un agente en breve.",
+      "chat_queue_position_next": "Eres el siguiente en la cola. Tu agente estará contigo en breve.",
+      "chat_queue_position_in_queue": "Estás en la cola. Por favor, espera al siguiente agente disponible.",
+      "chat_queue_position_estimated_wait_time": "Tu tiempo estimado de espera es de {estimatedWaitTime} segundos.",
+      "chat_queue_position_estimated_wait_time_singular": "Tu tiempo estimado de espera es de {estimatedWaitTime} segundo."
+    },
+    "BailoutFormDisplay": {
+      "unable_to_answer": "No puedo responder a esta pregunta.",
+      "default_bailout_text": "Por favor, intenta con otra pregunta o contacta a un agente de soporte para más asistencia.",
+      "integration_bailout_text": "Por favor, haz clic en el botón de abajo para conectarte con un agente, o haz otra pregunta.",
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "question": "Pregunta",
+      "connect_to_live_agent": "Conectar con un agente en vivo",
+      "connection_to_live_agent_success_title": "Ahora estás conectando con un agente en vivo",
+      "connection_to_live_agent_success_description": "Por favor, espera a que el agente responda.",
+      "ticket_created_title": "Ticket de soporte creado con éxito",
+      "ticket_created_description": "Un agente te responderá en 24-48 horas",
+      "send": "Enviar"
+    },
+    "ChatInput": {
+      "see_more": "Ver más",
+      "see_less": "Ver menos",
+      "question_placeholder": "Haz una pregunta...",
+      "speaking_with_agent": "Hablando con el agente",
+      "end_chat": "Terminar chat",
+      "aria_submit_question": "Enviar pregunta",
+      "aria_question_box": "Caja de preguntas"
+    },
+    "FeedbackForm": {
+      "submit_error": "Error al enviar comentarios",
+      "submit_success": "¡Gracias por tus comentarios!",
+      "thumbs_up": "Pulgar arriba",
+      "thumbs_down": "Pulgar abajo",
+      "human_agent_requested": "Agente humano solicitado",
+      "copied_to_clipboard": "Copiado al portapapeles",
+      "copy_to_clipboard": "Copiar al portapapeles",
+      "speak_to_agent": "Hablar con un agente",
+      "feedback_reason": "¿Por qué seleccionaste este comentario?",
+      "down_placeholder": "Haznos saber cómo se puede mejorar la respuesta.",
+      "up_placeholder": "¿Qué te gustó de la respuesta?",
+      "submit": "Enviar"
     }
   }
+}

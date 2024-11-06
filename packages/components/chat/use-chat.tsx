@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React, { useEffect } from 'react';
-import { nanoid } from 'nanoid';
+import React, { useEffect } from "react";
+import { nanoid } from "nanoid";
 
-import { type MavenAGI } from 'mavenagi'
+import { type MavenAGI } from "mavenagi";
 import {
   type ConversationMessageResponse,
   BotConversationMessageType,
-} from 'mavenagi/api';
+} from "mavenagi/api";
 import {
   type Message,
   type ChatMessage,
@@ -15,10 +15,10 @@ import {
   type ActionChatMessage,
   isBotMessage,
   isChatMessage,
-  isChatUserMessage
-} from '@/types';
+  isChatUserMessage,
+} from "@/types";
 
-const API_ENDPOINT = '/api/create';
+const API_ENDPOINT = "/api/create";
 
 type UseChatOptions = {
   orgFriendlyId: string;
@@ -26,12 +26,16 @@ type UseChatOptions = {
   unverifiedUserInfo: Record<string, string>;
 };
 
-export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOptions) {
+export function useChat({
+  orgFriendlyId,
+  id,
+  unverifiedUserInfo,
+}: UseChatOptions) {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [conversationId, setConversationId] = React.useState<string>(nanoid());
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [abortController, setAbortController] = React.useState(
-    new AbortController()
+    new AbortController(),
   );
 
   const resetAbortController = () => {
@@ -49,20 +53,20 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
     const lastMessage = _messages[_messages.length - 1];
     return (
       isChatMessage(lastMessage) &&
-      _messages[_messages.length - 1].type === 'USER'
+      _messages[_messages.length - 1].type === "USER"
     );
   };
 
   const createResponse = async (
     _messages: Message[],
-    newAbortController: AbortController
+    newAbortController: AbortController,
   ) => {
     const lastMessage = _messages[_messages.length - 1];
     if (!isChatUserMessage(lastMessage)) {
-      throw new Error('Last message is not a user message');
+      throw new Error("Last message is not a user message");
     }
     return await fetch(API_ENDPOINT, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({
         orgFriendlyId,
         id,
@@ -72,11 +76,11 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
         unverifiedUserInfo,
       }),
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       signal: newAbortController.signal,
     });
-  }
+  };
 
   const streamResponse = async (response: Response) => {
     const reader = response.body?.getReader();
@@ -87,7 +91,7 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
 
     const decoder = new TextDecoder();
     let done = false;
-    let buffer = '';
+    let buffer = "";
     let referenceId: string | undefined; // Reference ID to be set by the "start" event
     const eventQueue: MavenAGI.StreamResponse[] = []; // Buffer to hold events that arrive before "start"
 
@@ -95,21 +99,21 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
       const { done: readerDone, value } = await reader.read();
       done = readerDone;
       if (readerDone) {
-        console.log('Stream complete');
+        console.log("Stream complete");
       }
 
       buffer += decoder.decode(value, { stream: true });
 
       let boundaryIndex;
-      while ((boundaryIndex = buffer.indexOf('\n\n')) !== -1) {
+      while ((boundaryIndex = buffer.indexOf("\n\n")) !== -1) {
         const completeEvent = buffer.slice(0, boundaryIndex + 2);
         buffer = buffer.slice(boundaryIndex + 2);
 
         const eventData = completeEvent
-          .split('\n')
-          .filter((line) => line.startsWith('data:'))
-          .map((line) => line.replace(/^data: /, '').trim())
-          .join('');
+          .split("\n")
+          .filter((line) => line.startsWith("data:"))
+          .map((line) => line.replace(/^data: /, "").trim())
+          .join("");
 
         if (eventData) {
           try {
@@ -117,9 +121,9 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
             console.log({ parsedData });
 
             // Handle the "start" event immediately
-            if (parsedData.eventType === 'start') {
+            if (parsedData.eventType === "start") {
               referenceId = parsedData.conversationMessageId?.referenceId;
-              console.log('Reference ID set:', referenceId);
+              console.log("Reference ID set:", referenceId);
 
               handleParsedData(parsedData, referenceId);
 
@@ -137,7 +141,7 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
               handleParsedData(parsedData, referenceId);
             }
           } catch (err) {
-            console.error('Failed to parse JSON:', err);
+            console.error("Failed to parse JSON:", err);
           }
         }
       }
@@ -162,26 +166,26 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
 
   const handleParsedData = (
     parsedData: MavenAGI.StreamResponse,
-    referenceId: string | undefined
+    referenceId: string | undefined,
   ) => {
-    if (parsedData.eventType === 'start') {
+    if (parsedData.eventType === "start") {
       const { conversationMessageId } = parsedData;
       const newMessage: ConversationMessageResponse.Bot = {
         responses: [],
         conversationMessageId,
-        type: 'bot',
+        type: "bot",
         botMessageType: BotConversationMessageType.BotResponse,
         metadata: {
           followupQuestions: [],
           sources: [],
-        }
+        },
       };
       setMessages((prevState) => [...prevState, newMessage]);
-    } else if (parsedData.eventType === 'text') {
+    } else if (parsedData.eventType === "text") {
       setIsLoading(false);
-      console.log('The reference Id is:', referenceId);
+      console.log("The reference Id is:", referenceId);
       if (!referenceId) {
-        throw new Error('No referenceId');
+        throw new Error("No referenceId");
       }
       setMessages((prevMessages) =>
         prevMessages.map((m) =>
@@ -197,13 +201,13 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
                   },
                 ],
               }
-            : m
-        )
+            : m,
+        ),
       );
-    } else if (parsedData.eventType === 'metadata') {
+    } else if (parsedData.eventType === "metadata") {
       const { followupQuestions, sources } = parsedData;
       if (!referenceId) {
-        throw new Error('No referenceId');
+        throw new Error("No referenceId");
       }
       setMessages((prevMessages) =>
         prevMessages.map((m) =>
@@ -216,20 +220,20 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
                   sources,
                 },
               }
-            : m
-        )
+            : m,
+        ),
       );
-    } else if (parsedData.eventType === 'action') {
+    } else if (parsedData.eventType === "action") {
       setMessages((prevMessages) =>
         prevMessages.map((m) =>
           isBotMessage(m) &&
           m.conversationMessageId?.referenceId === referenceId
             ? {
                 ...m,
-                action: parsedData
+                action: parsedData,
               }
-            : m
-        )
+            : m,
+        ),
       );
     }
   };
@@ -247,11 +251,9 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
   }
 
   useEffect(() => {
-    const timestamp = (new Date()).getTime();
+    const timestamp = new Date().getTime();
     setMessages((prevMessages) =>
-      prevMessages.map((m) =>
-        ({ timestamp, ...m  } as Message)
-      )
+      prevMessages.map((m) => ({ timestamp, ...m }) as Message),
     );
   }, [messages.length, setMessages]);
 
@@ -259,7 +261,7 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
     messages,
     askQuestion: (message: ChatMessage) => {
       setMessages((prevState) => [...prevState, message]);
-      if (message.type === 'USER') {
+      if (message.type === "USER") {
         void ask([...messages, message]);
       }
     },

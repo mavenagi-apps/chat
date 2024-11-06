@@ -1,9 +1,9 @@
-import {MenuItem as HeadlessMenuItem} from '@headlessui/react'
-import type {Meta, StoryObj} from '@storybook/react'
-import {HiUsers} from 'react-icons/hi'
+import { MenuItem as HeadlessMenuItem } from "@headlessui/react";
+import type { Meta, StoryObj } from "@storybook/react";
+import { HiUsers } from "react-icons/hi";
 
-import {Dropdown} from '../dropdown'
-import {Link} from '../link'
+import { Dropdown } from "../dropdown";
+import { Link } from "../link";
 import {
   Sidebar,
   SidebarBackButton,
@@ -12,19 +12,19 @@ import {
   SidebarMenuButton,
   SidebarMenuItems,
   type SidebarProps,
-} from './sidebar'
+} from "./sidebar";
 
 const meta: Meta<typeof Sidebar> = {
-  title: 'Nav/Sidebar',
+  title: "Nav/Sidebar",
   component: Sidebar,
-  tags: ['autodocs'],
-}
-export default meta
-type Story = StoryObj<typeof Sidebar>
+  tags: ["autodocs"],
+};
+export default meta;
+type Story = StoryObj<typeof Sidebar>;
 
 export const Default: Story = {
   args: {
-    className: 'border-r',
+    className: "border-r",
   },
   render: (args: SidebarProps) => (
     <div className="flex h-[500px] w-[800px] flex-row border bg-gray-50">
@@ -59,4 +59,4 @@ export const Default: Story = {
       <div className="flex-1"></div>
     </div>
   ),
-}
+};

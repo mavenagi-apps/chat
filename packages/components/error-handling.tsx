@@ -1,18 +1,22 @@
-'use client'
+"use client";
 
-import * as Sentry from '@sentry/nextjs'
-import {useEffect} from 'react'
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
 
-import {ErrorFallbackRender} from '@magi/ui/src/error-boundary'
+import { ErrorFallbackRender } from "@magi/ui/src/error-boundary";
 
-
-
-export const ErrorBoundary = ({children, className}: {children: React.ReactNode; className?: string}) => {
+export const ErrorBoundary = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
   const MavenFallbackRender = (errorData: {
-    error: unknown
-    componentStack: string
-    eventId: string
-    resetError(): void
+    error: unknown;
+    componentStack: string;
+    eventId: string;
+    resetError(): void;
   }) => {
     return (
       <ErrorFallbackRender
@@ -22,16 +26,31 @@ export const ErrorBoundary = ({children, className}: {children: React.ReactNode;
         eventId={errorData.eventId}
         className={className}
       />
-    )
-  }
-  return <Sentry.ErrorBoundary fallback={MavenFallbackRender}>{children}</Sentry.ErrorBoundary>
-}
-
-export const ErrorPage = ({error, reset}: {error: Error & {digest?: string}; reset: () => void}) => {
-  useEffect(() => {
-    Sentry.captureException(error)
-  }, [error])
+    );
+  };
   return (
-    <ErrorFallbackRender error={error} resetErrorBoundary={reset} eventId={error.digest} componentStack={error.stack} />
-  )
-}
+    <Sentry.ErrorBoundary fallback={MavenFallbackRender}>
+      {children}
+    </Sentry.ErrorBoundary>
+  );
+};
+
+export const ErrorPage = ({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) => {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+  return (
+    <ErrorFallbackRender
+      error={error}
+      resetErrorBoundary={reset}
+      eventId={error.digest}
+      componentStack={error.stack}
+    />
+  );
+};

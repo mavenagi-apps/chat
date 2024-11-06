@@ -1,1 +1,1 @@
-export {NewRelicHeadScript as MonitoringHeadScript} from './NewRelic'
+export { NewRelicHeadScript as MonitoringHeadScript } from "./NewRelic";

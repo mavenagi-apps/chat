@@ -1,15 +1,19 @@
-import type {Meta, StoryObj} from '@storybook/react'
+import type { Meta, StoryObj } from "@storybook/react";
 
-import {Link} from '../link'
-import {DesktopNavbar, DesktopNavbarBrand, type DesktopNavbarProps} from './desktop-navbar'
+import { Link } from "../link";
+import {
+  DesktopNavbar,
+  DesktopNavbarBrand,
+  type DesktopNavbarProps,
+} from "./desktop-navbar";
 
 const meta: Meta<typeof DesktopNavbar> = {
-  title: 'Nav/DesktopNavbar',
+  title: "Nav/DesktopNavbar",
   component: DesktopNavbar,
-  tags: ['autodocs'],
-}
-export default meta
-type Story = StoryObj<typeof DesktopNavbar>
+  tags: ["autodocs"],
+};
+export default meta;
+type Story = StoryObj<typeof DesktopNavbar>;
 
 export const Default: Story = {
   render: (args: DesktopNavbarProps) => (
@@ -21,4 +25,4 @@ export const Default: Story = {
       </DesktopNavbar>
     </div>
   ),
-}
+};

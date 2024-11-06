@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
   Dialog as HeadlessDialog,
@@ -7,30 +7,37 @@ import {
   DialogTitle as HeadlessDialogTitle,
   Transition as HeadlessTransition,
   TransitionChild as HeadlessTransitionChild,
-} from '@headlessui/react'
-import clsx from 'clsx'
-import React from 'react'
-import {Fragment} from 'react'
+} from "@headlessui/react";
+import clsx from "clsx";
+import React from "react";
+import { Fragment } from "react";
 
-import {cn} from './lib/utils'
+import { cn } from "./lib/utils";
 
 const sizes = {
-  xs: 'sm:max-w-xs',
-  sm: 'sm:max-w-sm',
-  md: 'sm:max-w-md',
-  lg: 'sm:max-w-lg',
-  xl: 'sm:max-w-xl',
-  '2xl': 'sm:max-w-2xl',
-  '3xl': 'sm:max-w-3xl',
-  '4xl': 'sm:max-w-4xl',
-  '5xl': 'sm:max-w-5xl',
-}
+  xs: "sm:max-w-xs",
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-lg",
+  xl: "sm:max-w-xl",
+  "2xl": "sm:max-w-2xl",
+  "3xl": "sm:max-w-3xl",
+  "4xl": "sm:max-w-4xl",
+  "5xl": "sm:max-w-5xl",
+};
 
 export type DialogProps = {
-  size?: keyof typeof sizes
-  children: React.ReactNode
-} & HeadlessDialogProps
-export const Dialog = ({open, onClose, size = 'lg', className, children, ...props}: DialogProps) => {
+  size?: keyof typeof sizes;
+  children: React.ReactNode;
+} & HeadlessDialogProps;
+export const Dialog = ({
+  open,
+  onClose,
+  size = "lg",
+  className,
+  children,
+  ...props
+}: DialogProps) => {
   return (
     <HeadlessTransition appear as={Fragment} show={open} {...props}>
       <HeadlessDialog onClose={onClose}>
@@ -61,7 +68,7 @@ export const Dialog = ({open, onClose, size = 'lg', className, children, ...prop
               className={clsx(
                 className,
                 sizes[size],
-                'row-start-2 w-full min-w-0 divide-y rounded-t-xl bg-white shadow-lg ring-1 ring-zinc-950/10 [--gutter:theme(spacing.6)] *:p-[--gutter] sm:mb-auto sm:rounded-lg dark:bg-zinc-900 dark:ring-white/10 forced-colors:outline'
+                "row-start-2 w-full min-w-0 divide-y rounded-t-xl bg-white shadow-lg ring-1 ring-zinc-950/10 [--gutter:theme(spacing.6)] *:p-[--gutter] sm:mb-auto sm:rounded-lg dark:bg-zinc-900 dark:ring-white/10 forced-colors:outline",
               )}
               enter="ease-out duration-100"
               enterFrom="sm:scale-95"
@@ -76,30 +83,47 @@ export const Dialog = ({open, onClose, size = 'lg', className, children, ...prop
         </HeadlessTransitionChild>
       </HeadlessDialog>
     </HeadlessTransition>
-  )
-}
+  );
+};
 
-export const DialogTitle = ({className, ...props}: React.ComponentPropsWithoutRef<'div'>) => {
+export const DialogTitle = ({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"div">) => {
   return (
     <HeadlessDialogTitle
       {...props}
-      className={clsx(className, 'text-balance text-lg/[27px] font-semibold text-gray-900')}
+      className={clsx(
+        className,
+        "text-balance text-lg/[27px] font-semibold text-gray-900",
+      )}
     />
-  )
-}
+  );
+};
 
-export const DialogBody = ({className, ...props}: React.ComponentPropsWithoutRef<'div'>) => {
-  return <div {...props} className={cn(className, 'space-y-4 text-pretty text-sm')} />
-}
+export const DialogBody = ({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"div">) => {
+  return (
+    <div
+      {...props}
+      className={cn(className, "space-y-4 text-pretty text-sm")}
+    />
+  );
+};
 
-export const DialogActions = ({className, ...props}: React.ComponentPropsWithoutRef<'div'>) => {
+export const DialogActions = ({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"div">) => {
   return (
     <div
       {...props}
       className={clsx(
         className,
-        'flex flex-col-reverse items-center justify-end gap-3 *:w-full sm:flex-row sm:*:w-auto'
+        "flex flex-col-reverse items-center justify-end gap-3 *:w-full sm:flex-row sm:*:w-auto",
       )}
     />
-  )
-}
+  );
+};

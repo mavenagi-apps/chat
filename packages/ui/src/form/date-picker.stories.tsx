@@ -1,20 +1,20 @@
-import type {Meta, StoryObj} from '@storybook/react'
-import {useState} from 'react'
+import type { Meta, StoryObj } from "@storybook/react";
+import { useState } from "react";
 
-import {DatePicker} from './date-picker'
+import { DatePicker } from "./date-picker";
 
 const meta: Meta<typeof DatePicker> = {
-  title: 'Forms/DatePicker',
+  title: "Forms/DatePicker",
   component: DatePicker,
-  tags: ['autodocs'],
-}
-export default meta
-type Story = StoryObj<typeof DatePicker>
+  tags: ["autodocs"],
+};
+export default meta;
+type Story = StoryObj<typeof DatePicker>;
 
 export const Basic: Story = {
   render: () => {
-    const [value, setValue] = useState<Date | undefined>()
+    const [value, setValue] = useState<Date | undefined>();
 
-    return <DatePicker value={value} onChange={setValue} />
+    return <DatePicker value={value} onChange={setValue} />;
   },
-}
+};

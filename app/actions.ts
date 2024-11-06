@@ -1,9 +1,9 @@
-'use server';
+"use server";
 
-import { getMavenAGIClient } from '@/app/index';
-import { type MavenAGIClient, type MavenAGI } from 'mavenagi';
-import { type FeedbackType } from 'mavenagi/api';
-import { nanoid } from 'nanoid';
+import { getMavenAGIClient } from "@/app/index";
+import { type MavenAGIClient, type MavenAGI } from "mavenagi";
+import { type FeedbackType } from "mavenagi/api";
+import { nanoid } from "nanoid";
 
 interface CreateOrUpdateFeedbackProps {
   orgFriendlyId: string;
@@ -24,10 +24,7 @@ export async function createOrUpdateFeedback({
   feedbackType,
   feedbackText,
 }: CreateOrUpdateFeedbackProps) {
-  const client: MavenAGIClient = getMavenAGIClient(
-    orgFriendlyId,
-    agentId
-  );
+  const client: MavenAGIClient = getMavenAGIClient(orgFriendlyId, agentId);
 
   const feedbackRequest = {
     feedbackId: {
@@ -47,17 +44,17 @@ export async function createOrUpdateFeedback({
     const {
       feedbackId: { referenceId },
     } = await client.conversation.createFeedback(
-      feedbackRequest as MavenAGI.FeedbackRequest
+      feedbackRequest as MavenAGI.FeedbackRequest,
     );
     return referenceId;
   } catch (error) {
-    return { error: (error as any)?.message || 'Unknown error' };
+    return { error: (error as any)?.message || "Unknown error" };
   }
 }
 
 export async function getPublicAppSettings(
   orgFriendlyId: string,
-  agentId: string
+  agentId: string,
 ) {
   const client = getMavenAGIClient(orgFriendlyId, agentId);
 

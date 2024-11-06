@@ -1,8 +1,11 @@
-import { type ConversationMessageResponse, type AskStreamActionEvent } from 'mavenagi/api';
+import {
+  type ConversationMessageResponse,
+  type AskStreamActionEvent,
+} from "mavenagi/api";
 
-type ChatMessage = { text: string; type: 'USER' | 'ERROR' | 'SIMULATED' };
-type UserChatMessage = ChatMessage & { type: 'USER' };
-type SimulatedChatMessage = ChatMessage & { type: 'SIMULATED' };
+type ChatMessage = { text: string; type: "USER" | "ERROR" | "SIMULATED" };
+type UserChatMessage = ChatMessage & { type: "USER" };
+type SimulatedChatMessage = ChatMessage & { type: "SIMULATED" };
 type ActionChatMessage = ConversationMessageResponse.Bot & {
   action: AskStreamActionEvent;
 };
@@ -16,20 +19,20 @@ type Message = (
 };
 
 const isBotMessage = (
-  message: Message
-): message is ConversationMessageResponse.Bot => message.type === 'bot';
+  message: Message,
+): message is ConversationMessageResponse.Bot => message.type === "bot";
 
 const isChatMessage = (message: Message): message is ChatMessage =>
-  ['USER', 'ERROR', 'SIMULATED'].includes(message.type);
+  ["USER", "ERROR", "SIMULATED"].includes(message.type);
 
 const isChatUserMessage = (message: Message): message is UserChatMessage =>
-  message.type === 'USER';
+  message.type === "USER";
 
 const isActionChatMessage = (message: Message): message is ActionChatMessage =>
-  'action' in message && message.type === 'bot';
+  "action" in message && message.type === "bot";
 
 type SalesforceSimulatedChatEstablishedMessage = {
-  type: 'ChatEstablished';
+  type: "ChatEstablished";
   message: {
     text: string;
   };
@@ -37,13 +40,13 @@ type SalesforceSimulatedChatEstablishedMessage = {
 
 type SalesforceResponseMessage = {
   type:
-    | 'ChatMessage'
-    | 'QueueUpdate'
-    | 'ChatTransferred'
-    | 'ChatEnded'
-    | 'AgentTyping'
-    | 'AgentNotTyping'
-    | 'ChatEstablished';
+    | "ChatMessage"
+    | "QueueUpdate"
+    | "ChatTransferred"
+    | "ChatEnded"
+    | "AgentTyping"
+    | "AgentNotTyping"
+    | "ChatEstablished";
   message: {
     text: string;
     name: string;
@@ -57,14 +60,15 @@ type SalesforceResponseMessage = {
   };
 };
 
-type SalesforceSystemMessage = SalesforceResponseMessage | SalesforceSimulatedChatEstablishedMessage;
+type SalesforceSystemMessage =
+  | SalesforceResponseMessage
+  | SalesforceSimulatedChatEstablishedMessage;
 
-type SalesforceChatMessage =
-  | SalesforceSystemMessage
-  | UserChatMessage;
+type SalesforceChatMessage = SalesforceSystemMessage | UserChatMessage;
 
-const isChatTransferredMessage = (message: SalesforceChatMessage): message is SalesforceResponseMessage =>
-  message.type === 'ChatTransferred';
+const isChatTransferredMessage = (
+  message: SalesforceChatMessage,
+): message is SalesforceResponseMessage => message.type === "ChatTransferred";
 
 export {
   isActionChatMessage,

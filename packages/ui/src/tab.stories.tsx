@@ -1,14 +1,14 @@
-import type {Meta, StoryObj} from '@storybook/react'
+import type { Meta, StoryObj } from "@storybook/react";
 
-import {Tab, TabGroup, TabList, TabPanel, TabPanels} from './tab'
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "./tab";
 
 const meta: Meta<typeof Tab> = {
-  title: 'ui/Tab',
+  title: "ui/Tab",
   component: Tab,
-  tags: ['autodocs'],
-}
-export default meta
-type Story = StoryObj<typeof Tab>
+  tags: ["autodocs"],
+};
+export default meta;
+type Story = StoryObj<typeof Tab>;
 
 export const Underline: Story = {
   args: {},
@@ -30,7 +30,7 @@ export const Underline: Story = {
       </TabPanels>
     </TabGroup>
   ),
-}
+};
 
 export const Pills: Story = {
   args: {},
@@ -52,4 +52,4 @@ export const Pills: Story = {
       </TabPanels>
     </TabGroup>
   ),
-}
+};

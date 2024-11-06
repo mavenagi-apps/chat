@@ -1,15 +1,28 @@
-import type {Meta, StoryObj} from '@storybook/react'
+import type { Meta, StoryObj } from "@storybook/react";
 
-import {Card, CardBody, CardSubtitle, CardTitle, CardTitleActions} from './card'
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from './table'
+import {
+  Card,
+  CardBody,
+  CardSubtitle,
+  CardTitle,
+  CardTitleActions,
+} from "./card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./table";
 
 const meta: Meta<typeof Table> = {
-  title: 'Table',
+  title: "Table",
   component: Table,
-  tags: ['autodocs'],
-}
-export default meta
-type Story = StoryObj<typeof Table>
+  tags: ["autodocs"],
+};
+export default meta;
+type Story = StoryObj<typeof Table>;
 
 const SampleTable = () => (
   <Table>
@@ -33,26 +46,26 @@ const SampleTable = () => (
       </TableRow>
     </TableBody>
   </Table>
-)
+);
 
 export const WithoutCard: Story = {
-  render: args => (
+  render: (args) => (
     <div className="w-[500px]" {...args}>
       <SampleTable />
     </div>
   ),
-}
+};
 
 export const InFullCard: Story = {
-  render: args => (
+  render: (args) => (
     <Card className="w-[500px]" {...args}>
       <SampleTable />
     </Card>
   ),
-}
+};
 
 export const InCardBody: Story = {
-  render: args => (
+  render: (args) => (
     <Card className="w-[500px]" {...args}>
       <CardBody>
         <CardTitle>
@@ -67,10 +80,10 @@ export const InCardBody: Story = {
       </CardBody>
     </Card>
   ),
-}
+};
 
 export const CardInCardBody: Story = {
-  render: args => (
+  render: (args) => (
     <Card className="w-[500px]" {...args}>
       <CardBody>
         <CardTitle>
@@ -87,4 +100,4 @@ export const CardInCardBody: Story = {
       </CardBody>
     </Card>
   ),
-}
+};

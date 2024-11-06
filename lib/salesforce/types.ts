@@ -34,8 +34,7 @@ export interface CreateChatVisitorSessionParams {
     affinityToken: string;
     key: string;
     id: string;
-  }
-
+  };
 }
 
 export interface GetChatMessagesParams {
@@ -44,7 +43,7 @@ export interface GetChatMessagesParams {
     affinityToken: string;
     key: string;
     id?: string;
-  }
+  };
 }
 
 export interface SendChatMessageParams {
@@ -53,9 +52,8 @@ export interface SendChatMessageParams {
     affinityToken: string;
     key: string;
     id?: string;
-  }
+  };
 }
-
 
 export type ChatMessageResponse = {
   messages: Array<{

@@ -1,6 +1,6 @@
-import {ChevronDownIcon} from '@heroicons/react/20/solid'
-import type {Meta, StoryObj} from '@storybook/react'
-import {useState} from 'react'
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import type { Meta, StoryObj } from "@storybook/react";
+import { useState } from "react";
 
 import {
   Dropdown,
@@ -10,20 +10,20 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownSection,
-} from './dropdown'
+} from "./dropdown";
 
 const meta: Meta<typeof Dropdown> = {
-  title: 'Dropdown',
+  title: "Dropdown",
   component: Dropdown,
-  tags: ['autodocs'],
-}
-export default meta
-type Story = StoryObj<typeof Dropdown>
+  tags: ["autodocs"],
+};
+export default meta;
+type Story = StoryObj<typeof Dropdown>;
 
 export const Default: Story = {
   render: () => {
     const Component = () => {
-      const [checked, setChecked] = useState(false)
+      const [checked, setChecked] = useState(false);
       return (
         <div className="flex flex-row gap-2">
           <Dropdown>
@@ -36,27 +36,36 @@ export const Default: Story = {
               <DropdownItem disabled>Dropdown Item</DropdownItem>
               <DropdownItem>Dropdown Item</DropdownItem>
               <DropdownSection>
-                <DropdownCheckboxItem checked={false}>Dropdown Checkbox Item</DropdownCheckboxItem>
-                <DropdownCheckboxItem checked={checked} onCheckedChange={setChecked}>
+                <DropdownCheckboxItem checked={false}>
                   Dropdown Checkbox Item
                 </DropdownCheckboxItem>
-                <DropdownCheckboxItem checked={checked} onCheckedChange={setChecked} disabled>
+                <DropdownCheckboxItem
+                  checked={checked}
+                  onCheckedChange={setChecked}
+                >
+                  Dropdown Checkbox Item
+                </DropdownCheckboxItem>
+                <DropdownCheckboxItem
+                  checked={checked}
+                  onCheckedChange={setChecked}
+                  disabled
+                >
                   Dropdown Checkbox Item
                 </DropdownCheckboxItem>
               </DropdownSection>
             </DropdownMenu>
           </Dropdown>
         </div>
-      )
-    }
-    return <Component />
+      );
+    };
+    return <Component />;
   },
-}
+};
 
 export const WithHeading: Story = {
   render: () => {
     const Component = () => {
-      const [checked, setChecked] = useState(false)
+      const [checked, setChecked] = useState(false);
       return (
         <div className="flex flex-row gap-2">
           <Dropdown>
@@ -72,19 +81,28 @@ export const WithHeading: Story = {
                 <DropdownItem>Dropdown Item</DropdownItem>
               </DropdownSection>
               <DropdownSection>
-                <DropdownCheckboxItem checked={false}>Dropdown Checkbox Item</DropdownCheckboxItem>
-                <DropdownCheckboxItem checked={checked} onCheckedChange={setChecked}>
+                <DropdownCheckboxItem checked={false}>
                   Dropdown Checkbox Item
                 </DropdownCheckboxItem>
-                <DropdownCheckboxItem checked={checked} onCheckedChange={setChecked} disabled>
+                <DropdownCheckboxItem
+                  checked={checked}
+                  onCheckedChange={setChecked}
+                >
+                  Dropdown Checkbox Item
+                </DropdownCheckboxItem>
+                <DropdownCheckboxItem
+                  checked={checked}
+                  onCheckedChange={setChecked}
+                  disabled
+                >
                   Dropdown Checkbox Item
                 </DropdownCheckboxItem>
               </DropdownSection>
             </DropdownMenu>
           </Dropdown>
         </div>
-      )
-    }
-    return <Component />
+      );
+    };
+    return <Component />;
   },
-}
+};

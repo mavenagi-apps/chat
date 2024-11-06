@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import lottie from 'lottie-web';
+import React, { useEffect, useRef } from "react";
+import lottie from "lottie-web";
 
 interface AnimationProps {
   animationData: object;
@@ -8,14 +8,19 @@ interface AnimationProps {
   alignLeft?: boolean; // Optional alignLeft prop
 }
 
-const Animation: React.FC<AnimationProps> = ({ animationData, height = '100%', width = '100%', alignLeft = false }) => {
+const Animation: React.FC<AnimationProps> = ({
+  animationData,
+  height = "100%",
+  width = "100%",
+  alignLeft = false,
+}) => {
   const animationContainer = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (animationContainer.current) {
       lottie.loadAnimation({
         container: animationContainer.current,
-        renderer: 'svg',
+        renderer: "svg",
         loop: true,
         autoplay: true,
         animationData: animationData,
@@ -26,7 +31,7 @@ const Animation: React.FC<AnimationProps> = ({ animationData, height = '100%', w
   return (
     <div
       ref={animationContainer}
-      className={`flex items-center justify-center ${alignLeft ? '' : 'mx-auto'}`}
+      className={`flex items-center justify-center ${alignLeft ? "" : "mx-auto"}`}
       style={{
         width: width,
         height: height,

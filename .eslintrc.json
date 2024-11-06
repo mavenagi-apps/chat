@@ -3,7 +3,6 @@
   "root": true,
   "extends": [
     "eslint:recommended",
-    "plugin:node/recommended",
     "plugin:@typescript-eslint/recommended",
     "next/core-web-vitals",
     "prettier",
@@ -41,6 +40,7 @@
     ],
     "@typescript-eslint/no-base-to-string": "error",
     "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-unused-expressions": "off",
     "@typescript-eslint/await-thenable": "error",
     "@typescript-eslint/consistent-type-imports": [
       "error",
@@ -49,26 +49,7 @@
         "fixStyle": "inline-type-imports",
         "disallowTypeAnnotations": true
       }
-    ],
-    "node/no-extraneous-import": [
-      "error",
-      {
-        "allowModules": [
-          "msw",
-          "vitest",
-          "@storybook/preview-api",
-          "@sentry/types",
-          "@playwright/test"
-        ]
-      }
-    ],
-    "node/no-missing-import": "off",
-    "node/no-empty-function": "off",
-    "node/no-unpublished-import": "off",
-    "node/no-unpublished-require": "off",
-    "node/no-unsupported-features/es-syntax": "off",
-    "node/no-missing-require": "off",
-    "node/shebang": "off"
+    ]
   },
   "settings": {
     "tailwindcss": {

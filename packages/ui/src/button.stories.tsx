@@ -1,15 +1,15 @@
-import {ArrowUpTrayIcon} from '@heroicons/react/24/outline'
-import type {Meta, StoryObj} from '@storybook/react'
+import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
+import type { Meta, StoryObj } from "@storybook/react";
 
-import {Button} from './button'
+import { Button } from "./button";
 
 const meta: Meta<typeof Button> = {
-  title: 'Button',
+  title: "Button",
   component: Button,
-  tags: ['autodocs'],
-}
-export default meta
-type Story = StoryObj<typeof Button>
+  tags: ["autodocs"],
+};
+export default meta;
+type Story = StoryObj<typeof Button>;
 
 export const Solid: Story = {
   render: () => (
@@ -40,7 +40,7 @@ export const Solid: Story = {
       </div>
     </div>
   ),
-}
+};
 
 export const OutlineButtons: Story = {
   render: () => (
@@ -98,7 +98,7 @@ export const OutlineButtons: Story = {
       </div>
     </div>
   ),
-}
+};
 
 export const PlainButtons: Story = {
   render: () => (
@@ -156,7 +156,7 @@ export const PlainButtons: Story = {
       </div>
     </div>
   ),
-}
+};
 
 export const LinkButtons: Story = {
   render: () => (
@@ -197,7 +197,7 @@ export const LinkButtons: Story = {
       </div>
     </div>
   ),
-}
+};
 
 export const Spinner: Story = {
   render: () => (
@@ -223,4 +223,4 @@ export const Spinner: Story = {
       </div>
     </div>
   ),
-}
+};

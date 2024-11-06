@@ -1,23 +1,23 @@
-import {Field as HeadlessField} from '@headlessui/react'
-import type {Meta, StoryObj} from '@storybook/react'
+import { Field as HeadlessField } from "@headlessui/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
-import {Description, ErrorMessage, Field, Label} from './fieldset'
-import {Select} from './select'
+import { Description, ErrorMessage, Field, Label } from "./fieldset";
+import { Select } from "./select";
 
 const meta: Meta<typeof Select> = {
-  title: 'Forms/Select',
+  title: "Forms/Select",
   component: Select,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   decorators: [
-    Story => (
+    (Story) => (
       <div className="min-w-[400px]">
         <Story />
       </div>
     ),
   ],
-}
-export default meta
-type Story = StoryObj<typeof Select>
+};
+export default meta;
+type Story = StoryObj<typeof Select>;
 
 export const Basic: Story = {
   render: () => (
@@ -28,7 +28,7 @@ export const Basic: Story = {
       <option value="canceled">Canceled</option>
     </Select>
   ),
-}
+};
 export const WithLabel: Story = {
   render: () => (
     <Field>
@@ -41,7 +41,7 @@ export const WithLabel: Story = {
       </Select>
     </Field>
   ),
-}
+};
 export const WithDescription: Story = {
   render: () => (
     <Field>
@@ -55,7 +55,7 @@ export const WithDescription: Story = {
       </Select>
     </Field>
   ),
-}
+};
 export const DisabledState: Story = {
   render: () => (
     <Field disabled>
@@ -68,7 +68,7 @@ export const DisabledState: Story = {
       </Select>
     </Field>
   ),
-}
+};
 export const ValidationErrors: Story = {
   render: () => (
     <Field>
@@ -85,7 +85,7 @@ export const ValidationErrors: Story = {
       <ErrorMessage>A project status is required.</ErrorMessage>
     </Field>
   ),
-}
+};
 export const CustomLayout: Story = {
   render: () => (
     <HeadlessField className="flex items-baseline justify-center gap-6">
@@ -98,4 +98,4 @@ export const CustomLayout: Story = {
       </Select>
     </HeadlessField>
   ),
-}
+};

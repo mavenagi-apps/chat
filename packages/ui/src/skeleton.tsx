@@ -1,17 +1,38 @@
-import {cn} from './lib/utils'
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from './table'
+import { cn } from "./lib/utils";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./table";
 
-export const Skeleton = ({className, ...props}: React.HTMLAttributes<HTMLDivElement>) => {
-  return <div className={cn('bg-fg-primary/10 animate-pulse rounded-md', className)} {...props} />
-}
-
-export const SkeletonDonutChart = ({className, ...props}: React.HTMLAttributes<HTMLDivElement>) => {
+export const Skeleton = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => {
   return (
-    <div className={cn('flex w-full items-center justify-center p-6', className)} {...props}>
+    <div
+      className={cn("bg-fg-primary/10 animate-pulse rounded-md", className)}
+      {...props}
+    />
+  );
+};
+
+export const SkeletonDonutChart = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => {
+  return (
+    <div
+      className={cn("flex w-full items-center justify-center p-6", className)}
+      {...props}
+    >
       <Skeleton className="aspect-square max-h-[250px] w-full max-w-[250px] rounded-full" />
     </div>
-  )
-}
+  );
+};
 
 export const SkeletonTable = ({
   className,
@@ -19,14 +40,18 @@ export const SkeletonTable = ({
   cols = 3,
   showHeader = true,
   ...props
-}: {rows?: number; cols?: number; showHeader?: boolean} & React.HTMLAttributes<HTMLDivElement>) => {
+}: {
+  rows?: number;
+  cols?: number;
+  showHeader?: boolean;
+} & React.HTMLAttributes<HTMLDivElement>) => {
   return (
-    <div className={cn('w-full', className)} {...props}>
+    <div className={cn("w-full", className)} {...props}>
       <Table>
         {showHeader && (
           <TableHead>
             <TableRow>
-              {Array.from({length: 3}).map((_, i) => (
+              {Array.from({ length: 3 }).map((_, i) => (
                 <TableHeader key={i}>
                   <Skeleton className="h-4" />
                 </TableHeader>
@@ -35,9 +60,9 @@ export const SkeletonTable = ({
           </TableHead>
         )}
         <TableBody>
-          {Array.from({length: rows}).map((_, i) => (
+          {Array.from({ length: rows }).map((_, i) => (
             <TableRow key={i}>
-              {Array.from({length: cols}).map((_, i) => (
+              {Array.from({ length: cols }).map((_, i) => (
                 <TableCell key={i}>
                   <Skeleton className="h-4" />
                 </TableCell>
@@ -47,5 +72,5 @@ export const SkeletonTable = ({
         </TableBody>
       </Table>
     </div>
-  )
-}
+  );
+};

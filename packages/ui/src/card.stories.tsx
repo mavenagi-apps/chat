@@ -1,26 +1,34 @@
-import type {Meta, StoryObj} from '@storybook/react'
+import type { Meta, StoryObj } from "@storybook/react";
 
-import {Card, CardBody, CardHeader, CardHeaderTools, CardSubtitle, CardTitle, CardTitleActions} from './card'
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardHeaderTools,
+  CardSubtitle,
+  CardTitle,
+  CardTitleActions,
+} from "./card";
 
 const meta: Meta<typeof Card> = {
-  title: 'Card',
+  title: "Card",
   component: Card,
-  tags: ['autodocs'],
-}
-export default meta
-type Story = StoryObj<typeof Card>
+  tags: ["autodocs"],
+};
+export default meta;
+type Story = StoryObj<typeof Card>;
 
 export const WithHeader: Story = {
-  render: args => (
+  render: (args) => (
     <Card className="w-[500px]" {...args}>
       <CardHeader>Card Header</CardHeader>
       <CardBody>Body</CardBody>
     </Card>
   ),
-}
+};
 
 export const WithHeaderTools: Story = {
-  render: args => (
+  render: (args) => (
     <Card className="w-[500px]" {...args}>
       <CardHeader>
         Card Header
@@ -32,10 +40,10 @@ export const WithHeaderTools: Story = {
       <CardBody>Body</CardBody>
     </Card>
   ),
-}
+};
 
 export const WithTitle: Story = {
-  render: args => (
+  render: (args) => (
     <Card className="w-[500px]" {...args}>
       <CardBody>
         <CardTitle>
@@ -50,4 +58,4 @@ export const WithTitle: Story = {
       </CardBody>
     </Card>
   ),
-}
+};

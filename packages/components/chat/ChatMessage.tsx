@@ -1,11 +1,11 @@
 // packages/components/chat/ChatMessage.tsx
-import React from 'react';
-import { ReactMarkdown } from '@magi/components/ReactMarkdown';
-import { ChatBubble } from '@magi/components/chat/ChatCard';
-import { HiOutlineExclamationCircle } from 'react-icons/hi2';
-import FeedbackForm from '@magi/components/chat/FeedbackForm';
-import BailoutFormDisplay from '@magi/components/chat/BailoutFormDisplay';
-import { showBotAnswer } from '@/lib/chat/chat-helpers';
+import React from "react";
+import { ReactMarkdown } from "@magi/components/ReactMarkdown";
+import { ChatBubble } from "@magi/components/chat/ChatCard";
+import { HiOutlineExclamationCircle } from "react-icons/hi2";
+import FeedbackForm from "@magi/components/chat/FeedbackForm";
+import BailoutFormDisplay from "@magi/components/chat/BailoutFormDisplay";
+import { showBotAnswer } from "@/lib/chat/chat-helpers";
 import {
   isBotMessage,
   isActionChatMessage,
@@ -14,9 +14,9 @@ import {
   type Message,
   type SalesforceChatMessage,
   type UserChatMessage,
-} from '@/types';
-import { type ConversationMessageResponse } from 'mavenagi/api';
-import { useTranslations } from 'next-intl';
+} from "@/types";
+import { type ConversationMessageResponse } from "mavenagi/api";
+import { useTranslations } from "next-intl";
 
 export interface MessageProps {
   message: Message | SalesforceChatMessage;
@@ -37,14 +37,14 @@ export function ChatMessage({
   conversationId,
   onSalesforceChatMode = () => {},
 }: MessageProps) {
-  const t = useTranslations('chat.ChatPage');
-  if ('type' in message) {
+  const t = useTranslations("chat.ChatPage");
+  if ("type" in message) {
     switch (message.type) {
-      case 'USER':
+      case "USER":
         return (
           <ChatBubble
-            direction='right'
-            className='bg-[--brand-color] text-[--brand-text-color]'
+            direction="right"
+            className="bg-[--brand-color] text-[--brand-text-color]"
             ref={isLastMessage ? latestChatBubbleRef : null}
           >
             <UserMessage
@@ -53,11 +53,11 @@ export function ChatMessage({
             />
           </ChatBubble>
         );
-      case 'ERROR':
+      case "ERROR":
         return (
           <ChatBubble
-            direction='left'
-            className='border-red-500 bg-red-50 text-xs'
+            direction="left"
+            className="border-red-500 bg-red-50 text-xs"
             ref={isLastMessage ? latestChatBubbleRef : null}
           >
             <ErrorMessage
@@ -66,10 +66,10 @@ export function ChatMessage({
             />
           </ChatBubble>
         );
-      case 'SIMULATED':
+      case "SIMULATED":
         return (
           <ChatBubble
-            direction='left'
+            direction="left"
             ref={isLastMessage ? latestChatBubbleRef : null}
           >
             <SimulatedMessage
@@ -78,16 +78,16 @@ export function ChatMessage({
             />
           </ChatBubble>
         );
-      case 'ChatMessage':
-      case 'ChatEstablished':
-      case 'ChatTransferred':
-      case 'QueueUpdate':
-      case 'ChatEnded':
+      case "ChatMessage":
+      case "ChatEstablished":
+      case "ChatTransferred":
+      case "QueueUpdate":
+      case "ChatEnded":
         return renderSalesforceMessage(
           message as SalesforceChatMessage,
           isLastMessage,
           latestChatBubbleRef,
-          t
+          t,
         );
       default:
         if (isBotMessage(message as Message)) {
@@ -97,7 +97,7 @@ export function ChatMessage({
             latestChatBubbleRef,
             conversationId,
             onSalesforceChatMode,
-            linkTargetInNewTab
+            linkTargetInNewTab,
           );
         }
         return null;
@@ -114,7 +114,7 @@ function UserMessage({
   linkTargetInNewTab?: boolean;
 }) {
   return (
-    <div className='text-xs'>
+    <div className="text-xs">
       <ReactMarkdown linkTargetInNewTab={linkTargetInNewTab}>
         {text}
       </ReactMarkdown>
@@ -129,14 +129,13 @@ function BotMessage({
   message: ConversationMessageResponse.Bot;
   linkTargetInNewTab?: boolean;
 }) {
-  const messageText = message
-    .responses
-    .filter(r => r.type === 'text')
+  const messageText = message.responses
+    .filter((r) => r.type === "text")
     .map(({ text }) => text)
-    .join('')
-    .replaceAll('\\n', '\n');
+    .join("")
+    .replaceAll("\\n", "\n");
   return (
-    <div className='prose max-w-full overflow-auto text-xs'>
+    <div className="prose max-w-full overflow-auto text-xs">
       <ReactMarkdown linkTargetInNewTab={linkTargetInNewTab}>
         {messageText}
       </ReactMarkdown>
@@ -152,11 +151,11 @@ function ErrorMessage({
   linkTargetInNewTab?: boolean;
 }) {
   return (
-    <div className='flex items-center'>
-      <HiOutlineExclamationCircle className='size-5 text-red-500' />
-      <div className='ml-3 flex-1 content-center'>
+    <div className="flex items-center">
+      <HiOutlineExclamationCircle className="size-5 text-red-500" />
+      <div className="ml-3 flex-1 content-center">
         <ReactMarkdown linkTargetInNewTab={linkTargetInNewTab}>
-          {text !== '' ? text : 'An error occurred. Please try again.'}
+          {text !== "" ? text : "An error occurred. Please try again."}
         </ReactMarkdown>
       </div>
     </div>
@@ -171,7 +170,7 @@ function SimulatedMessage({
   linkTargetInNewTab?: boolean;
 }) {
   return (
-    <div className='prose max-w-full text-xs'>
+    <div className="prose max-w-full text-xs">
       <ReactMarkdown linkTargetInNewTab={linkTargetInNewTab}>
         {text}
       </ReactMarkdown>
@@ -185,7 +184,7 @@ function renderBotMessage(
   latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
   conversationId: string | undefined,
   onSalesforceChatMode: () => void,
-  linkTargetInNewTab: boolean
+  linkTargetInNewTab: boolean,
 ) {
   if (!showBotAnswer({ message })) {
     return null;
@@ -193,7 +192,7 @@ function renderBotMessage(
   const showHumanChatButton = isActionChatMessage(message);
   return (
     <ChatBubble
-      direction='left'
+      direction="left"
       ref={isLastMessage ? latestChatBubbleRef : null}
     >
       <BotMessage message={message} linkTargetInNewTab={linkTargetInNewTab} />
@@ -211,18 +210,18 @@ function renderSalesforceMessage(
   message: SalesforceChatMessage,
   isLastMessage: boolean,
   latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
-  t: Function
+  t: Function,
 ) {
   switch (message.type) {
-    case 'USER':
-      return null;  
-    case 'ChatMessage':
-      if (message.message.text === 'Click the close button to end this chat') {
+    case "USER":
+      return null;
+    case "ChatMessage":
+      if (message.message.text === "Click the close button to end this chat") {
         return null;
       }
       return (
         <ChatBubble
-          direction='left-hug'
+          direction="left-hug"
           author={
             /^Management Center$/i.test(message.message.name)
               ? undefined
@@ -233,53 +232,58 @@ function renderSalesforceMessage(
           <ReactMarkdown>{message.message.text}</ReactMarkdown>
         </ChatBubble>
       );
-    case 'ChatEstablished':
-    case 'ChatTransferred':
-    case 'QueueUpdate':
-    case 'ChatEnded':
-    case 'AgentTyping':
-    case 'AgentNotTyping':
+    case "ChatEstablished":
+    case "ChatTransferred":
+    case "QueueUpdate":
+    case "ChatEnded":
+    case "AgentTyping":
+    case "AgentNotTyping":
       return (
         <div
           ref={isLastMessage ? latestChatBubbleRef : null}
-          className='my-5 flex items-center justify-center h-auto text-gray-500'
+          className="my-5 flex items-center justify-center h-auto text-gray-500"
         >
-          <div className='grow border-t border-gray-300'></div>
-          <span className='mx-4 prose max-w-full text-xs whitespace-nowrap'>
+          <div className="grow border-t border-gray-300"></div>
+          <span className="mx-4 prose max-w-full text-xs whitespace-nowrap">
             {getSalesforceStatusMessage(message, t)}
           </span>
-          <div className='grow border-t border-gray-300'></div>
+          <div className="grow border-t border-gray-300"></div>
         </div>
       );
   }
 }
 
-function getSalesforceStatusMessage(message: SalesforceChatMessage, t: Function): string {
-  if (message.type === 'USER') {
-    return '';
+function getSalesforceStatusMessage(
+  message: SalesforceChatMessage,
+  t: Function,
+): string {
+  if (message.type === "USER") {
+    return "";
   }
 
-  const { estimatedWaitTime, position } = 
-    'message' in message && 'estimatedWaitTime' in message.message
+  const { estimatedWaitTime, position } =
+    "message" in message && "estimatedWaitTime" in message.message
       ? message.message
       : { estimatedWaitTime: undefined, position: undefined };
   switch (message.type) {
-    case 'ChatEstablished':
+    case "ChatEstablished":
       return message.message.text;
-    case 'ChatTransferred':
-      return t('chat_transferred', { name: message.message.name });
-    case 'QueueUpdate':
+    case "ChatTransferred":
+      return t("chat_transferred", { name: message.message.name });
+    case "QueueUpdate":
       if (estimatedWaitTime && estimatedWaitTime > -1) {
-        return t('chat_queue_position_estimated_wait_time', { estimatedWaitTime });
+        return t("chat_queue_position_estimated_wait_time", {
+          estimatedWaitTime,
+        });
       } else if (position && position > 0) {
-        return t('chat_queue_position_in_queue', { position });
+        return t("chat_queue_position_in_queue", { position });
       } else if (position === 0) {
-        return t('chat_queue_position_next');
+        return t("chat_queue_position_next");
       }
-      return t('chat_queue_position_in_queue');
-    case 'ChatEnded':
-      return t('chat_has_ended');
+      return t("chat_queue_position_in_queue");
+    case "ChatEnded":
+      return t("chat_has_ended");
     default:
-      return '';
+      return "";
   }
 }

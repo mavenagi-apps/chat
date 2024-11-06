@@ -1,15 +1,19 @@
-import {CheckCircleIcon, ExclamationTriangleIcon, InformationCircleIcon} from '@heroicons/react/20/solid'
-import type {Meta, StoryObj} from '@storybook/react'
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/20/solid";
+import type { Meta, StoryObj } from "@storybook/react";
 
-import {Alert, AlertDescription, AlertTitle} from './alert'
+import { Alert, AlertDescription, AlertTitle } from "./alert";
 
 const meta: Meta<typeof Alert> = {
-  title: 'Alert',
+  title: "Alert",
   component: Alert,
-  tags: ['autodocs'],
-}
-export default meta
-type Story = StoryObj<typeof Alert>
+  tags: ["autodocs"],
+};
+export default meta;
+type Story = StoryObj<typeof Alert>;
 
 export const Default: Story = {
   render: () => {
@@ -52,14 +56,16 @@ export const Default: Story = {
           </Alert>
           <Alert variant="info">
             <CheckCircleIcon />
-            <AlertTitle>You have successfully refreshed your corpora.</AlertTitle>
+            <AlertTitle>
+              You have successfully refreshed your corpora.
+            </AlertTitle>
           </Alert>
           <Alert variant="info">
             <AlertTitle>Title</AlertTitle>
           </Alert>
         </div>
-      )
-    }
-    return <Component />
+      );
+    };
+    return <Component />;
   },
-}
+};
