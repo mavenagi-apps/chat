@@ -1,11 +1,18 @@
 import { headers } from "next/headers";
 
-export default async function Page({
-  params: { orgFriendlyId, agentFriendlyId },
-}: {
-  params: { orgFriendlyId: string; agentFriendlyId: string };
-}) {
-  const envPrefix = headers().get("x-magi-env-prefix") ?? "";
+export default async function Page(
+  props: {
+    params: Promise<{ orgFriendlyId: string; agentFriendlyId: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    orgFriendlyId,
+    agentFriendlyId
+  } = params;
+
+  const envPrefix = (await headers()).get("x-magi-env-prefix") ?? "";
 
   return (
     <div>

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from 'next/navigation';
 
 import Chat from "@magi/components/chat/Chat";
 import Animation from "@magi/components/Animation";
@@ -30,16 +31,15 @@ import {
   type UserChatMessage,
 } from "@/types";
 
-interface Props {
-  params: {
-    orgFriendlyId: string; // Organization ID
-    id: string; // Agent ID
-  };
+interface SearchParams {
+  orgFriendlyId: string; // Organization ID
+  id: string; // Agent ID
 }
 
-function ChatPage({ params }: Props) {
+function ChatPage() {
   // Analytics
   const analytics = useAnalytics();
+  const params = useSearchParams() as unknown as SearchParams;
 
   // i18n
   const t = useTranslations("chat.ChatPage");
@@ -186,8 +186,6 @@ function ChatPage({ params }: Props) {
     <main className="flex h-screen flex-col bg-gray-50">
       <div className="border-b border-gray-300 bg-white md:block">
         <div className="text-md flex p-5 font-medium text-gray-950">
-          {/* TODO(doll): Many of our customer images are SVGs which NextJs doesn't support well by default */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             alt="Logo"
             src="https://app.mavenagi.com/api/v1/files/age_CSMoGtyyQNzJyoJdFkdPfOXw/logo?1723509365729&w=256&q=75"
@@ -295,9 +293,10 @@ function ChatPage({ params }: Props) {
   );
 }
 
-export default function ChatPageWrapper(props: Props) {
+export default function ChatPageWrapper() {
   const [loading, setLoading] = useState(true);
-  const { orgFriendlyId, id } = props.params;
+  const searchParams = useSearchParams() as unknown as SearchParams;
+  const { orgFriendlyId, id } = searchParams;
 
   useEffect(() => {
     const isInIframe = () => {
@@ -319,5 +318,5 @@ export default function ChatPageWrapper(props: Props) {
     return null;
   }
 
-  return <ChatPage {...props} />;
+  return <ChatPage />;
 }
