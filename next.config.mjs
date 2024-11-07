@@ -10,6 +10,13 @@ const nextConfig = {
       allowedOrigins: ["chat-v2.onmaven.app"],
     },
   },
+  images: {
+    remotePatterns: [
+      {
+        hostname: "**",
+      },
+    ],
+  },
   logging: {
     fetches: {
       fullUrl: true,
