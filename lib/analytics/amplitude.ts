@@ -2,7 +2,6 @@
 
 import {type MagiEvent, type MagiProduct} from '@/lib/analytics/events'
 import * as amplitude from '@amplitude/analytics-browser'
-// eslint-disable-next-line node/no-extraneous-import
 import {type BrowserConfig, type EnrichmentPlugin, type Event} from '@amplitude/analytics-types'
 
 import {AbstractAnalytics} from './abstractanalytics'
