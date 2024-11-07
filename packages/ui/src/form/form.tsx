@@ -105,12 +105,12 @@ export function useForm<
   };
 
   const SubmitButton = (props: React.ComponentProps<typeof Button>) => {
-    // @ts-expect-error ButtonProps are wrong
     return (
       <Button
+        // @ts-expect-error ButtonProps are wrong
         form={id}
         isProcessing={methods.formState.isSubmitting}
-        type="submit"
+        type='submit'
         {...props}
       />
     );
@@ -161,8 +161,8 @@ const Form = <
               event.stopPropagation();
             }
           }
-          // @ts-expect-error handleSubmit
           void methods.handleSubmit(
+            // @ts-expect-error handleSubmit
             async (values: TTransformedValues, event) => {
               try {
                 await onSubmit(values, event);
@@ -175,28 +175,28 @@ const Form = <
                   if (violations) {
                     // TODO(doll): This manual prefixing is a hack. Spring boot isn't returning the requestPart prefix in the field name
                     violations.map((value) => {
-                      // @ts-expect-error setError
                       methods.setError(
+                        // @ts-expect-error setError
                         fieldnameMapper?.(value.fieldName) ?? value.fieldName,
                         {
                           message: value.message,
-                        },
+                        }
                       );
                     });
                   } else {
-                    methods.setError("root.serverError", {
-                      message: data?.message || "Unknown error",
+                    methods.setError('root.serverError', {
+                      message: data?.message || 'Unknown error',
                     });
                   }
                 } else {
-                  methods.setError("root.serverError", {
-                    message: (error as Error)?.message ?? "Unknown error",
-                    type: "server",
+                  methods.setError('root.serverError', {
+                    message: (error as Error)?.message ?? 'Unknown error',
+                    type: 'server',
                   });
                 }
               }
             },
-            console.error,
+            console.error
           )(event);
         }}
       >
