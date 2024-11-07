@@ -1,4 +1,3 @@
-// packages/components/chat/ChatMessage.tsx
 import React from 'react';
 import { ReactMarkdown } from '@magi/components/ReactMarkdown';
 import { ChatBubble } from '@magi/components/chat/ChatCard';
@@ -185,23 +184,22 @@ function renderBotMessage(
   isLastMessage: boolean,
   latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
   conversationId: string | undefined,
-  onSalesforceChatMode: () => void,
   linkTargetInNewTab: boolean
 ) {
   if (!showBotAnswer({ message })) {
     return null;
   }
-  const showHumanChatButton = isActionChatMessage(message);
+  const showActionForm = isActionChatMessage(message);
   return (
     <ChatBubble
       direction='left'
       ref={isLastMessage ? latestChatBubbleRef : null}
     >
       <BotMessage message={message} linkTargetInNewTab={linkTargetInNewTab} />
-      {showHumanChatButton && (
-        <BailoutFormDisplay onSalesforceChatMode={onSalesforceChatMode} />
+      {showActionForm && (
+        <BailoutFormDisplay action={message.action} conversationId={conversationId} />
       )}
-      {!showHumanChatButton && conversationId && (
+      {!showActionForm && conversationId && (
         <FeedbackForm message={message} conversationId={conversationId} />
       )}
     </ChatBubble>

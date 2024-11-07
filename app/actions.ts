@@ -1,5 +1,7 @@
 'use server';
 
+import { z } from 'zod';
+import { revalidatePath } from 'next/cache';
 import { getMavenAGIClient } from '@/app/index';
 import { type MavenAGIClient, type MavenAGI } from 'mavenagi';
 import { type FeedbackType } from 'mavenagi/api';
@@ -24,10 +26,7 @@ export async function createOrUpdateFeedback({
   feedbackType,
   feedbackText,
 }: CreateOrUpdateFeedbackProps) {
-  const client: MavenAGIClient = getMavenAGIClient(
-    orgFriendlyId,
-    agentId
-  );
+  const client: MavenAGIClient = getMavenAGIClient(orgFriendlyId, agentId);
 
   const feedbackRequest = {
     feedbackId: {
@@ -91,5 +90,27 @@ export async function getPublicAppSettings(
   } catch (error) {
     console.error('Error fetching app settings', error);
     return null;
+  }
+}
+
+export async function submitBailoutForm(prevState: any, formData: FormData) {
+  console.log(prevState, formData);
+
+  try {
+    const { orgFriendlyId, agentId, conversationId, actionFormId, ...parameters } = Object.fromEntries(
+      formData.entries()
+    );
+    const client = getMavenAGIClient(orgFriendlyId as string, agentId as string);
+
+    const request = {
+      actionFormId: actionFormId as string,
+      parameters,
+    };
+    const response = await client.conversation.submitActionForm(conversationId as string, request);
+    console.log(response);
+    return { success: true, data: Object.fromEntries(formData) };
+  } catch (error) {
+    console.error('Error submitting bailout form', error);
+    return { success: false, error: 'Unknown error' };
   }
 }
