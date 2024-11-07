@@ -190,7 +190,7 @@ export async function load({
   const iframeProtocol = isLocalhost ? 'http' : 'https';
   const iframeDomain = isLocalhost
     ? 'localhost:3000'
-    : 'chat-develop.onmaven.app';
+    : 'chat-v2.onmaven.app';
   let iframeUrl = `${iframeProtocol}://${iframeDomain}/${orgFriendlyId}/${agentFriendlyId}`;
   if (unverifiedUserInfo) {
     iframeUrl += `?unverifiedUserInfo=${encodeURIComponent(JSON.stringify(unverifiedUserInfo))}`;
