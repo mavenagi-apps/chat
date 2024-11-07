@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-
+import { useSearchParams } from 'next/navigation';
 import Chat from '@magi/components/chat/Chat';
 import Animation from '@magi/components/Animation';
 import typingIndicator from '@magi/components/chat/typing-indicator.json';
@@ -38,9 +38,10 @@ interface Props {
   };
 }
 
-function ChatPage({ params }: Props) {
+function ChatPage() {
   // Analytics
   const analytics = useAnalytics();
+  const params = useSearchParams() as unknown as Props['params'];
 
   // i18n
   const t = useTranslations('chat.ChatPage');
@@ -48,6 +49,7 @@ function ChatPage({ params }: Props) {
   const popularQuestions: string[] = useMemo(() => {
     try {
       return JSON.parse(popularQuestionsJSON || '[]');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       return [];
     }
@@ -296,14 +298,16 @@ function ChatPage({ params }: Props) {
   );
 }
 
-export default function ChatPageWrapper(props: Props) {
+export default function ChatPageWrapper() {
   const [loading, setLoading] = useState(true);
-  const { orgFriendlyId, id } = props.params;
+  const params = useSearchParams() as unknown as Props['params'];
+  const { orgFriendlyId, id } = params;
 
   useEffect(() => {
     const isInIframe = () => {
       try {
         return window.self !== window.top;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         return true;
       }
@@ -319,5 +323,5 @@ export default function ChatPageWrapper(props: Props) {
     return null;
   }
 
-  return <ChatPage {...props} />;
+  return <ChatPage />;
 }

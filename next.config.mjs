@@ -1,25 +1,14 @@
 /** @type {import('next').NextConfig} */
-import createNextIntlPlugin from 'next-intl/plugin';
+import createNextIntlPlugin from "next-intl/plugin";
 
-const withNextIntl = createNextIntlPlugin('./i18n.ts');
+const withNextIntl = createNextIntlPlugin("./i18n.ts");
 
 const nextConfig = {
   reactStrictMode: false,
   experimental: {
     serverActions: {
-      allowedOrigins: [
-        'private-ibex-chat-zendesk.onmaven.app',
-        'app.mavenagi.com',
-        'zendesk-handoff.onmaven.app',
-      ],
+      allowedOrigins: ["chat-v2.onmaven.app"],
     },
-  },
-  images: {
-    remotePatterns: [
-      {
-        hostname: '*',
-      },
-    ],
   },
   logging: {
     fetches: {
