@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Chat from '@magi/components/chat/Chat';
 import Animation from '@magi/components/Animation';
 import typingIndicator from '@magi/components/chat/typing-indicator.json';
@@ -34,9 +34,7 @@ import {
 function ChatPage() {
   // Analytics
   const analytics = useAnalytics();
-  const params = useSearchParams();
-  const orgFriendlyId = params.get('orgFriendlyId') || '';
-  const agentFriendlyId = params.get('id') || '';
+  const { orgFriendlyId, id: agentFriendlyId }: { orgFriendlyId: string, id: string } = useParams();
 
   // i18n
   const t = useTranslations('chat.ChatPage');
@@ -299,9 +297,7 @@ function ChatPage() {
 
 export default function ChatPageWrapper() {
   const [loading, setLoading] = useState(true);
-  const params = useSearchParams();
-  const orgFriendlyId = params.get('orgFriendlyId') || '';
-  const agentFriendlyId = params.get('id') || '';
+  const { orgFriendlyId, id: agentFriendlyId }: { orgFriendlyId: string, id: string } = useParams();
 
   useEffect(() => {
     const isInIframe = () => {
