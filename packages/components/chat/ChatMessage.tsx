@@ -96,7 +96,6 @@ export function ChatMessage({
             isLastMessage,
             latestChatBubbleRef,
             conversationId,
-            onSalesforceChatMode,
             linkTargetInNewTab
           );
         }
@@ -197,7 +196,7 @@ function renderBotMessage(
     >
       <BotMessage message={message} linkTargetInNewTab={linkTargetInNewTab} />
       {showActionForm && (
-        <BailoutFormDisplay action={message.action} conversationId={conversationId} />
+        <BailoutFormDisplay action={message.action} conversationId={conversationId ?? ''} />
       )}
       {!showActionForm && conversationId && (
         <FeedbackForm message={message} conversationId={conversationId} />

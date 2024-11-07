@@ -1,7 +1,5 @@
 'use server';
 
-import { z } from 'zod';
-import { revalidatePath } from 'next/cache';
 import { getMavenAGIClient } from '@/app/index';
 import { type MavenAGIClient, type MavenAGI } from 'mavenagi';
 import { type FeedbackType } from 'mavenagi/api';
