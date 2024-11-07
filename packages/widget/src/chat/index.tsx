@@ -190,7 +190,7 @@ export async function load({
   const iframeProtocol = isLocalhost ? 'http' : 'https';
   const iframeDomain = isLocalhost
     ? 'localhost:3000'
-    : 'private-ibex-chat-zendesk.onmaven.app';
+    : 'chat-develop.onmaven.app';
   let iframeUrl = `${iframeProtocol}://${iframeDomain}/${orgFriendlyId}/${agentFriendlyId}`;
   if (unverifiedUserInfo) {
     iframeUrl += `?unverifiedUserInfo=${encodeURIComponent(JSON.stringify(unverifiedUserInfo))}`;
