@@ -31,17 +31,12 @@ import {
   type SimulatedChatMessage,
 } from '@/types';
 
-interface Props {
-  params: {
-    orgFriendlyId: string; // Organization ID
-    id: string; // Agent ID
-  };
-}
-
 function ChatPage() {
   // Analytics
   const analytics = useAnalytics();
-  const params = useSearchParams() as unknown as Props['params'];
+  const params = useSearchParams();
+  const orgFriendlyId = params.get('orgFriendlyId') || '';
+  const agentFriendlyId = params.get('id') || '';
 
   // i18n
   const t = useTranslations('chat.ChatPage');
@@ -66,7 +61,8 @@ function ChatPage() {
     askQuestion,
     conversationId,
   } = useChat({
-    ...params,
+    orgFriendlyId,
+    id: agentFriendlyId,
     unverifiedUserInfo,
   });
 
@@ -97,12 +93,12 @@ function ChatPage() {
       askQuestion(IDLE_MESSAGE(conversationId));
       setShowIdleMessage(true);
       analytics.logEvent(MagiEvent.idleMessageDisplay, {
-        agentId: params.id,
+        agentId: agentFriendlyId,
         conversationId: conversationId || '',
         onSalesforceExit,
       });
     },
-    [conversationId, params.id, askQuestion, t, analytics, surveyLink]
+    [conversationId, agentFriendlyId, askQuestion, t, analytics, surveyLink]
   );
 
   // Zendesk chat logic
@@ -118,7 +114,10 @@ function ChatPage() {
     // createConnectingToAgentMessage: zendeskCreateConnectingToAgentMessage,
     // zendeskError,
   } = useZendeskChat(
-    params,
+    {
+      id: agentFriendlyId,
+      orgFriendlyId,
+    },
     conversationId,
     unverifiedUserInfo,
     messages,
@@ -143,7 +142,7 @@ function ChatPage() {
   const ask = async (question: string) => {
     setHasUserSentFirstMessage(true);
     analytics.logEvent(MagiEvent.chatAskClick, {
-      agentId: params.id,
+      agentId: agentFriendlyId,
       conversationId: conversationId || '',
     });
     askQuestion({
@@ -154,8 +153,8 @@ function ChatPage() {
   };
 
   useEffect(() => {
-    analytics.logEvent(MagiEvent.chatHomeView, { agentId: params.id });
-  }, [params.id, analytics]);
+    analytics.logEvent(MagiEvent.chatHomeView, { agentId: agentFriendlyId });
+  }, [agentFriendlyId, analytics]);
 
   useEffect(() => {
     setCombinedMessages(
@@ -213,7 +212,7 @@ function ChatPage() {
                     key={index}
                     onClick={() => {
                       analytics.logEvent(MagiEvent.popularQuestionClick, {
-                        agentId: params.id,
+                        agentId: agentFriendlyId,
                         conversationId: conversationId || '',
                         question,
                       });
@@ -237,7 +236,7 @@ function ChatPage() {
                 onSalesforceChatMode={() => {
                   void handleZendeskChatMode();
                   analytics.logEvent(MagiEvent.bailoutActionClick, {
-                    agentId: params.id,
+                    agentId: agentFriendlyId,
                     conversationId: conversationId || '',
                   });
                 }}
@@ -300,8 +299,9 @@ function ChatPage() {
 
 export default function ChatPageWrapper() {
   const [loading, setLoading] = useState(true);
-  const params = useSearchParams() as unknown as Props['params'];
-  const { orgFriendlyId, id } = params;
+  const params = useSearchParams();
+  const orgFriendlyId = params.get('orgFriendlyId') || '';
+  const agentFriendlyId = params.get('id') || '';
 
   useEffect(() => {
     const isInIframe = () => {
@@ -313,11 +313,11 @@ export default function ChatPageWrapper() {
       }
     };
     if (!isInIframe()) {
-      window.location.href = `/demo/${orgFriendlyId}/${id}`;
+      window.location.href = `/demo/${orgFriendlyId}/${agentFriendlyId}`;
     } else {
       setLoading(false);
     }
-  }, [orgFriendlyId, id]);
+  }, [orgFriendlyId, agentFriendlyId]);
 
   if (loading) {
     return null;
