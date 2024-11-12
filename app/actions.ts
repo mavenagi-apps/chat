@@ -61,27 +61,15 @@ export async function getPublicAppSettings(
   try {
     const {
       amplitudeApiKey,
-      preferredLiveAgentProvider,
-      zendeskChatAccountKey,
-      zendeskChatIntegrationId,
-      zendeskSubdomain,
-      escalationTopics,
       logoUrl,
       popularQuestions,
-      defaultAgentName,
       brandColor,
       surveyLink,
     } = await client.appSettings.get();
     return {
       amplitudeApiKey,
-      preferredLiveAgentProvider,
-      zendeskChatAccountKey,
-      zendeskChatIntegrationId,
-      zendeskSubdomain,
-      escalationTopics,
       logoUrl,
       popularQuestions,
-      defaultAgentName,
       brandColor,
       surveyLink,
     } as Partial<AppSettings>;

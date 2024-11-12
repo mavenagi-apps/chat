@@ -11,22 +11,19 @@ import {
   type ChatMessage,
   type ActionChatMessage,
   type Message,
-  type SalesforceChatMessage,
-  type ZendeskChatMessage,
   type UserChatMessage,
 } from '@/types';
 import { type ConversationMessageResponse } from 'mavenagi/api';
 import { useTranslations } from 'next-intl';
 
 export interface MessageProps {
-  message: Message | SalesforceChatMessage | ZendeskChatMessage;
+  message: Message;
   linkTargetInNewTab?: boolean;
   isLastMessage?: boolean;
   latestChatBubbleRef?: React.RefObject<HTMLDivElement>;
   conversationId?: string;
   initialUserChatMessage?: UserChatMessage | null;
   unverifiedUserInfo?: Record<string, string>;
-  onSalesforceChatMode?: () => void;
 }
 
 export function ChatMessage({
@@ -35,7 +32,6 @@ export function ChatMessage({
   isLastMessage = false,
   latestChatBubbleRef,
   conversationId,
-  onSalesforceChatMode = () => {},
 }: MessageProps) {
   const t = useTranslations('chat.ChatPage');
   if ('type' in message) {
@@ -77,17 +73,6 @@ export function ChatMessage({
               linkTargetInNewTab={linkTargetInNewTab}
             />
           </ChatBubble>
-        );
-      case 'ChatMessage':
-      case 'ChatEstablished':
-      case 'ChatTransferred':
-      case 'QueueUpdate':
-      case 'ChatEnded':
-        return renderSalesforceMessage(
-          message as SalesforceChatMessage,
-          isLastMessage,
-          latestChatBubbleRef,
-          t
         );
       default:
         if (isBotMessage(message as Message)) {
@@ -203,81 +188,4 @@ function renderBotMessage(
       )}
     </ChatBubble>
   );
-}
-
-function renderSalesforceMessage(
-  message: SalesforceChatMessage,
-  isLastMessage: boolean,
-  latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
-  t: Function
-) {
-  switch (message.type) {
-    case 'USER':
-      return null;  
-    case 'ChatMessage':
-      if (message.message.text === 'Click the close button to end this chat') {
-        return null;
-      }
-      return (
-        <ChatBubble
-          direction='left-hug'
-          author={
-            /^Management Center$/i.test(message.message.name)
-              ? undefined
-              : message.message.name
-          }
-          ref={isLastMessage ? latestChatBubbleRef : null}
-        >
-          <ReactMarkdown>{message.message.text}</ReactMarkdown>
-        </ChatBubble>
-      );
-    case 'ChatEstablished':
-    case 'ChatTransferred':
-    case 'QueueUpdate':
-    case 'ChatEnded':
-    case 'AgentTyping':
-    case 'AgentNotTyping':
-      return (
-        <div
-          ref={isLastMessage ? latestChatBubbleRef : null}
-          className='my-5 flex items-center justify-center h-auto text-gray-500'
-        >
-          <div className='grow border-t border-gray-300'></div>
-          <span className='mx-4 prose max-w-full text-xs whitespace-nowrap'>
-            {getSalesforceStatusMessage(message, t)}
-          </span>
-          <div className='grow border-t border-gray-300'></div>
-        </div>
-      );
-  }
-}
-
-function getSalesforceStatusMessage(message: SalesforceChatMessage, t: Function): string {
-  if (message.type === 'USER') {
-    return '';
-  }
-
-  const { estimatedWaitTime, position } = 
-    'message' in message && 'estimatedWaitTime' in message.message
-      ? message.message
-      : { estimatedWaitTime: undefined, position: undefined };
-  switch (message.type) {
-    case 'ChatEstablished':
-      return message.message.text;
-    case 'ChatTransferred':
-      return t('chat_transferred', { name: message.message.name });
-    case 'QueueUpdate':
-      if (estimatedWaitTime && estimatedWaitTime > -1) {
-        return t('chat_queue_position_estimated_wait_time', { estimatedWaitTime });
-      } else if (position && position > 0) {
-        return t('chat_queue_position_in_queue', { position });
-      } else if (position === 0) {
-        return t('chat_queue_position_next');
-      }
-      return t('chat_queue_position_in_queue');
-    case 'ChatEnded':
-      return t('chat_has_ended');
-    default:
-      return '';
-  }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
@@ -10,7 +10,6 @@ import { ChatMessage } from '@magi/components/chat/ChatMessage';
 import { ChatBubble } from '@magi/components/chat/ChatCard';
 import { ChatInput } from '@magi/components/chat/ChatInput';
 import { useChat } from '@magi/components/chat/use-chat';
-import { useIdleTimeout } from '@magi/components/chat/use-idle-timeout';
 import { useUnverifiedUserInfo } from '@magi/components/chat/use-unverified-user-info';
 import { ReactMarkdown } from '@magi/components/ReactMarkdown';
 import Spinner from '@magi/components/Spinner';
@@ -19,13 +18,6 @@ import { MagiEvent } from '@/lib/analytics/events';
 import { useAnalytics } from '@/lib/use-analytics';
 import { useSettings } from '@/app/providers/SettingsProvider';
 
-import {
-  type Message,
-  type SalesforceChatMessage,
-  type ZendeskChatMessage,
-  type SimulatedChatMessage,
-} from '@/types';
-
 function ChatPage() {
   // Analytics
   const analytics = useAnalytics();
@@ -33,7 +25,7 @@ function ChatPage() {
 
   // i18n
   const t = useTranslations('chat.ChatPage');
-  const { popularQuestions: popularQuestionsJSON, brandColor, logoUrl, surveyLink } = useSettings();
+  const { popularQuestions: popularQuestionsJSON, brandColor, logoUrl } = useSettings();
   const popularQuestions: string[] = useMemo(() => {
     try {
       return JSON.parse(popularQuestionsJSON || '[]');
@@ -73,41 +65,7 @@ function ChatPage() {
     );
   };
 
-  const displayIdleMessage = useCallback(
-    (onSalesforceExit = false) => {
-      const IDLE_MESSAGE = (conversationId: string): SimulatedChatMessage => ({
-        text: t('idle_message_with_survey', {
-          url: surveyLink,
-          urlParams: `?conversationId=${conversationId}`,
-        }),
-        type: 'SIMULATED',
-      });
-
-      askQuestion(IDLE_MESSAGE(conversationId));
-      setShowIdleMessage(true);
-      analytics.logEvent(MagiEvent.idleMessageDisplay, {
-        agentId: agentFriendlyId,
-        conversationId: conversationId || '',
-        onSalesforceExit,
-      });
-    },
-    [conversationId, agentFriendlyId, askQuestion, t, analytics, surveyLink]
-  );
-
-  const [combinedMessages, setCombinedMessages] = useState<(Message | SalesforceChatMessage | ZendeskChatMessage)[]>([]);
-
-  const [hasUserSentFirstMessage, setHasUserSentFirstMessage] = useState(false);
-
-  const idleTimeoutMilliseconds = 30000; // 30 seconds
-  const { isIdle } = useIdleTimeout({
-    timeout: idleTimeoutMilliseconds,
-    isExternalProviderChatMode: false,
-    isWaitingForChatResponse: isLoading,
-    hasUserSentFirstMessage,
-  });
-
   const ask = async (question: string) => {
-    setHasUserSentFirstMessage(true);
     analytics.logEvent(MagiEvent.chatAskClick, {
       agentId: agentFriendlyId,
       conversationId: conversationId || '',
@@ -122,32 +80,6 @@ function ChatPage() {
   useEffect(() => {
     analytics.logEvent(MagiEvent.chatHomeView, { agentId: agentFriendlyId });
   }, [agentFriendlyId, analytics]);
-
-  useEffect(() => {
-    setCombinedMessages(
-      [...messages]
-        .filter(({ timestamp }) => !!timestamp)
-        .sort(
-          (a, b) => (a.timestamp || 0) - (b.timestamp || 0)
-        )
-    );
-
-    console.log('combinedMessages', combinedMessages);
-    scrollLatestChatBubbleIntoView();
-  }, [messages, setCombinedMessages]);
-
-  // Idle logic
-  const [showIdleMessage, setShowIdleMessage] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (isIdle && !showIdleMessage) {
-      displayIdleMessage();
-    }
-  }, [
-    displayIdleMessage,
-    isIdle,
-    showIdleMessage,
-  ]);
 
   return (
     <main className='flex h-screen flex-col bg-gray-50'>
@@ -194,20 +126,14 @@ function ChatPage() {
               </div>
             </ChatBubble>
 
-            {combinedMessages.map((message, index) => (
+            {messages.map((message, index) => (
               <ChatMessage
                 key={index}
                 message={message}
-                isLastMessage={index === combinedMessages.length - 1}
+                isLastMessage={index === messages.length - 1}
                 latestChatBubbleRef={latestChatBubbleRef}
                 conversationId={conversationId}
                 unverifiedUserInfo={unverifiedUserInfo}
-                onSalesforceChatMode={() => {
-                  analytics.logEvent(MagiEvent.bailoutActionClick, {
-                    agentId: agentFriendlyId,
-                    conversationId: conversationId || '',
-                  });
-                }}
               />
             ))}
 
@@ -217,7 +143,7 @@ function ChatPage() {
               </div>
             )}
           </div>
-          {combinedMessages.length === 0 && !isLoading && (
+          {messages.length === 0 && !isLoading && (
             <div className='flex h-20 w-full items-center text-center'>
               <div className='mx-auto flex items-center text-xs text-gray-400'>
                 Powered by{' '}

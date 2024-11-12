@@ -15,18 +15,6 @@ type Message = (
   timestamp?: number;
 };
 
-export type ZendeskChatMessage = {
-  id?: string;
-  type: string;
-  message?: {
-    text: string;
-    name?: string;
-    agentId?: string;
-  };
-  event_name?: string;
-  event_timestamp?: string;
-};
-
 const isBotMessage = (
   message: Message
 ): message is ConversationMessageResponse.Bot => message.type === 'bot';
@@ -40,57 +28,14 @@ const isChatUserMessage = (message: Message): message is UserChatMessage =>
 const isActionChatMessage = (message: Message): message is ActionChatMessage =>
   'action' in message && message.type === 'bot';
 
-type SalesforceSimulatedChatEstablishedMessage = {
-  type: 'ChatEstablished';
-  message: {
-    text: string;
-  };
-};
-
-type SalesforceResponseMessage = {
-  type:
-    | 'ChatMessage'
-    | 'QueueUpdate'
-    | 'ChatTransferred'
-    | 'ChatEnded'
-    | 'AgentTyping'
-    | 'AgentNotTyping'
-    | 'ChatEstablished';
-  message: {
-    text: string;
-    name: string;
-    schedule: {
-      responseDelayMilliseconds: number;
-    };
-    agentId: string;
-    estimatedWaitTime?: number;
-    position?: number;
-    reason?: string;
-  };
-};
-
-type SalesforceSystemMessage = SalesforceResponseMessage | SalesforceSimulatedChatEstablishedMessage;
-
-type SalesforceChatMessage =
-  | SalesforceSystemMessage
-  | UserChatMessage;
-
-const isChatTransferredMessage = (message: SalesforceChatMessage): message is SalesforceResponseMessage =>
-  message.type === 'ChatTransferred';
-
 export {
   isActionChatMessage,
   isBotMessage,
   isChatMessage,
-  isChatTransferredMessage,
   isChatUserMessage,
   type ActionChatMessage,
   type ChatMessage,
   type Message,
-  type SalesforceChatMessage,
-  type SalesforceResponseMessage,
-  type SalesforceSimulatedChatEstablishedMessage,
-  type SalesforceSystemMessage,
   type SimulatedChatMessage,
   type UserChatMessage,
 };

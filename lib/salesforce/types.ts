@@ -72,32 +72,3 @@ export type ChatMessageResponse = {
   sequence: number;
   offset: number;
 };
-
-export type SalesforceMessageType =
-  | "AgentDisconnect"
-  | "AgentNotTyping"
-  | "AgentTyping"
-  | "ChasitorSessionData"
-  | "ChatEnded"
-  | "ChatEstablished"
-  | "ChatMessage"
-  | "ChatRequestFail"
-  | "ChatRequestSuccess"
-  | "ChatTransferred"
-  | "CustomEvent"
-  | "NewVisitorBreadcrumb"
-  | "QueueUpdate"
-  | "SensitiveDataRules";
-
-// Define the SalesforceChatMessage type
-export type SalesforceChatMessage = {
-  type: SalesforceMessageType;
-  message: {
-    text: string;
-    name: string;
-    schedule: {
-      responseDelayMilliseconds: number;
-    };
-    agentId: string;
-  };
-};
