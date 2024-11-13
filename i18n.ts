@@ -1,25 +1,20 @@
+import { headers } from 'next/headers';
 import { getRequestConfig } from 'next-intl/server';
-import { notFound } from 'next/navigation';
 import type { AbstractIntlMessages, IntlConfig } from 'use-intl/core';
 
-async function getMessagesUnchecked(locale: string) {
-  return await (
-    await import(`@/messages/${locale}.json`)
-  ).default as AbstractIntlMessages;
-}
+const PERMITTED_LOCALES = ['en', 'en-US', 'fr', 'es', 'it'];
 
-export async function getMessages(locale: string) {
-  try {
-    return await getMessagesUnchecked(locale);
-  } catch {
-    notFound();
+export default getRequestConfig(async ({ requestLocale }): Promise<IntlConfig> => {
+  let locale = (await requestLocale) || 'en-US';
+  const headersList = await headers();
+  const acceptLanguage = headersList.get('accept-language');
+
+  if (acceptLanguage) {
+    locale = acceptLanguage.split(',').find((lang) => PERMITTED_LOCALES.includes(lang)) || 'en-US';
   }
-}
 
-export default getRequestConfig(async ({ locale }) => {
   return {
-    messages: (await import(`./messages/${locale}.json`)).default,
-    timeZone: 'UTC',
+    locale,
+    messages: (await import(`./messages/${locale}.json`)).default as AbstractIntlMessages,
   };
-}) as RequestConfig | Promise<RequestConfig>;
-type RequestConfig = Omit<IntlConfig, 'locale'>;
+});

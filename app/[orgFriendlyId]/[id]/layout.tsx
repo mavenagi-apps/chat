@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
-import { NextIntlClientProvider } from 'next-intl'
-import { unstable_setRequestLocale } from 'next-intl/server'
-import { getMessages } from '@/i18n'
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 import ClientLayout from './ClientLayout';
 
 export const metadata: Metadata = {
@@ -14,15 +13,13 @@ export default async function ChatLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = 'en'
-  unstable_setRequestLocale(locale)
-  const messages = await getMessages(locale)
+  const messages = await getMessages()
+  const locale = await getLocale();
 
   return (
       <NextIntlClientProvider
         locale={locale}
         messages={messages}
-        timeZone={'UTC'}
       >
         <ClientLayout>
           {children}
