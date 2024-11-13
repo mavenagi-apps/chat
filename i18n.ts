@@ -4,28 +4,51 @@ import type { AbstractIntlMessages, IntlConfig } from 'use-intl/core';
 
 const PERMITTED_LOCALES = ['en', 'fr', 'es', 'it'];
 
-export default getRequestConfig(async ({ requestLocale }): Promise<IntlConfig> => {
-  try {
-    let locale = (await requestLocale) || 'en';
-    const headersList = await headers();
-    const acceptLanguage = headersList.get('accept-language');
+// Helper function to get base locale
+function getBaseLocale(locale: string): string {
+  // Handle cases like 'en-US' -> 'en'
+  const baseLocale = locale.split('-')[0].toLowerCase();
+  return PERMITTED_LOCALES.includes(
+    baseLocale as (typeof PERMITTED_LOCALES)[number]
+  )
+    ? baseLocale
+    : 'en';
+}
 
-    if (acceptLanguage) {
-      locale =
-        acceptLanguage
+export default getRequestConfig(
+  async ({ requestLocale }): Promise<IntlConfig> => {
+    try {
+      let locale = (await requestLocale) || 'en';
+      const headersList = await headers();
+      const acceptLanguage = headersList.get('accept-language');
+
+      if (acceptLanguage) {
+        // Get the first matching locale from accept-language header
+        const matchedLocale = acceptLanguage
           .split(',')
-          .find((lang) => PERMITTED_LOCALES.includes(lang)) || locale;
-    }
+          .map((lang) => lang.split(';')[0].trim()) // Remove quality values
+          .find((lang) => PERMITTED_LOCALES.includes(getBaseLocale(lang)));
 
-    return {
-      locale,
-      messages: (await import(`./messages/${locale}.json`)).default as AbstractIntlMessages,
-    };
-  } catch (error) {
-    console.error('Error loading locale messages:', error);
-    return {
-      locale: 'en',
-      messages: (await import('./messages/en.json')).default as AbstractIntlMessages,
-    };
+        if (matchedLocale) {
+          locale = getBaseLocale(matchedLocale);
+        }
+      }
+
+      // Always ensure we use the base locale for file lookup
+      const baseLocale = getBaseLocale(locale);
+
+      return {
+        locale: baseLocale,
+        messages: (await import(`./messages/${baseLocale}.json`))
+          .default as AbstractIntlMessages,
+      };
+    } catch (error) {
+      console.error('Error loading locale messages:', error);
+      return {
+        locale: 'en',
+        messages: (await import('./messages/en.json'))
+          .default as AbstractIntlMessages,
+      };
+    }
   }
-});
+);
