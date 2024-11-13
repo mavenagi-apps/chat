@@ -1,7 +1,7 @@
 {
     "chat": {
       "ChatPage": {
-        "default_welcome_message": "Comment pouvons-nous vous aider ? Vous pouvez commencer une conversation ci-dessous ou commencer par des questions populaires :",
+        "default_welcome_message": "Comment pouvons-nous vous aider ? Vous pouvez commencer une conversation ci-dessous ou commencer par des questions populaires:",
         "default_error_message": "Une erreur s'est produite. Veuillez réessayer.",
         "related_links": "Liens connexes",
         "powered_by": "Propulsé par",

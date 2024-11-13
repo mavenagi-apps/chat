@@ -1,34 +1,113 @@
+# Maven AGI Chat Widget
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
 
-Local Development:
+### Local Development
 
-Add the env variables from [Vercel](https://vercel.com/mavenagi/mavenagi-developer-app-production-internal-snowflake-query/settings/environment-variables) into a .env.local file:
+1. Add the env variables from [Vercel](https://vercel.com/mavenagi/mavenagi-developer-app-production-internal-snowflake-query/settings/environment-variables) into a `.env.local` file:
 * MAVENAGI_APP_ID
 * MAVENAGI_APP_SECRET
 
-Install the dependences
-
-`yarn install`
-
-Run the development server:
-
+2. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+```
+
+3. Run the development server:
+```bash
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+The project uses a monorepo structure managed with pnpm workspaces:
+
+- `packages/widget`: The core chat widget (built with Vite)
+- `packages/components`: Reusable React components
+- `packages/ui`: Base UI components and utilities
+
+## Widget Integration
+
+### Basic Implementation
+
+Add the following to your HTML:
+
+```html
+<script src="https://chat-v2.onmaven.app/js/widget.js" defer></script>
+<script>
+addEventListener("load", function () {
+  Maven.ChatWidget.load({
+    orgFriendlyId: "your-org-id",
+    agentFriendlyId: "your-agent-id",
+    bgColor: "#00202b",
+  })
+});
+</script>
+```
+
+### Configuration Options
+
+```typescript
+interface WidgetConfig {
+  envPrefix?: string;              // Environment prefix for API endpoints
+  bgColor?: string;               // Widget background color
+  textColor?: string;             // Widget text color (default: 'white')
+  horizontalPosition?: 'left' | 'right';  // Widget position (default: 'right')
+  verticalPosition?: 'top' | 'bottom';    // Widget position (default: 'bottom')
+  unverifiedUserInfo?: {
+    firstName?: string;
+    lastName?: string;
+    userId?: string;
+    email?: string;
+    businessName?: string;
+  };
+  orgFriendlyId: string;          // Required: Your organization ID
+  agentFriendlyId: string;        // Required: Your agent ID
+}
+```
+
+## Internationalization
+
+The widget supports multiple languages through `next-intl`. Currently supported languages:
+
+- English (en)
+- Spanish (es)
+- French (fr)
+- Italian (it)
+
+### Adding New Languages
+
+1. Create a new translation file in `messages/<locale>.json`
+2. Follow the existing structure in other language files
+3. Messages are organized by feature:
+
+```json
+{
+  "chat": {
+    "ChatPage": {
+      "default_welcome_message": "Your translated message",
+      // ... other translations
+    }
+  }
+}
+```
+
+4. Update the `PERMITTED_LOCALES` constant in `i18n.ts`
+
+## Building the Widget
+
+The widget is built using Vite and outputs a UMD bundle:
+
+```bash
+cd packages/widget
+pnpm build
+```
+
+This creates `public/js/widget.js` which can be served from your Next.js application.
 
 ## Learn More
 
