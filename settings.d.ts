@@ -4,7 +4,6 @@ declare global {
     logoUrl: string;
     popularQuestions: string;
     brandColor: string;
-    surveyLink: string;
   }
 }
 
