@@ -1,4 +1,4 @@
-# Maven AGI Chat Widget
+# Maven AGI Chat App
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
@@ -32,43 +32,7 @@ The project uses a monorepo structure managed with pnpm workspaces:
 
 ## Widget Integration
 
-### Basic Implementation
-
-Add the following to your HTML:
-
-```html
-<script src="https://chat-v2.onmaven.app/js/widget.js" defer></script>
-<script>
-addEventListener("load", function () {
-  Maven.ChatWidget.load({
-    orgFriendlyId: "your-org-id",
-    agentFriendlyId: "your-agent-id",
-    bgColor: "#00202b",
-  })
-});
-</script>
-```
-
-### Configuration Options
-
-```typescript
-interface WidgetConfig {
-  envPrefix?: string;              // Environment prefix for API endpoints
-  bgColor?: string;               // Widget background color
-  textColor?: string;             // Widget text color (default: 'white')
-  horizontalPosition?: 'left' | 'right';  // Widget position (default: 'right')
-  verticalPosition?: 'top' | 'bottom';    // Widget position (default: 'bottom')
-  unverifiedUserInfo?: {
-    firstName?: string;
-    lastName?: string;
-    userId?: string;
-    email?: string;
-    businessName?: string;
-  };
-  orgFriendlyId: string;          // Required: Your organization ID
-  agentFriendlyId: string;        // Required: Your agent ID
-}
-```
+[INSTALL.md](INSTALL.md)
 
 ## Internationalization
 
