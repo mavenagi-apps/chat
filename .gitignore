@@ -41,3 +41,7 @@ next-env.d.ts
 # turbo
 packages/**/node_modules
 .turbo
+
+# widget
+public/js/widget.debug.js
+public/js/widget.js
