@@ -3,12 +3,13 @@
   "globalDependencies": ["**/.env.*local", "tsconfig.json"],
   "tasks": {
     "build": {
+      "cache": false,
       "dependsOn": ["^build"],
       "env": [
         "VERCEL_PROJECT_PRODUCTION_URL"
       ],
       "outputs": [
-        ".next/**", 
+        ".next/**",
         "!.next/cache/**",
         "public/js/**"
       ]
