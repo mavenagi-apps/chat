@@ -1,22 +1,4 @@
-import preact from '@preact/preset-vite';
 import { defineConfig } from 'vite';
+import { createBaseConfig } from './vite.config.base';
 
-export default defineConfig({
-  plugins: [
-    preact(),
-  ],
-  build: {
-    rollupOptions: {
-      input: {
-        widget: 'src/main.tsx',
-      },
-      output: {
-        // Universal Module Definition, is a module definition format that aims to be compatible with both CommonJS and AMD
-        format: 'umd',
-        dir: '../../public/js',
-        // output js file to ../../public/js/widget.js
-        entryFileNames: 'widget.js',
-      },
-    },
-  },
-});
+export default defineConfig(({ mode }) => createBaseConfig(mode));
