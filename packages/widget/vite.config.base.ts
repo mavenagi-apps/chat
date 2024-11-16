@@ -6,9 +6,10 @@ import type { UserConfig } from 'vite';
 export const EXPORT_NAME = 'widget';
 
 export function createBaseConfig(mode: string): UserConfig {
+  const root = path.resolve(__dirname, '../../');
   const { VERCEL_PROJECT_PRODUCTION_URL } = loadEnv(
     mode,
-    path.resolve(__dirname, '../../'),
+    root,
     'VERCEL_PROJECT_PRODUCTION_URL'
   );
 
@@ -26,7 +27,7 @@ export function createBaseConfig(mode: string): UserConfig {
         formats: ['umd'],
         fileName: () => `${EXPORT_NAME}.js`,
       },
-      outDir: '../../public/js',
+      outDir: path.resolve(root, 'public/js'),
       sourcemap: false,
       minify: 'esbuild',
       target: 'es2015',
