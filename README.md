@@ -7,15 +7,18 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 ### Local Development
 
 1. Add the env variables from [Vercel](https://vercel.com/mavenagi/mavenagi-developer-app-production-internal-snowflake-query/settings/environment-variables) into a `.env.local` file:
-* MAVENAGI_APP_ID
-* MAVENAGI_APP_SECRET
+
+- MAVENAGI_APP_ID
+- MAVENAGI_APP_SECRET
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 3. Run the development server:
+
 ```bash
 pnpm dev
 ```
@@ -85,5 +88,3 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
