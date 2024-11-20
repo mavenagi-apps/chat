@@ -1,0 +1,24 @@
+name: build
+
+on:
+  push:
+    branches:
+      - wip-github-actions
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: dist/ # Adjust the path to your build output directory

@@ -1,0 +1,18 @@
+name: test
+
+on:
+  push:
+    branches:
+      - wip-github-actions
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Run linter
+        run: pnpm test

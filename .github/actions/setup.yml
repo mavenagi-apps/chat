@@ -1,0 +1,24 @@
+name: setup
+description: Shared setup for Node.js with pnpm
+
+inputs:
+  node-version-file:
+    description: Path to .nvmrc file
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: ${{ inputs.node-version-file }}
+
+    - name: Install pnpm
+      run: npm install -g pnpm
+
+    - name: Install dependencies using pnpm
+      run: pnpm install
