@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: ./.github/actions/setup
         with:
           node-version-file: '.nvmrc'
 
