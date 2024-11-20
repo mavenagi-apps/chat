@@ -2,6 +2,22 @@ import { createRef, render } from 'preact';
 import { forwardRef, useImperativeHandle } from 'preact/compat';
 import { useEffect, useState } from 'preact/hooks';
 
+const generateIframeUrl = (orgFriendlyId: string, agentFriendlyId: string, unverifiedUserInfo: Record<string, unknown>): string => {
+    const currentDomain = window.location.hostname;
+    const isLocalEnvironment =
+      !currentDomain || ['localhost', '127.0.0.1'].includes(currentDomain);
+    const iframeProtocol = isLocalEnvironment ? 'http' : 'https';
+    const iframeDomain = isLocalEnvironment
+      ? `${currentDomain || 'localhost'}:3000`
+      : __IFRAME_DOMAIN__;
+    let iframeUrl = `${iframeProtocol}://${iframeDomain}/${orgFriendlyId}/${agentFriendlyId}`;
+    if (unverifiedUserInfo) {
+      iframeUrl += `?unverifiedUserInfo=${encodeURIComponent(JSON.stringify(unverifiedUserInfo))}`;
+    }
+
+    return iframeUrl;
+};
+
 export const useMediaQuery = (query: string) => {
   const mediaMatch = window.matchMedia(query);
   const [matches, setMatches] = useState(mediaMatch.matches);
@@ -185,14 +201,7 @@ export async function load({
   const placeholder = document.createElement('div');
   document.body.appendChild(placeholder);
 
-  const currentDomain = window.location.hostname;
-  const isLocalhost = currentDomain.includes('localhost');
-  const iframeProtocol = isLocalhost ? 'http' : 'https';
-  const iframeDomain = isLocalhost ? 'localhost:3000' : __IFRAME_DOMAIN__;
-  let iframeUrl = `${iframeProtocol}://${iframeDomain}/${orgFriendlyId}/${agentFriendlyId}`;
-  if (unverifiedUserInfo) {
-    iframeUrl += `?unverifiedUserInfo=${encodeURIComponent(JSON.stringify(unverifiedUserInfo))}`;
-  }
+  const iframeUrl = generateIframeUrl(orgFriendlyId, agentFriendlyId, unverifiedUserInfo);
 
   render(
     // @ts-expect-error Server Component

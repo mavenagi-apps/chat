@@ -2,14 +2,15 @@ import preact from '@preact/preset-vite';
 import path from 'path';
 import { loadEnv } from 'vite';
 import type { UserConfig } from 'vite';
+import RootPath from 'app-root-path';
 
+const PROJECT_ROOT = RootPath.toString();
 export const EXPORT_NAME = 'widget';
 
 export function createBaseConfig(mode: string): UserConfig {
-  const root = path.resolve(__dirname, '../../');
   const { VERCEL_PROJECT_PRODUCTION_URL } = loadEnv(
     mode,
-    root,
+    PROJECT_ROOT,
     'VERCEL_PROJECT_PRODUCTION_URL'
   );
 
@@ -27,7 +28,7 @@ export function createBaseConfig(mode: string): UserConfig {
         formats: ['umd'],
         fileName: () => `${EXPORT_NAME}.js`,
       },
-      outDir: path.resolve(root, 'public/js'),
+      outDir: path.resolve(PROJECT_ROOT, 'public/js'),
       sourcemap: false,
       minify: 'esbuild',
       target: 'es2015',
