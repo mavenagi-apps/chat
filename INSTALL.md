@@ -49,15 +49,9 @@ interface WidgetConfig {
   textColor?: string;                     // Widget text color (default: 'white')
   horizontalPosition?: 'left' | 'right';  // Widget position (default: 'right')
   verticalPosition?: 'top' | 'bottom';    // Widget position (default: 'bottom')
-  unverifiedUserInfo?: {
-    firstName?: string;
-    lastName?: string;
-    userId?: string;
-    email?: string;
-    businessName?: string;
-  };
-  orgFriendlyId: string;          // Required: Your organization ID
-  agentFriendlyId: string;        // Required: Your agent ID
+  userData?: Record<string, string>
+  orgFriendlyId: string;                  // Required: Your organization ID
+  agentFriendlyId: string;                // Required: Your agent ID
 }
 ```
 

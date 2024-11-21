@@ -78,8 +78,6 @@ export async function getPublicAppSettings(
 }
 
 export async function submitBailoutForm(prevState: any, formData: FormData) {
-  console.log(prevState, formData);
-
   try {
     const { orgFriendlyId, agentId, conversationId, actionFormId, ...parameters } = Object.fromEntries(
       formData.entries()
@@ -90,8 +88,8 @@ export async function submitBailoutForm(prevState: any, formData: FormData) {
       actionFormId: actionFormId as string,
       parameters,
     };
-    const response = await client.conversation.submitActionForm(conversationId as string, request);
-    console.log(response);
+
+    await client.conversation.submitActionForm(conversationId as string, request);
     return { success: true, data: Object.fromEntries(formData) };
   } catch (error) {
     console.error('Error submitting bailout form', error);

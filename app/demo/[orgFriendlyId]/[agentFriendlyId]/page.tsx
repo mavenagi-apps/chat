@@ -112,7 +112,7 @@ addEventListener("load", function () {
     orgFriendlyId: "${orgFriendlyId}",
     agentFriendlyId: "${agentFriendlyId}",
     bgColor: "${brandColor || '#00202b'}",
-    unverifiedUserInfo: {
+    userData: {
       firstName: "${faker.person.firstName()}",
       lastName: "${faker.person.lastName()}",
       userId: "${faker.string.uuid()}",

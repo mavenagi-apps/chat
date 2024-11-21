@@ -23,7 +23,7 @@ export interface MessageProps {
   latestChatBubbleRef?: React.RefObject<HTMLDivElement>;
   conversationId?: string;
   initialUserChatMessage?: UserChatMessage | null;
-  unverifiedUserInfo?: Record<string, string>;
+  userData?: Record<string, string> | null;
 }
 
 export function ChatMessage({

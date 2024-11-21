@@ -28,7 +28,6 @@ export function useAnalytics() {
       }
   >({
     logEvent: (event: MagiEvent, properties?: Record<string, any>) => {
-      console.log('Analytics called before API key set');
       setLogEventsQueue((prevQueue) => [
         ...prevQueue,
         { event, properties: properties || {} },
@@ -39,7 +38,6 @@ export function useAnalytics() {
       userId?: string | undefined,
       email?: string | undefined
     ) => {
-      console.log('Analytics called before API key set');
       setInitQueue((prevQueue) => [...prevQueue, { product, userId, email }]);
     },
   });
