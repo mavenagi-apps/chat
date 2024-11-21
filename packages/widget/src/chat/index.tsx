@@ -2,7 +2,7 @@ import { createRef, render } from 'preact';
 import { forwardRef, useImperativeHandle } from 'preact/compat';
 import { useEffect, useState } from 'preact/hooks';
 import { ChatButton } from './components/ChatButton';
-import { useIframeMessaging } from './hooks/useIframeMessaging';
+import { useIframeCommunication } from './hooks/useIframeCommunication';
 
 type UserData = Record<string, string> | null;
 
@@ -36,7 +36,7 @@ const App = forwardRef<{ open: () => void; close: () => void }, Props>(
       iframeRef,
       iframeUrl,
       iframeStyle
-    } = useIframeMessaging({
+    } = useIframeCommunication({
       orgFriendlyId: props.orgFriendlyId,
       agentFriendlyId: props.agentFriendlyId,
       userData: props.userData,

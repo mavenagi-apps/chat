@@ -16,7 +16,7 @@ interface LegacyMessageEvent extends MessageEvent {
   message?: any; // Support for older browsers
 }
 
-export function useIframeMessaging({
+export function useIframeCommunication({
   orgFriendlyId,
   agentFriendlyId,
   userData,
