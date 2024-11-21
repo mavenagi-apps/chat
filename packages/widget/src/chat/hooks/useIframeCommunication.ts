@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import React from 'react';
 
 export enum MAVEN_MESSAGE_TYPES {
   USER_DATA = 'USER_DATA',
