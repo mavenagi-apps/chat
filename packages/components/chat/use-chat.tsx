@@ -12,7 +12,6 @@ import {
   type Message,
   type ChatMessage,
   type UserChatMessage,
-  type ActionChatMessage,
   isBotMessage,
   isChatMessage,
   isChatUserMessage
@@ -23,10 +22,10 @@ const API_ENDPOINT = '/api/create';
 type UseChatOptions = {
   orgFriendlyId: string;
   id: string;
-  unverifiedUserInfo: Record<string, string>;
+  userData: Record<string, string> | null;
 };
 
-export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOptions) {
+export function useChat({ orgFriendlyId, id, userData }: UseChatOptions) {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [conversationId, setConversationId] = React.useState<string>(nanoid());
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
@@ -69,7 +68,7 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
         question: (_messages[_messages.length - 1] as UserChatMessage).text,
         conversationId: conversationId,
         initialize: _messages.length <= 1,
-        unverifiedUserInfo,
+        userData: userData || undefined,
       }),
       headers: {
         'Content-Type': 'application/json',
@@ -94,9 +93,6 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
     while (!done) {
       const { done: readerDone, value } = await reader.read();
       done = readerDone;
-      if (readerDone) {
-        console.log('Stream complete');
-      }
 
       buffer += decoder.decode(value, { stream: true });
 
@@ -114,12 +110,10 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
         if (eventData) {
           try {
             const parsedData = JSON.parse(eventData);
-            console.log({ parsedData });
 
             // Handle the "start" event immediately
             if (parsedData.eventType === 'start') {
               referenceId = parsedData.conversationMessageId?.referenceId;
-              console.log('Reference ID set:', referenceId);
 
               handleParsedData(parsedData, referenceId);
 
@@ -179,7 +173,6 @@ export function useChat({ orgFriendlyId, id, unverifiedUserInfo }: UseChatOption
       setMessages((prevState) => [...prevState, newMessage]);
     } else if (parsedData.eventType === 'text') {
       setIsLoading(false);
-      console.log('The reference Id is:', referenceId);
       if (!referenceId) {
         throw new Error('No referenceId');
       }

@@ -17,11 +17,9 @@ export const SettingsProvider = ({
   const { orgFriendlyId, id: agentId }: { orgFriendlyId: string, id: string } = useParams();
 
   useEffect(() => {
-    console.log('Loading settings');
     const loadSettings = async () => {
       const appSettings = await getPublicAppSettings(orgFriendlyId, agentId);
       setSettings(appSettings);
-      console.log('Settings loaded', appSettings);
     };
 
     void loadSettings();

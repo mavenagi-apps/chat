@@ -9,7 +9,7 @@ interface CreateOptions {
   question: string;
   conversationId: string;
   initialize: boolean;
-  unverifiedUserInfo: Record<string, string>;
+  userData: Record<string, string> | null;
 }
 
 async function createOrUpdateUser(
@@ -28,7 +28,7 @@ async function createOrUpdateUser(
 async function initializeConversation(
   client: MavenAGIClient,
   conversationId: string,
-  userData: Record<string, string>
+  userData: Record<string, string> | null
 ) {
   const conversationInitializationPayload = {
     conversationId: { referenceId: conversationId },
@@ -43,13 +43,13 @@ async function initializeConversation(
     },
   } as MavenAGI.ConversationRequest;
 
-  if (userData.firstName) {
+  if (userData) {
     conversationInitializationPayload.messages.push({
       conversationMessageId: {
         referenceId: nanoid(),
       },
       userId: { referenceId: 'system' },
-      text: `Customer's Name: ${[userData.firstName, userData.lastName].join(' ')}, Customer's Email: ${userData.email}, Business Name: ${userData.businessName}, Customer's ID: ${userData.userId}`,
+      text: Object.keys(userData).map(key => `${key}: ${userData[key]}`).join('\n'),
       userMessageType: 'EXTERNAL_SYSTEM',
     });
   }
@@ -64,14 +64,14 @@ export async function POST(req: NextRequest) {
     initialize,
     question,
     conversationId,
-    unverifiedUserInfo,
+    userData,
   } = (await req.json()) as CreateOptions;
 
   const client: MavenAGIClient = getMavenAGIClient(orgFriendlyId, id);
 
   if (initialize) {
     await createOrUpdateUser(client, conversationId);
-    await initializeConversation(client, conversationId, unverifiedUserInfo);
+    await initializeConversation(client, conversationId, userData);
   }
 
   try {
@@ -89,7 +89,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json('No response from server', { status: 500 });
     }
 
-    console.log(response);
     const stream = new ReadableStream({
       async start(controller) {
         try {
@@ -101,9 +100,6 @@ export async function POST(req: NextRequest) {
             controller.enqueue(
               new TextEncoder().encode(`data: ${chunkString}\n\n`)
             );
-
-            // Log the chunk for debugging purposes
-            console.log(chunk);
           }
 
           // End the stream when done
@@ -123,7 +119,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     if (error instanceof MavenAGIError) {
       return NextResponse.json(error.body, { status: error.statusCode });
     }
