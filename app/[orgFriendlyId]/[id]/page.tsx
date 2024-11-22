@@ -34,6 +34,7 @@ function ChatPage({ userData, signedUserData }: { userData: Record<string, strin
     orgFriendlyId,
     id: agentFriendlyId,
     userData,
+    signedUserData
   });
 
   const { scrollToLatest, latestChatBubbleRef } = useScrollToLatest();
