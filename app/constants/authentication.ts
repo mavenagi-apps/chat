@@ -1,0 +1,1 @@
+export const AUTHENTICATION_HEADER = 'X-Maven-User-Id';

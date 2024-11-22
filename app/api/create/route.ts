@@ -3,7 +3,7 @@ import { type MavenAGIClient, MavenAGI, MavenAGIError } from 'mavenagi';
 import { nanoid } from 'nanoid';
 import { getMavenAGIClient } from '@/app';
 import { decryptAndVerifySignedUserData } from '@/app/api/utils';
-
+import { AUTHENTICATION_HEADER } from '@/app/constants/authentication';
 interface CreateOptions {
   orgFriendlyId: string;
   id: string;
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
     await initializeConversation(client, conversationId, userData);
   } else {
     // get user id from headers
-    userId = req.headers.get('x-maven-user-id');
+    userId = req.headers.get(AUTHENTICATION_HEADER);
   }
 
   if (!userId) {
@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         Connection: 'keep-alive',
-        'X-Maven-User-Id': userId,
+        [AUTHENTICATION_HEADER]: userId,
       },
     });
   } catch (error) {

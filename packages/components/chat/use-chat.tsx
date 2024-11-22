@@ -16,7 +16,7 @@ import {
   isChatMessage,
   isChatUserMessage
 } from '@/types';
-
+import { AUTHENTICATION_HEADER } from '@/app/constants/authentication';
 const API_ENDPOINT = '/api/create';
 
 type UseChatOptions = {
@@ -66,7 +66,7 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
       'Content-Type': 'application/json',
     };
     if (userId) {
-      headers['X-Maven-User-Id'] = userId;
+      headers[AUTHENTICATION_HEADER] = userId;
     }
     return await fetch(API_ENDPOINT, {
       method: 'POST',
@@ -155,7 +155,7 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
       try {
         const response = await createResponse(_messages, newAbortController);
         // Get user id from headers
-        const userId = response.headers.get('x-maven-user-id');
+        const userId = response.headers.get(AUTHENTICATION_HEADER);
         if (!userId) {
           throw new Error('User ID not found');
         }

@@ -38,6 +38,15 @@ export default async function Page({
     console.log('Error generating signed user data', error);
   }
 
+  const widgetLoadPayload = {
+    envPrefix,
+    orgFriendlyId,
+    agentFriendlyId,
+    bgColor: brandColor || '#00202b',
+    userData: mockUserData,
+    signedUserData: signedUserData || undefined,
+  };
+
   return (
     <div>
       <div className='relative flex flex-auto overflow-hidden bg-white pt-14'>
@@ -133,14 +142,7 @@ export default async function Page({
         dangerouslySetInnerHTML={{
           __html: `
     addEventListener("load", function () {
-      Maven.ChatWidget.load({
-        envPrefix: "${envPrefix}",
-        orgFriendlyId: "${orgFriendlyId}",
-        agentFriendlyId: "${agentFriendlyId}",
-        bgColor: "${brandColor || '#00202b'}",
-        userData: ${JSON.stringify(mockUserData)},
-        signedUserData: ${signedUserData ? `"${signedUserData}"` : 'undefined'}
-      })
+      Maven.ChatWidget.load(${JSON.stringify(widgetLoadPayload)});
     });`,
         }}
       ></script>

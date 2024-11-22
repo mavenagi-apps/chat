@@ -28,12 +28,13 @@ addEventListener("load", function () {
     orgFriendlyId: "replace-with-org-id",
     agentFriendlyId: "replace-with-agent-id",
     bgColor: "#004f32",
-    personalizationData: {
+    userData: {
       firstName: "Jane",
       lastName: "Doe",
       userId: "replace-with-end-user-id",
       email: "jane.doe@example.com",
     },
+    signedUserData: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9...",
   })
 });
 ```
@@ -50,9 +51,32 @@ interface WidgetConfig {
   horizontalPosition?: 'left' | 'right';  // Widget position (default: 'right')
   verticalPosition?: 'top' | 'bottom';    // Widget position (default: 'bottom')
   userData?: Record<string, string>
+  signedUserData: string
   orgFriendlyId: string;                  // Required: Your organization ID
   agentFriendlyId: string;                // Required: Your agent ID
 }
 ```
 
 NOTE: The ID values for the organization and agent are the plain-text versions.
+
+## Encrypting and Signing User Data
+
+When integrating Maven's widget, you'll need to securely transmit user data using a two-step process: signing and encryption. First, configure your app settings by adding your encryption secret and public key during the app installation. Then, implement a server-side function similar to this example:
+
+```typescript
+async function secureUserData(userData: any) {
+  // 1. Sign the user data with your private key (ES256 algorithm)
+  const signedJWT = await new SignJWT(userData)
+    .setProtectedHeader({ alg: 'ES256' })
+    .setIssuedAt()
+    .setExpirationTime('1d')
+    .sign(yourPrivateKey);
+
+  // 2. Encrypt the signed JWT using your encryption secret
+  const encryptedJWT = await new EncryptJWT({ jwt: signedJWT })
+    .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
+    .encrypt(base64url.decode(encryptionSecret));
+
+  return encryptedJWT;
+}
+```

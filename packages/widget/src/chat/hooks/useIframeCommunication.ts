@@ -17,6 +17,8 @@ export type SignedUserDataMessage = {
   data: string;
 };
 
+type Message = UserDataMessage | SignedUserDataMessage;
+
 interface LegacyMessageEvent extends MessageEvent {
   message?: any; // Support for older browsers
 }
@@ -38,7 +40,7 @@ export function useIframeCommunication({
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const messageQueue = useRef<(UserDataMessage | SignedUserDataMessage)[]>([]);
+  const messageQueue = useRef<Message[]>([]);
 
   const iframeUrl = useMemo((): string => {
     const currentDomain = window.location.hostname;
@@ -74,7 +76,7 @@ export function useIframeCommunication({
     } as React.CSSProperties;
   }, [isWide, isOpen]);
 
-  const postMessageToIframe = useCallback((message: UserDataMessage | SignedUserDataMessage) => {
+  const postMessageToIframe = useCallback((message: Message) => {
     if (isLoaded && iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.postMessage(message, '*');
     } else {
