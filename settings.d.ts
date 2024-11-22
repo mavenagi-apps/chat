@@ -3,7 +3,9 @@ declare global {
     logoUrl: string;
     brandColor: string;
     amplitudeApiKey: string;
-    popularQuestions: string
+    popularQuestions: string;
+    jwtPublicKey: string;
+    encryptionSecret: string;
   }
 }
 

@@ -16,18 +16,20 @@ import {
   isChatMessage,
   isChatUserMessage
 } from '@/types';
-
+import { AUTHENTICATION_HEADER } from '@/app/constants/authentication';
 const API_ENDPOINT = '/api/create';
 
 type UseChatOptions = {
   orgFriendlyId: string;
   id: string;
   userData: Record<string, string> | null;
+  signedUserData: string | null;
 };
 
-export function useChat({ orgFriendlyId, id, userData }: UseChatOptions) {
+export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChatOptions) {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [conversationId, setConversationId] = React.useState<string>(nanoid());
+  const [userId, setUserId] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [abortController, setAbortController] = React.useState(
     new AbortController()
@@ -60,6 +62,12 @@ export function useChat({ orgFriendlyId, id, userData }: UseChatOptions) {
     if (!isChatUserMessage(lastMessage)) {
       throw new Error('Last message is not a user message');
     }
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    if (userId) {
+      headers[AUTHENTICATION_HEADER] = userId;
+    }
     return await fetch(API_ENDPOINT, {
       method: 'POST',
       body: JSON.stringify({
@@ -69,10 +77,9 @@ export function useChat({ orgFriendlyId, id, userData }: UseChatOptions) {
         conversationId: conversationId,
         initialize: _messages.length <= 1,
         userData: userData || undefined,
+        signedUserData: signedUserData || undefined,
       }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       signal: newAbortController.signal,
     });
   }
@@ -147,6 +154,12 @@ export function useChat({ orgFriendlyId, id, userData }: UseChatOptions) {
     if (shouldHitApi) {
       try {
         const response = await createResponse(_messages, newAbortController);
+        // Get user id from headers
+        const userId = response.headers.get(AUTHENTICATION_HEADER);
+        if (!userId) {
+          throw new Error('User ID not found');
+        }
+        setUserId(userId);
         await streamResponse(response);
       } catch (error) {
         console.log(error);
