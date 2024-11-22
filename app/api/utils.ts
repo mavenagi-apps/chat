@@ -1,4 +1,4 @@
-import { jwtDecrypt, base64url, jwtVerify, importSPKI, JWTPayload } from 'jose';
+import { jwtDecrypt, base64url, jwtVerify, importSPKI, type JWTPayload } from 'jose';
 import { getMavenAGIClient } from '@/app';
 
 export async function getAppSettings(
@@ -34,7 +34,7 @@ export async function decryptAndVerifySignedUserData(
       jwtPublicKey
     );
 
-    const { iat, exp, ...verifiedUserData } = verifiedPayload;
+    const { iat: _iat, exp: _exp, ...verifiedUserData } = verifiedPayload;
 
     return verifiedUserData;
   } catch (error) {
