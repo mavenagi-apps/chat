@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 
 export enum MAVEN_MESSAGE_TYPES {
   USER_DATA = 'USER_DATA',
+  SIGNED_USER_DATA = 'SIGNED_USER_DATA',
   MAVEN_LOADED = 'MAVEN_LOADED',
 }
 
@@ -9,6 +10,11 @@ export type UserData = Record<string, string> | null;
 export type UserDataMessage = { 
   type: MAVEN_MESSAGE_TYPES.USER_DATA; 
   data: UserData 
+};
+
+export type SignedUserDataMessage = {
+  type: MAVEN_MESSAGE_TYPES.SIGNED_USER_DATA;
+  data: string;
 };
 
 interface LegacyMessageEvent extends MessageEvent {
@@ -19,18 +25,20 @@ export function useIframeCommunication({
   orgFriendlyId,
   agentFriendlyId,
   userData,
+  signedUserData,
   isWide,
   isOpen
 }: {
   orgFriendlyId: string,
   agentFriendlyId: string,
   userData: UserData,
+  signedUserData?: string | null,
   isWide: boolean,
   isOpen: boolean
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const messageQueue = useRef<UserDataMessage[]>([]);
+  const messageQueue = useRef<(UserDataMessage | SignedUserDataMessage)[]>([]);
 
   const iframeUrl = useMemo((): string => {
     const currentDomain = window.location.hostname;
@@ -66,7 +74,7 @@ export function useIframeCommunication({
     } as React.CSSProperties;
   }, [isWide, isOpen]);
 
-  const postMessageToIframe = useCallback((message: UserDataMessage) => {
+  const postMessageToIframe = useCallback((message: UserDataMessage | SignedUserDataMessage) => {
     if (isLoaded && iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.postMessage(message, '*');
     } else {
@@ -79,7 +87,14 @@ export function useIframeCommunication({
       type: MAVEN_MESSAGE_TYPES.USER_DATA,
       data: userData,
     });
-  }, [postMessageToIframe, userData]);
+
+    if (signedUserData) {
+      postMessageToIframe({
+        type: MAVEN_MESSAGE_TYPES.SIGNED_USER_DATA,
+        data: signedUserData,
+      });
+    }
+  }, [postMessageToIframe]);
 
   useEffect(() => {
     if (isLoaded && messageQueue.current.length > 0) {

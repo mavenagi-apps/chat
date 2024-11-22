@@ -5,14 +5,19 @@ interface LegacyMessageEvent extends MessageEvent {
   message?: any;
 }
 
-const USER_DATA_EVENT = 'USER_DATA';
-const MAVEN_LOADED_EVENT = 'MAVEN_LOADED';
+export enum MAVEN_MESSAGE_TYPES {
+  USER_DATA = 'USER_DATA',
+  SIGNED_USER_DATA = 'SIGNED_USER_DATA',
+  MAVEN_LOADED = 'MAVEN_LOADED',
+}
+
 const demoUrl = (orgFriendlyId: string, agentFriendlyId: string) =>
   `/demo/${orgFriendlyId}/${agentFriendlyId}`;
 
 export function useIframeMessaging() {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<Record<string, string> | null>(null);
+  const [signedUserData, setSignedUserData] = useState<string | null>(null);
   const {
     orgFriendlyId,
     id: agentFriendlyId,
@@ -23,8 +28,15 @@ export function useIframeMessaging() {
     const data = event[key] as MessageEvent['data'];
     if (typeof data !== 'object') return;
 
-    if (data.type === USER_DATA_EVENT) {
-      setUserData(data.data);
+    switch (data.type) {
+      case MAVEN_MESSAGE_TYPES.USER_DATA:
+        setUserData(data.data);
+        break;
+      case MAVEN_MESSAGE_TYPES.SIGNED_USER_DATA:
+        setSignedUserData(data.data);
+        break;
+      default:
+        break;
     }
   }, []);
 
@@ -47,7 +59,7 @@ export function useIframeMessaging() {
     setLoading(false);
 
     try {
-      parent.postMessage({ type: MAVEN_LOADED_EVENT }, '*');
+      parent.postMessage({ type: MAVEN_MESSAGE_TYPES.MAVEN_LOADED }, '*');
     } catch (e) {
       console.error('Error posting MAVEN_LOADED_EVENT', e);
     }
@@ -58,5 +70,6 @@ export function useIframeMessaging() {
   return {
     loading,
     userData,
+    signedUserData,
   };
 }

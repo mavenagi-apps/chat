@@ -17,7 +17,7 @@ import { useAskQuestion } from '@/lib/useAskQuestion';
 import { useScrollToLatest } from '@/lib/useScrollToLatest';
 import { PoweredByMaven } from '@magi/components/chat/PoweredByMaven';
 
-function ChatPage({ userData }: { userData: Record<string, string> | null }) {
+function ChatPage({ userData, signedUserData }: { userData: Record<string, string> | null, signedUserData: string | null }) {
   const analytics = useAnalytics();
   const { orgFriendlyId, id: agentFriendlyId }: { orgFriendlyId: string, id: string } = useParams();
 
@@ -84,9 +84,9 @@ function ChatPage({ userData }: { userData: Record<string, string> | null }) {
 }
 
 export default function ChatPageWrapper() {
-  const { loading, userData } = useIframeMessaging();
+  const { loading, userData, signedUserData } = useIframeMessaging();
   
   if (loading) return null;
   
-  return <ChatPage userData={userData} />;
+  return <ChatPage userData={userData} signedUserData={signedUserData} />;
 }
