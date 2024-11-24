@@ -1,6 +1,24 @@
+/**
+ * Custom React hook for managing chat functionality
+ * 
+ * Key features:
+ * - Manages chat messages and conversation state
+ * - Handles streaming responses from the API
+ * - Supports user authentication
+ * - Processes different types of responses (text, metadata, actions)
+ * 
+ * Usage:
+ * const { messages, askQuestion, isLoading, isResponseAvailable } = useChat({
+ *   orgFriendlyId: 'org-id',
+ *   id: 'agent-id',
+ *   userData: userDataObject,
+ *   signedUserData: 'signed-data'
+ * });
+ */
+
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { nanoid } from 'nanoid';
 
 import { type MavenAGI } from 'mavenagi'
@@ -16,7 +34,8 @@ import {
   isChatMessage,
   isChatUserMessage
 } from '@/types';
-import { AUTHENTICATION_HEADER } from '@/app/constants/authentication';
+import { AUTHENTICATION_HEADER, AuthJWTPayload } from '@/app/constants/authentication';
+import { decodeJwt } from 'jose';
 const API_ENDPOINT = '/api/create';
 
 type UseChatOptions = {
@@ -26,23 +45,41 @@ type UseChatOptions = {
   signedUserData: string | null;
 };
 
-export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChatOptions) {
+type UseChatReturn = {
+  messages: Message[];
+  askQuestion: (message: ChatMessage) => void;
+  isLoading: boolean;
+  isResponseAvailable: boolean | undefined;
+  conversationId: string;
+};
+
+export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChatOptions): UseChatReturn {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [conversationId, setConversationId] = React.useState<string>(nanoid());
-  const [userId, setUserId] = React.useState<string | null>(null);
+  const [authToken, setAuthToken] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [abortController, setAbortController] = React.useState(
     new AbortController()
   );
 
-  const resetAbortController = () => {
+  const requestHeaders = useMemo(() => {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    if (authToken) {
+      headers[AUTHENTICATION_HEADER] = authToken;
+    }
+    return headers;
+  }, [authToken]);
+
+  const resetAbortController = useCallback(() => {
     abortController.abort();
     const newAbortController = new AbortController();
     setAbortController(newAbortController);
     return newAbortController;
-  };
+  }, []);
 
-  const userAskedQuestion = (_messages: Message[]) => {
+  const userAskedQuestion = useCallback((_messages: Message[]) => {
     if (_messages.length === 0) {
       return false;
     }
@@ -52,9 +89,9 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
       isChatMessage(lastMessage) &&
       _messages[_messages.length - 1].type === 'USER'
     );
-  };
+  }, []);
 
-  const createResponse = async (
+  const createResponse = useCallback(async (
     _messages: Message[],
     newAbortController: AbortController
   ) => {
@@ -62,29 +99,22 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
     if (!isChatUserMessage(lastMessage)) {
       throw new Error('Last message is not a user message');
     }
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-    if (userId) {
-      headers[AUTHENTICATION_HEADER] = userId;
-    }
+
     return await fetch(API_ENDPOINT, {
       method: 'POST',
       body: JSON.stringify({
         orgFriendlyId,
         id,
         question: (_messages[_messages.length - 1] as UserChatMessage).text,
-        conversationId: conversationId,
-        initialize: _messages.length <= 1,
         userData: userData || undefined,
         signedUserData: signedUserData || undefined,
       }),
-      headers,
+      headers: requestHeaders,
       signal: newAbortController.signal,
     });
-  }
+  }, [orgFriendlyId, id, userData, signedUserData, requestHeaders]);
 
-  const streamResponse = async (response: Response) => {
+  const streamResponse = useCallback(async (response: Response) => {
     const reader = response.body?.getReader();
 
     if (!response.ok || !reader) {
@@ -143,9 +173,9 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
         }
       }
     }
-  };
+  }, []);
 
-  const ask = async (_messages: Message[]) => {
+  const ask = useCallback(async (_messages: Message[]) => {
     setIsLoading(true);
     const newAbortController = resetAbortController();
 
@@ -155,19 +185,24 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
       try {
         const response = await createResponse(_messages, newAbortController);
         // Get user id from headers
-        const userId = response.headers.get(AUTHENTICATION_HEADER);
-        if (!userId) {
-          throw new Error('User ID not found');
+        const authToken = response.headers.get(AUTHENTICATION_HEADER);
+        if (!authToken) {
+          throw new Error('Auth token not found');
         }
-        setUserId(userId);
+        const responseAuthData = decodeJwt<AuthJWTPayload>(authToken);
+        if (!responseAuthData.conversationId) {
+          throw new Error('Conversation ID not found');
+        }
+        setAuthToken(authToken);
+        setConversationId(responseAuthData.conversationId);
         await streamResponse(response);
       } catch (error) {
         console.log(error);
       }
     }
-  };
+  }, [createResponse, streamResponse, userAskedQuestion]);
 
-  const handleParsedData = (
+  const handleParsedData = useCallback((
     parsedData: MavenAGI.StreamResponse,
     referenceId: string | undefined
   ) => {
@@ -238,9 +273,9 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
         )
       );
     }
-  };
+  }, []);
 
-  function getResponseAvailable() {
+  const getResponseAvailable = useCallback(() => {
     if (messages.length === 0) {
       return;
     }
@@ -250,7 +285,7 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
       return;
     }
     return lastMessage?.responses?.length > 0;
-  }
+  }, []);
 
   useEffect(() => {
     const timestamp = (new Date()).getTime();
@@ -268,11 +303,6 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
       if (message.type === 'USER') {
         void ask([...messages, message]);
       }
-    },
-    setMessages: (newMessages: ChatMessage[]) => {
-      setConversationId(nanoid());
-      setMessages(newMessages);
-      void ask(newMessages);
     },
     isLoading: isLoading,
     isResponseAvailable: getResponseAvailable(),
