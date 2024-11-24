@@ -18,7 +18,7 @@ import { type MavenAGIClient, MavenAGI, MavenAGIError } from 'mavenagi';
 import { nanoid } from 'nanoid';
 import { getMavenAGIClient } from '@/app';
 import { decryptAndVerifySignedUserData, generateAuthToken, verifyAuthToken } from '@/app/api/server/utils';
-import { AUTHENTICATION_HEADER, AuthJWTPayload } from '@/app/constants/authentication';
+import { AUTHENTICATION_HEADER, type AuthJWTPayload } from '@/app/constants/authentication';
 interface CreateOptions {
   orgFriendlyId: string;
   id: string;

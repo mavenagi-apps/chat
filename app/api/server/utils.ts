@@ -2,7 +2,7 @@
 
 import { jwtDecrypt, base64url, jwtVerify, importSPKI, type JWTPayload, SignJWT, importPKCS8 } from 'jose';
 import { getMavenAGIClient } from '@/app';
-import { AuthJWTPayload } from '@/app/constants/authentication';
+import type { AuthJWTPayload } from '@/app/constants/authentication';
 const CONVERSATIONS_API_PRIVATE_KEY = process.env.CONVERSATIONS_API_PRIVATE_KEY;
 const CONVERSATIONS_API_PUBLIC_KEY = process.env.CONVERSATIONS_API_PUBLIC_KEY;
 
