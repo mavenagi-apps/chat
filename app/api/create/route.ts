@@ -1,9 +1,24 @@
+/**
+ * API Route Handler for Chat Creation and Message Processing
+ * 
+ * This file handles:
+ * - Creating new chat conversations
+ * - Processing incoming chat messages
+ * - Managing user authentication and session state
+ * - Streaming responses back to the client
+ * 
+ * Key features:
+ * - Supports both anonymous and authenticated users
+ * - Handles encrypted user data
+ * - Implements server-sent events (SSE) for streaming responses
+ */
+
 import { type NextRequest, NextResponse } from 'next/server';
 import { type MavenAGIClient, MavenAGI, MavenAGIError } from 'mavenagi';
 import { nanoid } from 'nanoid';
 import { getMavenAGIClient } from '@/app';
-import { decryptAndVerifySignedUserData } from '@/app/api/utils';
-import { AUTHENTICATION_HEADER } from '@/app/constants/authentication';
+import { decryptAndVerifySignedUserData, generateAuthToken, verifyAuthToken } from '@/app/api/server/utils';
+import { AUTHENTICATION_HEADER, AuthJWTPayload } from '@/app/constants/authentication';
 interface CreateOptions {
   orgFriendlyId: string;
   id: string;
@@ -88,40 +103,44 @@ async function initializeConversation(
   return client.conversation.initialize(conversationInitializationPayload);
 }
 
+const generateDecryptedSignedUserData = async (signedUserData: string | null, orgFriendlyId: string, id: string) => {
+  if (!signedUserData) {
+    return null;
+  }
+
+  try {
+    return await decryptAndVerifySignedUserData(signedUserData, orgFriendlyId, id);
+  } catch (error) {
+    console.log('Failed to decrypt signed user data:', error);
+    return null;
+  }
+}
+
+const generateAuthData = async (headers: Headers): Promise<AuthJWTPayload | null> => {
+  const authToken = headers.get(AUTHENTICATION_HEADER);
+  if (!authToken) {
+    return null;
+  }
+  return await verifyAuthToken(authToken);
+}
+
 export async function POST(req: NextRequest) {
   const {
     orgFriendlyId,
     id,
-    initialize,
     question,
-    conversationId,
     userData,
     signedUserData,
   } = (await req.json()) as CreateOptions;
-
   const client: MavenAGIClient = getMavenAGIClient(orgFriendlyId, id);
-  let decryptedSignedUserData: any | null = null;
-  try {
-    if (signedUserData) {
-      decryptedSignedUserData = await decryptAndVerifySignedUserData(signedUserData, orgFriendlyId, id);
-    }
-  } catch (error) {
-    console.log('Failed to decrypt signed user data:', error);
-  }
+  const decryptedSignedUserData: any | null = await generateDecryptedSignedUserData(signedUserData, orgFriendlyId, id);
+  let { userId, conversationId } = (await generateAuthData(req.headers)) || {};
 
-  let userId: string | null = null;
-
-  if (initialize) {
-    const { userId: { referenceId } } = await createOrUpdateUser(client, conversationId, decryptedSignedUserData);
-    userId = referenceId;
+  if (!userId || !conversationId) {
+    conversationId = nanoid() as string;
+    const userResponse = await createOrUpdateUser(client, conversationId, decryptedSignedUserData);
+    userId = userResponse.userId.referenceId;
     await initializeConversation(client, conversationId, userData);
-  } else {
-    // get user id from headers
-    userId = req.headers.get(AUTHENTICATION_HEADER);
-  }
-
-  if (!userId) {
-    return NextResponse.json('User ID not found', { status: 400 });
   }
 
   try {
@@ -161,12 +180,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const refreshedAuthToken = await generateAuthToken(userId, conversationId);
+
     return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         Connection: 'keep-alive',
-        [AUTHENTICATION_HEADER]: userId,
+        [AUTHENTICATION_HEADER]: refreshedAuthToken,
       },
     });
   } catch (error) {
