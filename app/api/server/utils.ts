@@ -1,5 +1,10 @@
-import { jwtDecrypt, base64url, jwtVerify, importSPKI, type JWTPayload } from 'jose';
+'use server';
+
+import { jwtDecrypt, base64url, jwtVerify, importSPKI, type JWTPayload, SignJWT, importPKCS8 } from 'jose';
 import { getMavenAGIClient } from '@/app';
+import type { AuthJWTPayload } from '@/app/constants/authentication';
+const CONVERSATIONS_API_PRIVATE_KEY = process.env.CONVERSATIONS_API_PRIVATE_KEY;
+const CONVERSATIONS_API_PUBLIC_KEY = process.env.CONVERSATIONS_API_PUBLIC_KEY;
 
 export async function getAppSettings(
   orgFriendlyId: string,
@@ -7,6 +12,37 @@ export async function getAppSettings(
 ): Promise<AppSettings> {
   const client = getMavenAGIClient(orgFriendlyId, agentId);
   return (await client.appSettings.get()) as unknown as AppSettings;
+}
+
+/** @internal */
+export async function verifyAuthToken(token: string): Promise<AuthJWTPayload> {
+  if (!CONVERSATIONS_API_PUBLIC_KEY) {
+    throw new Error('CONVERSATIONS_API_PUBLIC_KEY is not set');
+  }
+
+  const publicKey = await importSPKI(CONVERSATIONS_API_PUBLIC_KEY, 'ES256');
+  const { payload } = await jwtVerify<AuthJWTPayload>(token, publicKey);
+  return payload;
+}
+
+export async function generateAuthToken(userId: string, conversationId: string): Promise<string> {
+  if (!CONVERSATIONS_API_PRIVATE_KEY) {
+    throw new Error('CONVERSATIONS_API_PRIVATE_KEY is not set');
+  }
+
+  const payload = {
+    userId,
+    conversationId,
+  };
+
+  const privateKey = await importPKCS8(CONVERSATIONS_API_PRIVATE_KEY, 'ES256');
+
+  const token = await new SignJWT(payload)
+    .setProtectedHeader({ alg: 'ES256' })
+    .setIssuedAt()
+    .setExpirationTime('1d')
+    .sign(privateKey);
+  return token;
 }
 
 export async function decryptAndVerifySignedUserData(
