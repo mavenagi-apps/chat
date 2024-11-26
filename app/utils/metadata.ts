@@ -12,13 +12,6 @@ export async function generateSharedMetadata({ params }: { params: Promise<Metad
   };
 
   const { orgFriendlyId, id: agentId } = await params;
-
-  const awaitedParams = await params;
-
-  console.log('params', awaitedParams);
-  console.log('orgFriendlyId', orgFriendlyId);
-  console.log('agentId', agentId);
-
   if (!orgFriendlyId || !agentId) {
     return defaultMetadata;
   }
@@ -35,8 +28,6 @@ export async function generateSharedMetadata({ params }: { params: Promise<Metad
   ) {
     allowlist.push('self');
   }
-
-  console.log('allowlist', allowlist);
 
   return {
     ...defaultMetadata,
