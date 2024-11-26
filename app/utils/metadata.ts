@@ -31,10 +31,9 @@ export async function generateSharedMetadata({ params }: { params: Promise<Metad
 
   const allowlist = appSettings.embedAllowlist || [];
   if (
-    process.env.VERCEL_PROJECT_PRODUCTION_URL &&
     ['true', '1'].includes(appSettings.enableDemoSite || '')
   ) {
-    allowlist.push(process.env.VERCEL_PROJECT_PRODUCTION_URL);
+    allowlist.push('self');
   }
 
   console.log('allowlist', allowlist);
