@@ -26,9 +26,13 @@ export async function generateSignedUserData(payload: any, orgFriendlyId: string
 
   const { encryptionSecret } = await getAppSettings(orgFriendlyId, agentFriendlyId);
 
+  if (!encryptionSecret) {
+    throw new Error('Encryption secret not found');
+  }
+
   // Generate a secret for encryption
   const decodedEncryptionSecret = base64url.decode(
-    encryptionSecret
+    encryptionSecret!
   );
 
   // First, create and sign the JWT
