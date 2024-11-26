@@ -6,6 +6,7 @@ declare global {
     popularQuestions: string;
     jwtPublicKey: string;
     encryptionSecret: string;
+    handoffConfiguration: Record<string, unknown> & { type: 'zendesk' | 'salesforce' };
   }
 }
 

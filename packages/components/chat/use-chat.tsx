@@ -261,6 +261,7 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
         )
       );
     } else if (parsedData.eventType === 'action') {
+      console.log('action', parsedData);
       setMessages((prevMessages) =>
         prevMessages.map((m) =>
           isBotMessage(m) &&
