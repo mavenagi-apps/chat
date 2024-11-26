@@ -52,7 +52,7 @@ const defaultModule = {
       actionId: {
         referenceId: 'escalate-to-agent',
       },
-      name: 'Escalate to a live human agent',
+      name: 'escalate-live-agent',
       description,
       userInteractionRequired: true,
       userFormParameters: [
@@ -63,7 +63,7 @@ const defaultModule = {
           required: true,
         },
       ],
-      buttonName: 'Submit',
+      buttonName: 'Connect to live agent',
       precondition: {
         preconditionType: 'conversation',
         value: {
