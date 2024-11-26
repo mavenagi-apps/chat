@@ -1,12 +1,9 @@
-import type { Metadata } from 'next';
+import { generateSharedMetadata } from '@/app/utils/metadata';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import ClientLayout from './ClientLayout';
 
-export const metadata: Metadata = {
-  title: "Support Chat",
-  description: "Powered by Maven AGI",
-};
+export const generateMetadata = generateSharedMetadata;
 
 export default async function ChatLayout({
   children,
