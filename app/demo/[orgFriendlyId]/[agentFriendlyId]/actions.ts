@@ -32,7 +32,7 @@ export async function generateSignedUserData(payload: any, orgFriendlyId: string
 
   // Generate a secret for encryption
   const decodedEncryptionSecret = base64url.decode(
-    encryptionSecret!
+    encryptionSecret
   );
 
   // First, create and sign the JWT
