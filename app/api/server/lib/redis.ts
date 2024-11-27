@@ -1,10 +1,8 @@
 import { createClient } from 'redis';
 
-console.log('REDIS_URL', process.env.REDIS_URL?.substring(0, 5));
-
 // Create a Redis client
 const redisClient = createClient({
-  url: process.env.REDIS_URL,
+  url: process.env.STORAGE_REDIS_URL,
 });
 
 redisClient.on('error', (err) => console.error('Redis Client Error', err));
