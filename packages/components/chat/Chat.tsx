@@ -23,7 +23,7 @@ export default function Chat({
   children,
 }: React.PropsWithChildren<ChatProps>) {
   const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([])
-  const { brandColor, brandFontColor, brandTitleColor } = useSettings();
+  const { brandColor, brandFontColor } = useSettings();
   useEffect(() => {
     if (messages.length > 0) {
       const lastMsg = messages[messages.length - 1]
@@ -44,7 +44,6 @@ export default function Chat({
           // @ts-expect-error css variable
           '--brand-color': brandColor,
           '--brand-font-color': brandFontColor || '#FFFFFF',
-          '--brand-title-color': brandTitleColor || '#FFFFFF',
         }}
       >
         {children}
