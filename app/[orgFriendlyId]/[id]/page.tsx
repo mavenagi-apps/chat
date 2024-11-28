@@ -20,7 +20,7 @@ import { PoweredByMaven } from '@magi/components/chat/PoweredByMaven';
 import type { ChatEndedMessage, ChatEstablishedMessage, HandoffChatMessage } from '@/types';
 import type { Message } from '@/types';
 
-function ChatPage({ userData, signedUserData }: { userData: Record<string, string> | null, signedUserData: string | null }) {
+function ChatPage({ signedUserData }: { signedUserData: string | null }) {
   const analytics = useAnalytics();
   const { id: agentFriendlyId }: { orgFriendlyId: string, id: string } = useParams();
   const { brandColor, logoUrl } = useSettings();
@@ -35,7 +35,6 @@ function ChatPage({ userData, signedUserData }: { userData: Record<string, strin
     askQuestion,
     conversationId,
   } = useChat({
-    userData,
     signedUserData
   });
 
@@ -97,7 +96,6 @@ function ChatPage({ userData, signedUserData }: { userData: Record<string, strin
               isLoading={isLoading}
               isResponseAvailable={isResponseAvailable || false}
               conversationId={conversationId}
-              userData={userData}
               ref={latestChatBubbleRef}
             />
           </div>
@@ -116,9 +114,9 @@ function ChatPage({ userData, signedUserData }: { userData: Record<string, strin
 }
 
 export default function ChatPageWrapper() {
-  const { loading, userData, signedUserData } = useIframeMessaging();
+  const { loading, signedUserData } = useIframeMessaging();
   
   if (loading) return null;
   
-  return <ChatPage userData={userData} signedUserData={signedUserData} />;
+  return <ChatPage signedUserData={signedUserData} />;
 }

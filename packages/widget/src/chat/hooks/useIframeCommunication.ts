@@ -6,19 +6,10 @@ export enum MAVEN_MESSAGE_TYPES {
   MAVEN_LOADED = 'MAVEN_LOADED',
 }
 
-export type UserData = Record<string, string> | null;
-export type UserDataMessage = { 
-  type: MAVEN_MESSAGE_TYPES.USER_DATA; 
-  data: UserData 
-};
-
 export type SignedUserDataMessage = {
   type: MAVEN_MESSAGE_TYPES.SIGNED_USER_DATA;
   data: string;
 };
-
-type Message = UserDataMessage | SignedUserDataMessage;
-
 interface LegacyMessageEvent extends MessageEvent {
   message?: any; // Support for older browsers
 }
@@ -26,21 +17,19 @@ interface LegacyMessageEvent extends MessageEvent {
 export function useIframeCommunication({
   orgFriendlyId,
   agentFriendlyId,
-  userData,
   signedUserData,
   isWide,
   isOpen
 }: {
   orgFriendlyId: string,
   agentFriendlyId: string,
-  userData: UserData,
   signedUserData?: string | null,
   isWide: boolean,
   isOpen: boolean
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const messageQueue = useRef<Message[]>([]);
+  const messageQueue = useRef<SignedUserDataMessage[]>([]);
 
   const iframeUrl = useMemo((): string => {
     const currentDomain = window.location.hostname;
@@ -76,7 +65,7 @@ export function useIframeCommunication({
     } as React.CSSProperties;
   }, [isWide, isOpen]);
 
-  const postMessageToIframe = useCallback((message: Message) => {
+  const postMessageToIframe = useCallback((message: SignedUserDataMessage) => {
     if (isLoaded && iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.postMessage(message, '*');
     } else {
@@ -85,11 +74,6 @@ export function useIframeCommunication({
   }, [isLoaded]);
 
   useEffect(() => {
-    postMessageToIframe({
-      type: MAVEN_MESSAGE_TYPES.USER_DATA,
-      data: userData,
-    });
-
     if (signedUserData) {
       postMessageToIframe({
         type: MAVEN_MESSAGE_TYPES.SIGNED_USER_DATA,

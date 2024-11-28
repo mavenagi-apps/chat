@@ -28,7 +28,6 @@ export interface MessageProps {
   latestChatBubbleRef?: React.RefObject<HTMLDivElement>;
   conversationId?: string;
   initialUserChatMessage?: UserChatMessage | null;
-  userData?: Record<string, string> | null;
 }
 
 function renderHandoffMessage(

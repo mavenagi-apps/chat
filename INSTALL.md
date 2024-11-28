@@ -28,12 +28,6 @@ addEventListener("load", function () {
     orgFriendlyId: "replace-with-org-id",
     agentFriendlyId: "replace-with-agent-id",
     bgColor: "#004f32",
-    userData: {
-      firstName: "Jane",
-      lastName: "Doe",
-      userId: "replace-with-end-user-id",
-      email: "jane.doe@example.com",
-    },
     signedUserData: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9...",
   })
 });
@@ -50,7 +44,6 @@ interface WidgetConfig {
   textColor?: string;                     // Widget text color (default: 'white')
   horizontalPosition?: 'left' | 'right';  // Widget position (default: 'right')
   verticalPosition?: 'top' | 'bottom';    // Widget position (default: 'bottom')
-  userData?: Record<string, string>
   signedUserData: string
   orgFriendlyId: string;                  // Required: Your organization ID
   agentFriendlyId: string;                // Required: Your agent ID

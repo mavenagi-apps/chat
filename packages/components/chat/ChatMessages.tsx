@@ -8,12 +8,11 @@ interface ChatMessagesProps {
   isLoading: boolean;
   isResponseAvailable: boolean;
   conversationId?: string;
-  userData: Record<string, string> | null;
 }
 
 export const ChatMessages = forwardRef<HTMLDivElement, ChatMessagesProps>(
   function ChatMessages(
-    { messages, isLoading, isResponseAvailable, conversationId, userData },
+    { messages, isLoading, isResponseAvailable, conversationId },
     ref
   ) {
     return (
@@ -25,7 +24,6 @@ export const ChatMessages = forwardRef<HTMLDivElement, ChatMessagesProps>(
             isLastMessage={index === messages.length - 1}
             latestChatBubbleRef={ref as RefObject<HTMLDivElement>}
             conversationId={conversationId}
-            userData={userData}
           />
         ))}
 

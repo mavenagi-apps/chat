@@ -25,7 +25,6 @@ interface CreateOptions {
   question: string;
   conversationId: string;
   initialize: boolean;
-  userData: Record<string, string> | null;
   signedUserData: string | null;
 }
 
@@ -34,8 +33,10 @@ async function createOrUpdateUser(
   conversationId: string,
   decryptedSignedUserData: any | null
 ) {
-  const { email, phoneNumber, ...rest } = decryptedSignedUserData || {};
-  const isAnonymous = !email && !phoneNumber;
+  const { email, phoneNumber, id, ...rest } = decryptedSignedUserData || {};
+  // Authenticated users must have an id
+  // Authenticated users must also have one of email/phoneNumber
+  const isAnonymous = !id || (!email && !phoneNumber);
 
   if (isAnonymous) {
     return client.users.createOrUpdate({
@@ -63,7 +64,7 @@ async function createOrUpdateUser(
 
     return client.users.createOrUpdate({
       userId: {
-        referenceId: `chat-authenticated-user-${conversationId}`,
+        referenceId: id,
       },
       identifiers,
       data,
@@ -74,7 +75,6 @@ async function createOrUpdateUser(
 async function initializeConversation(
   client: MavenAGIClient,
   conversationId: string,
-  userData: Record<string, string> | null
 ) {
   const conversationInitializationPayload = {
     conversationId: { referenceId: conversationId },
@@ -88,17 +88,6 @@ async function initializeConversation(
       escalation_action_enabled: 'true',
     },
   } as MavenAGI.ConversationRequest;
-
-  if (userData) {
-    conversationInitializationPayload.messages.push({
-      conversationMessageId: {
-        referenceId: nanoid(),
-      },
-      userId: { referenceId: 'system' },
-      text: Object.keys(userData).map(key => `${key}: ${userData[key]}`).join('\n'),
-      userMessageType: 'EXTERNAL_SYSTEM',
-    });
-  }
 
   return client.conversation.initialize(conversationInitializationPayload);
 }
@@ -128,7 +117,6 @@ export async function POST(req: NextRequest) {
   return withAppSettings(req, async (req, settings, organizationId, agentId) => {
     const {
       question,
-      userData,
       signedUserData,
     } = (await req.json()) as CreateOptions;
     const client: MavenAGIClient = getMavenAGIClient(organizationId, agentId);
@@ -139,7 +127,7 @@ export async function POST(req: NextRequest) {
       conversationId = nanoid() as string;
       const userResponse = await createOrUpdateUser(client, conversationId, decryptedSignedUserData);
       userId = userResponse.userId.referenceId;
-      await initializeConversation(client, conversationId, userData);
+      await initializeConversation(client, conversationId);
     }
 
     try {

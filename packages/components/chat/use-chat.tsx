@@ -11,7 +11,6 @@
  * const { messages, askQuestion, isLoading, isResponseAvailable } = useChat({
  *   orgFriendlyId: 'org-id',
  *   id: 'agent-id',
- *   userData: userDataObject,
  *   signedUserData: 'signed-data'
  * });
  */
@@ -40,7 +39,6 @@ import { useParams } from 'next/navigation';
 const API_ENDPOINT = '/api/create';
 
 type UseChatOptions = {
-  userData: Record<string, string> | null;
   signedUserData: string | null;
 };
 
@@ -57,7 +55,7 @@ type UseChatParams = {
   id: string;
 };
 
-export function useChat({ userData, signedUserData }: UseChatOptions): UseChatReturn {
+export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [conversationId, setConversationId] = React.useState<string>(nanoid());
   const [authToken, setAuthToken] = React.useState<string | null>(null);
@@ -110,14 +108,13 @@ export function useChat({ userData, signedUserData }: UseChatOptions): UseChatRe
         method: 'POST',
         body: JSON.stringify({
           question: (_messages[_messages.length - 1] as UserChatMessage).text,
-          userData: userData || undefined,
           signedUserData: signedUserData || undefined,
         }),
         headers: requestHeaders,
         signal: newAbortController.signal,
       });
     },
-    [userData, signedUserData, requestHeaders]
+    [signedUserData, requestHeaders]
   );
 
   const streamResponse = useCallback(async (response: Response) => {

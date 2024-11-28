@@ -6,7 +6,6 @@ interface LegacyMessageEvent extends MessageEvent {
 }
 
 export enum MAVEN_MESSAGE_TYPES {
-  USER_DATA = 'USER_DATA',
   SIGNED_USER_DATA = 'SIGNED_USER_DATA',
   MAVEN_LOADED = 'MAVEN_LOADED',
 }
@@ -16,7 +15,6 @@ const demoUrl = (orgFriendlyId: string, agentFriendlyId: string) =>
 
 export function useIframeMessaging() {
   const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState<Record<string, string> | null>(null);
   const [signedUserData, setSignedUserData] = useState<string | null>(null);
   const {
     orgFriendlyId,
@@ -29,9 +27,6 @@ export function useIframeMessaging() {
     if (typeof data !== 'object') return;
 
     switch (data.type) {
-      case MAVEN_MESSAGE_TYPES.USER_DATA:
-        setUserData(data.data);
-        break;
       case MAVEN_MESSAGE_TYPES.SIGNED_USER_DATA:
         setSignedUserData(data.data);
         break;
@@ -69,7 +64,6 @@ export function useIframeMessaging() {
 
   return {
     loading,
-    userData,
     signedUserData,
   };
 }
