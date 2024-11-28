@@ -22,6 +22,16 @@ export const POST = async (request: NextRequest) => {
       60, // 1 minute
       JSON.stringify(event)
     );
+
+    // Verify the key was set
+    const savedValue = await redisClient.get(
+      `zendesk:${conversationId}:${eventId}`
+    );
+    console.log('Saved value:', savedValue);
+
+    if (!savedValue) {
+      console.error(`Failed to save event for conversation ${conversationId}`);
+    }
   }
 
   return NextResponse.json({ success: true });
