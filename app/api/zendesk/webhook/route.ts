@@ -8,7 +8,7 @@ export const POST = async (request: NextRequest) => {
   const body = await request.json();
   console.log(JSON.stringify(body, null, 2));
   for (const event of (body.events || [])) {
-    console.log('event', event);
+    console.log('event', JSON.stringify(event, null, 2));
     console.log('event.type', event.type);
     if (!event.type.startsWith(ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX)) {
       continue;
@@ -21,9 +21,8 @@ export const POST = async (request: NextRequest) => {
       continue;
     }
 
-    await redisClient.setEx(
+    await redisClient.publish(
       `zendesk:${conversationId}:${eventId}`,
-      60, // 1 minute
       JSON.stringify(event)
     );
 
