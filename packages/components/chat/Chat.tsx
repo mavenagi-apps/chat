@@ -1,24 +1,43 @@
 import clsx from 'clsx'
 import React, {useEffect, useState} from 'react'
 
-import { type Message, isBotMessage } from '@/types';
+import { HandoffChatMessage, type Message, isBotMessage } from '@/types';
 import { useSettings } from '@/app/providers/SettingsProvider';
 
 export interface ChatProps {
-  messages: Message[]
+  messages: (Message | HandoffChatMessage)[]
   askFn: (question: string) => Promise<void>
+  initializeHandoff: () => Promise<void>
   brandColor?: string
   className?: string
+  agentName: string | null
+  isHandoff: boolean
+  handleEndHandoff: () => Promise<void>
 }
 
 export const ChatContext = React.createContext<{
-  followUpQuestions: string[]
-  ask: (question: string) => Promise<void>
-}>({ followUpQuestions: [], ask: async () => {} })
+  followUpQuestions: string[];
+  ask: (question: string) => Promise<void>;
+  initializeHandoff: () => Promise<void>;
+  agentName: string | null;
+  isHandoff: boolean;
+  handleEndHandoff: () => Promise<void>;
+}>({
+  followUpQuestions: [],
+  ask: async () => {},
+  initializeHandoff: async () => {},
+  agentName: null,
+  isHandoff: false,
+  handleEndHandoff: async () => {},
+});
 
 export default function Chat({
   messages,
   askFn,
+  initializeHandoff,
+  agentName,
+  isHandoff,
+  handleEndHandoff,
   className,
   children,
 }: React.PropsWithChildren<ChatProps>) {
@@ -37,7 +56,14 @@ export default function Chat({
   }, [messages])
 
   return (
-    <ChatContext.Provider value={{ followUpQuestions, ask: askFn }}>
+    <ChatContext.Provider value={{
+      followUpQuestions,
+      ask: askFn,
+      initializeHandoff,
+      agentName,
+      isHandoff,
+      handleEndHandoff,
+    }}>
       <div
         className={clsx(className, 'flex w-full flex-1 flex-col overflow-auto')}
         style={{

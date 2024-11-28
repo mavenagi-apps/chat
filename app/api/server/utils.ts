@@ -3,16 +3,32 @@
 import { jwtDecrypt, base64url, jwtVerify, importSPKI, type JWTPayload, SignJWT, importPKCS8 } from 'jose';
 import { getMavenAGIClient } from '@/app';
 import type { AuthJWTPayload } from '@/app/constants/authentication';
+import type { NextRequest } from 'next/server';
+import { ORGANIZATION_HEADER, AGENT_HEADER, HANDOFF_AUTH_HEADER } from '@/app/constants/authentication';
+
 const CONVERSATIONS_API_PRIVATE_KEY = process.env.CONVERSATIONS_API_PRIVATE_KEY;
 const CONVERSATIONS_API_PUBLIC_KEY = process.env.CONVERSATIONS_API_PUBLIC_KEY;
 
 export async function getAppSettings(
   orgFriendlyId: string,
   agentId: string
-): Promise<AppSettings> {
+): Promise<ParsedAppSettings> {
   const client = getMavenAGIClient(orgFriendlyId, agentId);
-  return (await client.appSettings.get()) as unknown as AppSettings;
+  const settings = (await client.appSettings.get()) as unknown as AppSettings;
+
+  if (settings?.handoffConfiguration) {
+    try {
+      settings.handoffConfiguration = JSON.parse(settings.handoffConfiguration);
+    } catch (error) {
+      console.error('Failed to parse handoff configuration:', error);
+      settings.handoffConfiguration = undefined;
+    }
+  }
+
+  return settings as ParsedAppSettings;
 }
+
+
 
 /** @internal */
 export async function verifyAuthToken(token: string): Promise<AuthJWTPayload> {
@@ -47,14 +63,10 @@ export async function generateAuthToken(userId: string, conversationId: string):
 
 export async function decryptAndVerifySignedUserData(
   encryptedJWT: string,
-  orgFriendlyId: string,
-  agentId: string
+  settings: ParsedAppSettings
 ): Promise<JWTPayload> {
   // 1. Get and validate settings
-  const { encryptionSecret, jwtPublicKey } = await getAppSettings(
-    orgFriendlyId,
-    agentId
-  );
+  const { encryptionSecret, jwtPublicKey } = settings;
   validateSettings(encryptionSecret, jwtPublicKey);
 
   try {
@@ -101,4 +113,93 @@ async function verifyJWTSignature(jwt: string, publicKeyString: string): Promise
   const publicKey = await importSPKI(publicKeyString, 'ES256');
   const { payload } = await jwtVerify(jwt, publicKey);
   return payload;
+}
+
+export type RouteHandlerWithSettings<T> = (
+  req: NextRequest,
+  settings: ParsedAppSettings,
+  organizationId: string,
+  agentId: string
+) => Promise<T>;
+
+export async function withAppSettings<T>(
+  req: NextRequest,
+  handler: RouteHandlerWithSettings<T>
+): Promise<T> {
+  const organizationId = req.headers.get(ORGANIZATION_HEADER);
+  const agentId = req.headers.get(AGENT_HEADER);
+
+  if (!organizationId || !agentId) {
+    throw new Error('Missing required headers: X-Organization-Id or X-Agent-Id');
+  }
+
+  const settings = await getAppSettings(organizationId, agentId);
+  
+  if (!settings) {
+    throw new Error('Could not retrieve app settings');
+  }
+
+  return handler(req, settings, organizationId, agentId);
+}
+
+export type RouteHandlerWithAuth<T> = (
+  req: NextRequest,
+  settings: ParsedAppSettings,
+  organizationId: string,
+  agentId: string,
+  userId: string,
+  conversationId: string
+) => Promise<T>;
+
+export async function withApiAuthentication<T>(
+  req: NextRequest,
+  settings: ParsedAppSettings,
+  organizationId: string,
+  agentId: string,
+  handler: RouteHandlerWithAuth<T>,
+): Promise<T> {
+  const apiToken = req.headers.get(HANDOFF_AUTH_HEADER);
+  
+  if (!apiToken) {
+    throw new Error('Missing API token');
+  }
+
+  if (!settings?.handoffConfiguration?.apiSecret) {
+    throw new Error('API secret not configured');
+  }
+
+  let userId: string;
+  let conversationId: string;
+
+  try { 
+    const encoder = new TextEncoder();
+    const secret = encoder.encode(settings.handoffConfiguration.apiSecret);
+    const { payload } = await jwtVerify(apiToken, secret);
+    userId = payload.userId as string;
+    conversationId = payload.conversationId as string;
+  } catch (error) {
+    throw new Error('Invalid API token', { cause: error });
+  }
+
+  return handler(req, settings, organizationId, agentId, userId, conversationId);
+}
+
+export type RouteHandlerWithSettingsAndAuth<T> = (
+  req: NextRequest,
+  settings: ParsedAppSettings,
+  organizationId: string,
+  agentId: string,
+  userId: string,
+  conversationId: string
+) => Promise<T>;
+
+export async function withSettingsAndAuthentication<T>(
+  req: NextRequest,
+  handler: RouteHandlerWithSettingsAndAuth<T>
+): Promise<T> {
+  return withAppSettings(req, async (req, settings, organizationId, agentId) => {
+    return withApiAuthentication(req, settings, organizationId, agentId, async (req, settings, organizationId, agentId, userId, conversationId) => {
+      return handler(req, settings, organizationId, agentId, userId, conversationId);
+    });
+  });
 }

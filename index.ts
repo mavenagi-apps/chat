@@ -18,8 +18,9 @@ const defaultModule = {
     const escalationTopics: string[] = [];
 
     try {
-      if (Array.isArray(settings.handoffConfiguration?.escalationTopics)) {
-        settings.handoffConfiguration?.escalationTopics.map((topic) => {
+      const parsedHandoffConfiguration = JSON.parse(settings.handoffConfiguration);
+      if (Array.isArray(parsedHandoffConfiguration?.escalationTopics)) {
+        parsedHandoffConfiguration.escalationTopics.map((topic: string) => {
           if (typeof topic === 'string') {
             escalationTopics.push(topic);
           }
@@ -73,19 +74,15 @@ const defaultModule = {
         },
       },
     });
-
-    console.log('Escalate action created', result);
   },
 
   async executeAction({
     actionId,
-    parameters,
   }: {
     actionId: string;
     parameters: Record<string, any>;
   }) {
     if (actionId === 'escalate-to-agent') {
-      console.log('Escalating to agent with topic:', parameters);
       return 'Escalating to agent...';
     }
 

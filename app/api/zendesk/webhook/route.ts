@@ -6,10 +6,7 @@ const ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX = 'conversation:';
 
 export const POST = async (request: NextRequest) => {
   const body = await request.json();
-  console.log(JSON.stringify(body, null, 2));
   for (const event of (body.events || [])) {
-    console.log('event', JSON.stringify(event, null, 2));
-    console.log('event.type', event.type);
     if (!event.type.startsWith(ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX)) {
       continue;
     }
@@ -25,16 +22,6 @@ export const POST = async (request: NextRequest) => {
       `zendesk:${conversationId}:${eventId}`,
       JSON.stringify(event)
     );
-
-    // Verify the key was set
-    const savedValue = await redisClient.get(
-      `zendesk:${conversationId}:${eventId}`
-    );
-    console.log('Saved value:', savedValue);
-
-    if (!savedValue) {
-      console.error(`Failed to save event for conversation ${conversationId}`);
-    }
   }
 
   return NextResponse.json({ success: true });

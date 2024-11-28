@@ -4,26 +4,78 @@ import { ChatBubble } from '@magi/components/chat/ChatCard';
 import { HiOutlineExclamationCircle } from 'react-icons/hi2';
 import FeedbackForm from '@magi/components/chat/FeedbackForm';
 import BailoutFormDisplay from '@magi/components/chat/BailoutFormDisplay';
+import EscalationFormDisplay from '@magi/components/chat/EscalationFormDisplay';
 import { showBotAnswer } from '@/lib/chat/chat-helpers';
 import {
   isBotMessage,
   isActionChatMessage,
+  isEscalationChatMessage,
   type ChatMessage,
   type ActionChatMessage,
   type Message,
   type UserChatMessage,
+  type HandoffChatMessage,
+  ChatEstablishedMessage,
+  ChatEndedMessage,
 } from '@/types';
 import { type ConversationMessageResponse } from 'mavenagi/api';
 import { useTranslations } from 'next-intl';
 
 export interface MessageProps {
-  message: Message;
+  message: Message | HandoffChatMessage | ChatEstablishedMessage;
   linkTargetInNewTab?: boolean;
   isLastMessage?: boolean;
   latestChatBubbleRef?: React.RefObject<HTMLDivElement>;
   conversationId?: string;
   initialUserChatMessage?: UserChatMessage | null;
   userData?: Record<string, string> | null;
+}
+
+function renderHandoffMessage(
+  message: HandoffChatMessage,
+  isLastMessage: boolean,
+  latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
+) {
+  const author = message.payload.message?.author?.displayName;
+  return (
+    <ChatBubble
+      direction='left-hug'
+      author={author}
+      ref={isLastMessage ? latestChatBubbleRef : null}
+    >
+      <ReactMarkdown linkTargetInNewTab={true}>
+        {message.payload.message?.content.text || ''}
+      </ReactMarkdown>
+    </ChatBubble>
+  );
+}
+
+function renderHandoffEventMessage(
+  message: ChatEstablishedMessage | ChatEndedMessage,
+  isLastMessage: boolean,
+  latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
+) {
+  const t = useTranslations('chat.Handoff');
+  const messageMap = {
+    'ChatEstablished': t('connected_to_agent'), 
+    'ChatEnded': t('chat_has_ended'),
+  };
+  const messageText = messageMap[message.type];
+  if (!messageText) {
+    return null;
+  }
+  return (
+    <div
+      ref={isLastMessage ? latestChatBubbleRef : null}
+      className='my-5 flex items-center justify-center h-auto text-gray-500'
+    >
+      <div className='grow border-t border-gray-300'></div>
+      <span className='mx-4 prose max-w-full text-xs whitespace-nowrap'>
+        {messageText}
+      </span>
+      <div className='grow border-t border-gray-300'></div>
+    </div>
+  );
 }
 
 export function ChatMessage({
@@ -74,6 +126,16 @@ export function ChatMessage({
             />
           </ChatBubble>
         );
+      case 'handoff-zendesk':
+        return renderHandoffMessage(
+          message as HandoffChatMessage,
+          isLastMessage,
+          latestChatBubbleRef,
+        );
+      case 'ChatEstablished':
+        return renderHandoffEventMessage(message as ChatEstablishedMessage, isLastMessage, latestChatBubbleRef);
+      case 'ChatEnded':
+        return renderHandoffEventMessage(message as ChatEndedMessage, isLastMessage, latestChatBubbleRef);
       default:
         if (isBotMessage(message as Message)) {
           return renderBotMessage(
@@ -174,6 +236,7 @@ function renderBotMessage(
     return null;
   }
   const showActionForm = isActionChatMessage(message);
+  const showEscalationForm = isEscalationChatMessage(message);
   return (
     <ChatBubble
       direction='left'
@@ -183,7 +246,10 @@ function renderBotMessage(
       {showActionForm && (
         <BailoutFormDisplay action={message.action} conversationId={conversationId ?? ''} />
       )}
-      {!showActionForm && conversationId && (
+      {showEscalationForm && (
+        <EscalationFormDisplay />
+      )}
+      {!showActionForm && !showEscalationForm && conversationId && (
         <FeedbackForm message={message} conversationId={conversationId} />
       )}
     </ChatBubble>

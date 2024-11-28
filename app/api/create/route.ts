@@ -17,7 +17,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { type MavenAGIClient, MavenAGI, MavenAGIError } from 'mavenagi';
 import { nanoid } from 'nanoid';
 import { getMavenAGIClient } from '@/app';
-import { decryptAndVerifySignedUserData, generateAuthToken, verifyAuthToken } from '@/app/api/server/utils';
+import { decryptAndVerifySignedUserData, generateAuthToken, verifyAuthToken, withAppSettings } from '@/app/api/server/utils';
 import { AUTHENTICATION_HEADER, type AuthJWTPayload } from '@/app/constants/authentication';
 interface CreateOptions {
   orgFriendlyId: string;
@@ -103,13 +103,13 @@ async function initializeConversation(
   return client.conversation.initialize(conversationInitializationPayload);
 }
 
-const generateDecryptedSignedUserData = async (signedUserData: string | null, orgFriendlyId: string, id: string) => {
+const generateDecryptedSignedUserData = async (signedUserData: string | null, settings: ParsedAppSettings) => {
   if (!signedUserData) {
     return null;
   }
 
   try {
-    return await decryptAndVerifySignedUserData(signedUserData, orgFriendlyId, id);
+    return await decryptAndVerifySignedUserData(signedUserData, settings);
   } catch (error) {
     console.log('Failed to decrypt signed user data:', error);
     return null;
@@ -125,78 +125,78 @@ const generateAuthData = async (headers: Headers): Promise<AuthJWTPayload | null
 }
 
 export async function POST(req: NextRequest) {
-  const {
-    orgFriendlyId,
-    id,
-    question,
-    userData,
-    signedUserData,
-  } = (await req.json()) as CreateOptions;
-  const client: MavenAGIClient = getMavenAGIClient(orgFriendlyId, id);
-  const decryptedSignedUserData: any | null = await generateDecryptedSignedUserData(signedUserData, orgFriendlyId, id);
-  let { userId, conversationId } = (await generateAuthData(req.headers)) || {};
+  return withAppSettings(req, async (req, settings, organizationId, agentId) => {
+    const {
+      question,
+      userData,
+      signedUserData,
+    } = (await req.json()) as CreateOptions;
+    const client: MavenAGIClient = getMavenAGIClient(organizationId, agentId);
+    const decryptedSignedUserData: any | null = await generateDecryptedSignedUserData(signedUserData, settings);
+    let { userId, conversationId } = (await generateAuthData(req.headers)) || {};
 
-  if (!userId || !conversationId) {
-    conversationId = nanoid() as string;
-    const userResponse = await createOrUpdateUser(client, conversationId, decryptedSignedUserData);
-    userId = userResponse.userId.referenceId;
-    await initializeConversation(client, conversationId, userData);
-  }
-
-  try {
-    const response = await client.conversation.askStream(conversationId, {
-      userId: {
-        referenceId: userId,
-      },
-      conversationMessageId: {
-        referenceId: nanoid(),
-      },
-      text: question,
-    });
-
-    if (!response) {
-      return NextResponse.json('No response from server', { status: 500 });
+    if (!userId || !conversationId) {
+      conversationId = nanoid() as string;
+      const userResponse = await createOrUpdateUser(client, conversationId, decryptedSignedUserData);
+      userId = userResponse.userId.referenceId;
+      await initializeConversation(client, conversationId, userData);
     }
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of response) {
-            // Convert the chunk to a string (assuming it's an object)
-            const chunkString = JSON.stringify(chunk);
+    try {
+      const response = await client.conversation.askStream(conversationId, {
+        userId: {
+          referenceId: userId,
+        },
+        conversationMessageId: {
+          referenceId: nanoid(),
+        },
+        text: question,
+      });
 
-            // Send the chunk to the client as a data event
-            controller.enqueue(
-              new TextEncoder().encode(`data: ${chunkString}\n\n`)
-            );
+      if (!response) {
+        return NextResponse.json('No response from server', { status: 500 });
+      }
+
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of response) {
+              // Convert the chunk to a string (assuming it's an object)
+              const chunkString = JSON.stringify(chunk);
+
+              // Send the chunk to the client as a data event
+              controller.enqueue(
+                new TextEncoder().encode(`data: ${chunkString}\n\n`)
+              );
+            }
+
+            // End the stream when done
+            controller.close();
+          } catch (err) {
+            console.error('Stream error:', err);
+            controller.error(err);
           }
+        },
+      });
 
-          // End the stream when done
-          controller.close();
-        } catch (err) {
-          console.error('Stream error:', err);
-          controller.error(err);
-        }
-      },
-    });
+      const refreshedAuthToken = await generateAuthToken(userId, conversationId);
 
-    const refreshedAuthToken = await generateAuthToken(userId, conversationId);
-
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
-        [AUTHENTICATION_HEADER]: refreshedAuthToken,
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    if (error instanceof MavenAGIError) {
-      return NextResponse.json(error.body, { status: error.statusCode });
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+          [AUTHENTICATION_HEADER]: refreshedAuthToken,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      if (error instanceof MavenAGIError) {
+        return NextResponse.json(error.body, { status: error.statusCode });
+      }
+      return NextResponse.json('Error fetching response', { status: 500 });
     }
-    return NextResponse.json('Error fetching response', { status: 500 });
-  }
+  });
 }
 
 export const maxDuration = 900;

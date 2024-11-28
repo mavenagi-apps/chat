@@ -1,14 +1,18 @@
 import { createClient } from 'redis';
 
-// Create a Redis client
-const redisClient = createClient({
-  url: process.env.STORAGE_REDIS_URL,
-});
+// Create a Redis client factory
+const createRedisClient = () => {
+  const client = createClient({
+    url: process.env.STORAGE_REDIS_URL,
+  });
 
-redisClient.on('error', (err) => console.error('Redis Client Error', err));
-redisClient.on('ready', () => console.log('Redis Client Ready'));
+  client.on('error', (err) => console.error('Redis Client Error', err));
+  client.on('ready', () => console.log('Redis Client Ready'));
 
-// Connect to Redis
-redisClient.connect().catch(console.error);
+  return client;
+};
+
+// Create instance
+const redisClient = createRedisClient();
 
 export default redisClient;

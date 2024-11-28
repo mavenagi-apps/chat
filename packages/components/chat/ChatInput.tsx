@@ -2,11 +2,33 @@ import {Input as HeadlessInput} from '@headlessui/react'
 import {useTranslations} from 'next-intl'
 import React, {type HTMLAttributes} from 'react'
 import {HiArrowNarrowRight} from 'react-icons/hi'
+import { RiCustomerService2Line } from 'react-icons/ri';
 import {z} from 'zod'
 
 import {useForm} from '@magi/ui'
 
 import {ChatContext} from './Chat'
+
+const HandoffChatBar = () => {
+  const t = useTranslations('chat.ChatInput');
+  const { agentName, handleEndHandoff } = React.useContext(ChatContext);
+  return (
+    <div className='flex justify-between items-center p-3 border-b border-gray-300'>
+      <div className='flex items-center space-x-2'>
+        <RiCustomerService2Line />
+        <h2 className='text-xs text-gray-900'>
+          {t('speaking_with_agent')} {agentName}
+        </h2>
+      </div>
+      <button
+        onClick={handleEndHandoff}
+        className='bg-red-600 hover:bg-red-700 text-white text-xs py-2 px-3 rounded-lg'
+      >
+        {t('end_chat')}
+      </button>
+    </div>
+  );
+}
 
 export type ChatInputProps = {
   isSubmitting: boolean
@@ -15,7 +37,7 @@ export type ChatInputProps = {
 
 export const ChatInput = ({isSubmitting, questionPlaceholder, ...props}: ChatInputProps) => {
   const t = useTranslations('chat.ChatInput')
-  const {followUpQuestions, ask} = React.useContext(ChatContext)
+  const {followUpQuestions, ask, isHandoff} = React.useContext(ChatContext)
 
   const [seeMoreFollowupQuestions, setSeeMoreFollowupQuestions] = React.useState<boolean>(false)
   const {Form, ...methods} = useForm({
@@ -34,7 +56,10 @@ export const ChatInput = ({isSubmitting, questionPlaceholder, ...props}: ChatInp
   return (
     <div className="min-h-14 border-t border-gray-300 bg-white p-3">
       <div className="mx-auto">
-        {!isSubmitting && followUpQuestions.length > 0 && (
+        {isHandoff && (
+          <HandoffChatBar />
+        )}
+        {!isHandoff && !isSubmitting && followUpQuestions.length > 0 && (
           <div>
             {followUpQuestions.slice(0, seeMoreFollowupQuestions ? 3 : 1).map((question, index) => (
               <div key={index} className="flex w-full flex-col sm:flex-row">
