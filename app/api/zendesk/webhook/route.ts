@@ -2,11 +2,15 @@ import { type NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import redisClient from '@/app/api/server/lib/redis';
 
+const ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX = 'conversation:';
+
 export const POST = async (request: NextRequest) => {
   const body = await request.json();
   console.log(JSON.stringify(body, null, 2));
-  for (const event of body.events) {
-    if (!event.type.startsWith('conversation.')) {
+  for (const event of (body.events || [])) {
+    console.log('event', event);
+    console.log('event.type', event.type);
+    if (!event.type.startsWith(ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX)) {
       continue;
     }
 
