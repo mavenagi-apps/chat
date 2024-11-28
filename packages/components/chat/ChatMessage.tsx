@@ -15,14 +15,14 @@ import {
   type Message,
   type UserChatMessage,
   type HandoffChatMessage,
-  ChatEstablishedMessage,
-  ChatEndedMessage,
+  type ChatEstablishedMessage,
+  type ChatEndedMessage,
 } from '@/types';
 import { type ConversationMessageResponse } from 'mavenagi/api';
 import { useTranslations } from 'next-intl';
 
 export interface MessageProps {
-  message: Message | HandoffChatMessage | ChatEstablishedMessage;
+  message: Message | HandoffChatMessage | ChatEstablishedMessage | ChatEndedMessage;
   linkTargetInNewTab?: boolean;
   isLastMessage?: boolean;
   latestChatBubbleRef?: React.RefObject<HTMLDivElement>;

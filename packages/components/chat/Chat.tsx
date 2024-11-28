@@ -1,11 +1,11 @@
 import clsx from 'clsx'
 import React, {useEffect, useState} from 'react'
 
-import { HandoffChatMessage, type Message, isBotMessage } from '@/types';
+import { type ChatEndedMessage, type ChatEstablishedMessage, type HandoffChatMessage, type Message, isBotMessage } from '@/types';
 import { useSettings } from '@/app/providers/SettingsProvider';
 
 export interface ChatProps {
-  messages: (Message | HandoffChatMessage)[]
+  messages: (Message | HandoffChatMessage | ChatEstablishedMessage | ChatEndedMessage)[]
   askFn: (question: string) => Promise<void>
   initializeHandoff: () => Promise<void>
   brandColor?: string

@@ -1,10 +1,10 @@
 import { forwardRef, RefObject } from 'react';
-import { type Message, type HandoffChatMessage } from '@/types';
+import type { Message, HandoffChatMessage, ChatEstablishedMessage, ChatEndedMessage } from '@/types';
 import { ChatMessage } from '@magi/components/chat/ChatMessage';
 import Spinner from '@magi/components/Spinner';
 
 interface ChatMessagesProps {
-  messages: (Message | HandoffChatMessage)[];
+  messages: (Message | HandoffChatMessage | ChatEstablishedMessage | ChatEndedMessage)[];
   isLoading: boolean;
   isResponseAvailable: boolean;
   conversationId?: string;

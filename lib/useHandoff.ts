@@ -16,7 +16,6 @@ import {
   type UserChatMessage,
   type ChatEndedMessage,
 } from '@/types';
-import { useTranslations } from 'next-intl';
 
 export enum HandoffStatus {
   INITIALIZED = 'initialized',
@@ -42,7 +41,6 @@ type Params = {
 
 export function useHandoff({ messages, signedUserData }: HandoffProps) {
   const { orgFriendlyId, id: agentId } = useParams<Params>();
-  const t = useTranslations('chat.Handoff');
   const { handoffConfiguration } = useSettings();
   const handoffTypeRef = useRef<HandoffConfiguration['type'] | null>(
     handoffConfiguration?.type ?? null
@@ -267,6 +265,10 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
       } as UserChatMessage,
     ]);
 
+    if (!handoffAuthToken || !handoffTypeRef.current) {
+      return;
+    }
+
     const response = await fetch(`/api/${handoffTypeRef.current}/messages`, {
       method: 'POST',
       body: JSON.stringify({ message }),
@@ -290,11 +292,16 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
       } as ChatEndedMessage,
     ]);
 
+    void setHandoffStatus(HandoffStatus.NOT_INITIALIZED);
+
+    if (!handoffAuthToken || !handoffTypeRef.current) {
+      return;
+    }
+
     void fetch(`/api/${handoffTypeRef.current}/conversations/passControl`, {
       method: 'POST',
       headers: generatedHeaders,
     });
-    void setHandoffStatus(HandoffStatus.NOT_INITIALIZED);
   }, [
     setHandoffStatus,
     setHandoffAuthToken,

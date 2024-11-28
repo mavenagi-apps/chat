@@ -1,6 +1,6 @@
 import { type ConversationMessageResponse, type AskStreamActionEvent } from 'mavenagi/api';
 
-type ChatMessage = { text: string; type: 'USER' | 'ERROR' | 'SIMULATED' };
+type ChatMessage = { text: string; type: 'USER' | 'ERROR' | 'SIMULATED'; timestamp?: number };
 type UserChatMessage = ChatMessage & { type: 'USER' };
 type SimulatedChatMessage = ChatMessage & { type: 'SIMULATED' };
 type ActionChatMessage = ConversationMessageResponse.Bot & {
@@ -72,7 +72,7 @@ type ZendeskChatMessage = {
 };
 
 const isBotMessage = (
-  message: Message | HandoffChatMessage
+  message: Message | HandoffChatMessage | ChatEstablishedMessage | ChatEndedMessage
 ): message is ConversationMessageResponse.Bot => 'type' in message && message.type === 'bot';
 
 const isChatMessage = (message: Message): message is ChatMessage =>

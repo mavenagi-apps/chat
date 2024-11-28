@@ -17,14 +17,15 @@ import { useAskQuestion } from '@/lib/useAskQuestion';
 import { useScrollToLatest } from '@/lib/useScrollToLatest';
 import { HandoffStatus, useHandoff } from '@/lib/useHandoff';
 import { PoweredByMaven } from '@magi/components/chat/PoweredByMaven';
-import type { HandoffChatMessage } from '@/types';
+import type { ChatEndedMessage, ChatEstablishedMessage, HandoffChatMessage } from '@/types';
 import type { Message } from '@/types';
 
 function ChatPage({ userData, signedUserData }: { userData: Record<string, string> | null, signedUserData: string | null }) {
   const analytics = useAnalytics();
   const { id: agentFriendlyId }: { orgFriendlyId: string, id: string } = useParams();
   const { brandColor, logoUrl } = useSettings();
-  const [combinedMessages, setCombinedMessages] = useState<(Message | HandoffChatMessage)[]>([]);
+  const [combinedMessages, setCombinedMessages]
+    = useState<(Message | HandoffChatMessage | ChatEstablishedMessage | ChatEndedMessage)[]>([]);
 
   // Maven chat logic
   const {
