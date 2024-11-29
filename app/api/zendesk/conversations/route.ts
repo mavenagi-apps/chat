@@ -10,29 +10,23 @@ import {
 import jwt from 'jsonwebtoken';
 import { HANDOFF_AUTH_HEADER } from '@/app/constants/authentication';
 
-interface VerifiedUserInfo {
+interface VerifiedUserData {
   firstName: string;
   lastName: string;
   email: string;
   [key: string]: any;
 }
 
-interface UnverifiedUserInfo {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
 const getOrCreateZendeskUser = async (
   SunshineConversationsClient: typeof SunshineConversationsClientModule,
-  unverifiedUserInfo: UnverifiedUserInfo,
+  verifiedUserData: VerifiedUserData,
   appId: string
 ) => {
   const apiInstance = new SunshineConversationsClient.UsersApi();
 
-  if (unverifiedUserInfo.email) {
+  if (verifiedUserData.email) {
     try {
-      const { user } = await apiInstance.getUser(appId, unverifiedUserInfo.email);
+      const { user } = await apiInstance.getUser(appId, verifiedUserData.email);
       if (user) {
         console.log('User already exists');
         return user;
@@ -48,11 +42,11 @@ const getOrCreateZendeskUser = async (
   }
 
   const { user } = await apiInstance.createUser(appId, {
-    externalId: unverifiedUserInfo.email,
+    externalId: verifiedUserData.email,
     profile: {
-      givenName: unverifiedUserInfo.firstName,
-      surname: unverifiedUserInfo.lastName,
-      email: unverifiedUserInfo.email,
+      givenName: verifiedUserData.firstName,
+      surname: verifiedUserData.lastName,
+      email: verifiedUserData.email,
       locale: 'en-US',
     },
   });
@@ -113,7 +107,7 @@ export async function POST(req: NextRequest) {
       (await decryptAndVerifySignedUserData(
         signedUserData,
         settings
-      )) as VerifiedUserInfo;
+      )) as VerifiedUserData;
 
     const { id: userId } = await getOrCreateZendeskUser(
       SunshineConversationsClient,
