@@ -58,24 +58,38 @@ When integrating Maven's widget, you'll need to securely transmit user data usin
 ```typescript
 import { SignJWT, EncryptJWT } from 'jose';
 
-async function secureUserData(userData: Record<string, string> & { 
-  id: string 
+
+async function secureUserData(userData: Record<string, string> & {
+ id: string
+ firstName: string
+ lastName: string
 } & (
-  { email: string, phoneNumber?: string } | 
-  { email?: string, phoneNumber: string }
+ { email: string, phoneNumber?: string } |
+ { email?: string, phoneNumber: string }
 )) {
-  // 1. Sign the user data with your private key (ES256 algorithm)
-  const signedJWT = await new SignJWT(userData)
-    .setProtectedHeader({ alg: 'ES256' })
-    .setIssuedAt()
-    .setExpirationTime('1d')
-    .sign(yourPrivateKey);
+ // 1. Sign the user data with your private key (ES256 algorithm)
+ const signedJWT = await new SignJWT(userData)
+   .setProtectedHeader({ alg: 'ES256' })
+   .setIssuedAt()
+   .setExpirationTime('1d')
+   .sign(yourPrivateKey);
 
-  // 2. Encrypt the signed JWT using your encryption secret
-  const encryptedJWT = await new EncryptJWT({ jwt: signedJWT })
-    .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
-    .encrypt(base64url.decode(encryptionSecret));
 
-  return encryptedJWT;
+ // 2. Encrypt the signed JWT using your encryption secret
+ const encryptedJWT = await new EncryptJWT({ jwt: signedJWT })
+   .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
+   .encrypt(base64url.decode(encryptionSecret));
+
+
+ return encryptedJWT;
 }
 ```
+
+NOTE: User data must include:
+
+* `firstName`  
+* `lastName`  
+* `id`  
+* One of:  
+  * `phoneNumber`  
+  * `email`
