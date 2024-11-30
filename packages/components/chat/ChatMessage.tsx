@@ -16,7 +16,7 @@ import {
 import { type ConversationMessageResponse } from 'mavenagi/api';
 import { useTranslations } from 'next-intl';
 
-export interface MessageProps {
+interface MessageProps {
   message: Message;
   linkTargetInNewTab?: boolean;
   isLastMessage?: boolean;

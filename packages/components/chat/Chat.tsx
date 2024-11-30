@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react'
 import { type Message, isBotMessage } from '@/types';
 import { useSettings } from '@/app/providers/SettingsProvider';
 
-export interface ChatProps {
+interface ChatProps {
   messages: Message[]
   askFn: (question: string) => Promise<void>
   brandColor?: string
