@@ -5,7 +5,7 @@ interface LegacyMessageEvent extends MessageEvent {
   message?: any;
 }
 
-export enum MAVEN_MESSAGE_TYPES {
+enum MAVEN_MESSAGE_TYPES {
   USER_DATA = 'USER_DATA',
   SIGNED_USER_DATA = 'SIGNED_USER_DATA',
   MAVEN_LOADED = 'MAVEN_LOADED',

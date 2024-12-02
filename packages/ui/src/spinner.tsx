@@ -1,6 +1,6 @@
 import {cn} from './lib/utils'
 
-export type SpinnerProps = React.ComponentPropsWithoutRef<'svg'>
+type SpinnerProps = React.ComponentPropsWithoutRef<'svg'>
 export const Spinner = ({className, ...props}: SpinnerProps) => (
   <svg
     className={cn(className, 'motion-safe:animate-spin')}

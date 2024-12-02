@@ -2,7 +2,6 @@ import { type ConversationMessageResponse, type AskStreamActionEvent } from 'mav
 
 type ChatMessage = { text: string; type: 'USER' | 'ERROR' | 'SIMULATED' };
 type UserChatMessage = ChatMessage & { type: 'USER' };
-type SimulatedChatMessage = ChatMessage & { type: 'SIMULATED' };
 type ActionChatMessage = ConversationMessageResponse.Bot & {
   action: AskStreamActionEvent;
 };
@@ -36,6 +35,5 @@ export {
   type ActionChatMessage,
   type ChatMessage,
   type Message,
-  type SimulatedChatMessage,
   type UserChatMessage,
 };

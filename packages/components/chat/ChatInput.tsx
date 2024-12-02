@@ -8,7 +8,7 @@ import {useForm} from '@magi/ui'
 
 import {ChatContext} from './Chat'
 
-export type ChatInputProps = {
+type ChatInputProps = {
   isSubmitting: boolean
   questionPlaceholder: string
 } & HTMLAttributes<HTMLInputElement>
