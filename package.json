@@ -32,6 +32,7 @@
     "clsx": "^2.1.1",
     "highlight.js": "^11.10.0",
     "jose": "^5.9.6",
+    "jsonwebtoken": "^9.0.2",
     "mavenagi": "0.0.0-alpha.27",
     "nanoid": "^5.0.7",
     "next": "15.0.3",
@@ -46,6 +47,7 @@
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.0",
     "sonner": "^1.5.0",
+    "sunshine-conversations-client": "^14.1.0",
     "tailwind-merge": "^2.4.0",
     "use-intl": "^3.25.3",
     "zod": "^3.23.8"
