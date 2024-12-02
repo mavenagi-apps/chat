@@ -6,6 +6,23 @@ declare global {
     popularQuestions: string;
     jwtPublicKey: string;
     encryptionSecret: string;
+    handoffConfiguration?: string;
+  }
+
+  type HandoffConfiguration = {
+    type: 'zendesk' | 'salesforce';
+    subdomain: string;
+    apiKey: string;
+    apiSecret: string;
+    appId: string;
+  };
+
+  interface ClientSafeAppSettings extends Partial<AppSettings> {
+    handoffConfiguration?: { type: HandoffConfiguration['type'] } | undefined;
+  }
+
+  interface ParsedAppSettings extends AppSettings {
+    handoffConfiguration?: HandoffConfiguration | undefined;
   }
 }
 

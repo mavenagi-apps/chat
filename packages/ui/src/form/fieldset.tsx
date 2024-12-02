@@ -20,6 +20,19 @@ export function Fieldset({className, ...props}: {disabled?: boolean} & HeadlessF
   )
 }
 
+export function FieldGroup({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<'div'>) {
+  return (
+    <div
+      {...props}
+      data-slot='control'
+      className={clsx(className, 'space-y-4')}
+    />
+  );
+}
+
 export type FieldProps = HeadlessFieldProps
 export function Field({className, ...props}: FieldProps) {
   return (

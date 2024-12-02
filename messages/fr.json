@@ -9,7 +9,6 @@
         "agent_typing": "L'agent est en train de taper...",
         "idle_message": "Nous sommes là pour vous aider. Veuillez poser une question.",
         "idle_message_with_survey": "Merci de nous avoir contacté. Pouvez-vous remplir ce [sondage](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_08van6GAWPvXtyd?chatKey={conversationId}{additionalUrlParams}) pour nous parler de votre expérience ?",
-        "chat_has_ended": "Le chat est terminé",
         "chat_transferred": "L'agent {name} a rejoint le chat",
         "chat_queue_position": "Vous êtes en position {position} dans la file d'attente. Vous serez connecté à un agent sous peu.",
         "chat_queue_position_next": "Vous êtes le prochain dans la file d'attente. Votre agent sera avec vous sous peu.",
@@ -24,12 +23,18 @@
         "name": "Nom",
         "email": "Email",
         "question": "Question",
-        "connect_to_live_agent": "Connecter à un agent en direct",
-        "connection_to_live_agent_success_title": "Vous êtes maintenant connecté à un agent en direct",
-        "connection_to_live_agent_success_description": "Veuillez attendre que l'agent réponde.",
         "ticket_created_title": "Ticket de support créé avec succès",
         "ticket_created_description": "Un agent vous répondra dans les 24-48 heures",
         "send": "Envoyer"
+      },
+      "EscalationFormDisplay": {
+        "connect_to_live_agent": "Connecter à un agent en direct",
+        "connection_to_live_agent_success_title": "Vous êtes maintenant connecté à un agent en direct",
+        "connection_to_live_agent_success_description": "Veuillez attendre que l'agent réponde."
+      },
+      "Handoff": {
+        "connected_to_agent": "Connecté avec l'agent",
+        "chat_has_ended": "Le chat est terminé"
       },
       "ChatInput": {
         "see_more": "Voir plus",
