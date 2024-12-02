@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react'
 import { type ChatEndedMessage, type ChatEstablishedMessage, type HandoffChatMessage, type Message, isBotMessage } from '@/types';
 import { useSettings } from '@/app/providers/SettingsProvider';
 
-export interface ChatProps {
+interface ChatProps {
   messages: (Message | HandoffChatMessage | ChatEstablishedMessage | ChatEndedMessage)[]
   askFn: (question: string) => Promise<void>
   initializeHandoff: () => Promise<void>

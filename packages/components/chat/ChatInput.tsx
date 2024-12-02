@@ -30,7 +30,7 @@ const HandoffChatBar = () => {
   );
 }
 
-export type ChatInputProps = {
+type ChatInputProps = {
   isSubmitting: boolean
   questionPlaceholder: string
 } & HTMLAttributes<HTMLInputElement>

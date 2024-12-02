@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
-export enum MAVEN_MESSAGE_TYPES {
+enum MAVEN_MESSAGE_TYPES {
   USER_DATA = 'USER_DATA',
   SIGNED_USER_DATA = 'SIGNED_USER_DATA',
   MAVEN_LOADED = 'MAVEN_LOADED',
 }
 
-export type SignedUserDataMessage = {
+type SignedUserDataMessage = {
   type: MAVEN_MESSAGE_TYPES.SIGNED_USER_DATA;
   data: string;
 };

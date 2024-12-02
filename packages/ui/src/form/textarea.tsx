@@ -5,7 +5,7 @@ import {Textarea as HeadlessTextarea, type TextareaProps as HeadlessTextareaProp
 import {cn} from '../lib/utils'
 import {asControlledComponent} from './as-controlled-component'
 
-export type TextareaProps = HeadlessTextareaProps
+type TextareaProps = HeadlessTextareaProps
 export const Textarea = asControlledComponent(
   ({className, ...props}: TextareaProps) => (
     <span

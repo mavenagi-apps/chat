@@ -7,10 +7,6 @@ import {
   type FieldProps as HeadlessFieldProps,
   Fieldset as HeadlessFieldset,
   type FieldsetProps as HeadlessFieldsetProps,
-  Label as HeadlessLabel,
-  type LabelProps as HeadlessLabelProps,
-  Legend as HeadlessLegend,
-  type LegendProps as HeadlessLegendProps,
 } from '@headlessui/react'
 import clsx from 'clsx'
 import React from 'react'
@@ -22,23 +18,6 @@ export function Fieldset({className, ...props}: {disabled?: boolean} & HeadlessF
       className={clsx(className, '[&>*+[data-slot=control]]:mt-6 [&>[data-slot=text]]:mt-1')}
     />
   )
-}
-
-export function Legend({...props}: HeadlessLegendProps) {
-  return (
-    <HeadlessLegend
-      {...props}
-      data-slot="legend"
-      className={clsx(
-        props.className,
-        'text-base/6 font-semibold text-zinc-950 data-[disabled]:opacity-50 sm:text-sm/6 dark:text-white'
-      )}
-    />
-  )
-}
-
-export function FieldGroup({className, ...props}: React.ComponentPropsWithoutRef<'div'>) {
-  return <div {...props} data-slot="control" className={clsx(className, 'space-y-4')} />
 }
 
 export type FieldProps = HeadlessFieldProps
@@ -55,34 +34,6 @@ export function Field({className, ...props}: FieldProps) {
         '[&>[data-slot=label]]:font-medium'
       )}
       {...props}
-    />
-  )
-}
-
-export function Label({className, ...props}: {className?: string} & HeadlessLabelProps) {
-  return (
-    <HeadlessLabel
-      {...props}
-      data-slot="label"
-      className={clsx(className, 'select-none text-sm/[21px] text-gray-900 data-[disabled]:opacity-50')}
-    />
-  )
-}
-
-export function Description({
-  className,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  disabled,
-  ...props
-}: {className?: string; disabled?: boolean} & HeadlessDescriptionProps) {
-  return (
-    <HeadlessDescription
-      {...props}
-      data-slot="description"
-      className={clsx(
-        className,
-        'text-base/6 text-zinc-500 data-[disabled]:opacity-50 sm:text-sm/6 dark:text-zinc-400'
-      )}
     />
   )
 }

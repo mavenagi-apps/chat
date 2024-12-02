@@ -9,7 +9,7 @@ import {Link} from './link'
 import {Spinner} from './spinner'
 import {TouchTarget, buttonStyles} from './vanilla/button'
 
-export type ButtonProps = (
+type ButtonProps = (
   | {outline?: never; plain?: never; link?: never}
   | {outline: true; plain?: never; link?: never}
   | {outline?: never; plain: true; link?: never}

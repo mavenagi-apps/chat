@@ -8,7 +8,7 @@ import remarkGfm from 'remark-gfm';
 
 import { cn } from '@magi/ui';
 
-export interface ReactMarkdownProps {
+interface ReactMarkdownProps {
   children: string;
   bulletsInside?: boolean;
   linkTargetInNewTab?: boolean;

@@ -5,7 +5,7 @@ import React, {type HTMLAttributes} from 'react'
 const ButtonGroupContext = React.createContext<{} | undefined>(undefined)
 export const useButtonGroupContext = () => React.useContext(ButtonGroupContext)
 
-export type ButtonGroupProps = HTMLAttributes<HTMLDivElement>
+type ButtonGroupProps = HTMLAttributes<HTMLDivElement>
 export const ButtonGroup = ({className, ...props}: ButtonGroupProps) => {
   return (
     <ButtonGroupContext.Provider value={{}}>
