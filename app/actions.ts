@@ -52,38 +52,59 @@ export async function createOrUpdateFeedback({
   }
 }
 
+const parseHandoffConfiguration = (handoffConfiguration: AppSettings['handoffConfiguration']): ClientSafeAppSettings['handoffConfiguration'] | undefined => {
+  if (!handoffConfiguration) {
+    return undefined;
+  }
+
+  try {
+    const parsedHandoffConfiguration = JSON.parse(handoffConfiguration);
+
+    if (!parsedHandoffConfiguration.type) {
+      return undefined;
+    }
+
+    return {
+      type: parsedHandoffConfiguration.type,
+    };
+  } catch (error) {
+    console.error('Error parsing handoff configuration:', error);
+    return undefined;
+  }
+};
+
 export async function getPublicAppSettings(
   orgFriendlyId: string,
   agentId: string
-) {
-  const client = getMavenAGIClient(orgFriendlyId, agentId);
+): Promise<ClientSafeAppSettings | null> {
+  if (!orgFriendlyId || !agentId) {
+    return null;
+  }
 
+  const client = getMavenAGIClient(orgFriendlyId, agentId);
   try {
-    const {
-      amplitudeApiKey,
-      logoUrl,
-      popularQuestions,
-      brandColor,
-      brandFontColor,
-      enableDemoSite,
-      embedAllowlist,
-    } = await client.appSettings.get();
+    const settings = await client.appSettings.get() as unknown as AppSettings;
+    const parsedHandoffConfiguration = parseHandoffConfiguration(settings.handoffConfiguration);
+    
     return {
-      amplitudeApiKey,
-      logoUrl,
-      popularQuestions,
-      brandColor,
-      brandFontColor,
-      enableDemoSite,
-      embedAllowlist,
-    } as Partial<AppSettings>;
+      amplitudeApiKey: settings.amplitudeApiKey,
+      logoUrl: settings.logoUrl,
+      popularQuestions: settings.popularQuestions,
+      brandColor: settings.brandColor,
+      brandFontColor: settings.brandFontColor,
+      enableDemoSite: settings.enableDemoSite,
+      embedAllowlist: settings.embedAllowlist,
+      // Do not pass the full handoffConfiguration object to the client
+      // because it contains sensitive information that should not be exposed
+      handoffConfiguration: parsedHandoffConfiguration,
+    };
   } catch (error) {
-    console.error('Error fetching app settings', error);
+    console.error('Error fetching app settings:', error);
     return null;
   }
 }
 
-export async function submitBailoutForm(prevState: any, formData: FormData) {
+export async function submitBailoutForm(_prevState: any, formData: FormData) {
   try {
     const { orgFriendlyId, agentId, conversationId, actionFormId, ...parameters } = Object.fromEntries(
       formData.entries()

@@ -11,7 +11,6 @@
  * const { messages, askQuestion, isLoading, isResponseAvailable } = useChat({
  *   orgFriendlyId: 'org-id',
  *   id: 'agent-id',
- *   userData: userDataObject,
  *   signedUserData: 'signed-data'
  * });
  */
@@ -34,14 +33,12 @@ import {
   isChatMessage,
   isChatUserMessage
 } from '@/types';
-import { AUTHENTICATION_HEADER, AuthJWTPayload } from '@/app/constants/authentication';
+import { AGENT_HEADER, AUTHENTICATION_HEADER, AuthJWTPayload, ORGANIZATION_HEADER } from '@/app/constants/authentication';
 import { decodeJwt } from 'jose';
+import { useParams } from 'next/navigation';
 const API_ENDPOINT = '/api/create';
 
 type UseChatOptions = {
-  orgFriendlyId: string;
-  id: string;
-  userData: Record<string, string> | null;
   signedUserData: string | null;
 };
 
@@ -53,7 +50,12 @@ type UseChatReturn = {
   conversationId: string;
 };
 
-export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChatOptions): UseChatReturn {
+type UseChatParams = {
+  orgFriendlyId: string;
+  id: string;
+};
+
+export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [conversationId, setConversationId] = React.useState<string>(nanoid());
   const [authToken, setAuthToken] = React.useState<string | null>(null);
@@ -62,15 +64,19 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
     new AbortController()
   );
 
+  const { orgFriendlyId, id: agentId }: UseChatParams = useParams();
+
   const requestHeaders = useMemo(() => {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
+      [ORGANIZATION_HEADER]: orgFriendlyId,
+      [AGENT_HEADER]: agentId,
     };
     if (authToken) {
       headers[AUTHENTICATION_HEADER] = authToken;
     }
     return headers;
-  }, [authToken]);
+  }, [authToken, orgFriendlyId, agentId]);
 
   const resetAbortController = useCallback(() => {
     abortController.abort();
@@ -91,28 +97,25 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
     );
   }, []);
 
-  const createResponse = useCallback(async (
-    _messages: Message[],
-    newAbortController: AbortController
-  ) => {
-    const lastMessage = _messages[_messages.length - 1];
-    if (!isChatUserMessage(lastMessage)) {
-      throw new Error('Last message is not a user message');
-    }
+  const createResponse = useCallback(
+    async (_messages: Message[], newAbortController: AbortController) => {
+      const lastMessage = _messages[_messages.length - 1];
+      if (!isChatUserMessage(lastMessage)) {
+        throw new Error('Last message is not a user message');
+      }
 
-    return await fetch(API_ENDPOINT, {
-      method: 'POST',
-      body: JSON.stringify({
-        orgFriendlyId,
-        id,
-        question: (_messages[_messages.length - 1] as UserChatMessage).text,
-        userData: userData || undefined,
-        signedUserData: signedUserData || undefined,
-      }),
-      headers: requestHeaders,
-      signal: newAbortController.signal,
-    });
-  }, [orgFriendlyId, id, userData, signedUserData, requestHeaders]);
+      return await fetch(API_ENDPOINT, {
+        method: 'POST',
+        body: JSON.stringify({
+          question: (_messages[_messages.length - 1] as UserChatMessage).text,
+          signedUserData: signedUserData || undefined,
+        }),
+        headers: requestHeaders,
+        signal: newAbortController.signal,
+      });
+    },
+    [signedUserData, requestHeaders]
+  );
 
   const streamResponse = useCallback(async (response: Response) => {
     const reader = response.body?.getReader();
@@ -175,105 +178,108 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
     }
   }, []);
 
-  const ask = useCallback(async (_messages: Message[]) => {
-    setIsLoading(true);
-    const newAbortController = resetAbortController();
+  const ask = useCallback(
+    async (_messages: Message[]) => {
+      setIsLoading(true);
+      const newAbortController = resetAbortController();
 
-    const shouldHitApi = userAskedQuestion(_messages);
+      const shouldHitApi = userAskedQuestion(_messages);
 
-    if (shouldHitApi) {
-      try {
-        const response = await createResponse(_messages, newAbortController);
-        // Get user id from headers
-        const authToken = response.headers.get(AUTHENTICATION_HEADER);
-        if (!authToken) {
-          throw new Error('Auth token not found');
+      if (shouldHitApi) {
+        try {
+          const response = await createResponse(_messages, newAbortController);
+          // Get user id from headers
+          const authToken = response.headers.get(AUTHENTICATION_HEADER);
+          if (!authToken) {
+            throw new Error('Auth token not found');
+          }
+          const responseAuthData = decodeJwt<AuthJWTPayload>(authToken);
+          if (!responseAuthData.conversationId) {
+            throw new Error('Conversation ID not found');
+          }
+          setAuthToken(authToken);
+          setConversationId(responseAuthData.conversationId);
+          await streamResponse(response);
+        } catch (error) {
+          console.log(error);
         }
-        const responseAuthData = decodeJwt<AuthJWTPayload>(authToken);
-        if (!responseAuthData.conversationId) {
-          throw new Error('Conversation ID not found');
-        }
-        setAuthToken(authToken);
-        setConversationId(responseAuthData.conversationId);
-        await streamResponse(response);
-      } catch (error) {
-        console.log(error);
       }
-    }
-  }, [createResponse, streamResponse, userAskedQuestion]);
+    },
+    [createResponse, streamResponse, userAskedQuestion]
+  );
 
-  const handleParsedData = useCallback((
-    parsedData: MavenAGI.StreamResponse,
-    referenceId: string | undefined
-  ) => {
-    if (parsedData.eventType === 'start') {
-      const { conversationMessageId } = parsedData;
-      const newMessage: ConversationMessageResponse.Bot = {
-        responses: [],
-        conversationMessageId,
-        type: 'bot',
-        botMessageType: BotConversationMessageType.BotResponse,
-        metadata: {
-          followupQuestions: [],
-          sources: [],
+  const handleParsedData = useCallback(
+    (parsedData: MavenAGI.StreamResponse, referenceId: string | undefined) => {
+      if (parsedData.eventType === 'start') {
+        const { conversationMessageId } = parsedData;
+        const newMessage: ConversationMessageResponse.Bot = {
+          responses: [],
+          conversationMessageId,
+          type: 'bot',
+          botMessageType: BotConversationMessageType.BotResponse,
+          metadata: {
+            followupQuestions: [],
+            sources: [],
+          },
+        };
+        setMessages((prevState) => [...prevState, newMessage]);
+      } else if (parsedData.eventType === 'text') {
+        setIsLoading(false);
+        if (!referenceId) {
+          throw new Error('No referenceId');
         }
-      };
-      setMessages((prevState) => [...prevState, newMessage]);
-    } else if (parsedData.eventType === 'text') {
-      setIsLoading(false);
-      if (!referenceId) {
-        throw new Error('No referenceId');
-      }
-      setMessages((prevMessages) =>
-        prevMessages.map((m) =>
-          isBotMessage(m) &&
-          m.conversationMessageId?.referenceId === referenceId
-            ? {
-                ...m,
-                responses: [
-                  ...(m.responses || []),
-                  {
-                    text: parsedData.contents,
-                    type: parsedData.eventType,
+        setMessages((prevMessages) =>
+          prevMessages.map((m) =>
+            isBotMessage(m) &&
+            m.conversationMessageId?.referenceId === referenceId
+              ? {
+                  ...m,
+                  responses: [
+                    ...(m.responses || []),
+                    {
+                      text: parsedData.contents,
+                      type: parsedData.eventType,
+                    },
+                  ],
+                }
+              : m
+          )
+        );
+      } else if (parsedData.eventType === 'metadata') {
+        const { followupQuestions, sources } = parsedData;
+        if (!referenceId) {
+          throw new Error('No referenceId');
+        }
+        setMessages((prevMessages) =>
+          prevMessages.map((m) =>
+            isBotMessage(m) &&
+            m.conversationMessageId?.referenceId === referenceId
+              ? {
+                  ...m,
+                  metadata: {
+                    followupQuestions,
+                    sources,
                   },
-                ],
-              }
-            : m
-        )
-      );
-    } else if (parsedData.eventType === 'metadata') {
-      const { followupQuestions, sources } = parsedData;
-      if (!referenceId) {
-        throw new Error('No referenceId');
+                }
+              : m
+          )
+        );
+      } else if (parsedData.eventType === 'action') {
+        setMessages((prevMessages) =>
+          prevMessages.map((m) =>
+            isBotMessage(m) &&
+            m.conversationMessageId?.referenceId === referenceId
+              ? {
+                  ...m,
+                  action: parsedData,
+                }
+              : m
+          )
+        );
       }
-      setMessages((prevMessages) =>
-        prevMessages.map((m) =>
-          isBotMessage(m) &&
-          m.conversationMessageId?.referenceId === referenceId
-            ? {
-                ...m,
-                metadata: {
-                  followupQuestions,
-                  sources,
-                },
-              }
-            : m
-        )
-      );
-    } else if (parsedData.eventType === 'action') {
-      setMessages((prevMessages) =>
-        prevMessages.map((m) =>
-          isBotMessage(m) &&
-          m.conversationMessageId?.referenceId === referenceId
-            ? {
-                ...m,
-                action: parsedData
-              }
-            : m
-        )
-      );
-    }
-  }, []);
+    },
+    []
+  );
 
   const getResponseAvailable = useCallback(() => {
     if (messages.length === 0) {
@@ -288,11 +294,9 @@ export function useChat({ orgFriendlyId, id, userData, signedUserData }: UseChat
   }, []);
 
   useEffect(() => {
-    const timestamp = (new Date()).getTime();
+    const timestamp = new Date().getTime();
     setMessages((prevMessages) =>
-      prevMessages.map((m) =>
-        ({ timestamp, ...m  } as Message)
-      )
+      prevMessages.map((m) => ({ timestamp, ...m }) as Message)
     );
   }, [messages.length, setMessages]);
 
