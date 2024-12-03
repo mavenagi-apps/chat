@@ -64,12 +64,18 @@ export async function getPublicAppSettings(
       logoUrl,
       popularQuestions,
       brandColor,
+      brandFontColor,
+      enableDemoSite,
+      embedAllowlist,
     } = await client.appSettings.get();
     return {
       amplitudeApiKey,
       logoUrl,
       popularQuestions,
       brandColor,
+      brandFontColor,
+      enableDemoSite,
+      embedAllowlist,
     } as Partial<AppSettings>;
   } catch (error) {
     console.error('Error fetching app settings', error);
