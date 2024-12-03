@@ -91,7 +91,7 @@ export function ChatMessage({
         return (
           <ChatBubble
             direction='right'
-            className='bg-[--brand-color] text-[--brand-text-color]'
+            className='bg-[--brand-color] text-[--brand-font-color]'
             ref={isLastMessage ? latestChatBubbleRef : null}
           >
             <UserMessage

@@ -91,6 +91,9 @@ export async function getPublicAppSettings(
       logoUrl: settings.logoUrl,
       popularQuestions: settings.popularQuestions,
       brandColor: settings.brandColor,
+      brandFontColor: settings.brandFontColor,
+      enableDemoSite: settings.enableDemoSite,
+      embedAllowlist: settings.embedAllowlist,
       // Do not pass the full handoffConfiguration object to the client
       // because it contains sensitive information that should not be exposed
       handoffConfiguration: parsedHandoffConfiguration,

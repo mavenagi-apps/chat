@@ -73,13 +73,13 @@ export async function decryptAndVerifySignedUserData(
     // 2. Decrypt the JWT
     const { jwt: decryptedJWT } = await decryptJWT(
       encryptedJWT,
-      encryptionSecret
+      encryptionSecret!
     );
 
     // 3. Verify the JWT signature
     const verifiedPayload = await verifyJWTSignature(
       decryptedJWT as string,
-      jwtPublicKey
+      jwtPublicKey!
     );
 
     const { iat: _iat, exp: _exp, ...verifiedUserData } = verifiedPayload;
