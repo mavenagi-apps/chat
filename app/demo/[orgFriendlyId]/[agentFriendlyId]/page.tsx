@@ -8,7 +8,7 @@ import { notFound } from 'next/navigation';
 const mockUserData = {
   firstName: faker.person.firstName(),
   lastName: faker.person.lastName(),
-  userId: faker.string.uuid(),
+  id: faker.string.uuid(),
   email: faker.internet.email(),
 };
 
@@ -43,7 +43,6 @@ export default async function Page({
     orgFriendlyId,
     agentFriendlyId,
     bgColor: brandColor || '#00202b',
-    userData: mockUserData,
     signedUserData: signedUserData || undefined,
   };
 

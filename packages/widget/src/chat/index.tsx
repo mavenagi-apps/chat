@@ -4,8 +4,6 @@ import { useEffect, useState } from 'preact/hooks';
 import { ChatButton } from './components/ChatButton';
 import { useIframeCommunication } from './hooks/useIframeCommunication';
 
-type UserData = Record<string, string> | null;
-
 export const useMediaQuery = (query: string) => {
   const mediaMatch = window.matchMedia(query);
   const [matches, setMatches] = useState(mediaMatch.matches);
@@ -24,7 +22,6 @@ type Props = {
   textColor: string;
   horizontalPosition: 'left' | 'right';
   verticalPosition: 'top' | 'bottom';
-  userData: UserData;
   signedUserData?: string | null;
   orgFriendlyId: string;
   agentFriendlyId: string;
@@ -40,7 +37,6 @@ const App = forwardRef<{ open: () => void; close: () => void }, Props>(
     } = useIframeCommunication({
       orgFriendlyId: props.orgFriendlyId,
       agentFriendlyId: props.agentFriendlyId,
-      userData: props.userData,
       signedUserData: props.signedUserData,
       isWide,
       isOpen
@@ -88,7 +84,6 @@ export async function load({
   textColor = 'white',
   horizontalPosition = 'right',
   verticalPosition = 'bottom',
-  userData = null,
   orgFriendlyId,
   agentFriendlyId,
   signedUserData = null,
@@ -97,7 +92,6 @@ export async function load({
   apiKey: string;
   horizontalPosition?: 'left' | 'right';
   verticalPosition?: 'top' | 'bottom';
-  userData?: UserData;
   orgFriendlyId: string;
   agentFriendlyId: string;
   signedUserData?: string | null;
@@ -114,7 +108,6 @@ export async function load({
       textColor={textColor}
       horizontalPosition={horizontalPosition}
       verticalPosition={verticalPosition}
-      userData={userData}
       signedUserData={signedUserData}
       orgFriendlyId={orgFriendlyId}
       agentFriendlyId={agentFriendlyId}

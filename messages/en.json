@@ -9,7 +9,6 @@
       "agent_typing": "Agent is typing...",
       "idle_message": "We are here to help you. Please ask a question.",
       "idle_message_with_survey": "Thank you for reaching out. Can you please fill out this [survey]({url}{urlParams}) to tell us about your experience?",
-      "chat_has_ended": "Chat has ended",
       "chat_transferred": "Agent {name} has joined the chat",
       "chat_queue_position": "You are in position {position} in the queue. You will be connected to an agent shortly.",
       "chat_queue_position_next": "You are next in line in the queue. Your agent will be with you shortly.",
@@ -24,12 +23,18 @@
       "name": "Name",
       "email": "Email",
       "question": "Question",
-      "connect_to_live_agent": "Connect to live agent",
-      "connection_to_live_agent_success_title": "You are now connecting to a live agent",
-      "connection_to_live_agent_success_description": "Please wait for the agent to respond.",
       "ticket_created_title": "Support ticket successfully created",
       "ticket_created_description": "An agent will get back to you within 24-48 hours",
       "send": "Send"
+    },
+    "EscalationFormDisplay": {
+      "connect_to_live_agent": "Connect to live agent",
+      "connection_to_live_agent_success_title": "You are now connecting to a live agent",
+      "connection_to_live_agent_success_description": "Please wait for the agent to respond."
+    },
+    "Handoff": {
+      "connected_to_agent": "Connected to agent",
+      "chat_has_ended": "Chat has ended"
     },
     "ChatInput": {
       "see_more": "See more",

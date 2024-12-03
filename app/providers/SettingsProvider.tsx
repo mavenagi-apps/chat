@@ -3,8 +3,7 @@ import { getPublicAppSettings } from '@/app/actions';
 import Spinner from '@magi/components/Spinner';
 import { useParams } from 'next/navigation';
 
-
-type SettingsContextType = Partial<AppSettings> | null;
+type SettingsContextType = ClientSafeAppSettings | null;
 
 const SettingsContext = createContext<SettingsContextType>(null);
 
@@ -18,8 +17,12 @@ export const SettingsProvider = ({
 
   useEffect(() => {
     const loadSettings = async () => {
-      const appSettings = await getPublicAppSettings(orgFriendlyId, agentId);
-      setSettings(appSettings);
+      if (orgFriendlyId && agentId) {
+        const appSettings = await getPublicAppSettings(orgFriendlyId, agentId);
+        setSettings(appSettings);
+      } else {
+        setSettings(null);
+      }
     };
 
     void loadSettings();
