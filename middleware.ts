@@ -51,7 +51,7 @@ const supportsCsp = (request: NextRequest): boolean => {
  * Processes security settings and returns appropriate headers
  */
 const processSecuritySettings = (
-  appSettings: AppSettings,
+  appSettings: ParsedAppSettings,
   request: NextRequest
 ): { headers?: string; blocked: boolean } => {
   const allowlist = [...(appSettings.embedAllowlist || [])];
