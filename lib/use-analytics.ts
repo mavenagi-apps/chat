@@ -1,7 +1,7 @@
-import { Analytics } from '@/lib/analytics';
-import { useState, useEffect } from 'react';
-import { useSettings } from '@/app/providers/SettingsProvider';
-import type { MagiProduct, MagiEvent } from '@/lib/analytics/events';
+import { Analytics } from "@/lib/analytics";
+import { useState, useEffect } from "react";
+import { useSettings } from "@/app/providers/SettingsProvider";
+import type { MagiProduct, MagiEvent } from "@/lib/analytics/events";
 
 export function useAnalytics() {
   const { amplitudeApiKey } = useSettings();
@@ -23,7 +23,7 @@ export function useAnalytics() {
         init: (
           product: MagiProduct,
           userId?: string | undefined,
-          email?: string | undefined
+          email?: string | undefined,
         ) => void;
       }
   >({
@@ -36,7 +36,7 @@ export function useAnalytics() {
     init: (
       product: MagiProduct,
       userId?: string | undefined,
-      email?: string | undefined
+      email?: string | undefined,
     ) => {
       setInitQueue((prevQueue) => [...prevQueue, { product, userId, email }]);
     },

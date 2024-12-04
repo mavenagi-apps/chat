@@ -1,19 +1,19 @@
-import { useContext } from 'react';
-import { useTranslations } from 'next-intl';
-import React, { useState } from 'react';
-import { IoChatbubbleEllipsesOutline } from 'react-icons/io5';
+import { useContext } from "react";
+import { useTranslations } from "next-intl";
+import React, { useState } from "react";
+import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 
-import { ChatContext } from './Chat';
+import { ChatContext } from "./Chat";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
   FieldGroup,
   useForm,
-} from '@magi/ui';
+} from "@magi/ui";
 
 export default function EscalationFormDisplay() {
-  const t = useTranslations('chat.EscalationFormDisplay');
+  const t = useTranslations("chat.EscalationFormDisplay");
   const [error, setError] = useState<string | null>(null);
   const { initializeHandoff } = useContext(ChatContext);
 
@@ -22,8 +22,8 @@ export default function EscalationFormDisplay() {
       try {
         initializeHandoff();
       } catch (error) {
-        console.error('Error initiating chat session:', error);
-        setError('Failed to initiate chat session. Please try again.');
+        console.error("Error initiating chat session:", error);
+        setError("Failed to initiate chat session. Please try again.");
       }
     },
   });
@@ -35,7 +35,7 @@ export default function EscalationFormDisplay() {
   return (
     <div>
       {error ? (
-        <Alert variant='warning'>
+        <Alert variant="warning">
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -43,11 +43,11 @@ export default function EscalationFormDisplay() {
         <Form.Form {...methods}>
           <FieldGroup>
             <Form.SubmitButton
-              variant='primary'
-              className='w-full bg-[--brand-color]'
+              variant="primary"
+              className="w-full bg-[--brand-color]"
             >
               <IoChatbubbleEllipsesOutline />
-              {t('connect_to_live_agent')}
+              {t("connect_to_live_agent")}
             </Form.SubmitButton>
           </FieldGroup>
         </Form.Form>
