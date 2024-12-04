@@ -39,8 +39,8 @@ importers:
         specifier: ^9.0.2
         version: 9.0.2
       mavenagi:
-        specifier: 0.0.0-alpha.27
-        version: 0.0.0-alpha.27
+        specifier: 1.0.2
+        version: 1.0.2
       nanoid:
         specifier: ^5.0.7
         version: 5.0.8
@@ -2432,8 +2432,8 @@ packages:
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
 
-  mavenagi@0.0.0-alpha.27:
-    resolution: {integrity: sha512-zrNcXH9Q5AXGzlrGrsTaF3A6DQgXw/+E+Fd48LiLc7wN9HcwNThUiK8TQWwcQCWNOMEYO3Sst4BYAzeO42IgCg==}
+  mavenagi@1.0.2:
+    resolution: {integrity: sha512-gsZlZuN3t51+n/wCdmTbXUkzkhmC5iRdNyG2tfcNW/TT7yb4Dz+HDS1PYxIpsmCCoxEND6aiweh9NYBq0ta7VA==}
 
   mdast-util-find-and-replace@3.0.1:
     resolution: {integrity: sha512-SG21kZHGC3XRTSUhtofZkBzZTJNM5ecCi0SK2IMKmSXR8vO3peL+kb1O0z7Zl83jKtutG4k5Wv/W7V3/YHvzPA==}
@@ -6101,7 +6101,7 @@ snapshots:
 
   markdown-table@3.0.4: {}
 
-  mavenagi@0.0.0-alpha.27:
+  mavenagi@1.0.2:
     dependencies:
       form-data: 4.0.1
       formdata-node: 6.0.3

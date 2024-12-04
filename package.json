@@ -33,7 +33,7 @@
     "highlight.js": "^11.10.0",
     "jose": "^5.9.6",
     "jsonwebtoken": "^9.0.2",
-    "mavenagi": "0.0.0-alpha.27",
+    "mavenagi": "1.0.2",
     "nanoid": "^5.0.7",
     "next": "15.0.3",
     "next-intl": "^3.24.0",
