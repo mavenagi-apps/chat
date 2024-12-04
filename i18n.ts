@@ -1,32 +1,32 @@
-import { headers } from 'next/headers';
-import { getRequestConfig } from 'next-intl/server';
-import type { AbstractIntlMessages, IntlConfig } from 'use-intl/core';
+import { headers } from "next/headers";
+import { getRequestConfig } from "next-intl/server";
+import type { AbstractIntlMessages, IntlConfig } from "use-intl/core";
 
-const PERMITTED_LOCALES = ['en', 'fr', 'es', 'it'];
+const PERMITTED_LOCALES = ["en", "fr", "es", "it"];
 
 // Helper function to get base locale
 function getBaseLocale(locale: string): string {
   // Handle cases like 'en-US' -> 'en'
-  const baseLocale = locale.split('-')[0].toLowerCase();
+  const baseLocale = locale.split("-")[0].toLowerCase();
   return PERMITTED_LOCALES.includes(
-    baseLocale as (typeof PERMITTED_LOCALES)[number]
+    baseLocale as (typeof PERMITTED_LOCALES)[number],
   )
     ? baseLocale
-    : 'en';
+    : "en";
 }
 
 export default getRequestConfig(
   async ({ requestLocale }): Promise<IntlConfig> => {
     try {
-      let locale = (await requestLocale) || 'en';
+      let locale = (await requestLocale) || "en";
       const headersList = await headers();
-      const acceptLanguage = headersList.get('accept-language');
+      const acceptLanguage = headersList.get("accept-language");
 
       if (acceptLanguage) {
         // Get the first matching locale from accept-language header
         const matchedLocale = acceptLanguage
-          .split(',')
-          .map((lang) => lang.split(';')[0].trim()) // Remove quality values
+          .split(",")
+          .map((lang) => lang.split(";")[0].trim()) // Remove quality values
           .find((lang) => PERMITTED_LOCALES.includes(getBaseLocale(lang)));
 
         if (matchedLocale) {
@@ -43,12 +43,12 @@ export default getRequestConfig(
           .default as AbstractIntlMessages,
       };
     } catch (error) {
-      console.error('Error loading locale messages:', error);
+      console.error("Error loading locale messages:", error);
       return {
-        locale: 'en',
-        messages: (await import('./messages/en.json'))
+        locale: "en",
+        messages: (await import("./messages/en.json"))
           .default as AbstractIntlMessages,
       };
     }
-  }
+  },
 );

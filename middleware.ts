@@ -1,12 +1,12 @@
-import { NextResponse, URLPattern } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { getAppSettings } from '@/app/api/server/utils';
-import { notFound } from 'next/navigation';
+import { NextResponse, URLPattern } from "next/server";
+import type { NextRequest } from "next/server";
+import { getAppSettings } from "@/app/api/server/utils";
+import { notFound } from "next/navigation";
 
 // Constants
 const PATHNAMES = [
-  '/demo/:orgFriendlyId/:agentId/:path*',
-  '/:orgFriendlyId/:agentId/:path*',
+  "/demo/:orgFriendlyId/:agentId/:path*",
+  "/:orgFriendlyId/:agentId/:path*",
 ] as const;
 
 // Types
@@ -20,7 +20,7 @@ interface PathParams {
  * Extracts path parameters from a URL based on predefined patterns
  */
 const extractPathParams = (url: string): PathParams => {
-  const input = url.split('?')[0];
+  const input = url.split("?")[0];
 
   for (const pathname of PATHNAMES) {
     const pattern = new URLPattern({ pathname });
@@ -35,7 +35,10 @@ const extractPathParams = (url: string): PathParams => {
 /**
  * Validates if a referrer domain is in the allowlist
  */
-const isAllowedDomain = (referrer: string | null, allowlist: string[]): boolean => {
+const isAllowedDomain = (
+  referrer: string | null,
+  allowlist: string[],
+): boolean => {
   if (!referrer) return false;
   return allowlist.some((domain) => referrer.includes(domain));
 };
@@ -44,7 +47,7 @@ const isAllowedDomain = (referrer: string | null, allowlist: string[]): boolean 
  * Checks if the request supports Content Security Policy
  */
 const supportsCsp = (request: NextRequest): boolean => {
-  return request.headers.get('sec-fetch-mode') === 'navigate';
+  return request.headers.get("sec-fetch-mode") === "navigate";
 };
 
 /**
@@ -52,11 +55,13 @@ const supportsCsp = (request: NextRequest): boolean => {
  */
 const processSecuritySettings = (
   appSettings: ParsedAppSettings,
-  request: NextRequest
+  request: NextRequest,
 ): { headers?: string; blocked: boolean } => {
   const allowlist = [...(appSettings.embedAllowlist || [])];
-  const enableDemoSite = ['true', '1'].includes(appSettings.enableDemoSite || '');
-  const referrer = request.headers.get('referer');
+  const enableDemoSite = ["true", "1"].includes(
+    appSettings.enableDemoSite || "",
+  );
+  const referrer = request.headers.get("referer");
 
   if (enableDemoSite) {
     allowlist.push("'self'");
@@ -67,8 +72,8 @@ const processSecuritySettings = (
   }
 
   return {
-    headers: `frame-ancestors ${allowlist.join(' ')}`,
-    blocked: !supportsCsp(request) && !isAllowedDomain(referrer, allowlist)
+    headers: `frame-ancestors ${allowlist.join(" ")}`,
+    blocked: !supportsCsp(request) && !isAllowedDomain(referrer, allowlist),
   };
 };
 
@@ -78,7 +83,11 @@ const processSecuritySettings = (
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
-  if (!['iframe', 'document'].includes(request.headers.get('sec-fetch-dest') || '')) {
+  if (
+    !["iframe", "document"].includes(
+      request.headers.get("sec-fetch-dest") || "",
+    )
+  ) {
     return response;
   }
 
@@ -87,8 +96,8 @@ export async function middleware(request: NextRequest) {
   if (orgFriendlyId && agentId) {
     // Add 15-minute cache header
     response.headers.set(
-      'Cache-Control',
-      'public, max-age=900, stale-while-revalidate=60'
+      "Cache-Control",
+      "public, max-age=900, stale-while-revalidate=60",
     );
 
     try {
@@ -97,8 +106,8 @@ export async function middleware(request: NextRequest) {
       const security = processSecuritySettings(appSettings, request);
 
       if (security.headers) {
-        response.headers.set('Content-Security-Policy', security.headers);
-        console.log(request.url, security.headers)
+        response.headers.set("Content-Security-Policy", security.headers);
+        console.log(request.url, security.headers);
         if (security.blocked) {
           return notFound();
         }
@@ -119,6 +128,6 @@ export const config = {
      * - /api (API routes)
      * - /_next (Next.js internal routes)
      */
-    '/((?!api|_next/|_next$|not-found).*)',
+    "/((?!api|_next/|_next$|not-found).*)",
   ],
 };
