@@ -1,9 +1,9 @@
-"use server";
+'use server';
 
-import { getMavenAGIClient } from "@/app/index";
-import { type MavenAGIClient, type MavenAGI } from "mavenagi";
-import { type FeedbackType } from "mavenagi/api";
-import { nanoid } from "nanoid";
+import { getMavenAGIClient } from '@/app/index';
+import { type MavenAGIClient, type MavenAGI } from 'mavenagi';
+import { type FeedbackType } from 'mavenagi/api';
+import { nanoid } from 'nanoid';
 
 interface CreateOrUpdateFeedbackProps {
   orgFriendlyId: string;
@@ -44,17 +44,15 @@ export async function createOrUpdateFeedback({
     const {
       feedbackId: { referenceId },
     } = await client.conversation.createFeedback(
-      feedbackRequest as MavenAGI.FeedbackRequest,
+      feedbackRequest as MavenAGI.FeedbackRequest
     );
     return referenceId;
   } catch (error) {
-    return { error: (error as any)?.message || "Unknown error" };
+    return { error: (error as any)?.message || 'Unknown error' };
   }
 }
 
-const parseHandoffConfiguration = (
-  handoffConfiguration: AppSettings["handoffConfiguration"],
-): ClientSafeAppSettings["handoffConfiguration"] | undefined => {
+const parseHandoffConfiguration = (handoffConfiguration: AppSettings['handoffConfiguration']): ClientSafeAppSettings['handoffConfiguration'] | undefined => {
   if (!handoffConfiguration) {
     return undefined;
   }
@@ -70,14 +68,14 @@ const parseHandoffConfiguration = (
       type: parsedHandoffConfiguration.type,
     };
   } catch (error) {
-    console.error("Error parsing handoff configuration:", error);
+    console.error('Error parsing handoff configuration:', error);
     return undefined;
   }
 };
 
 export async function getPublicAppSettings(
   orgFriendlyId: string,
-  agentId: string,
+  agentId: string
 ): Promise<ClientSafeAppSettings | null> {
   if (!orgFriendlyId || !agentId) {
     return null;
@@ -85,11 +83,9 @@ export async function getPublicAppSettings(
 
   const client = getMavenAGIClient(orgFriendlyId, agentId);
   try {
-    const settings = (await client.appSettings.get()) as unknown as AppSettings;
-    const parsedHandoffConfiguration = parseHandoffConfiguration(
-      settings.handoffConfiguration,
-    );
-
+    const settings = await client.appSettings.get() as unknown as AppSettings;
+    const parsedHandoffConfiguration = parseHandoffConfiguration(settings.handoffConfiguration);
+    
     return {
       amplitudeApiKey: settings.amplitudeApiKey,
       logoUrl: settings.logoUrl,
@@ -103,37 +99,27 @@ export async function getPublicAppSettings(
       handoffConfiguration: parsedHandoffConfiguration,
     };
   } catch (error) {
-    console.error("Error fetching app settings:", error);
+    console.error('Error fetching app settings:', error);
     return null;
   }
 }
 
 export async function submitBailoutForm(_prevState: any, formData: FormData) {
   try {
-    const {
-      orgFriendlyId,
-      agentId,
-      conversationId,
-      actionFormId,
-      ...parameters
-    } = Object.fromEntries(formData.entries());
-    const client = getMavenAGIClient(
-      orgFriendlyId as string,
-      agentId as string,
+    const { orgFriendlyId, agentId, conversationId, actionFormId, ...parameters } = Object.fromEntries(
+      formData.entries()
     );
+    const client = getMavenAGIClient(orgFriendlyId as string, agentId as string);
 
     const request = {
       actionFormId: actionFormId as string,
       parameters,
     };
 
-    await client.conversation.submitActionForm(
-      conversationId as string,
-      request,
-    );
+    await client.conversation.submitActionForm(conversationId as string, request);
     return { success: true, data: Object.fromEntries(formData) };
   } catch (error) {
-    console.error("Error submitting bailout form", error);
-    return { success: false, error: "Unknown error" };
+    console.error('Error submitting bailout form', error);
+    return { success: false, error: 'Unknown error' };
   }
 }

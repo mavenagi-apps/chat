@@ -1,5 +1,5 @@
-import "@testing-library/jest-dom";
-import { vi } from "vitest";
+import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // Mock ResizeObserver which isn't available in jsdom
 global.ResizeObserver = vi.fn().mockImplementation(() => ({

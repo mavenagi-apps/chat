@@ -1,9 +1,9 @@
-import { defineConfig, type LibraryOptions } from "vite";
-import { createBaseConfig, EXPORT_NAME } from "./vite.config.base";
+import { defineConfig, type LibraryOptions } from 'vite';
+import { createBaseConfig, EXPORT_NAME } from './vite.config.base';
 
 export default defineConfig(({ mode }) => {
   const config = createBaseConfig(mode);
-
+  
   // Override settings for debug build
   config.build = {
     ...config.build,
@@ -14,12 +14,12 @@ export default defineConfig(({ mode }) => {
     minify: false,
     rollupOptions: {
       output: {
-        format: "umd",
-        indent: "  ",
+        format: 'umd',
+        indent: '  ',
         compact: false,
       },
     },
   };
 
   return config;
-});
+}); 

@@ -1,12 +1,12 @@
 /**
  * Custom React hook for managing chat functionality
- *
+ * 
  * Key features:
  * - Manages chat messages and conversation state
  * - Handles streaming responses from the API
  * - Supports user authentication
  * - Processes different types of responses (text, metadata, actions)
- *
+ * 
  * Usage:
  * const { messages, askQuestion, isLoading, isResponseAvailable } = useChat({
  *   orgFriendlyId: 'org-id',
@@ -15,33 +15,28 @@
  * });
  */
 
-"use client";
+'use client';
 
-import React, { useCallback, useEffect, useMemo } from "react";
-import { nanoid } from "nanoid";
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { nanoid } from 'nanoid';
 
-import { type MavenAGI } from "mavenagi";
+import { type MavenAGI } from 'mavenagi'
 import {
   type ConversationMessageResponse,
   BotConversationMessageType,
-} from "mavenagi/api";
+} from 'mavenagi/api';
 import {
   type Message,
   type ChatMessage,
   type UserChatMessage,
   isBotMessage,
   isChatMessage,
-  isChatUserMessage,
-} from "@/types";
-import {
-  AGENT_HEADER,
-  AUTHENTICATION_HEADER,
-  AuthJWTPayload,
-  ORGANIZATION_HEADER,
-} from "@/app/constants/authentication";
-import { decodeJwt } from "jose";
-import { useParams } from "next/navigation";
-const API_ENDPOINT = "/api/create";
+  isChatUserMessage
+} from '@/types';
+import { AGENT_HEADER, AUTHENTICATION_HEADER, AuthJWTPayload, ORGANIZATION_HEADER } from '@/app/constants/authentication';
+import { decodeJwt } from 'jose';
+import { useParams } from 'next/navigation';
+const API_ENDPOINT = '/api/create';
 
 type UseChatOptions = {
   signedUserData: string | null;
@@ -66,14 +61,14 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
   const [authToken, setAuthToken] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [abortController, setAbortController] = React.useState(
-    new AbortController(),
+    new AbortController()
   );
 
   const { orgFriendlyId, id: agentId }: UseChatParams = useParams();
 
   const requestHeaders = useMemo(() => {
     const headers: HeadersInit = {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       [ORGANIZATION_HEADER]: orgFriendlyId,
       [AGENT_HEADER]: agentId,
     };
@@ -98,7 +93,7 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
     const lastMessage = _messages[_messages.length - 1];
     return (
       isChatMessage(lastMessage) &&
-      _messages[_messages.length - 1].type === "USER"
+      _messages[_messages.length - 1].type === 'USER'
     );
   }, []);
 
@@ -106,11 +101,11 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
     async (_messages: Message[], newAbortController: AbortController) => {
       const lastMessage = _messages[_messages.length - 1];
       if (!isChatUserMessage(lastMessage)) {
-        throw new Error("Last message is not a user message");
+        throw new Error('Last message is not a user message');
       }
 
       return await fetch(API_ENDPOINT, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({
           question: (_messages[_messages.length - 1] as UserChatMessage).text,
           signedUserData: signedUserData || undefined,
@@ -119,7 +114,7 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
         signal: newAbortController.signal,
       });
     },
-    [signedUserData, requestHeaders],
+    [signedUserData, requestHeaders]
   );
 
   const streamResponse = useCallback(async (response: Response) => {
@@ -131,7 +126,7 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
 
     const decoder = new TextDecoder();
     let done = false;
-    let buffer = "";
+    let buffer = '';
     let referenceId: string | undefined; // Reference ID to be set by the "start" event
     const eventQueue: MavenAGI.StreamResponse[] = []; // Buffer to hold events that arrive before "start"
 
@@ -142,22 +137,22 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
       buffer += decoder.decode(value, { stream: true });
 
       let boundaryIndex;
-      while ((boundaryIndex = buffer.indexOf("\n\n")) !== -1) {
+      while ((boundaryIndex = buffer.indexOf('\n\n')) !== -1) {
         const completeEvent = buffer.slice(0, boundaryIndex + 2);
         buffer = buffer.slice(boundaryIndex + 2);
 
         const eventData = completeEvent
-          .split("\n")
-          .filter((line) => line.startsWith("data:"))
-          .map((line) => line.replace(/^data: /, "").trim())
-          .join("");
+          .split('\n')
+          .filter((line) => line.startsWith('data:'))
+          .map((line) => line.replace(/^data: /, '').trim())
+          .join('');
 
         if (eventData) {
           try {
             const parsedData = JSON.parse(eventData);
 
             // Handle the "start" event immediately
-            if (parsedData.eventType === "start") {
+            if (parsedData.eventType === 'start') {
               referenceId = parsedData.conversationMessageId?.referenceId;
 
               handleParsedData(parsedData, referenceId);
@@ -176,7 +171,7 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
               handleParsedData(parsedData, referenceId);
             }
           } catch (err) {
-            console.error("Failed to parse JSON:", err);
+            console.error('Failed to parse JSON:', err);
           }
         }
       }
@@ -196,11 +191,11 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
           // Get user id from headers
           const authToken = response.headers.get(AUTHENTICATION_HEADER);
           if (!authToken) {
-            throw new Error("Auth token not found");
+            throw new Error('Auth token not found');
           }
           const responseAuthData = decodeJwt<AuthJWTPayload>(authToken);
           if (!responseAuthData.conversationId) {
-            throw new Error("Conversation ID not found");
+            throw new Error('Conversation ID not found');
           }
           setAuthToken(authToken);
           setConversationId(responseAuthData.conversationId);
@@ -210,17 +205,17 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
         }
       }
     },
-    [createResponse, streamResponse, userAskedQuestion],
+    [createResponse, streamResponse, userAskedQuestion]
   );
 
   const handleParsedData = useCallback(
     (parsedData: MavenAGI.StreamResponse, referenceId: string | undefined) => {
-      if (parsedData.eventType === "start") {
+      if (parsedData.eventType === 'start') {
         const { conversationMessageId } = parsedData;
         const newMessage: ConversationMessageResponse.Bot = {
           responses: [],
           conversationMessageId,
-          type: "bot",
+          type: 'bot',
           botMessageType: BotConversationMessageType.BotResponse,
           metadata: {
             followupQuestions: [],
@@ -228,10 +223,10 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
           },
         };
         setMessages((prevState) => [...prevState, newMessage]);
-      } else if (parsedData.eventType === "text") {
+      } else if (parsedData.eventType === 'text') {
         setIsLoading(false);
         if (!referenceId) {
-          throw new Error("No referenceId");
+          throw new Error('No referenceId');
         }
         setMessages((prevMessages) =>
           prevMessages.map((m) =>
@@ -247,13 +242,13 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
                     },
                   ],
                 }
-              : m,
-          ),
+              : m
+          )
         );
-      } else if (parsedData.eventType === "metadata") {
+      } else if (parsedData.eventType === 'metadata') {
         const { followupQuestions, sources } = parsedData;
         if (!referenceId) {
-          throw new Error("No referenceId");
+          throw new Error('No referenceId');
         }
         setMessages((prevMessages) =>
           prevMessages.map((m) =>
@@ -266,10 +261,10 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
                     sources,
                   },
                 }
-              : m,
-          ),
+              : m
+          )
         );
-      } else if (parsedData.eventType === "action") {
+      } else if (parsedData.eventType === 'action') {
         setMessages((prevMessages) =>
           prevMessages.map((m) =>
             isBotMessage(m) &&
@@ -278,12 +273,12 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
                   ...m,
                   action: parsedData,
                 }
-              : m,
-          ),
+              : m
+          )
         );
       }
     },
-    [],
+    []
   );
 
   const getResponseAvailable = useCallback(() => {
@@ -301,7 +296,7 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
   useEffect(() => {
     const timestamp = new Date().getTime();
     setMessages((prevMessages) =>
-      prevMessages.map((m) => ({ timestamp, ...m }) as Message),
+      prevMessages.map((m) => ({ timestamp, ...m }) as Message)
     );
   }, [messages.length, setMessages]);
 
@@ -309,7 +304,7 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
     messages,
     askQuestion: (message: ChatMessage) => {
       setMessages((prevState) => [...prevState, message]);
-      if (message.type === "USER") {
+      if (message.type === 'USER') {
         void ask([...messages, message]);
       }
     },

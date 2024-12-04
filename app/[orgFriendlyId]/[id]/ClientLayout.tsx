@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { AnalyticsProvider } from "@/packages/components/analytics/AnalyticsProvider";
-import { MagiProduct } from "@/lib/analytics/events";
-import { SettingsProvider } from "@/app/providers/SettingsProvider";
+import { AnalyticsProvider } from '@/packages/components/analytics/AnalyticsProvider';
+import { MagiProduct } from '@/lib/analytics/events';
+import { SettingsProvider } from '@/app/providers/SettingsProvider';
 
 export default function ClientLayout({
   children,
@@ -11,9 +11,11 @@ export default function ClientLayout({
 }>) {
   return (
     <SettingsProvider>
-      <AnalyticsProvider product={MagiProduct.chat}>
+      <AnalyticsProvider
+        product={MagiProduct.chat}
+      >
         {children}
       </AnalyticsProvider>
     </SettingsProvider>
-  );
+  )
 }

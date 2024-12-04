@@ -13,7 +13,7 @@ declare global {
   }
 
   type HandoffConfiguration = {
-    type: "zendesk" | "salesforce";
+    type: 'zendesk' | 'salesforce';
     subdomain: string;
     apiKey: string;
     apiSecret: string;
@@ -21,7 +21,7 @@ declare global {
   };
 
   interface ClientSafeAppSettings extends Partial<AppSettings> {
-    handoffConfiguration?: { type: HandoffConfiguration["type"] } | undefined;
+    handoffConfiguration?: { type: HandoffConfiguration['type'] } | undefined;
   }
 
   interface ParsedAppSettings extends AppSettings {
