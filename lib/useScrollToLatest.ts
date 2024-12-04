@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef } from 'react';
 
 export function useScrollToLatest() {
   const latestChatBubbleRef = useRef<HTMLDivElement>(null);
@@ -7,11 +7,11 @@ export function useScrollToLatest() {
       setTimeout(
         () =>
           latestChatBubbleRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-            inline: "nearest",
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest',
           }),
-        100,
+        100
       );
     }, []),
     latestChatBubbleRef,

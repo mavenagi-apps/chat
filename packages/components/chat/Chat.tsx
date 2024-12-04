@@ -1,29 +1,18 @@
-import clsx from "clsx";
-import React, { useEffect, useState } from "react";
+import clsx from 'clsx'
+import React, {useEffect, useState} from 'react'
 
-import {
-  type ChatEndedMessage,
-  type ChatEstablishedMessage,
-  type HandoffChatMessage,
-  type Message,
-  isBotMessage,
-} from "@/types";
-import { useSettings } from "@/app/providers/SettingsProvider";
+import { type ChatEndedMessage, type ChatEstablishedMessage, type HandoffChatMessage, type Message, isBotMessage } from '@/types';
+import { useSettings } from '@/app/providers/SettingsProvider';
 
 interface ChatProps {
-  messages: (
-    | Message
-    | HandoffChatMessage
-    | ChatEstablishedMessage
-    | ChatEndedMessage
-  )[];
-  askFn: (question: string) => Promise<void>;
-  initializeHandoff: () => Promise<void>;
-  brandColor?: string;
-  className?: string;
-  agentName: string | null;
-  isHandoff: boolean;
-  handleEndHandoff: () => Promise<void>;
+  messages: (Message | HandoffChatMessage | ChatEstablishedMessage | ChatEndedMessage)[]
+  askFn: (question: string) => Promise<void>
+  initializeHandoff: () => Promise<void>
+  brandColor?: string
+  className?: string
+  agentName: string | null
+  isHandoff: boolean
+  handleEndHandoff: () => Promise<void>
 }
 
 export const ChatContext = React.createContext<{
@@ -52,37 +41,35 @@ export default function Chat({
   className,
   children,
 }: React.PropsWithChildren<ChatProps>) {
-  const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
+  const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([])
   const { brandColor, brandFontColor } = useSettings();
   useEffect(() => {
     if (messages.length > 0) {
-      const lastMsg = messages[messages.length - 1];
+      const lastMsg = messages[messages.length - 1]
 
       if (isBotMessage(lastMsg)) {
-        setFollowUpQuestions(lastMsg.metadata?.followupQuestions || []);
-        return;
+        setFollowUpQuestions(lastMsg.metadata?.followupQuestions || [])
+        return
       }
     }
-    setFollowUpQuestions([]);
-  }, [messages]);
+    setFollowUpQuestions([])
+  }, [messages])
 
   return (
-    <ChatContext.Provider
-      value={{
-        followUpQuestions,
-        ask: askFn,
-        initializeHandoff,
-        agentName,
-        isHandoff,
-        handleEndHandoff,
-      }}
-    >
+    <ChatContext.Provider value={{
+      followUpQuestions,
+      ask: askFn,
+      initializeHandoff,
+      agentName,
+      isHandoff,
+      handleEndHandoff,
+    }}>
       <div
-        className={clsx(className, "flex w-full flex-1 flex-col overflow-auto")}
+        className={clsx(className, 'flex w-full flex-1 flex-col overflow-auto')}
         style={{
           // @ts-expect-error css variable
-          "--brand-color": brandColor,
-          "--brand-font-color": brandFontColor || "#FFFFFF",
+          '--brand-color': brandColor,
+          '--brand-font-color': brandFontColor || '#FFFFFF',
         }}
       >
         {children}

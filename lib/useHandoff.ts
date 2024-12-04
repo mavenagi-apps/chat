@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSettings } from "@/app/providers/SettingsProvider";
-import { useParams } from "next/dist/client/components/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSettings } from '@/app/providers/SettingsProvider';
+import { useParams } from 'next/dist/client/components/navigation';
 import {
   HANDOFF_AUTH_HEADER,
   ORGANIZATION_HEADER,
   AGENT_HEADER,
-} from "@/app/constants/authentication";
+} from '@/app/constants/authentication';
 import {
   // type ZendeskChatMessage,
   type Message,
@@ -15,13 +15,13 @@ import {
   type ChatEstablishedMessage,
   type UserChatMessage,
   type ChatEndedMessage,
-} from "@/types";
+} from '@/types';
 
 export enum HandoffStatus {
-  INITIALIZED = "initialized",
-  INITIALIZING = "initializing",
-  NOT_INITIALIZED = "not_initialized",
-  FAILED = "failed",
+  INITIALIZED = 'initialized',
+  INITIALIZING = 'initializing',
+  NOT_INITIALIZED = 'not_initialized',
+  FAILED = 'failed',
 }
 
 type ChatEvent = {
@@ -42,26 +42,23 @@ type Params = {
 export function useHandoff({ messages, signedUserData }: HandoffProps) {
   const { orgFriendlyId, id: agentId } = useParams<Params>();
   const { handoffConfiguration } = useSettings();
-  const handoffTypeRef = useRef<HandoffConfiguration["type"] | null>(
-    handoffConfiguration?.type ?? null,
+  const handoffTypeRef = useRef<HandoffConfiguration['type'] | null>(
+    handoffConfiguration?.type ?? null
   );
   const [handoffError, _setHandoffError] = useState<string | null>(null);
   const [handoffChatEvents, setHandoffChatEvents] = useState<
-    (
-      | HandoffChatMessage
-      | ChatEstablishedMessage
-      | UserChatMessage
-      | ChatEndedMessage
-    )[]
+    (HandoffChatMessage | ChatEstablishedMessage | UserChatMessage | ChatEndedMessage)[]
   >([]);
   const [handoffAuthToken, setHandoffAuthToken] = useState<string | null>(null);
   const [agentName, setAgentName] = useState<string | null>(null);
 
   const [handoffStatus, setHandoffStatus] = useState<HandoffStatus>(
-    HandoffStatus.NOT_INITIALIZED,
+    HandoffStatus.NOT_INITIALIZED
   );
 
-  const [abortController, setAbortController] = useState(new AbortController());
+  const [abortController, setAbortController] = useState(
+    new AbortController()
+  );
 
   const resetAbortController = useCallback(() => {
     abortController.abort();
@@ -72,7 +69,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
 
   const generatedHeaders: HeadersInit = useMemo(() => {
     const headers: HeadersInit = {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       [ORGANIZATION_HEADER]: orgFriendlyId,
       [AGENT_HEADER]: agentId,
     };
@@ -86,84 +83,79 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
 
   const handoffMessages = useMemo(() => {
     switch (handoffTypeRef.current) {
-      case "zendesk":
+      case 'zendesk':
         return messages
-          .filter((message) => ["USER", "bot"].includes(message.type))
+          .filter((message) => ['USER', 'bot'].includes(message.type))
           .map((message) => {
             return {
               author: {
-                type: isChatUserMessage(message) ? "user" : "business",
+                type: isChatUserMessage(message) ? 'user' : 'business',
               },
               content: {
-                type: "text",
+                type: 'text',
                 text: isChatUserMessage(message)
                   ? message.text
                   : isBotMessage(message)
                     ? message.responses
                         .map((response: any) => response.text)
-                        .join("")
-                    : "",
+                        .join('')
+                    : '',
               },
             };
           });
-      case "salesforce":
+      case 'salesforce':
       case null:
       default:
         return [];
     }
   }, [messages]);
 
-  const handleHandoffChatEvent = useCallback(
-    (event: HandoffChatMessage) => {
-      const author = event.payload?.message?.author;
-      if (author?.type === "user") {
-        return;
-      }
+  const handleHandoffChatEvent = useCallback((event: HandoffChatMessage) => {
+    const author = event.payload?.message?.author;
+    if (author?.type === 'user') {
+      return;
+    }
 
-      if (author?.type === "business" && author.displayName) {
-        setAgentName(author.displayName);
-      }
+    if (author?.type === 'business' && author.displayName) {
+      setAgentName(author.displayName);
+    }
 
-      const eventWithTimestamp = {
-        ...event,
-        type: "handoff-zendesk",
-        timestamp: new Date(event.createdAt).getTime(),
-      };
-      setHandoffChatEvents((prev) => [...prev, eventWithTimestamp]);
-    },
-    [setHandoffChatEvents],
-  );
+    const eventWithTimestamp = {
+      ...event,
+      type: 'handoff-zendesk',
+      timestamp: new Date(event.createdAt).getTime(),
+    };
+    setHandoffChatEvents((prev) => [...prev, eventWithTimestamp]);
+  }, [setHandoffChatEvents]);
 
-  const streamResponse = useCallback(async function* (
-    response: Response,
-  ): AsyncGenerator<HandoffChatMessage> {
+  const streamResponse = useCallback(async function* (response: Response): AsyncGenerator<HandoffChatMessage> {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const reader = response.body?.getReader();
     if (!reader) {
-      throw new Error("No reader");
+      throw new Error('No reader');
     }
 
     const decoder = new TextDecoder();
-
+    
     try {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
+        
         const chunk = decoder.decode(value, { stream: true });
-        const events = chunk.split("\n\n");
+        const events = chunk.split('\n\n');
         for (const event of events) {
-          if (event.startsWith("data: ")) {
+          if (event.startsWith('data: ')) {
             try {
               const jsonData: ChatEvent = JSON.parse(event.slice(6));
               if (jsonData.message) {
                 yield jsonData.message;
               }
             } catch (error) {
-              console.error("Error parsing JSON:", error);
+              console.error('Error parsing JSON:', error);
             }
           }
         }
@@ -175,70 +167,69 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
 
   const getOrCreateUserAndConversation = useCallback(async () => {
     if (!handoffTypeRef.current) {
-      throw new Error("Handoff type is not set");
+      throw new Error('Handoff type is not set');
     }
 
     const response = await fetch(
       `/api/${handoffTypeRef.current}/conversations`,
       {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({
           messages: handoffMessages,
           signedUserData,
         }),
         headers: generatedHeaders,
-      },
+      }
     );
 
     const handoffAuthToken = response.headers.get(HANDOFF_AUTH_HEADER);
 
     if (!handoffAuthToken) {
-      throw new Error("Handoff auth token not found");
+      throw new Error('Handoff auth token not found');
     }
 
     setHandoffAuthToken(handoffAuthToken);
   }, [handoffMessages, signedUserData, generatedHeaders]);
 
-  const getMessages = useCallback(async () => {
-    if (!handoffAuthToken || !handoffTypeRef.current) {
-      return;
-    }
-
-    const newAbortController = resetAbortController();
-
-    try {
-      const response = await fetch(`/api/${handoffTypeRef.current}/messages`, {
-        method: "GET",
-        headers: generatedHeaders,
-        signal: newAbortController.signal,
-      });
-
-      for await (const event of streamResponse(response)) {
-        if (newAbortController.signal.aborted) break;
-        handleHandoffChatEvent(event);
+  const getMessages = useCallback(
+    async () => {
+      if (!handoffAuthToken || !handoffTypeRef.current) {
+        return;
       }
-    } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") {
-        console.log("Fetch aborted");
-      } else {
-        console.error("Error streaming response:", error);
+
+      const newAbortController = resetAbortController();
+
+      try {
+        const response = await fetch(`/api/${handoffTypeRef.current}/messages`, {
+          method: 'GET',
+          headers: generatedHeaders,
+          signal: newAbortController.signal,
+        });
+
+
+        for await (const event of streamResponse(response)) {
+          if (newAbortController.signal.aborted) break;
+          handleHandoffChatEvent(event);
+        }
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.log('Fetch aborted');
+        } else {
+          console.error('Error streaming response:', error);
+        }
       }
-    }
-  }, [
-    handoffAuthToken,
-    generatedHeaders,
-    streamResponse,
-    resetAbortController,
-  ]);
+    },
+    [handoffAuthToken, generatedHeaders, streamResponse, resetAbortController]
+  );
 
   const initializeHandoff = useCallback(async () => {
     if (!handoffTypeRef.current) {
-      console.error("Handoff type is not set");
+      console.error('Handoff type is not set');
       return;
     }
 
     if (!signedUserData) {
-      console.error("Signed user data is not set");
+      console.error('Signed user data is not set');
       return;
     }
 
@@ -252,7 +243,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
       setHandoffChatEvents((prev) => [
         ...prev,
         {
-          type: "ChatEstablished",
+          type: 'ChatEstablished',
           timestamp: new Date().getTime(),
         } as ChatEstablishedMessage,
       ]);
@@ -260,39 +251,34 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
   }, [handoffStatus]);
 
   useEffect(() => {
-    if (handoffAuthToken && handoffStatus === HandoffStatus.INITIALIZING) {
+    if (handoffAuthToken && handoffStatus === HandoffStatus.INITIALIZING) { 
       void getMessages();
       void setHandoffStatus(HandoffStatus.INITIALIZED);
     }
   }, [handoffAuthToken, getMessages]);
 
-  const askHandoff = useCallback(
-    async (message: string) => {
-      setHandoffChatEvents((prev) => [
-        ...prev,
-        {
-          text: message,
-          timestamp: new Date().getTime(),
-          type: "USER",
-        } as UserChatMessage,
-      ]);
+  const askHandoff = useCallback(async (message: string) => {
+    setHandoffChatEvents((prev) => [...prev, {
+      text: message,
+      timestamp: new Date().getTime(),
+        type: 'USER',
+      } as UserChatMessage,
+    ]);
 
-      if (!handoffAuthToken || !handoffTypeRef.current) {
-        return;
-      }
+    if (!handoffAuthToken || !handoffTypeRef.current) {
+      return;
+    }
 
-      const response = await fetch(`/api/${handoffTypeRef.current}/messages`, {
-        method: "POST",
-        body: JSON.stringify({ message }),
-        headers: generatedHeaders,
-      });
+    const response = await fetch(`/api/${handoffTypeRef.current}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+      headers: generatedHeaders,
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    },
-    [generatedHeaders],
-  );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  }, [generatedHeaders]);
 
   const handleEndHandoff = useCallback(async () => {
     resetAbortController();
@@ -301,7 +287,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     setHandoffChatEvents((prev) => [
       ...prev,
       {
-        type: "ChatEnded",
+        type: 'ChatEnded',
         timestamp: new Date().getTime(),
       } as ChatEndedMessage,
     ]);
@@ -313,7 +299,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     }
 
     void fetch(`/api/${handoffTypeRef.current}/conversations/passControl`, {
-      method: "POST",
+      method: 'POST',
       headers: generatedHeaders,
     });
   }, [

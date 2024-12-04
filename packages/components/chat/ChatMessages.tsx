@@ -1,20 +1,10 @@
-import { forwardRef, RefObject } from "react";
-import type {
-  Message,
-  HandoffChatMessage,
-  ChatEstablishedMessage,
-  ChatEndedMessage,
-} from "@/types";
-import { ChatMessage } from "@magi/components/chat/ChatMessage";
-import Spinner from "@magi/components/Spinner";
+import { forwardRef, RefObject } from 'react';
+import type { Message, HandoffChatMessage, ChatEstablishedMessage, ChatEndedMessage } from '@/types';
+import { ChatMessage } from '@magi/components/chat/ChatMessage';
+import Spinner from '@magi/components/Spinner';
 
 interface ChatMessagesProps {
-  messages: (
-    | Message
-    | HandoffChatMessage
-    | ChatEstablishedMessage
-    | ChatEndedMessage
-  )[];
+  messages: (Message | HandoffChatMessage | ChatEstablishedMessage | ChatEndedMessage)[];
   isLoading: boolean;
   isResponseAvailable: boolean;
   conversationId?: string;
@@ -23,7 +13,7 @@ interface ChatMessagesProps {
 export const ChatMessages = forwardRef<HTMLDivElement, ChatMessagesProps>(
   function ChatMessages(
     { messages, isLoading, isResponseAvailable, conversationId },
-    ref,
+    ref
   ) {
     return (
       <>
@@ -38,13 +28,13 @@ export const ChatMessages = forwardRef<HTMLDivElement, ChatMessagesProps>(
         ))}
 
         {isLoading && !isResponseAvailable && (
-          <div className="my-5">
-            <Spinner color={"#000000"} />
+          <div className='my-5'>
+            <Spinner color={'#000000'} />
           </div>
         )}
       </>
     );
-  },
+  }
 );
 
-ChatMessages.displayName = "ChatMessages";
+ChatMessages.displayName = 'ChatMessages';

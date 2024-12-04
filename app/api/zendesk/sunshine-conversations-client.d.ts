@@ -1,4 +1,4 @@
-declare module "sunshine-conversations-client" {
+declare module 'sunshine-conversations-client' {
   export class ApiClient {
     static instance: ApiClient;
     basePath: string;
@@ -31,11 +31,7 @@ declare module "sunshine-conversations-client" {
   // API classes
   export class ActivitiesApi {
     constructor();
-    postActivity(
-      appId: string,
-      conversationId: string,
-      activityPost: any,
-    ): Promise<any>;
+    postActivity(appId: string, conversationId: string, activityPost: any): Promise<any>;
   }
 
   export class AppsApi {
@@ -49,41 +45,22 @@ declare module "sunshine-conversations-client" {
 
   export class ConversationsApi {
     constructor();
-    createConversation(
-      appId: string,
-      conversationCreateBody: any,
-    ): Promise<any>;
+    createConversation(appId: string, conversationCreateBody: any): Promise<any>;
     deleteConversation(appId: string, conversationId: string): Promise<any>;
     getConversation(appId: string, conversationId: string): Promise<any>;
     listConversations(appId: string, filter?: any, options?: any): Promise<any>;
-    updateConversation(
-      appId: string,
-      conversationId: string,
-      conversationUpdateBody: any,
-    ): Promise<any>;
+    updateConversation(appId: string, conversationId: string, conversationUpdateBody: any): Promise<any>;
   }
 
   export class MessagesApi {
     constructor();
-    postMessage(
-      appId: string,
-      conversationId: string,
-      messagePost: any,
-    ): Promise<any>;
-    listMessages(
-      appId: string,
-      conversationId: string,
-      page?: number,
-    ): Promise<any>;
+    postMessage(appId: string, conversationId: string, messagePost: any): Promise<any>;
+    listMessages(appId: string, conversationId: string, page?: number): Promise<any>;
   }
 
   export class ParticipantsApi {
     constructor();
-    leaveConversation(
-      appId: string,
-      conversationId: string,
-      participantLeaveBody: any,
-    ): Promise<any>;
+    leaveConversation(appId: string, conversationId: string, participantLeaveBody: any): Promise<any>;
   }
 
   export class UsersApi {
@@ -91,11 +68,7 @@ declare module "sunshine-conversations-client" {
     createUser(appId: string, userCreateBody: any): Promise<any>;
     deleteUser(appId: string, userIdOrExternalId: string): Promise<any>;
     getUser(appId: string, userIdOrExternalId: string): Promise<any>;
-    updateUser(
-      appId: string,
-      userIdOrExternalId: string,
-      userUpdateBody: any,
-    ): Promise<any>;
+    updateUser(appId: string, userIdOrExternalId: string, userUpdateBody: any): Promise<any>;
   }
 
   export class WebhooksApi {
@@ -104,11 +77,7 @@ declare module "sunshine-conversations-client" {
     deleteWebhook(appId: string, webhookId: string): Promise<any>;
     getWebhook(appId: string, webhookId: string): Promise<any>;
     listWebhooks(appId: string): Promise<any>;
-    updateWebhook(
-      appId: string,
-      webhookId: string,
-      webhookUpdateBody: any,
-    ): Promise<any>;
+    updateWebhook(appId: string, webhookId: string, webhookUpdateBody: any): Promise<any>;
   }
 
   class ConversationCreateBody {
@@ -125,10 +94,6 @@ declare module "sunshine-conversations-client" {
 
   export class SwitchboardActionsApi {
     constructor();
-    passControl(
-      appId: string,
-      conversationId: string,
-      acceptControlBody: any,
-    ): Promise<any>;
+    passControl(appId: string, conversationId: string, acceptControlBody: any): Promise<any>;
   }
 }
