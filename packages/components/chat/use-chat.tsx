@@ -289,7 +289,6 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
             m.conversationMessageId?.referenceId === referenceId
               ? {
                   ...m,
-                  action: parsedData,
                   responses: [
                     ...(m.responses || []),
                     {
