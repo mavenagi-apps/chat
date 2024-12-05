@@ -91,7 +91,11 @@ async function initializeConversation(
     conversationId: { referenceId: conversationId },
     messages: [],
     responseConfig: {
-      capabilities: [MavenAGI.Capability.Markdown, MavenAGI.Capability.Forms],
+      capabilities: [
+        MavenAGI.Capability.Markdown,
+        MavenAGI.Capability.Forms,
+        MavenAGI.Capability.ChartsHighchartsTs,
+      ],
       isCopilot: false,
       responseLength: MavenAGI.ResponseLength.Medium,
     },
