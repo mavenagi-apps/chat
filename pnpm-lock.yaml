@@ -29,6 +29,12 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      highcharts:
+        specifier: ^12.0.2
+        version: 12.0.2
+      highcharts-react-official:
+        specifier: ^3.2.1
+        version: 3.2.1(highcharts@12.0.2)(react@19.0.0-rc-69d4b800-20241021)
       highlight.js:
         specifier: ^11.10.0
         version: 11.10.0
@@ -2005,6 +2011,15 @@ packages:
   he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
+
+  highcharts-react-official@3.2.1:
+    resolution: {integrity: sha512-hyQTX7ezCxl7JqumaWiGsroGWalzh24GedQIgO3vJbkGOZ6ySRAltIYjfxhrq4HszJOySZegotEF7v+haQ75UA==}
+    peerDependencies:
+      highcharts: '>=6.0.0'
+      react: '>=16.8.0'
+
+  highcharts@12.0.2:
+    resolution: {integrity: sha512-DKZFNn2Mk3EUmOfJIvIgPqBjUoKDkDW9WY1nT9zrhfB9SSyg5yVbVEFrw267C4+Hzg4U1H/0i0Z6S3VYJwg6qQ==}
 
   highlight.js@11.10.0:
     resolution: {integrity: sha512-SYVnVFswQER+zu1laSya563s+F8VDGt7o35d4utbamowvUNLLMovFqwCLSocpZTz3MgaSRA1IbqRWZv97dtErQ==}
@@ -5653,6 +5668,13 @@ snapshots:
       '@types/hast': 3.0.4
 
   he@1.2.0: {}
+
+  highcharts-react-official@3.2.1(highcharts@12.0.2)(react@19.0.0-rc-69d4b800-20241021):
+    dependencies:
+      highcharts: 12.0.2
+      react: 19.0.0-rc-69d4b800-20241021
+
+  highcharts@12.0.2: {}
 
   highlight.js@11.10.0: {}
 
