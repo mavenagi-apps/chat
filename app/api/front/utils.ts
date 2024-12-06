@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { SignJWT } from "jose";
-import {
+import type {
   FrontAppChannelInboundMessage,
   FrontAppChannelOutboundMessage,
 } from "@/types/front";
