@@ -13,6 +13,7 @@ export const POST = async (request: NextRequest) => {
     "x-zendesk-webhook-signature-timestamp",
   );
 
+  console.log("all headers", request.headers);
   console.log("body", body);
   console.log("webhookId", webhookId);
   console.log("signature", signature);
