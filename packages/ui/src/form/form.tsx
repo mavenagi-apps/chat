@@ -161,8 +161,8 @@ const Form = <
               event.stopPropagation();
             }
           }
-          // @ts-expect-error handleSubmit
           void methods.handleSubmit(
+            // @ts-expect-error handleSubmit
             async (values: TTransformedValues, event) => {
               try {
                 await onSubmit(values, event);
@@ -175,8 +175,8 @@ const Form = <
                   if (violations) {
                     // TODO(doll): This manual prefixing is a hack. Spring boot isn't returning the requestPart prefix in the field name
                     violations.map((value) => {
-                      // @ts-expect-error setError
                       methods.setError(
+                        // @ts-expect-error setError
                         fieldnameMapper?.(value.fieldName) ?? value.fieldName,
                         {
                           message: value.message,
