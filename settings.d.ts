@@ -18,6 +18,8 @@ declare global {
     apiKey: string;
     apiSecret: string;
     appId: string;
+    webhookId: string;
+    webhookSecret: string;
   };
 
   interface ClientSafeAppSettings extends Partial<AppSettings> {

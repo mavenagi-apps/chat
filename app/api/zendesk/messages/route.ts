@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { waitUntil } from "@vercel/functions";
 import {
   getSunshineConversationsClient,
@@ -6,6 +7,24 @@ import {
 } from "@/app/api/zendesk/utils";
 import { withSettingsAndAuthentication } from "@/app/api/server/utils";
 import { getRedisClient } from "@/app/api/server/lib/redis";
+
+const KEEP_ALIVE_INTERVAL = 30000;
+const SIGNING_SECRET_ALGORITHM = "sha256";
+
+const verifyWebhookMessage = (
+  payload: ZendeskMessagePayload,
+  webhookSecret: string,
+) => {
+  const { webhookId, signature, timestamp, rawBody } = payload;
+  if (!webhookId || !signature || !timestamp || !rawBody) {
+    return false;
+  }
+
+  const hmac = crypto.createHmac(SIGNING_SECRET_ALGORITHM, webhookSecret);
+  const sig = hmac.update(timestamp + rawBody).digest("base64");
+
+  return sig === signature;
+};
 
 export async function POST(request: NextRequest) {
   return withSettingsAndAuthentication(
@@ -48,14 +67,22 @@ export async function GET(request: NextRequest) {
     request,
     async (
       _req,
-      _settings,
+      settings,
       _organizationId,
       _agentId,
       _userId,
       conversationId,
     ) => {
       const encoder = new TextEncoder();
-      const pattern = `zendesk:${conversationId}:*`;
+      const { handoffConfiguration } = settings;
+      const { webhookId, webhookSecret } = handoffConfiguration || {};
+      if (!webhookId || !webhookSecret) {
+        return NextResponse.json("Error: Webhook configuration not found", {
+          status: 400,
+        });
+      }
+
+      const pattern = `zendesk:${conversationId}:${webhookId}:*`;
       const redisClient = await getRedisClient();
 
       let keepAliveInterval: NodeJS.Timeout;
@@ -63,22 +90,33 @@ export async function GET(request: NextRequest) {
       const stream = new ReadableStream({
         async start(controller) {
           try {
-            await redisClient.pSubscribe(pattern, (message, channel) => {
-              try {
-                const parsedMessage = JSON.parse(message);
-                controller.enqueue(
-                  encoder.encode(
-                    `data: ${JSON.stringify({ message: parsedMessage, channel })}\n\n`,
-                  ),
-                );
-              } catch (error) {
-                console.error("Error processing subscription message:", error);
-              }
-            });
+            await redisClient.pSubscribe(
+              pattern,
+              (message: string, channel: string) => {
+                try {
+                  const parsedMessage: ZendeskMessagePayload =
+                    JSON.parse(message);
+                  if (!verifyWebhookMessage(parsedMessage, webhookSecret)) {
+                    return;
+                  }
+
+                  controller.enqueue(
+                    encoder.encode(
+                      `data: ${JSON.stringify({ message: parsedMessage.event, channel })}\n\n`,
+                    ),
+                  );
+                } catch (error) {
+                  console.error(
+                    "Error processing subscription message:",
+                    error,
+                  );
+                }
+              },
+            );
 
             keepAliveInterval = setInterval(() => {
               controller.enqueue(encoder.encode(": keep-alive\n\n"));
-            }, 30000);
+            }, KEEP_ALIVE_INTERVAL);
           } catch (error) {
             console.error("Error streaming messages:", error);
             controller.error(error);

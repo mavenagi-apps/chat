@@ -17,6 +17,8 @@ import {
   type ChatEndedMessage,
 } from "@/types";
 
+const HANDOFF_RECONNECT_INTERVAL = 500;
+
 export enum HandoffStatus {
   INITIALIZED = "initialized",
   INITIALIZING = "initializing",
@@ -54,7 +56,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
       | ChatEndedMessage
     )[]
   >([]);
-  const [_isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
   const [handoffAuthToken, setHandoffAuthToken] = useState<string | null>(null);
   const [agentName, setAgentName] = useState<string | null>(null);
@@ -62,6 +64,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
   const [handoffStatus, setHandoffStatus] = useState<HandoffStatus>(
     HandoffStatus.NOT_INITIALIZED,
   );
+  const handoffStatusRef = useRef<HandoffStatus>(handoffStatus);
 
   const [abortController, setAbortController] = useState(new AbortController());
 
@@ -206,6 +209,14 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
       return;
     }
 
+    if (
+      isConnected ||
+      handoffStatusRef.current === HandoffStatus.NOT_INITIALIZED
+    ) {
+      return;
+    }
+    setIsConnected(true);
+
     const newAbortController = resetAbortController();
 
     try {
@@ -229,9 +240,11 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     } finally {
       setIsConnected(false);
       // Attempt to reconnect after 5 seconds
-      reconnectTimeoutRef.current = setTimeout(() => {
-        void getMessages();
-      }, 5000);
+      if (handoffStatusRef.current === HandoffStatus.INITIALIZED) {
+        reconnectTimeoutRef.current = setTimeout(() => {
+          void getMessages();
+        }, HANDOFF_RECONNECT_INTERVAL);
+      }
     }
   }, [
     handoffAuthToken,
@@ -257,6 +270,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
   }, [getOrCreateUserAndConversation, signedUserData]);
 
   useEffect(() => {
+    handoffStatusRef.current = handoffStatus;
     if (handoffStatus === HandoffStatus.INITIALIZED) {
       setHandoffChatEvents((prev) => [
         ...prev,
@@ -350,5 +364,6 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     agentName,
     askHandoff,
     handleEndHandoff,
+    isConnected,
   };
 }
