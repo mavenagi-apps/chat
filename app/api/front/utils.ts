@@ -44,7 +44,7 @@ export interface FrontSender {
   name: string;
 }
 
-const HOST = "https://api2.frontapp.com";
+export const DEFAULT_HOST = "https://api2.frontapp.com";
 
 export function postOutgoingMessages({
   host,
@@ -59,12 +59,12 @@ export function postOutgoingMessages({
   channelId: string;
   payload: FrontAppChannelOutboundMessage;
 }) {
-  const API_TOKEN = buildToken(frontId, frontSecret, channelId);
-  return fetch(new URL(`/channels/${channelId}/outbound_messages`, HOST), {
+  const api_token = buildToken(frontId, frontSecret, channelId);
+  return fetch(new URL(`/channels/${channelId}/outbound_messages`, host), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${API_TOKEN}`,
+      Authorization: `Bearer ${api_token}`,
     },
     body: JSON.stringify(payload),
   });
@@ -82,12 +82,12 @@ export function postIncomingMessages({
   channelId: string;
   payload: FrontAppChannelInboundMessage;
 }) {
-  const API_TOKEN = buildToken(frontId, frontSecret, channelId);
-  return fetch(new URL(`/channels/${channelId}/inbound_messages`, HOST), {
+  const api_token = buildToken(frontId, frontSecret, channelId);
+  return fetch(new URL(`/channels/${channelId}/inbound_messages`, host), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${API_TOKEN}`,
+      Authorization: `Bearer ${api_token}`,
     },
     body: JSON.stringify(payload),
   });
