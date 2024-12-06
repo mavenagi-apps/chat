@@ -13,6 +13,11 @@ export const POST = async (request: NextRequest) => {
     "x-zendesk-webhook-signature-timestamp",
   );
 
+  console.log("body", body);
+  console.log("webhookId", webhookId);
+  console.log("signature", signature);
+  console.log("timestamp", timestamp);
+
   if (!webhookId || !signature || !timestamp) {
     return NextResponse.json(
       { error: "Missing required headers" },
