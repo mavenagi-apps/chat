@@ -7,24 +7,21 @@ const ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX = "conversation:";
 export const POST = async (request: NextRequest) => {
   const rawBody = await request.text();
   const body = JSON.parse(rawBody);
-  const webhookId = request.headers.get("x-zendesk-webhook-id");
-  const signature = request.headers.get("x-zendesk-webhook-signature");
-  const timestamp = request.headers.get(
-    "x-zendesk-webhook-signature-timestamp",
-  );
+  const {
+    webhook: { id: webhookId },
+  } = body;
+  // const webhookId = request.headers.get("x-zendesk-webhook-id");
+  // const signature = request.headers.get("x-zendesk-webhook-signature");
+  // const timestamp = request.headers.get(
+  //   "x-zendesk-webhook-signature-timestamp",
+  // );
 
-  console.log("all headers", request.headers);
-  console.log("body", body);
-  console.log("webhookId", webhookId);
-  console.log("signature", signature);
-  console.log("timestamp", timestamp);
-
-  if (!webhookId || !signature || !timestamp) {
-    return NextResponse.json(
-      { error: "Missing required headers" },
-      { status: 400 },
-    );
-  }
+  // if (!webhookId || !signature || !timestamp) {
+  //   return NextResponse.json(
+  //     { error: "Missing required headers" },
+  //     { status: 400 },
+  //   );
+  // }
 
   for (const event of body.events || []) {
     if (!event.type.startsWith(ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX)) {
@@ -44,9 +41,9 @@ export const POST = async (request: NextRequest) => {
       `zendesk:${conversationId}:${webhookId}:${eventId}`,
       JSON.stringify({
         webhookId,
-        signature,
-        timestamp,
-        rawBody,
+        // signature,
+        // timestamp,
+        // rawBody,
         event,
       } as ZendeskMessagePayload),
     );
