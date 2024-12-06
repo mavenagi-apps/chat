@@ -14,8 +14,8 @@ const mockUserData = {
 };
 
 export default async function Page({
-                                     params,
-                                   }: {
+  params,
+}: {
   params: Promise<{ orgFriendlyId: string; agentFriendlyId: string }>;
 }) {
   const envPrefix = (await headers()).get("x-magi-env-prefix") ?? "";
@@ -31,9 +31,9 @@ export default async function Page({
 
   try {
     signedUserData = await generateSignedUserData(
-        mockUserData,
-        orgFriendlyId,
-        agentFriendlyId,
+      mockUserData,
+      orgFriendlyId,
+      agentFriendlyId,
     );
   } catch (error) {
     console.log("Error generating signed user data", error);
@@ -48,22 +48,22 @@ export default async function Page({
   };
 
   return (
-      <div
-          style={{
-            backgroundImage: `url(${backgroundImg.src})`,
-            backgroundSize: "cover",
-            height: "100vh",
-          }}
-      >
-        <script src="/js/widget.js" defer></script>
-        <script
-            dangerouslySetInnerHTML={{
-              __html: `
+    <div
+      style={{
+        backgroundImage: `url(${backgroundImg.src})`,
+        backgroundSize: "cover",
+        height: "100vh",
+      }}
+    >
+      <script src="/js/widget.js" defer></script>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
     addEventListener("load", function () {
       Maven.ChatWidget.load(${JSON.stringify(widgetLoadPayload)});
     });`,
-            }}
-        ></script>
-      </div>
+        }}
+      ></script>
+    </div>
   );
 }

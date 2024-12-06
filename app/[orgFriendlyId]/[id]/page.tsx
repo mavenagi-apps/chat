@@ -1,31 +1,37 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import Chat from '@magi/components/chat/Chat';
-import { ChatInput } from '@magi/components/chat/ChatInput';
-import { useChat } from '@magi/components/chat/use-chat';
-import { MagiEvent } from '@/lib/analytics/events';
-import { useAnalytics } from '@/lib/use-analytics';
-import { useSettings } from '@/app/providers/SettingsProvider';
-import { useIframeMessaging } from '@/lib/useIframeMessaging';
-import { ChatHeader } from '@magi/components/chat/ChatHeader';
-import { WelcomeMessage } from '@magi/components/chat/WelcomeChatMessage';
-import { ChatMessages } from '@magi/components/chat/ChatMessages';
-import { useAskQuestion } from '@/lib/useAskQuestion';
-import { useScrollToLatest } from '@/lib/useScrollToLatest';
-import { HandoffStatus, useHandoff } from '@/lib/useHandoff';
-import { PoweredByMaven } from '@magi/components/chat/PoweredByMaven';
-import type { ChatEndedMessage, ChatEstablishedMessage, HandoffChatMessage } from '@/types';
-import type { Message } from '@/types';
+import * as React from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Chat from "@magi/components/chat/Chat";
+import { ChatInput } from "@magi/components/chat/ChatInput";
+import { useChat } from "@magi/components/chat/use-chat";
+import { MagiEvent } from "@/lib/analytics/events";
+import { useAnalytics } from "@/lib/use-analytics";
+import { useSettings } from "@/app/providers/SettingsProvider";
+import { useIframeMessaging } from "@/lib/useIframeMessaging";
+import { ChatHeader } from "@magi/components/chat/ChatHeader";
+import { WelcomeMessage } from "@magi/components/chat/WelcomeChatMessage";
+import { ChatMessages } from "@magi/components/chat/ChatMessages";
+import { useAskQuestion } from "@/lib/useAskQuestion";
+import { useScrollToLatest } from "@/lib/useScrollToLatest";
+import { HandoffStatus, useHandoff } from "@/lib/useHandoff";
+import { PoweredByMaven } from "@magi/components/chat/PoweredByMaven";
+import type {
+  ChatEndedMessage,
+  ChatEstablishedMessage,
+  HandoffChatMessage,
+} from "@/types";
+import type { Message } from "@/types";
 
 function ChatPage({ signedUserData }: { signedUserData: string | null }) {
   const analytics = useAnalytics();
-  const { id: agentFriendlyId }: { orgFriendlyId: string, id: string } = useParams();
+  const { id: agentFriendlyId }: { orgFriendlyId: string; id: string } =
+    useParams();
   const { brandColor, logoUrl } = useSettings();
-  const [combinedMessages, setCombinedMessages]
-    = useState<(Message | HandoffChatMessage | ChatEstablishedMessage | ChatEndedMessage)[]>([]);
+  const [combinedMessages, setCombinedMessages] = useState<
+    (Message | HandoffChatMessage | ChatEstablishedMessage | ChatEndedMessage)[]
+  >([]);
 
   // Maven chat logic
   const {
@@ -35,7 +41,7 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
     askQuestion,
     conversationId,
   } = useChat({
-    signedUserData
+    signedUserData,
   });
 
   const { scrollToLatest, latestChatBubbleRef } = useScrollToLatest();
@@ -55,8 +61,8 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
     handleEndHandoff,
   } = useHandoff({
     messages,
-      signedUserData,
-    });
+    signedUserData,
+  });
 
   useEffect(() => {
     analytics.logEvent(MagiEvent.chatHomeView, { agentId: agentFriendlyId });
@@ -66,14 +72,14 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
     setCombinedMessages(
       [...messages, ...handoffChatEvents]
         .filter(({ timestamp }) => !!timestamp)
-        .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
+        .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)),
     );
     scrollToLatest();
   }, [messages, handoffChatEvents, setCombinedMessages, scrollToLatest]);
   const isHandoff = handoffStatus === HandoffStatus.INITIALIZED;
 
   return (
-    <main className='flex h-screen flex-col bg-gray-50'>
+    <main className="flex h-screen flex-col bg-gray-50">
       <ChatHeader logoUrl={logoUrl} />
       <Chat
         brandColor={brandColor}
@@ -84,8 +90,8 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
         isHandoff={isHandoff}
         handleEndHandoff={handleEndHandoff}
       >
-        <div className='flex flex-1 flex-col overflow-auto text-xs'>
-          <div className='mx-auto w-full max-w-3xl flex-1 text-gray-800 sm:mt-5 sm:px-5'>
+        <div className="flex flex-1 flex-col overflow-auto text-xs">
+          <div className="mx-auto w-full max-w-3xl flex-1 text-gray-800 sm:mt-5 sm:px-5">
             <WelcomeMessage
               agentFriendlyId={agentFriendlyId}
               conversationId={conversationId}
@@ -104,9 +110,9 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
         </div>
 
         <ChatInput
-          questionPlaceholder={'question_placeholder'}
+          questionPlaceholder={"question_placeholder"}
           isSubmitting={isLoading}
-          data-testid='chat-input'
+          data-testid="chat-input"
         />
       </Chat>
     </main>
@@ -115,8 +121,8 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
 
 export default function ChatPageWrapper() {
   const { loading, signedUserData } = useIframeMessaging();
-  
+
   if (loading) return null;
-  
+
   return <ChatPage signedUserData={signedUserData} />;
 }

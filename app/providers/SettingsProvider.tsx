@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getPublicAppSettings } from '@/app/actions';
-import Spinner from '@magi/components/Spinner';
-import { useParams } from 'next/navigation';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { getPublicAppSettings } from "@/app/actions";
+import Spinner from "@magi/components/Spinner";
+import { useParams } from "next/navigation";
 
 type SettingsContextType = ClientSafeAppSettings | null;
 
@@ -13,7 +13,8 @@ export const SettingsProvider = ({
   children: React.ReactNode;
 }) => {
   const [settings, setSettings] = useState<SettingsContextType>(null);
-  const { orgFriendlyId, id: agentId }: { orgFriendlyId: string, id: string } = useParams();
+  const { orgFriendlyId, id: agentId }: { orgFriendlyId: string; id: string } =
+    useParams();
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -46,7 +47,7 @@ export const SettingsProvider = ({
 export function useSettings() {
   const context = useContext(SettingsContext);
   if (context === null) {
-    throw new Error('useSettings must be used within a SettingsProvider');
+    throw new Error("useSettings must be used within a SettingsProvider");
   }
   return context;
-} 
+}

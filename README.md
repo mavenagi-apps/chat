@@ -56,7 +56,7 @@ The widget supports multiple languages through `next-intl`. Currently supported 
 {
   "chat": {
     "ChatPage": {
-      "default_welcome_message": "Your translated message",
+      "default_welcome_message": "Your translated message"
       // ... other translations
     }
   }
