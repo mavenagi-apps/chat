@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { waitUntil } from "@vercel/functions";
 import {
   getSunshineConversationsClient,
   postMessagesToZendeskConversation,
@@ -56,6 +57,9 @@ export async function GET(request: NextRequest) {
       const encoder = new TextEncoder();
       const pattern = `zendesk:${conversationId}:*`;
       const redisClient = await getRedisClient();
+
+      let keepAliveInterval: NodeJS.Timeout;
+
       const stream = new ReadableStream({
         async start(controller) {
           try {
@@ -71,23 +75,32 @@ export async function GET(request: NextRequest) {
                 console.error("Error processing subscription message:", error);
               }
             });
+
+            keepAliveInterval = setInterval(() => {
+              controller.enqueue(encoder.encode(": keep-alive\n\n"));
+            }, 30000);
           } catch (error) {
             console.error("Error streaming messages:", error);
             controller.error(error);
           }
         },
         cancel() {
+          clearInterval(keepAliveInterval);
           redisClient.pUnsubscribe(pattern).catch(console.error);
         },
       });
 
-      return new Response(stream, {
+      const response = new Response(stream, {
         headers: {
           "Content-Type": "text/event-stream",
           "Cache-Control": "no-cache",
           Connection: "keep-alive",
         },
       });
+
+      waitUntil(new Promise(() => {}));
+
+      return response;
     },
   );
 }

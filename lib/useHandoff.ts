@@ -54,6 +54,8 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
       | ChatEndedMessage
     )[]
   >([]);
+  const [_isConnected, setIsConnected] = useState(false);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
   const [handoffAuthToken, setHandoffAuthToken] = useState<string | null>(null);
   const [agentName, setAgentName] = useState<string | null>(null);
 
@@ -215,6 +217,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
 
       for await (const event of streamResponse(response)) {
         if (newAbortController.signal.aborted) break;
+        if (event.type === "keep-alive") continue; // Ignore keep-alive messages
         handleHandoffChatEvent(event);
       }
     } catch (error) {
@@ -223,6 +226,12 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
       } else {
         console.error("Error streaming response:", error);
       }
+    } finally {
+      setIsConnected(false);
+      // Attempt to reconnect after 5 seconds
+      reconnectTimeoutRef.current = setTimeout(() => {
+        void getMessages();
+      }, 5000);
     }
   }, [
     handoffAuthToken,
@@ -327,6 +336,9 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
   useEffect(() => {
     return () => {
       abortController?.abort();
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
   }, []);
 
