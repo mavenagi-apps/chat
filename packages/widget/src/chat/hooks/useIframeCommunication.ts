@@ -43,7 +43,7 @@ export function useIframeCommunication({
       !currentDomain || ["localhost", "127.0.0.1"].includes(currentDomain);
     const iframeProtocol = isLocalEnvironment ? "http" : "https";
     const iframeDomain = isLocalEnvironment
-      ? `${currentDomain || "localhost"}:3000`
+      ? `${currentDomain || "localhost"}:${window.location.port}`
       : __IFRAME_DOMAIN__;
     let iframeUrl = `${iframeProtocol}://${iframeDomain}/${orgFriendlyId}/${agentFriendlyId}`;
 

@@ -106,6 +106,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
               },
             };
           });
+      case "front":
       case "salesforce":
       case null:
       default:
