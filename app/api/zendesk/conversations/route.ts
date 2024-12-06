@@ -1,14 +1,15 @@
-import type * as SunshineConversationsClientModule from 'sunshine-conversations-client';
+import type * as SunshineConversationsClientModule from "sunshine-conversations-client";
 
-import { getSunshineConversationsClient, postMessagesToZendeskConversation } from '@/app/api/zendesk/utils';
-import { withAppSettings } from '@/app/api/server/utils';
-import { type NextRequest, NextResponse } from 'next/server';
 import {
-  decryptAndVerifySignedUserData,
-} from '@/app/api/server/utils';
+  getSunshineConversationsClient,
+  postMessagesToZendeskConversation,
+} from "@/app/api/zendesk/utils";
+import { withAppSettings } from "@/app/api/server/utils";
+import { type NextRequest, NextResponse } from "next/server";
+import { decryptAndVerifySignedUserData } from "@/app/api/server/utils";
 
-import jwt from 'jsonwebtoken';
-import { HANDOFF_AUTH_HEADER } from '@/app/constants/authentication';
+import jwt from "jsonwebtoken";
+import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
 
 interface VerifiedUserData {
   firstName: string;
@@ -20,7 +21,7 @@ interface VerifiedUserData {
 const getOrCreateZendeskUser = async (
   SunshineConversationsClient: typeof SunshineConversationsClientModule,
   verifiedUserData: VerifiedUserData,
-  appId: string
+  appId: string,
 ) => {
   const apiInstance = new SunshineConversationsClient.UsersApi();
 
@@ -28,14 +29,14 @@ const getOrCreateZendeskUser = async (
     try {
       const { user } = await apiInstance.getUser(appId, verifiedUserData.email);
       if (user) {
-        console.log('User already exists');
+        console.log("User already exists");
         return user;
       }
     } catch (error: any) {
-      if ('status' in error && error.status === 404) {
-        console.log('User does not exist');
+      if ("status" in error && error.status === 404) {
+        console.log("User does not exist");
       } else {
-        console.error('Error getting user', error);
+        console.error("Error getting user", error);
         throw error;
       }
     }
@@ -47,17 +48,17 @@ const getOrCreateZendeskUser = async (
       givenName: verifiedUserData.firstName,
       surname: verifiedUserData.lastName,
       email: verifiedUserData.email,
-      locale: 'en-US',
+      locale: "en-US",
     },
   });
-  console.log('User created');
+  console.log("User created");
   return user;
 };
 
 const getOrCreateZendeskConversation = async (
   SunshineConversationsClient: typeof SunshineConversationsClientModule,
   userId: string,
-  appId: string
+  appId: string,
 ) => {
   const apiInstance = new SunshineConversationsClient.ConversationsApi();
 
@@ -65,21 +66,21 @@ const getOrCreateZendeskConversation = async (
     userId,
   });
   if (conversations.length > 0) {
-    console.log('Conversation already exists');
+    console.log("Conversation already exists");
     return conversations[0];
   }
 
   const conversationCreateBody =
-    new SunshineConversationsClient.ConversationCreateBody('personal');
+    new SunshineConversationsClient.ConversationCreateBody("personal");
   const participants = [{ userId, subscribeSDKClient: false }];
   conversationCreateBody.setParticipants(participants);
-  conversationCreateBody.setDisplayName('Chat with Support');
+  conversationCreateBody.setDisplayName("Chat with Support");
   conversationCreateBody.setDescription(
-    'A conversation for customer support inquiries.'
+    "A conversation for customer support inquiries.",
   );
   const { conversation } = await apiInstance.createConversation(
     appId,
-    conversationCreateBody
+    conversationCreateBody,
   );
 
   return conversation;
@@ -91,34 +92,33 @@ export async function POST(req: NextRequest) {
     const { handoffConfiguration } = settings;
 
     if (!handoffConfiguration) {
-      throw new Error('Handoff configuration not found');
+      throw new Error("Handoff configuration not found");
     }
 
     const { apiKey, apiSecret } = handoffConfiguration;
 
     if (!apiKey || !apiSecret) {
-      throw new Error('Invalid handoff configuration');
+      throw new Error("Invalid handoff configuration");
     }
 
     const [SunshineConversationsClient, zendeskConversationsAppId] =
       await getSunshineConversationsClient(handoffConfiguration);
 
-    const verifiedUserInfo =
-      (await decryptAndVerifySignedUserData(
-        signedUserData,
-        settings
-      )) as VerifiedUserData;
+    const verifiedUserInfo = (await decryptAndVerifySignedUserData(
+      signedUserData,
+      settings,
+    )) as VerifiedUserData;
 
     const { id: userId } = await getOrCreateZendeskUser(
       SunshineConversationsClient,
       verifiedUserInfo,
-      zendeskConversationsAppId
+      zendeskConversationsAppId,
     );
 
     const conversation = await getOrCreateZendeskConversation(
       SunshineConversationsClient,
       userId,
-      zendeskConversationsAppId
+      zendeskConversationsAppId,
     );
 
     const { id: conversationId } = conversation;
@@ -128,15 +128,15 @@ export async function POST(req: NextRequest) {
       conversationId,
       userId,
       zendeskConversationsAppId,
-      messages
+      messages,
     );
 
     const token = jwt.sign(
-      { scope: 'appUser', userId, conversationId },
+      { scope: "appUser", userId, conversationId },
       apiSecret,
       {
         keyid: apiKey,
-      }
+      },
     );
 
     return NextResponse.json(
@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
         headers: {
           [HANDOFF_AUTH_HEADER]: token,
         },
-      }
+      },
     );
   });
 }

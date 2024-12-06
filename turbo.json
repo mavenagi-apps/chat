@@ -5,14 +5,8 @@
     "build": {
       "cache": false,
       "dependsOn": ["^build"],
-      "env": [
-        "VERCEL_PROJECT_PRODUCTION_URL"
-      ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "public/js/**"
-      ]
+      "env": ["VERCEL_PROJECT_PRODUCTION_URL"],
+      "outputs": [".next/**", "!.next/cache/**", "public/js/**"]
     },
     "dev": {
       "cache": false,

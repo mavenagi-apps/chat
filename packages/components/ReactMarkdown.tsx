@@ -1,12 +1,12 @@
 // eslint-disable-next-line node/no-extraneous-import
-import 'highlight.js/styles/atom-one-dark.css';
-import React from 'react';
-import RMReactMarkdown from 'react-markdown';
-import rehypeHighlight from 'rehype-highlight';
-import remarkBreaks from 'remark-breaks';
-import remarkGfm from 'remark-gfm';
+import "highlight.js/styles/atom-one-dark.css";
+import React from "react";
+import RMReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import remarkBreaks from "remark-breaks";
+import remarkGfm from "remark-gfm";
 
-import { cn } from '@magi/ui';
+import { cn } from "@magi/ui";
 
 interface ReactMarkdownProps {
   children: string;
@@ -20,7 +20,7 @@ export function ReactMarkdown({
   linkTargetInNewTab = true,
 }: ReactMarkdownProps) {
   // Note: list-style-position: inside does not work well on chrome if the <li> might have <p> within them
-  const listStylePosition = bulletsInside ? 'inside' : 'outside';
+  const listStylePosition = bulletsInside ? "inside" : "outside";
   return (
     <RMReactMarkdown
       remarkPlugins={[remarkGfm, remarkBreaks]}
@@ -30,7 +30,7 @@ export function ReactMarkdown({
         ul: ({ node: _node, ...props }) => (
           <ul
             style={{
-              listStyleType: 'disc',
+              listStyleType: "disc",
               listStylePosition: listStylePosition,
             }}
             {...props}
@@ -40,7 +40,7 @@ export function ReactMarkdown({
           return (
             <ul
               style={{
-                listStyleType: 'decimal',
+                listStyleType: "decimal",
                 listStylePosition: listStylePosition,
               }}
               {...props}
@@ -49,15 +49,15 @@ export function ReactMarkdown({
         },
         pre: ({ node: _node, className, ...props }) => (
           <pre
-            className={cn('whitespace-break-spaces', className)}
+            className={cn("whitespace-break-spaces", className)}
             {...props}
           />
         ),
         a: ({ node: _node, children, ...props }) => {
           // Reference: https://github.com/remarkjs/react-markdown/issues/12
           if (linkTargetInNewTab) {
-            props.target = '_blank';
-            props.rel = 'noopener noreferrer';
+            props.target = "_blank";
+            props.rel = "noopener noreferrer";
           }
 
           return <a {...props}>{children}</a>;

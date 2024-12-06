@@ -1,1 +1,1 @@
-declare const __IFRAME_DOMAIN__: string; 
+declare const __IFRAME_DOMAIN__: string;

@@ -1,9 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "preact/hooks";
 
 enum MAVEN_MESSAGE_TYPES {
-  USER_DATA = 'USER_DATA',
-  SIGNED_USER_DATA = 'SIGNED_USER_DATA',
-  MAVEN_LOADED = 'MAVEN_LOADED',
+  USER_DATA = "USER_DATA",
+  SIGNED_USER_DATA = "SIGNED_USER_DATA",
+  MAVEN_LOADED = "MAVEN_LOADED",
 }
 
 type SignedUserDataMessage = {
@@ -19,13 +25,13 @@ export function useIframeCommunication({
   agentFriendlyId,
   signedUserData,
   isWide,
-  isOpen
+  isOpen,
 }: {
-  orgFriendlyId: string,
-  agentFriendlyId: string,
-  signedUserData?: string | null,
-  isWide: boolean,
-  isOpen: boolean
+  orgFriendlyId: string;
+  agentFriendlyId: string;
+  signedUserData?: string | null;
+  isWide: boolean;
+  isOpen: boolean;
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -34,10 +40,10 @@ export function useIframeCommunication({
   const iframeUrl = useMemo((): string => {
     const currentDomain = window.location.hostname;
     const isLocalEnvironment =
-      !currentDomain || ['localhost', '127.0.0.1'].includes(currentDomain);
-    const iframeProtocol = isLocalEnvironment ? 'http' : 'https';
+      !currentDomain || ["localhost", "127.0.0.1"].includes(currentDomain);
+    const iframeProtocol = isLocalEnvironment ? "http" : "https";
     const iframeDomain = isLocalEnvironment
-      ? `${currentDomain || 'localhost'}:3000`
+      ? `${currentDomain || "localhost"}:3000`
       : __IFRAME_DOMAIN__;
     let iframeUrl = `${iframeProtocol}://${iframeDomain}/${orgFriendlyId}/${agentFriendlyId}`;
 
@@ -46,32 +52,35 @@ export function useIframeCommunication({
 
   const iframeStyle = useMemo(() => {
     return {
-      backgroundColor: 'white',
-      width: isWide ? '480px' : '100vw',
-      height: isWide ? '560px' : 'calc(100vh - 5rem)',
-      position: 'fixed',
+      backgroundColor: "white",
+      width: isWide ? "480px" : "100vw",
+      height: isWide ? "560px" : "calc(100vh - 5rem)",
+      position: "fixed",
       zIndex: 1000,
-      bottom: '5rem',
-      right: isWide ? '1rem' : 0,
-      border: 'solid rgb(209, 213, 219)',
-      outline: 'none',
-      boxShadow: 'rgba(0, 0, 0, 0.15) 0px 0px 20px 0px',
-      borderRadius: isWide ? '12px' : 0,
+      bottom: "5rem",
+      right: isWide ? "1rem" : 0,
+      border: "solid rgb(209, 213, 219)",
+      outline: "none",
+      boxShadow: "rgba(0, 0, 0, 0.15) 0px 0px 20px 0px",
+      borderRadius: isWide ? "12px" : 0,
       transition:
-        'transform 0.2s cubic-bezier(0.03, 0.18, 0.32, 0.66) 0s, opacity 0.2s cubic-bezier(0.03, 0.18, 0.32, 0.66) 0s, box-shadow 0.2s cubic-bezier(0.03, 0.18, 0.32, 0.66) 0s',
-      transformOrigin: 'bottom right',
+        "transform 0.2s cubic-bezier(0.03, 0.18, 0.32, 0.66) 0s, opacity 0.2s cubic-bezier(0.03, 0.18, 0.32, 0.66) 0s, box-shadow 0.2s cubic-bezier(0.03, 0.18, 0.32, 0.66) 0s",
+      transformOrigin: "bottom right",
       opacity: isOpen ? 1 : 0,
-      transform: isOpen ? 'scale(1)' : 'scale(0)',
+      transform: isOpen ? "scale(1)" : "scale(0)",
     } as React.CSSProperties;
   }, [isWide, isOpen]);
 
-  const postMessageToIframe = useCallback((message: SignedUserDataMessage) => {
-    if (isLoaded && iframeRef.current?.contentWindow) {
-      iframeRef.current.contentWindow.postMessage(message, '*');
-    } else {
-      messageQueue.current.push(message);
-    }
-  }, [isLoaded]);
+  const postMessageToIframe = useCallback(
+    (message: SignedUserDataMessage) => {
+      if (isLoaded && iframeRef.current?.contentWindow) {
+        iframeRef.current.contentWindow.postMessage(message, "*");
+      } else {
+        messageQueue.current.push(message);
+      }
+    },
+    [isLoaded],
+  );
 
   useEffect(() => {
     if (signedUserData) {
@@ -84,32 +93,35 @@ export function useIframeCommunication({
 
   useEffect(() => {
     if (isLoaded && messageQueue.current.length > 0) {
-      messageQueue.current.forEach(message =>
-        iframeRef.current?.contentWindow?.postMessage(message, '*')
+      messageQueue.current.forEach((message) =>
+        iframeRef.current?.contentWindow?.postMessage(message, "*"),
       );
       messageQueue.current = [];
     }
   }, [isLoaded]);
 
-  const handleMessage = useCallback((event: LegacyMessageEvent) => {
-    const key = event.message ? 'message' : 'data';
-    const data = event[key] as MessageEvent['data'];
-    if (typeof data !== 'object') return;
+  const handleMessage = useCallback(
+    (event: LegacyMessageEvent) => {
+      const key = event.message ? "message" : "data";
+      const data = event[key] as MessageEvent["data"];
+      if (typeof data !== "object") return;
 
-    if (data.type === MAVEN_MESSAGE_TYPES.MAVEN_LOADED) {
-      if (isLoaded) return;
-      setIsLoaded(true);
-    }
-  }, [isLoaded]);
+      if (data.type === MAVEN_MESSAGE_TYPES.MAVEN_LOADED) {
+        if (isLoaded) return;
+        setIsLoaded(true);
+      }
+    },
+    [isLoaded],
+  );
 
   useEffect(() => {
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, [handleMessage]);
 
   return {
     iframeRef,
     iframeUrl,
-    iframeStyle
+    iframeStyle,
   };
-} 
+}
