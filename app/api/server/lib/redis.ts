@@ -1,18 +1,26 @@
-import { createClient } from 'redis';
+import { createClient } from "redis";
 
 // Create a Redis client factory
-const createRedisClient = () => {
+const createRedisClient = async () => {
   const client = createClient({
     url: process.env.STORAGE_REDIS_URL,
   });
 
-  client.on('error', (err) => console.error('Redis Client Error', err));
-  client.on('ready', () => console.log('Redis Client Ready'));
+  client.on("error", (err) => console.error("Redis Client Error", err));
+  client.on("ready", () => console.log("Redis Client Ready"));
+
+  await client.connect();
 
   return client;
 };
 
-// Create instance
-const redisClient = createRedisClient();
+const globalForRedis = global as unknown as {
+  redis: ReturnType<typeof createClient> | undefined;
+};
 
-export default redisClient;
+export const getRedisClient = async () => {
+  if (!globalForRedis.redis) {
+    globalForRedis.redis = await createRedisClient();
+  }
+  return globalForRedis.redis;
+};

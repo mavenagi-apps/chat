@@ -1,12 +1,12 @@
-import { type NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
-import redisClient from '@/app/api/server/lib/redis';
+import { type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { getRedisClient } from "@/app/api/server/lib/redis";
 
-const ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX = 'conversation:';
+const ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX = "conversation:";
 
 export const POST = async (request: NextRequest) => {
   const body = await request.json();
-  for (const event of (body.events || [])) {
+  for (const event of body.events || []) {
     if (!event.type.startsWith(ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX)) {
       continue;
     }
@@ -18,9 +18,11 @@ export const POST = async (request: NextRequest) => {
       continue;
     }
 
+    const redisClient = await getRedisClient();
+
     await redisClient.publish(
       `zendesk:${conversationId}:${eventId}`,
-      JSON.stringify(event)
+      JSON.stringify(event),
     );
   }
 
