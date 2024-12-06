@@ -204,6 +204,36 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     setHandoffAuthToken(handoffAuthToken);
   }, [handoffMessages, signedUserData, generatedHeaders]);
 
+  const handleEndHandoff = useCallback(async () => {
+    resetAbortController();
+    setHandoffAuthToken(null);
+    setAgentName(null);
+    setHandoffChatEvents((prev) => [
+      ...prev,
+      {
+        type: "ChatEnded",
+        timestamp: new Date().getTime(),
+      } as ChatEndedMessage,
+    ]);
+
+    void setHandoffStatus(HandoffStatus.NOT_INITIALIZED);
+
+    if (!handoffAuthToken || !handoffTypeRef.current) {
+      return;
+    }
+
+    void fetch(`/api/${handoffTypeRef.current}/conversations/passControl`, {
+      method: "POST",
+      headers: generatedHeaders,
+    });
+  }, [
+    setHandoffStatus,
+    setHandoffAuthToken,
+    setAgentName,
+    generatedHeaders,
+    resetAbortController,
+  ]);
+
   const getMessages = useCallback(async () => {
     if (!handoffAuthToken || !handoffTypeRef.current) {
       return;
@@ -236,6 +266,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
         console.log("Fetch aborted");
       } else {
         console.error("Error streaming response:", error);
+        void handleEndHandoff();
       }
     } finally {
       setIsConnected(false);
@@ -251,6 +282,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     generatedHeaders,
     streamResponse,
     resetAbortController,
+    handleEndHandoff,
   ]);
 
   const initializeHandoff = useCallback(async () => {
@@ -316,36 +348,6 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     },
     [generatedHeaders],
   );
-
-  const handleEndHandoff = useCallback(async () => {
-    resetAbortController();
-    setHandoffAuthToken(null);
-    setAgentName(null);
-    setHandoffChatEvents((prev) => [
-      ...prev,
-      {
-        type: "ChatEnded",
-        timestamp: new Date().getTime(),
-      } as ChatEndedMessage,
-    ]);
-
-    void setHandoffStatus(HandoffStatus.NOT_INITIALIZED);
-
-    if (!handoffAuthToken || !handoffTypeRef.current) {
-      return;
-    }
-
-    void fetch(`/api/${handoffTypeRef.current}/conversations/passControl`, {
-      method: "POST",
-      headers: generatedHeaders,
-    });
-  }, [
-    setHandoffStatus,
-    setHandoffAuthToken,
-    setAgentName,
-    generatedHeaders,
-    resetAbortController,
-  ]);
 
   useEffect(() => {
     return () => {
