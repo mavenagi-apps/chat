@@ -13,7 +13,7 @@ declare global {
   }
 
   type HandoffConfiguration = {
-    type: "zendesk" | "salesforce";
+    type: "zendesk" | "salesforce" | "front";
     subdomain: string;
     apiKey: string;
     apiSecret: string;
