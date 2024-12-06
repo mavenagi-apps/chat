@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-// import crypto from "crypto";
 import { waitUntil } from "@vercel/functions";
 import {
   getSunshineConversationsClient,
@@ -7,24 +6,9 @@ import {
 } from "@/app/api/zendesk/utils";
 import { withSettingsAndAuthentication } from "@/app/api/server/utils";
 import { getRedisClient } from "@/app/api/server/lib/redis";
+import type { ZendeskMessagePayload } from "@/types/zendesk";
 
 const KEEP_ALIVE_INTERVAL = 30000;
-// const SIGNING_SECRET_ALGORITHM = "sha256";
-
-// const verifyWebhookMessage = (
-//   payload: ZendeskMessagePayload,
-//   webhookSecret: string,
-// ) => {
-//   const { webhookId, signature, timestamp, rawBody } = payload;
-//   if (!webhookId || !signature || !timestamp || !rawBody) {
-//     return false;
-//   }
-
-//   const hmac = crypto.createHmac(SIGNING_SECRET_ALGORITHM, webhookSecret);
-//   const sig = hmac.update(timestamp + rawBody).digest("base64");
-
-//   return sig === signature;
-// };
 
 export async function POST(request: NextRequest) {
   return withSettingsAndAuthentication(
@@ -75,8 +59,8 @@ export async function GET(request: NextRequest) {
     ) => {
       const encoder = new TextEncoder();
       const { handoffConfiguration } = settings;
-      const { webhookId, webhookSecret } = handoffConfiguration || {};
-      if (!webhookId || !webhookSecret) {
+      const { webhookId } = handoffConfiguration || {};
+      if (!webhookId) {
         return NextResponse.json("Error: Webhook configuration not found", {
           status: 400,
         });
@@ -96,9 +80,6 @@ export async function GET(request: NextRequest) {
                 try {
                   const parsedMessage: ZendeskMessagePayload =
                     JSON.parse(message);
-                  // if (!verifyWebhookMessage(parsedMessage, webhookSecret)) {
-                  //   return;
-                  // }
 
                   controller.enqueue(
                     encoder.encode(

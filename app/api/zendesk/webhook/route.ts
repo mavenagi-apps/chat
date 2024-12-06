@@ -1,6 +1,7 @@
 import { type NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getRedisClient } from "@/app/api/server/lib/redis";
+import type { ZendeskMessagePayload } from "@/types/zendesk";
 
 const ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX = "conversation:";
 
@@ -10,18 +11,6 @@ export const POST = async (request: NextRequest) => {
   const {
     webhook: { id: webhookId },
   } = body;
-  // const webhookId = request.headers.get("x-zendesk-webhook-id");
-  // const signature = request.headers.get("x-zendesk-webhook-signature");
-  // const timestamp = request.headers.get(
-  //   "x-zendesk-webhook-signature-timestamp",
-  // );
-
-  // if (!webhookId || !signature || !timestamp) {
-  //   return NextResponse.json(
-  //     { error: "Missing required headers" },
-  //     { status: 400 },
-  //   );
-  // }
 
   for (const event of body.events || []) {
     if (!event.type.startsWith(ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX)) {
@@ -41,9 +30,6 @@ export const POST = async (request: NextRequest) => {
       `zendesk:${conversationId}:${webhookId}:${eventId}`,
       JSON.stringify({
         webhookId,
-        // signature,
-        // timestamp,
-        // rawBody,
         event,
       } as ZendeskMessagePayload),
     );
