@@ -1,10 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { waitUntil } from "@vercel/functions";
 import {
   getSunshineConversationsClient,
   postMessagesToZendeskConversation,
 } from "@/app/api/zendesk/utils";
 import { withSettingsAndAuthentication } from "@/app/api/server/utils";
 import { getRedisClient } from "@/app/api/server/lib/redis";
+import type { ZendeskMessagePayload } from "@/types/zendesk";
+
+const KEEP_ALIVE_INTERVAL = 30000;
 
 export async function POST(request: NextRequest) {
   return withSettingsAndAuthentication(
@@ -47,47 +51,75 @@ export async function GET(request: NextRequest) {
     request,
     async (
       _req,
-      _settings,
+      settings,
       _organizationId,
       _agentId,
       _userId,
       conversationId,
     ) => {
       const encoder = new TextEncoder();
-      const pattern = `zendesk:${conversationId}:*`;
+      const { handoffConfiguration } = settings;
+      const { webhookId } = handoffConfiguration || {};
+      if (!webhookId) {
+        return NextResponse.json("Error: Webhook configuration not found", {
+          status: 400,
+        });
+      }
+
+      const pattern = `zendesk:${conversationId}:${webhookId}:*`;
       const redisClient = await getRedisClient();
+
+      let keepAliveInterval: NodeJS.Timeout;
+
       const stream = new ReadableStream({
         async start(controller) {
           try {
-            await redisClient.pSubscribe(pattern, (message, channel) => {
-              try {
-                const parsedMessage = JSON.parse(message);
-                controller.enqueue(
-                  encoder.encode(
-                    `data: ${JSON.stringify({ message: parsedMessage, channel })}\n\n`,
-                  ),
-                );
-              } catch (error) {
-                console.error("Error processing subscription message:", error);
-              }
-            });
+            await redisClient.pSubscribe(
+              pattern,
+              (message: string, channel: string) => {
+                try {
+                  const parsedMessage: ZendeskMessagePayload =
+                    JSON.parse(message);
+
+                  controller.enqueue(
+                    encoder.encode(
+                      `data: ${JSON.stringify({ message: parsedMessage.event, channel })}\n\n`,
+                    ),
+                  );
+                } catch (error) {
+                  console.error(
+                    "Error processing subscription message:",
+                    error,
+                  );
+                }
+              },
+            );
+
+            keepAliveInterval = setInterval(() => {
+              controller.enqueue(encoder.encode(": keep-alive\n\n"));
+            }, KEEP_ALIVE_INTERVAL);
           } catch (error) {
             console.error("Error streaming messages:", error);
             controller.error(error);
           }
         },
         cancel() {
+          clearInterval(keepAliveInterval);
           redisClient.pUnsubscribe(pattern).catch(console.error);
         },
       });
 
-      return new Response(stream, {
+      const response = new Response(stream, {
         headers: {
           "Content-Type": "text/event-stream",
           "Cache-Control": "no-cache",
           Connection: "keep-alive",
         },
       });
+
+      waitUntil(new Promise(() => {}));
+
+      return response;
     },
   );
 }

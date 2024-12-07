@@ -17,6 +17,8 @@ import {
   type ChatEndedMessage,
 } from "@/types";
 
+const HANDOFF_RECONNECT_INTERVAL = 500;
+
 export enum HandoffStatus {
   INITIALIZED = "initialized",
   INITIALIZING = "initializing",
@@ -54,12 +56,15 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
       | ChatEndedMessage
     )[]
   >([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
   const [handoffAuthToken, setHandoffAuthToken] = useState<string | null>(null);
   const [agentName, setAgentName] = useState<string | null>(null);
 
   const [handoffStatus, setHandoffStatus] = useState<HandoffStatus>(
     HandoffStatus.NOT_INITIALIZED,
   );
+  const handoffStatusRef = useRef<HandoffStatus>(handoffStatus);
 
   const [abortController, setAbortController] = useState(new AbortController());
 
@@ -160,7 +165,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
           if (event.startsWith("data: ")) {
             try {
               const jsonData: ChatEvent = JSON.parse(event.slice(6));
-              if (jsonData.message) {
+              if (jsonData?.message?.type === "conversation:message") {
                 yield jsonData.message;
               }
             } catch (error) {
@@ -200,10 +205,48 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     setHandoffAuthToken(handoffAuthToken);
   }, [handoffMessages, signedUserData, generatedHeaders]);
 
+  const handleEndHandoff = useCallback(async () => {
+    resetAbortController();
+    setHandoffAuthToken(null);
+    setAgentName(null);
+    setHandoffChatEvents((prev) => [
+      ...prev,
+      {
+        type: "ChatEnded",
+        timestamp: new Date().getTime(),
+      } as ChatEndedMessage,
+    ]);
+
+    void setHandoffStatus(HandoffStatus.NOT_INITIALIZED);
+
+    if (!handoffAuthToken || !handoffTypeRef.current) {
+      return;
+    }
+
+    void fetch(`/api/${handoffTypeRef.current}/conversations/passControl`, {
+      method: "POST",
+      headers: generatedHeaders,
+    });
+  }, [
+    setHandoffStatus,
+    setHandoffAuthToken,
+    setAgentName,
+    generatedHeaders,
+    resetAbortController,
+  ]);
+
   const getMessages = useCallback(async () => {
     if (!handoffAuthToken || !handoffTypeRef.current) {
       return;
     }
+
+    if (
+      isConnected ||
+      handoffStatusRef.current === HandoffStatus.NOT_INITIALIZED
+    ) {
+      return;
+    }
+    setIsConnected(true);
 
     const newAbortController = resetAbortController();
 
@@ -216,6 +259,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
 
       for await (const event of streamResponse(response)) {
         if (newAbortController.signal.aborted) break;
+        if (event.type === "keep-alive") continue; // Ignore keep-alive messages
         handleHandoffChatEvent(event);
       }
     } catch (error) {
@@ -223,6 +267,15 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
         console.log("Fetch aborted");
       } else {
         console.error("Error streaming response:", error);
+        void handleEndHandoff();
+      }
+    } finally {
+      setIsConnected(false);
+      // Attempt to reconnect after 5 seconds
+      if (handoffStatusRef.current === HandoffStatus.INITIALIZED) {
+        reconnectTimeoutRef.current = setTimeout(() => {
+          void getMessages();
+        }, HANDOFF_RECONNECT_INTERVAL);
       }
     }
   }, [
@@ -230,6 +283,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     generatedHeaders,
     streamResponse,
     resetAbortController,
+    handleEndHandoff,
   ]);
 
   const initializeHandoff = useCallback(async () => {
@@ -249,6 +303,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
   }, [getOrCreateUserAndConversation, signedUserData]);
 
   useEffect(() => {
+    handoffStatusRef.current = handoffStatus;
     if (handoffStatus === HandoffStatus.INITIALIZED) {
       setHandoffChatEvents((prev) => [
         ...prev,
@@ -295,39 +350,12 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     [generatedHeaders],
   );
 
-  const handleEndHandoff = useCallback(async () => {
-    resetAbortController();
-    setHandoffAuthToken(null);
-    setAgentName(null);
-    setHandoffChatEvents((prev) => [
-      ...prev,
-      {
-        type: "ChatEnded",
-        timestamp: new Date().getTime(),
-      } as ChatEndedMessage,
-    ]);
-
-    void setHandoffStatus(HandoffStatus.NOT_INITIALIZED);
-
-    if (!handoffAuthToken || !handoffTypeRef.current) {
-      return;
-    }
-
-    void fetch(`/api/${handoffTypeRef.current}/conversations/passControl`, {
-      method: "POST",
-      headers: generatedHeaders,
-    });
-  }, [
-    setHandoffStatus,
-    setHandoffAuthToken,
-    setAgentName,
-    generatedHeaders,
-    resetAbortController,
-  ]);
-
   useEffect(() => {
     return () => {
       abortController?.abort();
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -339,5 +367,6 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     agentName,
     askHandoff,
     handleEndHandoff,
+    isConnected,
   };
 }

@@ -80,7 +80,7 @@ function renderHandoffMessage(
       ref={isLastMessage ? latestChatBubbleRef : null}
     >
       <ReactMarkdown linkTargetInNewTab={true}>
-        {message.payload.message?.content.text || ""}
+        {message.payload.message?.content?.text || ""}
       </ReactMarkdown>
     </ChatBubble>
   );

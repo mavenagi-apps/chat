@@ -3,6 +3,8 @@ import {
   type AskStreamActionEvent,
 } from "mavenagi/api";
 
+import type { HandoffChatMessage } from "@/types/zendesk";
+
 type ChatMessage = {
   text: string;
   type: "USER" | "ERROR" | "SIMULATED";
@@ -15,36 +17,6 @@ type ActionChatMessage = ConversationMessageResponse.Bot & {
 
 type EscalationChatMessage = ConversationMessageResponse.Bot & {
   action: AskStreamActionEvent & { formLabel: "escalate-live-agent" };
-};
-
-type HandoffChatMessage = {
-  timestamp?: number;
-  createdAt: string;
-  id: string;
-  type?: string;
-  payload: {
-    conversation?: {
-      id: string;
-      type: "personal";
-      activeSwitchboardIntegration?: Record<string, unknown>;
-    };
-    message?: {
-      id: string;
-      author: {
-        type: "user" | "business";
-        avatarUrl?: string;
-        displayName?: string;
-      };
-      content: {
-        type: "text";
-        text: string;
-      };
-      metadata?: Record<string, unknown>;
-      received: string;
-      source?: Record<string, unknown>;
-    };
-    type: "conversation:message";
-  };
 };
 
 type ChatEstablishedMessage = {
