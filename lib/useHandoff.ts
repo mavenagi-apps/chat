@@ -164,7 +164,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
           if (event.startsWith("data: ")) {
             try {
               const jsonData: ChatEvent = JSON.parse(event.slice(6));
-              if (jsonData.message) {
+              if (jsonData?.message?.type === "conversation:message") {
                 yield jsonData.message;
               }
             } catch (error) {
