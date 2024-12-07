@@ -13,14 +13,22 @@ declare global {
   }
 
   type HandoffConfiguration = {
-    type: "zendesk" | "salesforce";
     subdomain: string;
     apiKey: string;
     apiSecret: string;
     appId: string;
-    webhookId: string;
-    webhookSecret: string;
-  };
+  } & (
+    | {
+        type: "zendesk";
+        webhookId: string;
+        webhookSecret: string;
+      }
+    | {
+        type: "salesforce" | "front";
+        webhookId?: string;
+        webhookSecret?: string;
+      }
+  );
 
   interface ClientSafeAppSettings extends Partial<AppSettings> {
     handoffConfiguration?: { type: HandoffConfiguration["type"] } | undefined;
