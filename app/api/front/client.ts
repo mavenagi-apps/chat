@@ -17,13 +17,13 @@ export class FrontApplicationClient {
   private async getAuthToken() {
     if (this.token) return this.token;
 
+    if (this.tokenTimeout) clearTimeout(this.tokenTimeout);
     this.token = await buildToken(
       this.appId,
       this.appSecret,
       this.channelId,
       this.tokenDuration * 1000,
     );
-    if (this.tokenTimeout) clearTimeout(this.tokenTimeout);
     this.tokenTimeout = setTimeout(
       () => {
         this.token = undefined;
