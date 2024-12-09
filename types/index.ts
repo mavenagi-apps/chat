@@ -5,6 +5,13 @@ import {
 
 import type { HandoffChatMessage } from "@/types/zendesk";
 
+interface VerifiedUserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  [key: string]: any;
+}
+
 type ChatMessage = {
   text: string;
   type: "USER" | "ERROR" | "SIMULATED";
@@ -90,4 +97,5 @@ export {
   type ChatEstablishedMessage,
   type ChatEndedMessage,
   type ZendeskChatMessage,
+  type VerifiedUserData,
 };
