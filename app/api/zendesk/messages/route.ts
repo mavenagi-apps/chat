@@ -5,7 +5,7 @@ import {
   postMessagesToZendeskConversation,
 } from "@/app/api/zendesk/utils";
 import { withSettingsAndAuthentication } from "@/app/api/server/utils";
-import { getRedisClient } from "@/app/api/server/lib/redis";
+import { getRedisSubscribeClient } from "@/app/api/server/lib/redis";
 import type { ZendeskMessagePayload } from "@/types/zendesk";
 
 const KEEP_ALIVE_INTERVAL = 30000;
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       }
 
       const pattern = `zendesk:${conversationId}:${webhookId}:*`;
-      const redisClient = await getRedisClient();
+      const redisClient = await getRedisSubscribeClient();
 
       let keepAliveInterval: NodeJS.Timeout;
 

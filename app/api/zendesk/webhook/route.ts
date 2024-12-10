@@ -1,6 +1,6 @@
 import { type NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { getRedisClient } from "@/app/api/server/lib/redis";
+import { getRedisPublishClient } from "@/app/api/server/lib/redis";
 import type { ZendeskMessagePayload } from "@/types/zendesk";
 
 const ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX = "conversation:";
@@ -24,7 +24,7 @@ export const POST = async (request: NextRequest) => {
       continue;
     }
 
-    const redisClient = await getRedisClient();
+    const redisClient = await getRedisPublishClient();
 
     await redisClient.publish(
       `zendesk:${conversationId}:${webhookId}:${eventId}`,
