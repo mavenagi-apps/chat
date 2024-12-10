@@ -22,7 +22,7 @@ export class FrontApplicationClient {
       this.appId,
       this.appSecret,
       this.channelId,
-      this.tokenDuration * 1000,
+      this.tokenDuration,
     );
     this.tokenTimeout = setTimeout(
       () => {
