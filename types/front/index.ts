@@ -36,6 +36,7 @@ export namespace Front {
     type: "message" | "message_imported" | string;
     payload: WebhookMessage;
     metadata: {
+      external_conversation_id?: string;
       external_conversation_ids: string[];
     };
   };
@@ -46,6 +47,7 @@ export namespace Front {
       related: {
         conversation: string;
         message_seen: string;
+        message_replied_to?: string;
       };
     };
     id: string;
