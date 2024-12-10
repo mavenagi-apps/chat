@@ -10,13 +10,7 @@ import { decryptAndVerifySignedUserData } from "@/app/api/server/utils";
 
 import jwt from "jsonwebtoken";
 import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
-
-interface VerifiedUserData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  [key: string]: any;
-}
+import type { VerifiedUserData } from "@/types";
 
 const getOrCreateZendeskUser = async (
   SunshineConversationsClient: typeof SunshineConversationsClientModule,
