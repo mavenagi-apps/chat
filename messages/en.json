@@ -40,7 +40,7 @@
     "ChatInput": {
       "see_more": "See more",
       "see_less": "See less",
-      "question_placeholder": "Ask a question...",
+      "question_placeholder": "Ask a query...",
       "speaking_with_agent": "Speaking with Agent",
       "end_chat": "End chat",
       "aria_submit_question": "Submit question",
