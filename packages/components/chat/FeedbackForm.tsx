@@ -31,6 +31,7 @@ type Props = {
   showClipboardButton?: boolean;
   showBailoutButton?: boolean;
   conversationId: string;
+  mavenUserId: string | null;
   copyToClipboardFn?: (message: string) => void;
 } & React.HTMLAttributes<HTMLDivElement>;
 
@@ -51,12 +52,12 @@ export default function FeedbackForm({
   conversationId,
   children,
   showClipboardButton = true,
+  mavenUserId,
   copyToClipboardFn = (message) => navigator.clipboard.writeText(message),
   ...props
 }: Props) {
   const t = useTranslations("chat.FeedbackForm");
   const analytics = useAnalytics();
-
   const [feedbackId, setFeedbackId] = React.useState<string | undefined>(
     undefined,
   );
@@ -99,6 +100,7 @@ export default function FeedbackForm({
       conversationMessageId: message.conversationMessageId.referenceId,
       feedbackType: feedback.type || feedbackType,
       feedbackText: feedback.text,
+      userId: mavenUserId || "",
     })) as ResponseType;
 
     if (isErrorResponse(response)) {
@@ -138,6 +140,7 @@ export default function FeedbackForm({
 
   return (
     <div {...props}>
+      <p>mavenUserId: {mavenUserId}</p>
       <div className="flex justify-end">
         <div
           className="relative flex flex-wrap justify-end gap-x-4 gap-y-2"

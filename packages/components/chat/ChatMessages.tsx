@@ -18,11 +18,12 @@ interface ChatMessagesProps {
   isLoading: boolean;
   isResponseAvailable: boolean;
   conversationId?: string;
+  mavenUserId: string | null;
 }
 
 export const ChatMessages = forwardRef<HTMLDivElement, ChatMessagesProps>(
   function ChatMessages(
-    { messages, isLoading, isResponseAvailable, conversationId },
+    { messages, isLoading, isResponseAvailable, conversationId, mavenUserId },
     ref,
   ) {
     return (
@@ -34,6 +35,7 @@ export const ChatMessages = forwardRef<HTMLDivElement, ChatMessagesProps>(
             isLastMessage={index === messages.length - 1}
             latestChatBubbleRef={ref as RefObject<HTMLDivElement>}
             conversationId={conversationId}
+            mavenUserId={mavenUserId}
           />
         ))}
 

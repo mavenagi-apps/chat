@@ -34,6 +34,7 @@ interface MessageProps {
   latestChatBubbleRef?: React.RefObject<HTMLDivElement>;
   conversationId?: string;
   initialUserChatMessage?: UserChatMessage | null;
+  mavenUserId: string | null;
 }
 
 function MessageCharts({
@@ -120,6 +121,7 @@ export function ChatMessage({
   isLastMessage = false,
   latestChatBubbleRef,
   conversationId,
+  mavenUserId,
 }: MessageProps) {
   const t = useTranslations("chat.ChatPage");
   if ("type" in message) {
@@ -188,6 +190,7 @@ export function ChatMessage({
             latestChatBubbleRef,
             conversationId,
             linkTargetInNewTab,
+            mavenUserId,
           );
         }
         return null;
@@ -275,6 +278,7 @@ function renderBotMessage(
   latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
   conversationId: string | undefined,
   linkTargetInNewTab: boolean,
+  mavenUserId: string | null,
 ) {
   if (!showBotAnswer({ message })) {
     return null;
@@ -295,7 +299,11 @@ function renderBotMessage(
       )}
       {showEscalationForm && <EscalationFormDisplay />}
       {!showActionForm && !showEscalationForm && conversationId && (
-        <FeedbackForm message={message} conversationId={conversationId} />
+        <FeedbackForm
+          message={message}
+          conversationId={conversationId}
+          mavenUserId={mavenUserId}
+        />
       )}
     </ChatBubble>
   );
