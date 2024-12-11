@@ -4,6 +4,7 @@ import {
 } from "mavenagi/api";
 
 import type { HandoffChatMessage } from "@/types/zendesk";
+import * as MavenAGI from "mavenagi/api";
 
 interface VerifiedUserData {
   firstName: string;
@@ -17,7 +18,10 @@ type ChatMessage = {
   type: "USER" | "ERROR" | "SIMULATED";
   timestamp?: number;
 };
-type UserChatMessage = ChatMessage & { type: "USER" };
+type UserChatMessage = ChatMessage & {
+  type: "USER";
+  attachments?: MavenAGI.Attachment[];
+};
 type ActionChatMessage = ConversationMessageResponse.Bot & {
   action: AskStreamActionEvent;
 };

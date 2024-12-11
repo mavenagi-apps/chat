@@ -1,13 +1,15 @@
 import { Input as HeadlessInput } from "@headlessui/react";
 import { useTranslations } from "next-intl";
-import React, { type HTMLAttributes } from "react";
+import React, { type HTMLAttributes, useState } from "react";
 import { HiArrowNarrowRight } from "react-icons/hi";
-import { RiCustomerService2Line } from "react-icons/ri";
+import { RiAttachmentLine, RiCustomerService2Line } from "react-icons/ri";
 import { z } from "zod";
 
 import { useForm } from "@magi/ui";
 
 import { ChatContext } from "./Chat";
+import Chip from "@magi/components/chat/Chip";
+import { Attachment } from "mavenagi/api";
 
 const HandoffChatBar = () => {
   const t = useTranslations("chat.ChatInput");
@@ -45,18 +47,72 @@ export const ChatInput = ({
 
   const [seeMoreFollowupQuestions, setSeeMoreFollowupQuestions] =
     React.useState<boolean>(false);
+
+  async function fileToAttachment(file: File): Promise<Attachment> {
+    const mimeType = file.type;
+    const base64content = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+
+    return {
+      type: mimeType,
+      content: base64content.split(",")[1], // Remove the data URL prefix
+    };
+  }
+
   const { Form, ...methods } = useForm({
     schema: z.object({
       question: z
         .string()
         .transform((v) => v.trim())
         .pipe(z.string().min(1)),
+      files: z.instanceof(FileList).optional(),
     }),
-    onSubmit: async ({ question }) => {
+    onSubmit: async ({ question, files }) => {
+      const attachments: Attachment[] = [];
+      if (files && files.length > 0) {
+        attachments.push(await fileToAttachment(files[0]));
+      }
+      await ask(question, attachments);
       methods.reset();
-      await ask(question);
     },
   });
+
+  const allowedAttachmentTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ];
+
+  //TODO to be used to add visual feedback to drag and drop
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragOver: React.DragEventHandler<HTMLDivElement> = (
+    event: React.DragEvent,
+  ) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  function handleDragLeave() {
+    setIsDragging(false);
+  }
+
+  const handleDrop: React.DragEventHandler<HTMLDivElement> = (
+    event: React.DragEvent,
+  ) => {
+    event.preventDefault();
+    setIsDragging(false);
+    const files: FileList = event.dataTransfer.files;
+    if (files.length > 0 && allowedAttachmentTypes.includes(files[0].type)) {
+      methods.setValue("files", files);
+    }
+  };
 
   return (
     <div className="min-h-14 border-t border-gray-300 bg-white p-3">
@@ -104,25 +160,46 @@ export const ChatInput = ({
           </div>
         )}
 
-        <Form.Form {...methods} className="flex items-center">
-          <HeadlessInput
-            {...props}
-            aria-label={t("aria_question_box")}
-            placeholder={t(questionPlaceholder)}
-            className="w-0 grow resize-none border-0 p-2 text-xs outline-none focus:shadow-none focus:ring-0"
-            {...methods.register("question")}
-            autoComplete="off"
-          />
-          <button
-            type="submit"
-            aria-label={t("aria_submit_question")}
-            disabled={isSubmitting || !methods.formState.isDirty}
-            data-testid="submit-question"
-            className="focus:ring-primary-300 flex size-7 items-center justify-center rounded-full bg-[--brand-color] bg-gradient-to-r text-xs font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4"
-          >
-            <HiArrowNarrowRight className="size-3.5" />
-          </button>
-        </Form.Form>
+        <div
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onDragLeave={handleDragLeave}
+        >
+          <Form.Form {...methods} className="flex items-center relative">
+            <HeadlessInput
+              {...props}
+              aria-label={t("aria_question_box")}
+              placeholder={t(questionPlaceholder)}
+              className="w-0 grow resize-none border-0 p-2 text-xs outline-none focus:shadow-none focus:ring-0"
+              {...methods.register("question")}
+              autoComplete="off"
+            />
+            <input
+              type="file"
+              id="file-input"
+              className="hidden"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+              {...methods.register("files")}
+            />
+            {methods.watch("files")?.[0] &&
+              Chip({
+                displayText: methods.getValues("files")![0].name,
+                onRemove: () => methods.resetField("files"),
+              })}
+            <label htmlFor="file-input" className="cursor-pointer">
+              <RiAttachmentLine className="size-5 text-gray-500 hover:text-gray-700 mr-2" />
+            </label>
+            <button
+              type="submit"
+              aria-label={t("aria_submit_question")}
+              disabled={isSubmitting || !methods.formState.isDirty}
+              data-testid="submit-question"
+              className="focus:ring-primary-300 flex size-7 items-center justify-center rounded-full bg-[--brand-color] bg-gradient-to-r text-xs font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4"
+            >
+              <HiArrowNarrowRight className="size-3.5" />
+            </button>
+          </Form.Form>
+        </div>
       </div>
     </div>
   );

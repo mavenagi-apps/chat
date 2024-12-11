@@ -9,6 +9,7 @@ import {
   isBotMessage,
 } from "@/types";
 import { useSettings } from "@/app/providers/SettingsProvider";
+import { Attachment } from "mavenagi/api";
 
 interface ChatProps {
   messages: (
@@ -28,7 +29,7 @@ interface ChatProps {
 
 export const ChatContext = React.createContext<{
   followUpQuestions: string[];
-  ask: (question: string) => Promise<void>;
+  ask: (question: string, attachments?: Attachment[]) => Promise<void>;
   initializeHandoff: () => Promise<void>;
   agentName: string | null;
   isHandoff: boolean;
