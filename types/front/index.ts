@@ -42,14 +42,7 @@ export namespace Front {
   };
 
   export type WebhookMessage = {
-    _links: {
-      self: string;
-      related: {
-        conversation: string;
-        message_seen: string;
-        message_replied_to?: string;
-      };
-    };
+    _links: Links;
     id: string;
     type: string;
     is_inbound: boolean;
@@ -74,13 +67,7 @@ export namespace Front {
   };
 
   export type Author = {
-    _links: {
-      self: string;
-      related: {
-        inboxes: string;
-        conversations: string;
-      };
-    };
+    _links: Links;
     id: string;
     email: string;
     username: string;
@@ -93,13 +80,52 @@ export namespace Front {
   };
 
   export type Recipient = {
-    _links: {
-      related: {
-        contact: string | null;
-      };
-    };
+    _links: Omit<Links, "self">;
     name: string | null;
     handle: string;
     role: "from" | "to";
+  };
+
+  export type Links = {
+    self: string;
+    related: {
+      channels?: string;
+      comments?: string;
+      conversation?: string;
+      conversations?: string;
+      contact?: string;
+      events?: string;
+      followers?: string;
+      inboxes?: string;
+      messages?: string;
+      message_replied_to?: string;
+      mentions?: string;
+      teammates?: string;
+    };
+  };
+
+  export type Channel = {
+    _links: Links;
+    address: string;
+    id: string;
+    name: string;
+    send_as: string;
+    settings?: ChannelSettings;
+    type: string;
+  };
+
+  export type ChannelSettings = {
+    webhook_url: string;
+  };
+
+  export type Pagination = {
+    limit: number;
+    next: string | null;
+    prev?: string;
+  };
+  export type List<T> = {
+    _pagination: Pagination;
+    _links: Omit<Links, "related">;
+    _results: T[];
   };
 }

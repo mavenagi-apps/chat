@@ -3,6 +3,50 @@ import { SignJWT } from "jose";
 import type { Front } from "@/types/front";
 
 export const DEFAULT_API_HOST = "https://api2.frontapp.com";
+
+export class FrontCoreClient {
+  constructor(
+    private apiKey: string,
+    private host: string = DEFAULT_API_HOST,
+  ) {}
+
+  private async fetch<T = any>({
+    method,
+    path,
+    body,
+  }: {
+    method: string;
+    path: string;
+    body?: any;
+  }) {
+    const url = new URL(path, this.host);
+    const init: RequestInit = {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.apiKey}`,
+      },
+    };
+    if (body) {
+      init.body = JSON.stringify(body);
+    }
+    const response = await fetch(url, init);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch ${method} ${path} with status ${response.status}`,
+      );
+    }
+    return (await response.json()) as T;
+  }
+
+  public async channels() {
+    return await this.fetch<Front.List<Front.Channel>>({
+      method: "GET",
+      path: "/channels/",
+    });
+  }
+}
+
 export class FrontApplicationClient {
   private tokenDuration: number = 30; // seconds
   private token?: string;
