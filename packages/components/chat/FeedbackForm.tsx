@@ -140,7 +140,6 @@ export default function FeedbackForm({
 
   return (
     <div {...props}>
-      <p>mavenUserId: {mavenUserId}</p>
       <div className="flex justify-end">
         <div
           className="relative flex flex-wrap justify-end gap-x-4 gap-y-2"
