@@ -53,6 +53,7 @@ type UseChatReturn = {
   isLoading: boolean;
   isResponseAvailable: boolean | undefined;
   conversationId: string;
+  mavenUserId: string | null;
 };
 
 type UseChatParams = {
@@ -65,6 +66,7 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
   const [conversationId, setConversationId] = React.useState<string>(nanoid());
   const [authToken, setAuthToken] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [mavenUserId, setMavenUserId] = React.useState<string | null>(null);
   const [abortController, setAbortController] = React.useState(
     new AbortController(),
   );
@@ -202,6 +204,7 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
           if (!responseAuthData.conversationId) {
             throw new Error("Conversation ID not found");
           }
+          setMavenUserId(responseAuthData.userId);
           setAuthToken(authToken);
           setConversationId(responseAuthData.conversationId);
           await streamResponse(response);
@@ -335,6 +338,7 @@ export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
       }
     },
     isLoading: isLoading,
+    mavenUserId: mavenUserId,
     isResponseAvailable: getResponseAvailable(),
     conversationId: conversationId,
   };

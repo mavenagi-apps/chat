@@ -13,6 +13,7 @@ interface CreateOrUpdateFeedbackProps {
   conversationMessageId: string;
   feedbackType?: FeedbackType;
   feedbackText?: string;
+  userId?: string;
 }
 
 export async function createOrUpdateFeedback({
@@ -23,12 +24,16 @@ export async function createOrUpdateFeedback({
   conversationMessageId,
   feedbackType,
   feedbackText,
+  userId,
 }: CreateOrUpdateFeedbackProps) {
   const client: MavenAGIClient = getMavenAGIClient(orgFriendlyId, agentId);
 
   const feedbackRequest = {
     feedbackId: {
       referenceId: feedbackId || nanoid(),
+    },
+    userId: {
+      referenceId: userId || "",
     },
     conversationId: {
       referenceId: conversationId,

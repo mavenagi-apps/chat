@@ -40,6 +40,7 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
     isResponseAvailable,
     askQuestion,
     conversationId,
+    mavenUserId,
   } = useChat({
     signedUserData,
   });
@@ -103,6 +104,7 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
               isResponseAvailable={isResponseAvailable || false}
               conversationId={conversationId}
               ref={latestChatBubbleRef}
+              mavenUserId={mavenUserId}
             />
           </div>
 
