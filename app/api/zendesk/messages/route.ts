@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
     async (req, settings, _orgId, _agentId, userId, conversationId) => {
       const { message } = await req.json();
 
-      if (!settings.handoffConfiguration) {
-        throw new Error("Handoff configuration not found");
+      if (settings.handoffConfiguration?.type !== "zendesk") {
+        throw new Error("Zendesk Handoff configuration not found");
       }
 
       const [SunshineConversationsClient, zendeskConversationsAppId] =
