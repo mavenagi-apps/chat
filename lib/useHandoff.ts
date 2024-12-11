@@ -11,10 +11,11 @@ import {
   type Message,
   isBotMessage,
   isChatUserMessage,
-  type HandoffChatMessage,
+  type ZendeskWebhookMessage,
   type ChatEstablishedMessage,
   type UserChatMessage,
   type ChatEndedMessage,
+  HandoffChatMessage,
 } from "@/types";
 
 const HANDOFF_RECONNECT_INTERVAL = 500;
@@ -27,13 +28,14 @@ export enum HandoffStatus {
 }
 
 type ChatEvent = {
-  message: HandoffChatMessage;
+  message: ZendeskWebhookMessage;
   channel: string;
 };
 
 type HandoffProps = {
   messages: Message[];
   signedUserData: string | null;
+  mavenConversationId: string;
 };
 
 type Params = {
@@ -41,7 +43,11 @@ type Params = {
   id: string;
 };
 
-export function useHandoff({ messages, signedUserData }: HandoffProps) {
+export function useHandoff({
+  messages,
+  signedUserData,
+  mavenConversationId,
+}: HandoffProps) {
   const { orgFriendlyId, id: agentId } = useParams<Params>();
   const { handoffConfiguration } = useSettings();
   const handoffTypeRef = useRef<HandoffConfiguration["type"] | null>(
@@ -50,7 +56,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
   const [handoffError, _setHandoffError] = useState<string | null>(null);
   const [handoffChatEvents, setHandoffChatEvents] = useState<
     (
-      | HandoffChatMessage
+      | ZendeskWebhookMessage
       | ChatEstablishedMessage
       | UserChatMessage
       | ChatEndedMessage
@@ -89,7 +95,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     return headers;
   }, [handoffAuthToken, orgFriendlyId, agentId]);
 
-  const handoffMessages = useMemo(() => {
+  const handoffMessages: HandoffChatMessage[] = useMemo(() => {
     switch (handoffTypeRef.current) {
       case "zendesk":
         return messages
@@ -112,6 +118,32 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
             };
           });
       case "front":
+        return messages
+          .filter((message) => ["USER", "bot"].includes(message.type))
+          .map((message: any) => {
+            return {
+              author: {
+                type: isChatUserMessage(message) ? "user" : "business",
+              },
+              content: {
+                type: "text",
+                text: isChatUserMessage(message)
+                  ? message.text
+                  : isBotMessage(message)
+                    ? message.responses
+                        .map((response: any) => response.text)
+                        .join("")
+                    : "",
+              },
+              timestamp: message.timestamp,
+              mavenContext: {
+                conversationId: mavenConversationId,
+                conversationMessageId: {
+                  referenceId: message?.conversationMessageId?.referenceId,
+                },
+              },
+            };
+          });
       case "salesforce":
       case null:
       default:
@@ -120,7 +152,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
   }, [messages]);
 
   const handleHandoffChatEvent = useCallback(
-    (event: HandoffChatMessage) => {
+    (event: ZendeskWebhookMessage) => {
       const author = event.payload?.message?.author;
       if (author?.type === "user") {
         return;
@@ -142,7 +174,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
 
   const streamResponse = useCallback(async function* (
     response: Response,
-  ): AsyncGenerator<HandoffChatMessage> {
+  ): AsyncGenerator<ZendeskWebhookMessage> {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

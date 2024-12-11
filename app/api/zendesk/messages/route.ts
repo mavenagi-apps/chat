@@ -59,7 +59,8 @@ export async function GET(request: NextRequest) {
     ) => {
       const encoder = new TextEncoder();
       const { handoffConfiguration } = settings;
-      const { webhookId } = handoffConfiguration || {};
+      const { webhookId } =
+        (handoffConfiguration as ZendeskHandoffConfiguration) || {};
       if (!webhookId) {
         return NextResponse.json("Error: Webhook configuration not found", {
           status: 400,
