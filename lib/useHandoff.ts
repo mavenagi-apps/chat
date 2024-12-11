@@ -15,7 +15,7 @@ import {
   type ChatEstablishedMessage,
   type UserChatMessage,
   type ChatEndedMessage,
-  HandoffChatMessage,
+  type HandoffChatMessage,
 } from "@/types";
 
 const HANDOFF_RECONNECT_INTERVAL = 500;
