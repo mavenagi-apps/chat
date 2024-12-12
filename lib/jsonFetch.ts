@@ -8,10 +8,9 @@ export class JsonFetchError extends Error {
 }
 
 export async function jsonFetch<T = any>(
-  path: string | URL,
+  url: string | URL,
   { method = "GET", body, headers, ...rest }: RequestInit,
 ) {
-  const url = new URL(path, "https://app.mavenagi.com");
   const init: RequestInit = {
     method,
     headers: {
@@ -30,7 +29,10 @@ export async function jsonFetch<T = any>(
   const response = await fetch(url, init);
   if (!response.ok) {
     // throw an error and provide the response so the caller handle
-    throw new JsonFetchError(`Failed to fetch ${method} ${path}`, response);
+    throw new JsonFetchError(
+      `Failed to fetch ${method} ${new URL(url).pathname}`,
+      response,
+    );
   }
   return (await response.json()) as T;
 }
