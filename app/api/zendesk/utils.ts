@@ -2,7 +2,7 @@ import * as SunshineConversationsClient from "sunshine-conversations-client";
 import type SunshineConversationsClientModule from "sunshine-conversations-client";
 
 export const getSunshineConversationsClient = async (
-  handoffConfiguration: HandoffConfiguration,
+  handoffConfiguration: ZendeskHandoffConfiguration,
 ): Promise<[typeof SunshineConversationsClient, string]> => {
   const sunshineClient = SunshineConversationsClient.ApiClient.instance;
   if (!handoffConfiguration) {

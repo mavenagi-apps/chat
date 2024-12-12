@@ -85,8 +85,8 @@ export async function POST(req: NextRequest) {
     const { messages, signedUserData } = await request.json();
     const { handoffConfiguration } = settings;
 
-    if (!handoffConfiguration) {
-      throw new Error("Handoff configuration not found");
+    if (handoffConfiguration?.type !== "zendesk") {
+      throw new Error("Zendesk Handoff configuration not found");
     }
 
     const { apiKey, apiSecret } = handoffConfiguration;

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import {
   type ChatEndedMessage,
   type ChatEstablishedMessage,
-  type HandoffChatMessage,
+  type ZendeskWebhookMessage,
   type Message,
   isBotMessage,
 } from "@/types";
@@ -13,7 +13,7 @@ import { useSettings } from "@/app/providers/SettingsProvider";
 interface ChatProps {
   messages: (
     | Message
-    | HandoffChatMessage
+    | ZendeskWebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage
   )[];
