@@ -13,9 +13,12 @@ export class FrontCoreClient {
 
   public async channels() {
     return await jsonFetch<Front.List<Front.Channel>>(
-      new URL("/channels/", this.host),
+      new URL("/channels", this.host),
       {
         method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+        },
       },
     );
   }
