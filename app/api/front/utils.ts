@@ -59,16 +59,30 @@ export function sendMessageToFront(
   return client.sendIncomingMessages(message as Front.AppChannelInboundMessage);
 }
 
+async function findChannel(client: FrontCoreClient, channelName: string) {
+  let next: string | null = null;
+  let channel: Front.Channel | null | undefined = null;
+
+  while (!channel) {
+    const channels = await client.channels({ next });
+    channel = channels._results.find((channel) => channel.name === channelName);
+
+    if (channel || !channels._pagination.next) {
+      break;
+    }
+    next = channels._pagination.next;
+  }
+
+  return channel;
+}
+
 export async function createApplicationChannelClient(
   config: FrontHandoffConfiguration,
 ) {
   const coreClient = createCoreClient(config);
   const channelName = config.channelName;
-  // TODO: page through channels if channelName is not found and there are more pages
-  const channels = await coreClient.channels();
-  const channel = channels._results.find(
-    (channel) => channel.name === channelName,
-  );
+  // TODO: store channelId in redis cache w/ a TTL
+  const channel = await findChannel(coreClient, channelName);
   if (!channel) {
     throw new Error(`Channel ${channelName} not found`);
   }

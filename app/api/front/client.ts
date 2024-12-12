@@ -5,22 +5,38 @@ import { jsonFetch } from "@/lib/jsonFetch";
 
 export const DEFAULT_API_HOST = "https://api2.frontapp.com";
 
+export type PagedEndpointParams = {
+  next?: string | null;
+  limit?: number;
+};
+
 export class FrontCoreClient {
   constructor(
     private apiKey: string,
     private host: string = DEFAULT_API_HOST,
   ) {}
 
-  public async channels() {
-    return await jsonFetch<Front.List<Front.Channel>>(
-      new URL("/channels", this.host),
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-        },
+  public async channels(params?: PagedEndpointParams) {
+    const { next, limit = 10 } = params ?? {};
+    let url: string | URL = new URL("/channels", this.host);
+    if (next) {
+      url = next;
+    } else {
+      const queryParams = new URLSearchParams();
+      // max front limit is 100
+      // min is 10 anything less will be ignored
+      if (10 < limit && limit <= 100) {
+        queryParams.append("limit", limit.toString());
+      }
+
+      url.search = queryParams.toString();
+    }
+    return await jsonFetch<Front.List<Front.Channel>>(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
       },
-    );
+    });
   }
 }
 
