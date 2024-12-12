@@ -31,6 +31,13 @@ export const POST = async (request: NextRequest) => {
 
     const redisClient = await getRedisClient();
 
+    if (ENABLE_API_LOGGING) {
+      console.log(
+        "Publishing message to Redis",
+        `zendesk:${conversationId}:${webhookId}:${eventId}`,
+      );
+    }
+
     await redisClient.publish(
       `zendesk:${conversationId}:${webhookId}:${eventId}`,
       JSON.stringify({
