@@ -87,15 +87,6 @@ async function postMavenMessagesToFront({
     .filter((message) => !!message);
 
   for (const message of frontMessages) {
-    const response = await sendMessageToFront(client, message);
-    // TODO: handle errors
-    if (response) {
-      console.log(
-        "Posted message",
-        response.ok,
-        response.status,
-        await response.text(),
-      );
-    }
+    await sendMessageToFront(client, message);
   }
 }

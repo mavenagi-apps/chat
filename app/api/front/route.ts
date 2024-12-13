@@ -57,7 +57,7 @@ export const POST = async (request: NextRequest) => {
   });
   const host =
     process.env.VERCEL_PRODUCTION_URL ??
-    process.env.LOCAL_DEV_TUNNER_URL ??
+    process.env.LOCAL_DEV_TUNNEL_URL ??
     "http://localhost:3000";
   const url = new URL(host);
   const hostname = url.hostname;
