@@ -178,7 +178,7 @@ export const ChatInput = ({
               type="file"
               id="file-input"
               className="hidden"
-              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+              accept={allowedAttachmentTypes.join(",")}
               {...methods.register("files")}
             />
             {methods.watch("files")?.[0] &&
