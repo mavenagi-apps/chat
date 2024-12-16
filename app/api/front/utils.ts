@@ -5,6 +5,8 @@ import { FrontApplicationClient, FrontCoreClient } from "./client";
 import Keyv from "keyv";
 import { Cacheable, KeyvCacheableMemory } from "cacheable";
 import { getRedisCache } from "@/app/api/server/lib/redis";
+import { JsonFetchError } from "@/lib/jsonFetch";
+import Bottleneck from "bottleneck";
 
 let channelCache: Cacheable | undefined;
 async function getChannelCache() {
@@ -127,4 +129,63 @@ export async function createApplicationChannelClient(
 }
 export function createCoreClient(config: FrontHandoffConfiguration) {
   return new FrontCoreClient(config.apiKey, config.host);
+}
+
+export async function postMavenMessagesToFront({
+  conversationId,
+  client,
+  messages,
+  userInfo,
+}: {
+  conversationId: string;
+  client: FrontApplicationClient;
+  messages: HandoffChatMessage[];
+  userInfo: VerifiedUserData;
+}) {
+  const frontMessages = messages
+    .map((message: any) =>
+      convertToFrontMessage(conversationId, userInfo, message),
+    )
+    .filter((message) => !!message);
+
+  if (!frontMessages.length) {
+    return;
+  }
+
+  const frontLimiter = new Bottleneck({
+    minTime: 200, // 5 requests per second per conversation
+  });
+  frontLimiter.on("failed", async (error, info) => {
+    enum RetryableStatusCodes {
+      TooManyRequests = 429,
+      InternalServerError = 500,
+      NotImplemented = 501,
+      BadGateway = 502,
+      ServiceUnavailable = 503,
+      GatewayTimeout = 504,
+    }
+    const { retryCount } = info;
+    const backoffs = [0.2, 0.4, 0.8, 1, 2];
+    if (
+      error instanceof JsonFetchError &&
+      Object.values(RetryableStatusCodes).includes(error.response.status)
+    ) {
+      const retryAfterSeconds = parseInt(
+        error.response.headers.get("retry-after") ??
+          String(backoffs[retryCount]),
+        10,
+      );
+      return retryAfterSeconds * 1000;
+    }
+    return;
+  });
+
+  for (const message of frontMessages) {
+    try {
+      await frontLimiter.schedule(() => sendMessageToFront(client, message));
+    } catch (error) {
+      console.error(`Failed to deliver message to Front`, error);
+      throw new Error("Failed to deliver message");
+    }
+  }
 }
