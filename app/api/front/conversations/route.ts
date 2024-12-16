@@ -14,6 +14,8 @@ import {
 } from "../utils";
 import type { VerifiedUserData } from "@/types";
 import { nanoid } from "nanoid";
+import { JsonFetchError } from "@/lib/jsonFetch";
+import Bottleneck from "bottleneck";
 
 export async function POST(req: NextRequest) {
   return withAppSettings(req, async (request, settings, _orgId, _agentId) => {
@@ -86,7 +88,44 @@ async function postMavenMessagesToFront({
     )
     .filter((message) => !!message);
 
+  if (!frontMessages.length) {
+    return;
+  }
+
+  const frontLimiter = new Bottleneck({
+    minTime: 200, // 5 requests per second per conversation
+  });
+  frontLimiter.on("failed", async (error, info) => {
+    enum RetryableStatusCodes {
+      TooManyRequests = 429,
+      InternalServerError = 500,
+      NotImplemented = 501,
+      BadGateway = 502,
+      ServiceUnavailable = 503,
+      GatewayTimeout = 504,
+    }
+    const { retryCount } = info;
+    const backoffs = [0.2, 0.4, 0.8, 1, 2];
+    if (
+      error instanceof JsonFetchError &&
+      Object.values(RetryableStatusCodes).includes(error.response.status)
+    ) {
+      const retryAfterSeconds = parseInt(
+        error.response.headers.get("retry-after") ??
+          String(backoffs[retryCount]),
+        10,
+      );
+      return retryAfterSeconds * 1000;
+    }
+    return;
+  });
+
   for (const message of frontMessages) {
-    await sendMessageToFront(client, message);
+    try {
+      await frontLimiter.schedule(() => sendMessageToFront(client, message));
+    } catch (error) {
+      console.error(`Failed to deliver message to Front`, error);
+      throw new Error("Failed to deliver message");
+    }
   }
 }
