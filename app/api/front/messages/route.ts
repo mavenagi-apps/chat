@@ -30,8 +30,6 @@ export async function POST(request: NextRequest) {
 
       const { handoffConfiguration } = settings;
 
-      // TODO: remove this line
-      handoffConfiguration.channelName = "channel-2-install-2";
       const frontClient =
         await createApplicationChannelClient(handoffConfiguration);
 
