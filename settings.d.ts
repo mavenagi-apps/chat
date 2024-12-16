@@ -10,6 +10,7 @@ declare global {
     handoffConfiguration?: string;
     embedAllowlist?: string[];
     enableDemoSite?: string;
+    welcomeMessage?: string;
   }
   type BaseHandoffConfiguration = {
     apiKey: string;
