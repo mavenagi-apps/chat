@@ -71,10 +71,9 @@ export class FrontApplicationClient {
       `/channels/${this.channelId}/inbound_messages`,
       this.host,
     );
-    return await fetch(url, {
+    return await jsonFetch<Front.AppChannelSyncResponse>(url, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(msg),
@@ -87,10 +86,9 @@ export class FrontApplicationClient {
       `/channels/${this.channelId}/outbound_messages`,
       this.host,
     );
-    return await fetch(url, {
+    return await jsonFetch<Front.AppChannelSyncResponse>(url, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(msg),

@@ -1,4 +1,9 @@
 export namespace Front {
+  export type AppChannelSyncResponse = {
+    status: string;
+    message_uid: string;
+  };
+
   export type AppChannelBaseMessage = {
     body: string;
     metadata: Metadata;

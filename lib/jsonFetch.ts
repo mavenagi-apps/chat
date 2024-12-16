@@ -24,7 +24,7 @@ export async function jsonFetch<T = any>(
     ...rest,
   };
   if (body) {
-    init.body = JSON.stringify(body);
+    init.body = body;
   }
   const response = await fetch(url, init);
   if (!response.ok) {
