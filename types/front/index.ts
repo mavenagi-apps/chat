@@ -1,4 +1,9 @@
 export namespace Front {
+  export type AppChannelSyncResponse = {
+    status: string;
+    message_uid: string;
+  };
+
   export type AppChannelBaseMessage = {
     body: string;
     metadata: Metadata;
@@ -127,5 +132,10 @@ export namespace Front {
     _pagination: Pagination;
     _links: Omit<Links, "related">;
     _results: T[];
+  };
+
+  export type PagedEndpointParams = {
+    next?: string | null;
+    limit?: number;
   };
 }

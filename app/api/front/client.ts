@@ -5,18 +5,13 @@ import { jsonFetch } from "@/lib/jsonFetch";
 
 export const DEFAULT_API_HOST = "https://api2.frontapp.com";
 
-export type PagedEndpointParams = {
-  next?: string | null;
-  limit?: number;
-};
-
 export class FrontCoreClient {
   constructor(
     private apiKey: string,
     private host: string = DEFAULT_API_HOST,
   ) {}
 
-  public async channels(params?: PagedEndpointParams) {
+  public async channels(params?: Front.PagedEndpointParams) {
     const { next, limit = 10 } = params ?? {};
     let url: string | URL = new URL("/channels", this.host);
     if (next) {
@@ -76,10 +71,9 @@ export class FrontApplicationClient {
       `/channels/${this.channelId}/inbound_messages`,
       this.host,
     );
-    return await fetch(url, {
+    return await jsonFetch<Front.AppChannelSyncResponse>(url, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(msg),
@@ -92,10 +86,9 @@ export class FrontApplicationClient {
       `/channels/${this.channelId}/outbound_messages`,
       this.host,
     );
-    return await fetch(url, {
+    return await jsonFetch<Front.AppChannelSyncResponse>(url, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(msg),
