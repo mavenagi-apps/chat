@@ -128,4 +128,9 @@ export namespace Front {
     _links: Omit<Links, "related">;
     _results: T[];
   };
+
+  export type PagedEndpointParams = {
+    next?: string | null;
+    limit?: number;
+  };
 }
