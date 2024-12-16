@@ -1,4 +1,4 @@
-export type HandoffChatMessage = {
+export type ZendeskWebhookMessage = {
   timestamp?: number;
   createdAt: string;
   id: string;
@@ -30,5 +30,5 @@ export type HandoffChatMessage = {
 
 export type ZendeskMessagePayload = {
   webhookId: string;
-  event: HandoffChatMessage;
+  event: ZendeskWebhookMessage;
 };

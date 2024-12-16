@@ -16,7 +16,7 @@ import {
   type ActionChatMessage,
   type Message,
   type UserChatMessage,
-  type HandoffChatMessage,
+  type ZendeskWebhookMessage,
   type ChatEstablishedMessage,
   type ChatEndedMessage,
 } from "@/types";
@@ -26,7 +26,7 @@ import { useTranslations } from "next-intl";
 interface MessageProps {
   message:
     | Message
-    | HandoffChatMessage
+    | ZendeskWebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage;
   linkTargetInNewTab?: boolean;
@@ -69,7 +69,7 @@ function MessageCharts({
 }
 
 function renderHandoffMessage(
-  message: HandoffChatMessage,
+  message: ZendeskWebhookMessage,
   isLastMessage: boolean,
   latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
 ) {
@@ -166,7 +166,7 @@ export function ChatMessage({
         );
       case "handoff-zendesk":
         return renderHandoffMessage(
-          message as HandoffChatMessage,
+          message as ZendeskWebhookMessage,
           isLastMessage,
           latestChatBubbleRef,
         );
