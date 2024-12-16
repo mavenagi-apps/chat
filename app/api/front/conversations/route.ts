@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       { scope: "appUser", userId: verifiedUserInfo.email, conversationId },
       apiSecret,
       {
-        keyid: appId, // apiKey,
+        keyid: appId,
       },
     );
 

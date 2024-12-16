@@ -69,7 +69,7 @@ export namespace Front {
     attachments: any[];
     signature: string | null;
     is_draft: boolean;
-  };
+  } & { timestamp?: number }; // this is not part of the webhook message, but is used in the app
 
   export type Author = {
     _links: Links;
