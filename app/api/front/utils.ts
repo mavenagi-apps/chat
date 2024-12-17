@@ -2,6 +2,32 @@ import type { Front } from "@/types/front";
 import { nanoid } from "nanoid";
 import type { HandoffChatMessage, VerifiedUserData } from "@/types";
 import { FrontApplicationClient, FrontCoreClient } from "./client";
+import Keyv from "keyv";
+import { Cacheable, KeyvCacheableMemory } from "cacheable";
+import { getRedisCache } from "@/app/api/server/lib/redis";
+
+let channelCache: Cacheable | undefined;
+async function getChannelCache() {
+  if (!channelCache) {
+    let redisCache: Cacheable | undefined;
+    try {
+      redisCache = await getRedisCache();
+    } catch (error) {
+      console.error("Error getting redis cache", error);
+    }
+    channelCache = new Cacheable({
+      nonBlocking: true,
+      primary: new Keyv({
+        store: new KeyvCacheableMemory({
+          lruSize: 100,
+          ttl: "1h",
+        }),
+      }),
+      secondary: redisCache?.primary,
+    });
+  }
+  return channelCache;
+}
 
 export function convertToFrontMessage(
   conversationId: string,
@@ -79,17 +105,23 @@ async function findChannel(client: FrontCoreClient, channelName: string) {
 export async function createApplicationChannelClient(
   config: FrontHandoffConfiguration,
 ) {
-  const coreClient = createCoreClient(config);
   const channelName = config.channelName;
-  // TODO: store channelId in redis cache w/ a TTL
-  const channel = await findChannel(coreClient, channelName);
-  if (!channel) {
-    throw new Error(`Channel ${channelName} not found`);
+  const channelCache = await getChannelCache();
+  let channelId = await channelCache.get<string>(channelName);
+
+  if (!channelId) {
+    const coreClient = createCoreClient(config);
+    const channel = await findChannel(coreClient, channelName);
+    if (!channel) {
+      throw new Error(`Channel ${channelName} not found`);
+    }
+    channelId = channel.id;
+    await channelCache.set(channelName, channelId, "1h");
   }
   return new FrontApplicationClient(
     config.appId,
     config.apiSecret,
-    channel.id,
+    channelId,
     config.host,
   );
 }
