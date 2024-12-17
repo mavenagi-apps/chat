@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
         signedUserData: string;
       };
       if (settings.handoffConfiguration?.type !== "front") {
-        throw new Error("Zendesk Handoff configuration not found");
+        throw new Error("Front Handoff configuration not found");
       }
 
       const verifiedUserInfo = (await decryptAndVerifySignedUserData(
