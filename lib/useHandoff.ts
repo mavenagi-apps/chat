@@ -228,7 +228,7 @@ export function useHandoff({
               const currentHandoffType = handoffTypeRef.current ?? "";
               const messageType = jsonData.message.type ?? "";
               switch (`${currentHandoffType}-${messageType}`) {
-                case "zendesk-conversation::message":
+                case "zendesk-conversation:message":
                   yield jsonData.message as ZendeskWebhookMessage;
                   break;
                 case "front-custom":
