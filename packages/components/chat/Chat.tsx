@@ -9,11 +9,13 @@ import {
   isBotMessage,
 } from "@/types";
 import { useSettings } from "@/app/providers/SettingsProvider";
+import type { Front } from "@/types/front";
 
 interface ChatProps {
   messages: (
     | Message
     | ZendeskWebhookMessage
+    | Front.WebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage
   )[];

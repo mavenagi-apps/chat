@@ -18,12 +18,13 @@ import {
   type ChatEndedMessage,
   type HandoffChatMessage,
 } from "@/types";
+import type { Front } from "@/types/front";
 import { HandoffStatus } from "@/app/constants/handoff";
 
 const HANDOFF_RECONNECT_INTERVAL = 500;
 
 type ChatEvent = {
-  message: ZendeskWebhookMessage;
+  message: ZendeskWebhookMessage | Front.WebhookMessage;
   channel: string;
 };
 
@@ -48,6 +49,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
   const [handoffChatEvents, setHandoffChatEvents] = useState<
     (
       | ZendeskWebhookMessage
+      | Front.WebhookMessage
       | ChatEstablishedMessage
       | UserChatMessage
       | ChatEndedMessage
@@ -143,29 +145,55 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
   }, [messages]);
 
   const handleHandoffChatEvent = useCallback(
-    (event: ZendeskWebhookMessage) => {
-      const author = event.payload?.message?.author;
-      if (author?.type === "user") {
-        return;
-      }
+    (event: ZendeskWebhookMessage | Front.WebhookMessage) => {
+      switch (handoffTypeRef.current) {
+        case "zendesk": {
+          const zEvent = event as ZendeskWebhookMessage;
+          const payload = zEvent.payload;
+          const author = payload?.message?.author;
+          if (author?.type === "user") {
+            return;
+          }
 
-      if (author?.type === "business" && author.displayName) {
-        setAgentName(author.displayName);
-      }
+          if (author?.type === "business" && author.displayName) {
+            setAgentName(author.displayName);
+          }
 
-      const eventWithTimestamp = {
-        ...event,
-        type: "handoff-zendesk",
-        timestamp: new Date(event.createdAt).getTime(),
-      };
-      setHandoffChatEvents((prev) => [...prev, eventWithTimestamp]);
+          const eventWithTimestamp = {
+            ...event,
+            type: "handoff-zendesk",
+            timestamp: new Date(zEvent.createdAt).getTime(),
+          };
+          setHandoffChatEvents((prev) => [...prev, eventWithTimestamp]);
+          break;
+        }
+        case "front": {
+          const fEvent = event as Front.WebhookMessage;
+          setAgentName(
+            `${fEvent.author.first_name} ${fEvent.author.last_name}`.trim(),
+          );
+          setHandoffChatEvents((prev) => [
+            ...prev,
+            {
+              ...fEvent,
+              type: "front-agent",
+              timestamp: Math.trunc(fEvent.created_at * 1000),
+            },
+          ]);
+          break;
+        }
+        case "salesforce":
+        case null:
+        default:
+          break;
+      }
     },
     [setHandoffChatEvents],
   );
 
   const streamResponse = useCallback(async function* (
     response: Response,
-  ): AsyncGenerator<ZendeskWebhookMessage> {
+  ): AsyncGenerator<ZendeskWebhookMessage | Front.WebhookMessage> {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -188,8 +216,19 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
           if (event.startsWith("data: ")) {
             try {
               const jsonData: ChatEvent = JSON.parse(event.slice(6));
-              if (jsonData?.message?.type === "conversation:message") {
-                yield jsonData.message;
+              const currentHandoffType = handoffTypeRef.current ?? "";
+              const messageType = jsonData.message.type ?? "";
+              switch (`${currentHandoffType}-${messageType}`) {
+                case "zendesk-conversation:message":
+                  yield jsonData.message as ZendeskWebhookMessage;
+                  break;
+                case "front-custom":
+                  yield jsonData.message as Front.WebhookMessage;
+                  break;
+                case "salesforce":
+                case null:
+                default:
+                  break;
               }
             } catch (error) {
               console.error("Error parsing JSON:", error);
@@ -257,6 +296,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
     void fetch(`/api/${handoffTypeRef.current}/conversations/passControl`, {
       method: "POST",
       headers: generatedHeaders,
+      body: JSON.stringify({ signedUserData }),
     });
   }, [
     setHandoffStatus,
@@ -373,7 +413,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
 
       const response = await fetch(`/api/${handoffTypeRef.current}/messages`, {
         method: "POST",
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, signedUserData }),
         headers: generatedHeaders,
       });
 

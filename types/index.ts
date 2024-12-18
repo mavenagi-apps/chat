@@ -4,6 +4,7 @@ import {
 } from "mavenagi/api";
 
 import type { ZendeskWebhookMessage } from "@/types/zendesk";
+import type { Front } from "./front";
 
 interface VerifiedUserData {
   firstName: string;
@@ -77,6 +78,7 @@ const isBotMessage = (
   message:
     | Message
     | ZendeskWebhookMessage
+    | Front.WebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage,
 ): message is ConversationMessageResponse.Bot =>

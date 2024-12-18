@@ -19,6 +19,13 @@ import { useScrollToLatest } from "@/lib/useScrollToLatest";
 import { useHandoff } from "@/lib/useHandoff";
 import { HandoffStatus } from "@/app/constants/handoff";
 import { PoweredByMaven } from "@magi/components/chat/PoweredByMaven";
+import type {
+  ChatEndedMessage,
+  ChatEstablishedMessage,
+  ZendeskWebhookMessage,
+} from "@/types";
+import type { Message } from "@/types";
+import type { Front } from "@/types/front";
 
 function ChatPage() {
   const analytics = useAnalytics();
