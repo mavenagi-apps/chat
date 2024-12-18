@@ -26,9 +26,18 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.9.0
         version: 3.9.1(react-hook-form@7.53.1(react@19.0.0-rc-69d4b800-20241021))
+      '@keyv/redis':
+        specifier: ^4.1.0
+        version: 4.1.0
       '@vercel/functions':
         specifier: ^1.5.1
         version: 1.5.1
+      bottleneck:
+        specifier: ^2.19.5
+        version: 2.19.5
+      cacheable:
+        specifier: ^1.8.6
+        version: 1.8.6
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -47,6 +56,9 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
+      keyv:
+        specifier: ^5.2.2
+        version: 5.2.2
       mavenagi:
         specifier: 1.0.2
         version: 1.0.2
@@ -749,6 +761,13 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
+  '@keyv/redis@4.1.0':
+    resolution: {integrity: sha512-wZqQBYHKrL+Hu4zGduZFwiuj0rLhm3Hw9SLo5GBblGunX3tYmzMziE5za94xRKSnV/uZr7fsHLBfHZUJ4lyCPw==}
+    engines: {node: '>= 18'}
+
+  '@keyv/serialize@1.0.1':
+    resolution: {integrity: sha512-kKXeynfORDGPUEEl2PvTExM2zs+IldC6ZD8jPcfvI351MDNtfMlw9V9s4XZXuJNDK2qR5gbEKxRyoYx3quHUVQ==}
+
   '@next/env@15.0.3':
     resolution: {integrity: sha512-t9Xy32pjNOvVn2AS+Utt6VmyrshbpfUMhIjFO60gI58deSo/KgLOp31XZ4O+kY/Is8WAGYwA5gR7kOb1eORDBA==}
 
@@ -1370,6 +1389,9 @@ packages:
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
+  bottleneck@2.19.5:
+    resolution: {integrity: sha512-VHiNCbI1lKdl44tGrhNfU3lup0Tj/ZBMJB5/2ZbNXRCPuRCO7ed2mgcK4r17y+KB2EfuYuRaVlwNbAeaWGSpbw==}
+
   brace-expansion@1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
 
@@ -1401,6 +1423,9 @@ packages:
   cac@6.7.14:
     resolution: {integrity: sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==}
     engines: {node: '>=8'}
+
+  cacheable@1.8.6:
+    resolution: {integrity: sha512-RNBnqNhWBtgYNe4mF4395e6260Q9loh6zT2CDFia9LSJor5+vOsvkxhd7GAtg3U4m8i38adn1Q3jiCU1N33/gg==}
 
   call-bind@1.0.7:
     resolution: {integrity: sha512-GHTSNSYICQ7scH7sZ+M2rFopRoLh8t2bLSW6BbgrtLsahOIB5iyAVJf9GjWK3cYTDaMj4XdBpM1cA6pIS0Kv2w==}
@@ -2106,6 +2131,9 @@ packages:
     resolution: {integrity: sha512-fJ7cW7fQGCYAkgv4CPfwFHrfd/cLS4Hau96JuJ+ZTOWhjnhoeN1ub1tFmALm/+lW5z4WCAuAV9bm05AP0mS6Gw==}
     engines: {node: '>=12.0.0'}
 
+  hookified@1.5.1:
+    resolution: {integrity: sha512-sZQQ5QgNVQUXffNd66qefqOMXA88CXIV0gW8I4bMAJYeu1ZCJsyy7sdchaoHzRyS4o0cXw3krNDXkljZr7uexw==}
+
   html-encoding-sniffer@4.0.0:
     resolution: {integrity: sha512-Y22oTqIU4uuPgEemfz7NDJz6OeKf12Lsu+QC+s3BVpda64lTiMYCyGwg5ki4vFxkMwQdeZDl2adZoqUgdFuTgQ==}
     engines: {node: '>=18'}
@@ -2412,6 +2440,9 @@ packages:
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
+
+  keyv@5.2.2:
+    resolution: {integrity: sha512-CRPP4Sq5ofbUE8s4FOirFmDgHeKZFRrH/8+WOUNvLJiMIplRMfnMjxmbaDb+zVd7ex0gGAWqMhZHfcL2u6PrNQ==}
 
   kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
@@ -4321,6 +4352,16 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
+  '@keyv/redis@4.1.0':
+    dependencies:
+      cluster-key-slot: 1.1.2
+      keyv: 5.2.2
+      redis: 4.7.0
+
+  '@keyv/serialize@1.0.1':
+    dependencies:
+      buffer: 6.0.3
+
   '@next/env@15.0.3': {}
 
   '@next/eslint-plugin-next@15.0.2':
@@ -4967,6 +5008,8 @@ snapshots:
 
   boolbase@1.0.0: {}
 
+  bottleneck@2.19.5: {}
+
   brace-expansion@1.1.11:
     dependencies:
       balanced-match: 1.0.2
@@ -5002,6 +5045,11 @@ snapshots:
       streamsearch: 1.1.0
 
   cac@6.7.14: {}
+
+  cacheable@1.8.6:
+    dependencies:
+      hookified: 1.5.1
+      keyv: 5.2.2
 
   call-bind@1.0.7:
     dependencies:
@@ -5427,7 +5475,7 @@ snapshots:
       debug: 4.3.7
       enhanced-resolve: 5.17.1
       eslint: 9.14.0(jiti@1.21.6)
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.13.0(eslint@9.14.0(jiti@1.21.6))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.13.0(eslint@9.14.0(jiti@1.21.6))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@9.14.0(jiti@1.21.6)))(eslint@9.14.0(jiti@1.21.6))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.13.0(eslint@9.14.0(jiti@1.21.6))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@9.14.0(jiti@1.21.6))
       fast-glob: 3.3.2
       get-tsconfig: 4.8.1
       is-bun-module: 1.2.1
@@ -5440,7 +5488,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.13.0(eslint@9.14.0(jiti@1.21.6))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.13.0(eslint@9.14.0(jiti@1.21.6))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@9.14.0(jiti@1.21.6)))(eslint@9.14.0(jiti@1.21.6)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.13.0(eslint@9.14.0(jiti@1.21.6))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@9.14.0(jiti@1.21.6)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -5467,7 +5515,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.14.0(jiti@1.21.6)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.13.0(eslint@9.14.0(jiti@1.21.6))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.13.0(eslint@9.14.0(jiti@1.21.6))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@9.14.0(jiti@1.21.6)))(eslint@9.14.0(jiti@1.21.6))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.13.0(eslint@9.14.0(jiti@1.21.6))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@9.14.0(jiti@1.21.6))
       hasown: 2.0.2
       is-core-module: 2.15.1
       is-glob: 4.0.3
@@ -5865,6 +5913,8 @@ snapshots:
 
   highlight.js@11.9.0: {}
 
+  hookified@1.5.1: {}
+
   html-encoding-sniffer@4.0.0:
     dependencies:
       whatwg-encoding: 3.1.1
@@ -6185,6 +6235,10 @@ snapshots:
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
+
+  keyv@5.2.2:
+    dependencies:
+      '@keyv/serialize': 1.0.1
 
   kolorist@1.8.0: {}
 

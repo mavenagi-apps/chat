@@ -1,7 +1,7 @@
 import { forwardRef, RefObject } from "react";
 import type {
   Message,
-  HandoffChatMessage,
+  ZendeskWebhookMessage,
   ChatEstablishedMessage,
   ChatEndedMessage,
 } from "@/types";
@@ -11,18 +11,19 @@ import Spinner from "@magi/components/Spinner";
 interface ChatMessagesProps {
   messages: (
     | Message
-    | HandoffChatMessage
+    | ZendeskWebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage
   )[];
   isLoading: boolean;
   isResponseAvailable: boolean;
   conversationId?: string;
+  mavenUserId: string | null;
 }
 
 export const ChatMessages = forwardRef<HTMLDivElement, ChatMessagesProps>(
   function ChatMessages(
-    { messages, isLoading, isResponseAvailable, conversationId },
+    { messages, isLoading, isResponseAvailable, conversationId, mavenUserId },
     ref,
   ) {
     return (
@@ -34,6 +35,7 @@ export const ChatMessages = forwardRef<HTMLDivElement, ChatMessagesProps>(
             isLastMessage={index === messages.length - 1}
             latestChatBubbleRef={ref as RefObject<HTMLDivElement>}
             conversationId={conversationId}
+            mavenUserId={mavenUserId}
           />
         ))}
 

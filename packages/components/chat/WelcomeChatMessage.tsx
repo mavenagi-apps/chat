@@ -1,4 +1,4 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ReactMarkdown } from "@magi/components/ReactMarkdown";
 import { ChatBubble } from "@magi/components/chat/ChatCard";
 import { MagiEvent } from "@/lib/analytics/events";
@@ -17,10 +17,26 @@ export function WelcomeMessage({
   conversationId,
 }: WelcomeMessageProps) {
   const t = useTranslations("chat.ChatPage");
+  const locale = useLocale();
   const analytics = useAnalytics();
   const { ask } = useContext(ChatContext);
 
-  const { popularQuestions: popularQuestionsJSON } = useSettings();
+  const { popularQuestions: popularQuestionsJSON, welcomeMessage } =
+    useSettings();
+
+  const welcomeMessageParsed = useMemo((): string | null => {
+    if (!welcomeMessage) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(welcomeMessage);
+      return parsed[locale] || parsed.en || "";
+    } catch (error) {
+      return welcomeMessage;
+    }
+  }, [welcomeMessage, locale]);
+
   const popularQuestions: string[] = useMemo(() => {
     try {
       if (typeof popularQuestionsJSON === "string") {
@@ -50,7 +66,7 @@ export function WelcomeMessage({
       <div className="flex flex-col">
         <div className="mb-2 whitespace-pre-wrap">
           <ReactMarkdown linkTargetInNewTab>
-            {t("default_welcome_message")}
+            {welcomeMessageParsed || t("default_welcome_message")}
           </ReactMarkdown>
         </div>
         {popularQuestions.slice(0, 3).map((question, index) => (

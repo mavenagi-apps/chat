@@ -3,7 +3,14 @@ import {
   type AskStreamActionEvent,
 } from "mavenagi/api";
 
-import type { HandoffChatMessage } from "@/types/zendesk";
+import type { ZendeskWebhookMessage } from "@/types/zendesk";
+
+interface VerifiedUserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  [key: string]: any;
+}
 
 type ChatMessage = {
   text: string;
@@ -49,10 +56,27 @@ type ZendeskChatMessage = {
   event_timestamp?: string;
 };
 
+type HandoffChatMessage = {
+  author: {
+    type: "user" | "business";
+  };
+  content: {
+    type: "text";
+    text: string;
+  };
+  timestamp?: number;
+  mavenContext?: {
+    conversationId: string;
+    conversationMessageId?: {
+      referenceId?: string;
+    };
+  };
+};
+
 const isBotMessage = (
   message:
     | Message
-    | HandoffChatMessage
+    | ZendeskWebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage,
 ): message is ConversationMessageResponse.Bot =>
@@ -86,8 +110,10 @@ export {
   type ChatMessage,
   type Message,
   type UserChatMessage,
-  type HandoffChatMessage,
+  type ZendeskWebhookMessage,
   type ChatEstablishedMessage,
   type ChatEndedMessage,
   type ZendeskChatMessage,
+  type VerifiedUserData,
+  type HandoffChatMessage,
 };

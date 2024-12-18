@@ -10,13 +10,7 @@ import { decryptAndVerifySignedUserData } from "@/app/api/server/utils";
 
 import jwt from "jsonwebtoken";
 import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
-
-interface VerifiedUserData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  [key: string]: any;
-}
+import type { VerifiedUserData } from "@/types";
 
 const getOrCreateZendeskUser = async (
   SunshineConversationsClient: typeof SunshineConversationsClientModule,
@@ -91,8 +85,8 @@ export async function POST(req: NextRequest) {
     const { messages, signedUserData } = await request.json();
     const { handoffConfiguration } = settings;
 
-    if (!handoffConfiguration) {
-      throw new Error("Handoff configuration not found");
+    if (handoffConfiguration?.type !== "zendesk") {
+      throw new Error("Zendesk Handoff configuration not found");
     }
 
     const { apiKey, apiSecret } = handoffConfiguration;

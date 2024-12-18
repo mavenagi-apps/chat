@@ -20,7 +20,7 @@ import { PoweredByMaven } from "@magi/components/chat/PoweredByMaven";
 import type {
   ChatEndedMessage,
   ChatEstablishedMessage,
-  HandoffChatMessage,
+  ZendeskWebhookMessage,
 } from "@/types";
 import type { Message } from "@/types";
 
@@ -30,7 +30,12 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
     useParams();
   const { brandColor, logoUrl } = useSettings();
   const [combinedMessages, setCombinedMessages] = useState<
-    (Message | HandoffChatMessage | ChatEstablishedMessage | ChatEndedMessage)[]
+    (
+      | Message
+      | ZendeskWebhookMessage
+      | ChatEstablishedMessage
+      | ChatEndedMessage
+    )[]
   >([]);
 
   // Maven chat logic
@@ -40,6 +45,7 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
     isResponseAvailable,
     askQuestion,
     conversationId,
+    mavenUserId,
   } = useChat({
     signedUserData,
   });
@@ -62,6 +68,7 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
   } = useHandoff({
     messages,
     signedUserData,
+    mavenConversationId: conversationId,
   });
 
   useEffect(() => {
@@ -103,6 +110,7 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
               isResponseAvailable={isResponseAvailable || false}
               conversationId={conversationId}
               ref={latestChatBubbleRef}
+              mavenUserId={mavenUserId}
             />
           </div>
 

@@ -16,7 +16,7 @@ import {
   type ActionChatMessage,
   type Message,
   type UserChatMessage,
-  type HandoffChatMessage,
+  type ZendeskWebhookMessage,
   type ChatEstablishedMessage,
   type ChatEndedMessage,
 } from "@/types";
@@ -26,7 +26,7 @@ import { useTranslations } from "next-intl";
 interface MessageProps {
   message:
     | Message
-    | HandoffChatMessage
+    | ZendeskWebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage;
   linkTargetInNewTab?: boolean;
@@ -34,6 +34,7 @@ interface MessageProps {
   latestChatBubbleRef?: React.RefObject<HTMLDivElement>;
   conversationId?: string;
   initialUserChatMessage?: UserChatMessage | null;
+  mavenUserId: string | null;
 }
 
 function MessageCharts({
@@ -68,7 +69,7 @@ function MessageCharts({
 }
 
 function renderHandoffMessage(
-  message: HandoffChatMessage,
+  message: ZendeskWebhookMessage,
   isLastMessage: boolean,
   latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
 ) {
@@ -120,6 +121,7 @@ export function ChatMessage({
   isLastMessage = false,
   latestChatBubbleRef,
   conversationId,
+  mavenUserId,
 }: MessageProps) {
   const t = useTranslations("chat.ChatPage");
   if ("type" in message) {
@@ -164,7 +166,7 @@ export function ChatMessage({
         );
       case "handoff-zendesk":
         return renderHandoffMessage(
-          message as HandoffChatMessage,
+          message as ZendeskWebhookMessage,
           isLastMessage,
           latestChatBubbleRef,
         );
@@ -188,6 +190,7 @@ export function ChatMessage({
             latestChatBubbleRef,
             conversationId,
             linkTargetInNewTab,
+            mavenUserId,
           );
         }
         return null;
@@ -275,6 +278,7 @@ function renderBotMessage(
   latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
   conversationId: string | undefined,
   linkTargetInNewTab: boolean,
+  mavenUserId: string | null,
 ) {
   if (!showBotAnswer({ message })) {
     return null;
@@ -295,7 +299,11 @@ function renderBotMessage(
       )}
       {showEscalationForm && <EscalationFormDisplay />}
       {!showActionForm && !showEscalationForm && conversationId && (
-        <FeedbackForm message={message} conversationId={conversationId} />
+        <FeedbackForm
+          message={message}
+          conversationId={conversationId}
+          mavenUserId={mavenUserId}
+        />
       )}
     </ChatBubble>
   );

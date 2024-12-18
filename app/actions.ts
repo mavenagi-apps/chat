@@ -13,6 +13,7 @@ interface CreateOrUpdateFeedbackProps {
   conversationMessageId: string;
   feedbackType?: FeedbackType;
   feedbackText?: string;
+  userId?: string;
 }
 
 export async function createOrUpdateFeedback({
@@ -23,12 +24,16 @@ export async function createOrUpdateFeedback({
   conversationMessageId,
   feedbackType,
   feedbackText,
+  userId,
 }: CreateOrUpdateFeedbackProps) {
   const client: MavenAGIClient = getMavenAGIClient(orgFriendlyId, agentId);
 
   const feedbackRequest = {
     feedbackId: {
       referenceId: feedbackId || nanoid(),
+    },
+    userId: {
+      referenceId: userId || "",
     },
     conversationId: {
       referenceId: conversationId,
@@ -98,6 +103,7 @@ export async function getPublicAppSettings(
       brandFontColor: settings.brandFontColor,
       enableDemoSite: settings.enableDemoSite,
       embedAllowlist: settings.embedAllowlist,
+      welcomeMessage: settings.welcomeMessage,
       // Do not pass the full handoffConfiguration object to the client
       // because it contains sensitive information that should not be exposed
       handoffConfiguration: parsedHandoffConfiguration,

@@ -16,9 +16,9 @@ export async function POST(request: NextRequest) {
       userId,
       conversationId,
     ) => {
-      if (!settings.handoffConfiguration) {
+      if (settings.handoffConfiguration?.type !== "zendesk") {
         return NextResponse.json(
-          { error: "Handoff configuration not found" },
+          { error: "Zendesk Handoff configuration not found" },
           { status: 400 },
         );
       }
