@@ -19,11 +19,6 @@ export const POST = async (
   }: { params: Promise<{ orgFriendlyId: string; agentFriendlyId: string }> },
 ) => {
   const body = (await request.json()) as Front.WebhookPayload;
-  console.log(
-    `Received ${request.method} ${request.url} request`,
-    body,
-    JSON.stringify(Object.fromEntries(request.headers.entries()), null, 4),
-  );
 
   // ignore unknown message types
   if (!KNOWN_MESSAGE_TYPES.includes(body.type)) {
