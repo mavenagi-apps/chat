@@ -23,6 +23,7 @@ import type {
   ZendeskWebhookMessage,
 } from "@/types";
 import type { Message } from "@/types";
+import type { Front } from "@/types/front";
 
 function ChatPage({ signedUserData }: { signedUserData: string | null }) {
   const analytics = useAnalytics();
@@ -33,6 +34,7 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
     (
       | Message
       | ZendeskWebhookMessage
+      | Front.WebhookMessage
       | ChatEstablishedMessage
       | ChatEndedMessage
     )[]
