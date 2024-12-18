@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Chat from "@magi/components/chat/Chat";
 import { ChatInput } from "@magi/components/chat/ChatInput";
@@ -10,33 +10,21 @@ import { MagiEvent } from "@/lib/analytics/events";
 import { useAnalytics } from "@/lib/use-analytics";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { useIframeMessaging } from "@/lib/useIframeMessaging";
+import { AuthProvider } from "@/app/providers/AuthProvider";
 import { ChatHeader } from "@magi/components/chat/ChatHeader";
 import { WelcomeMessage } from "@magi/components/chat/WelcomeChatMessage";
 import { ChatMessages } from "@magi/components/chat/ChatMessages";
 import { useAskQuestion } from "@/lib/useAskQuestion";
 import { useScrollToLatest } from "@/lib/useScrollToLatest";
-import { HandoffStatus, useHandoff } from "@/lib/useHandoff";
+import { useHandoff } from "@/lib/useHandoff";
+import { HandoffStatus } from "@/app/constants/handoff";
 import { PoweredByMaven } from "@magi/components/chat/PoweredByMaven";
-import type {
-  ChatEndedMessage,
-  ChatEstablishedMessage,
-  ZendeskWebhookMessage,
-} from "@/types";
-import type { Message } from "@/types";
 
-function ChatPage({ signedUserData }: { signedUserData: string | null }) {
+function ChatPage() {
   const analytics = useAnalytics();
   const { id: agentFriendlyId }: { orgFriendlyId: string; id: string } =
     useParams();
   const { brandColor, logoUrl } = useSettings();
-  const [combinedMessages, setCombinedMessages] = useState<
-    (
-      | Message
-      | ZendeskWebhookMessage
-      | ChatEstablishedMessage
-      | ChatEndedMessage
-    )[]
-  >([]);
 
   // Maven chat logic
   const {
@@ -46,9 +34,7 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
     askQuestion,
     conversationId,
     mavenUserId,
-  } = useChat({
-    signedUserData,
-  });
+  } = useChat();
 
   const { scrollToLatest, latestChatBubbleRef } = useScrollToLatest();
 
@@ -67,7 +53,6 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
     handleEndHandoff,
   } = useHandoff({
     messages,
-    signedUserData,
     mavenConversationId: conversationId,
   });
 
@@ -75,14 +60,14 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
     analytics.logEvent(MagiEvent.chatHomeView, { agentId: agentFriendlyId });
   }, [agentFriendlyId, analytics]);
 
+  const combinedMessages = useMemo(() => {
+    return [...messages, ...handoffChatEvents]
+      .filter(({ timestamp }) => !!timestamp)
+      .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+  }, [messages, handoffChatEvents]);
   useEffect(() => {
-    setCombinedMessages(
-      [...messages, ...handoffChatEvents]
-        .filter(({ timestamp }) => !!timestamp)
-        .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)),
-    );
     scrollToLatest();
-  }, [messages, handoffChatEvents, setCombinedMessages, scrollToLatest]);
+  }, [combinedMessages.length, scrollToLatest]);
   const isHandoff = handoffStatus === HandoffStatus.INITIALIZED;
 
   return (
@@ -114,7 +99,9 @@ function ChatPage({ signedUserData }: { signedUserData: string | null }) {
             />
           </div>
 
-          <PoweredByMaven shouldRender={messages.length === 0 && !isLoading} />
+          <PoweredByMaven
+            shouldRender={combinedMessages.length === 0 && !isLoading}
+          />
         </div>
 
         <ChatInput
@@ -132,5 +119,9 @@ export default function ChatPageWrapper() {
 
   if (loading) return null;
 
-  return <ChatPage signedUserData={signedUserData} />;
+  return (
+    <AuthProvider signedUserData={signedUserData}>
+      <ChatPage />
+    </AuthProvider>
+  );
 }

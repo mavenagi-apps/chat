@@ -1,5 +1,4 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
-import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
 import { POST } from "@/app/api/zendesk/conversations/route";
 import {
@@ -8,9 +7,11 @@ import {
 } from "@/app/api/zendesk/utils";
 import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
 import { NextRequest } from "next/server";
-
+import { withAppSettings } from "@/app/api/server/utils";
 // Mock all external dependencies
-vi.mock("nanoid", () => ({ nanoid: vi.fn() }));
+vi.mock("nanoid", () => ({
+  nanoid: () => "test-nanoid",
+}));
 vi.mock("jsonwebtoken", () => ({
   default: { sign: vi.fn() },
   sign: vi.fn(),
@@ -26,6 +27,7 @@ vi.mock("@/app/api/server/utils", () => ({
   withAppSettings: vi.fn((req, handler) =>
     handler(req, {
       handoffConfiguration: {
+        type: "zendesk",
         apiKey: "test-key",
         apiSecret: "test-secret",
       },
@@ -68,28 +70,32 @@ describe("POST /api/zendesk/conversations", () => {
     }),
   });
 
-  // Mock API instances
-  const mockApiInstances = {
-    users: {
-      getUser: vi.fn().mockRejectedValue({ status: 404 }),
-      createUser: vi
-        .fn()
-        .mockResolvedValue({ user: { id: TEST_DATA.USER_ID } }),
-    },
-    conversations: {
-      listConversations: vi.fn().mockResolvedValue({ conversations: [] }),
-      createConversation: vi.fn().mockResolvedValue({
-        conversation: { id: TEST_DATA.CONVERSATION_ID },
-      }),
-    },
-    conversationBody: {
-      setParticipants: vi.fn(),
-      setDisplayName: vi.fn(),
-      setDescription: vi.fn(),
-    },
-  };
+  let mockApiInstances: any;
 
   beforeEach(() => {
+    vi.clearAllMocks();
+
+    // Move mockApiInstances initialization here
+    mockApiInstances = {
+      users: {
+        getUser: vi.fn().mockRejectedValue({ status: 404 }),
+        createUser: vi
+          .fn()
+          .mockResolvedValue({ user: { id: TEST_DATA.USER_ID } }),
+      },
+      conversations: {
+        listConversations: vi.fn().mockResolvedValue({ conversations: [] }),
+        createConversation: vi.fn().mockResolvedValue({
+          conversation: { id: TEST_DATA.CONVERSATION_ID },
+        }),
+      },
+      conversationBody: {
+        setParticipants: vi.fn(),
+        setDisplayName: vi.fn(),
+        setDescription: vi.fn(),
+      },
+    };
+
     // Setup default mocks
     const mockClient = {
       UsersApi: vi.fn().mockReturnValue(mockApiInstances.users),
@@ -103,7 +109,6 @@ describe("POST /api/zendesk/conversations", () => {
       mockClient as any,
       TEST_DATA.APP_ID,
     ]);
-    vi.mocked(nanoid).mockReturnValue(TEST_DATA.NANOID);
     vi.mocked(jwt.sign).mockReturnValue(TEST_DATA.JWT_TOKEN);
   });
 
@@ -111,11 +116,45 @@ describe("POST /api/zendesk/conversations", () => {
     vi.clearAllMocks();
   });
 
+  describe("Configuration Validation", () => {
+    it("should return 400 when handoff configuration is invalid", async () => {
+      vi.mocked(withAppSettings).mockImplementationOnce((req, handler) =>
+        handler(
+          req,
+          {
+            handoffConfiguration: {
+              type: "zendesk",
+              apiSecret: "test-secret",
+              // Remove the apiKey from the handoff configuration
+            } as HandoffConfiguration,
+          } as ParsedAppSettings,
+          "test-org-id",
+          "test-agent-id",
+        ),
+      );
+
+      const response = await POST(
+        createMockRequest() as unknown as NextRequest,
+      );
+
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({
+        success: false,
+        error:
+          "Missing required Zendesk configuration. Both apiKey and apiSecret are required.",
+      });
+    });
+  });
+
   describe("User Creation", () => {
     it("should create an anonymous user when no signed user data is provided", async () => {
       const response = await POST(
         createMockRequest() as unknown as NextRequest,
       );
+
+      console.log(await response.json());
+
+      expect(response.status).toBe(200);
 
       expect(mockApiInstances.users.createUser).toHaveBeenCalledWith(
         TEST_DATA.APP_ID,
@@ -160,7 +199,11 @@ describe("POST /api/zendesk/conversations", () => {
       );
 
       expect(response.status).toBe(400);
-      expect(await response.json()).toEqual({ success: false });
+      expect(await response.json()).toEqual({
+        success: false,
+        error:
+          "User identification required. Please provide either an email or signed user data.",
+      });
     });
   });
 
@@ -181,7 +224,7 @@ describe("POST /api/zendesk/conversations", () => {
       ).toHaveBeenCalledWith("A conversation for customer support inquiries.");
     });
 
-    it("should post messages including system notification", async () => {
+    it("should post messages including system notification for unauthenticated users", async () => {
       await POST(createMockRequest() as unknown as NextRequest);
 
       expect(postMessagesToZendeskConversation).toHaveBeenCalledWith(
@@ -199,6 +242,23 @@ describe("POST /api/zendesk/conversations", () => {
             },
           }),
         ]),
+      );
+    });
+
+    it("should not add system notification for authenticated users", async () => {
+      await POST(
+        createMockRequest({
+          signedUserData: JSON.stringify(AUTHENTICATED_USER),
+          email: AUTHENTICATED_USER.email,
+        }) as unknown as NextRequest,
+      );
+
+      expect(postMessagesToZendeskConversation).toHaveBeenCalledWith(
+        expect.anything(),
+        TEST_DATA.CONVERSATION_ID,
+        TEST_DATA.USER_ID,
+        TEST_DATA.APP_ID,
+        [TEST_DATA.DEFAULT_MESSAGE],
       );
     });
   });

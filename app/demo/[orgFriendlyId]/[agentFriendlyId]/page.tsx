@@ -15,9 +15,12 @@ const mockUserData = {
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ orgFriendlyId: string; agentFriendlyId: string }>;
+  searchParams: Promise<{ anonymous?: string }>;
 }) {
+  const anonymous = "anonymous" in (await searchParams);
   const envPrefix = (await headers()).get("x-magi-env-prefix") ?? "";
   const { orgFriendlyId, agentFriendlyId } = await params;
   const settings = await getPublicAppSettings(orgFriendlyId, agentFriendlyId);
@@ -29,14 +32,17 @@ export default async function Page({
 
   let signedUserData = null;
 
-  try {
-    signedUserData = await generateSignedUserData(
-      mockUserData,
-      orgFriendlyId,
-      agentFriendlyId,
-    );
-  } catch (error) {
-    console.log("Error generating signed user data", error);
+  // Only generate signed user data if anonymous param is not present
+  if (!anonymous) {
+    try {
+      signedUserData = await generateSignedUserData(
+        mockUserData,
+        orgFriendlyId,
+        agentFriendlyId,
+      );
+    } catch (error) {
+      console.error("Error generating signed user data", error);
+    }
   }
 
   const widgetLoadPayload = {
