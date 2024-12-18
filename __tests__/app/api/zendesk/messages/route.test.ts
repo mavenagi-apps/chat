@@ -62,13 +62,11 @@ describe("POST /api/zendesk/conversations", () => {
     email?: string | null;
   } = {}) =>
     ({
-      json: vi
-        .fn()
-        .mockResolvedValue({
-          messages,
-          signedUserData,
-          email: email || undefined,
-        }),
+      json: vi.fn().mockResolvedValue({
+        messages,
+        signedUserData,
+        email: email || undefined,
+      }),
     }) as unknown as NextRequest;
 
   // Mock API instances
