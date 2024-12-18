@@ -21,16 +21,19 @@ export async function POST(req: NextRequest) {
     };
     const { handoffConfiguration } = settings;
 
-    if (!handoffConfiguration) {
-      throw new Error("Handoff configuration not found");
+    if (
+      handoffConfiguration?.type !== "front" ||
+      !handoffConfiguration.appId ||
+      !handoffConfiguration.apiSecret ||
+      !handoffConfiguration.apiKey
+    ) {
+      return NextResponse.json(
+        { error: "Front Handoff configuration not found or invalid" },
+        { status: 400 },
+      );
     }
 
-    const { apiSecret, appId, apiKey, type } = handoffConfiguration;
-
-    if (!appId || !apiSecret || !apiKey || type !== "front") {
-      throw new Error("Invalid handoff configuration");
-    }
-
+    const { appId, apiSecret } = handoffConfiguration;
     const frontClient =
       await createApplicationChannelClient(handoffConfiguration);
     const verifiedUserInfo = (await decryptAndVerifySignedUserData(

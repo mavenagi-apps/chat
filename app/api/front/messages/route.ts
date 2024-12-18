@@ -20,7 +20,10 @@ export async function POST(request: NextRequest) {
       };
 
       if (settings.handoffConfiguration?.type !== "front") {
-        throw new Error("Front Handoff configuration not found");
+        return NextResponse.json(
+          { error: "Front Handoff configuration not found or invalid" },
+          { status: 400 },
+        );
       }
 
       const verifiedUserInfo = (await decryptAndVerifySignedUserData(
