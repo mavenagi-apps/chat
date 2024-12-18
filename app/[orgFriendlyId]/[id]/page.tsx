@@ -67,7 +67,13 @@ function ChatPage() {
     analytics.logEvent(MagiEvent.chatHomeView, { agentId: agentFriendlyId });
   }, [agentFriendlyId, analytics]);
 
-  const combinedMessages = useMemo(() => {
+  const combinedMessages: (
+    | Message
+    | ZendeskWebhookMessage
+    | ChatEstablishedMessage
+    | ChatEndedMessage
+    | Front.WebhookMessage
+  )[] = useMemo(() => {
     return [...messages, ...handoffChatEvents]
       .filter(({ timestamp }) => !!timestamp)
       .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
