@@ -11,7 +11,7 @@ export class FrontCoreClient {
     private host: string = DEFAULT_API_HOST,
   ) {}
 
-  private async fetchPagedResource<T>(
+  private async fetchPagedResource<T extends Front.PagedResource>(
     resource: string,
     params?: Front.PagedEndpointParams,
   ) {
