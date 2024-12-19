@@ -37,13 +37,13 @@ export class FrontCoreClient {
     });
   }
 
-  public async channels(params?: Front.PagedEndpointParams) {
+  public channels = async (params?: Front.PagedEndpointParams) => {
     return await this.fetchPagedResource<Front.Channel>("/channels", params);
-  }
+  };
 
-  public async inboxes(params?: Front.PagedEndpointParams) {
+  public inboxes = async (params?: Front.PagedEndpointParams) => {
     return await this.fetchPagedResource<Front.Inbox>("/inboxes", params);
-  }
+  };
 
   public async importMessage(inboxId: string, message: Front.ImportedMessage) {
     const url = new URL(`/inboxes/${inboxId}/imported_messages`, this.host);
