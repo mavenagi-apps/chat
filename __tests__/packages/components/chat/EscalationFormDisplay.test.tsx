@@ -105,7 +105,7 @@ describe("EscalationFormDisplay", () => {
     });
   });
 
-  it("displays error message when submission fails", async () => {
+  it("displays error message when submission fails and keeps component mounted", async () => {
     vi.spyOn(console, "error").mockImplementationOnce(() => {});
     mockInitializeHandoff.mockRejectedValueOnce(new Error("Test error"));
     renderComponent(false);
@@ -114,11 +114,21 @@ describe("EscalationFormDisplay", () => {
     fireEvent.submit(form);
 
     await waitFor(() => {
+      // Verify error message is shown
       expect(screen.getByText("Error")).toBeInTheDocument();
       expect(
         screen.getByText("Failed to initiate chat session. Please try again."),
       ).toBeInTheDocument();
+
+      // Verify form is no longer visible
+      expect(screen.queryByRole("form")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("connect_to_live_agent"),
+      ).not.toBeInTheDocument();
     });
+
+    // Verify component itself is still mounted (the div wrapper)
+    expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
   it("hides form after successful submission", async () => {
