@@ -40,6 +40,10 @@ export class FrontCoreClient {
   public async channels(params?: Front.PagedEndpointParams) {
     return await this.fetchPagedResource<Front.Channel>("/channels", params);
   }
+
+  public async inboxes(params?: Front.PagedEndpointParams) {
+    return await this.fetchPagedResource<Front.Inbox>("/inboxes", params);
+  }
 }
 
 export class FrontApplicationClient {
