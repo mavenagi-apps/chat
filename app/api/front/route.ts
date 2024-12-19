@@ -44,14 +44,14 @@ export const POST = async (request: NextRequest) => {
         mavenAPIClient.agent(agentId),
       ]);
   } catch (error) {
-    console.error(`Error getting agent`, error);
+    console.error("Error getting agent", error);
     return NextResponse.json(
       { type: "bad_request", message: "API Token validation failed" },
       { status: (error as JsonFetchError).response?.status ?? 400 },
     );
   }
 
-  console.log(`Received Front application channel installation request`, {
+  console.log("Received Front application channel installation request", {
     orgId: orgFriendlyId,
     agentId: agentFriendlyId,
   });
