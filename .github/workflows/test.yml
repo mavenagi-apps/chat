@@ -55,7 +55,7 @@ jobs:
           node-version-file: '.nvmrc'
 
       - name: Run vitest
-        run: pnpm run test:vitest
+        run: pnpm test
 
   coverage:
     runs-on: ubuntu-latest
