@@ -112,6 +112,23 @@ async function findChannel(client: FrontCoreClient, channelName: string) {
   return channel;
 }
 
+export async function findInbox(client: FrontCoreClient, inboxName: string) {
+  let next: string | null = null;
+  let inbox: Front.Inbox | null | undefined = null;
+
+  while (!inbox) {
+    const inboxes = await client.inboxes({ next });
+    inbox = inboxes._results.find((channel) => channel.name === inboxName);
+
+    if (inbox || !inboxes._pagination.next) {
+      break;
+    }
+    next = inboxes._pagination.next;
+  }
+
+  return inbox;
+}
+
 export async function createApplicationChannelClient(
   config: FrontHandoffConfiguration,
 ) {
