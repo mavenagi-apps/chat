@@ -11,9 +11,12 @@ export class FrontCoreClient {
     private host: string = DEFAULT_API_HOST,
   ) {}
 
-  public async channels(params?: Front.PagedEndpointParams) {
+  private async fetchPagedResource<T>(
+    resource: string,
+    params?: Front.PagedEndpointParams,
+  ) {
     const { next, limit = 10 } = params ?? {};
-    let url: string | URL = new URL("/channels", this.host);
+    let url: string | URL = new URL(resource, this.host);
     if (next) {
       url = next;
     } else {
@@ -26,12 +29,16 @@ export class FrontCoreClient {
 
       url.search = queryParams.toString();
     }
-    return await jsonFetch<Front.List<Front.Channel>>(url, {
+    return await jsonFetch<Front.List<T>>(url, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
       },
     });
+  }
+
+  public async channels(params?: Front.PagedEndpointParams) {
+    return await this.fetchPagedResource<Front.Channel>("/channels", params);
   }
 }
 
