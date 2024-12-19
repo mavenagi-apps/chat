@@ -72,7 +72,9 @@ jobs:
       - name: Gather test coverage
         run: |
           pnpm test:coverage > coverage_report.txt
-          echo "COVERAGE=$(cat coverage_report.txt | grep -A1 "All files" | tail -1 | awk '{print $4}')"  >> $GITHUB_ENV
+          COVERAGE_LINE=$(grep "All files" coverage_report.txt)
+          COVERAGE=$(echo $COVERAGE_LINE | awk '{print $4}')
+          echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
 
       - name: Add coverage comment to PR
         if: github.event_name == 'pull_request'
@@ -80,7 +82,9 @@ jobs:
         with:
           message: |
             ## Test Coverage Report
-            Current coverage: ${{ env.COVERAGE }}
+            | Metric | Coverage |
+            |--------|----------|
+            | Lines | ${{ env.COVERAGE }}% |
 
       # - name: Create badge
       #   uses: schneegans/dynamic-badges-action@v1.7.0
