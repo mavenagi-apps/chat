@@ -7,6 +7,14 @@ import { Cacheable, KeyvCacheableMemory } from "cacheable";
 import { getRedisCache } from "@/app/api/server/lib/redis";
 import { JsonFetchError } from "@/lib/jsonFetch";
 import Bottleneck from "bottleneck";
+enum RetryableStatusCodes {
+  TooManyRequests = 429,
+  InternalServerError = 500,
+  NotImplemented = 501,
+  BadGateway = 502,
+  ServiceUnavailable = 503,
+  GatewayTimeout = 504,
+}
 
 let channelCache: Cacheable | undefined;
 async function getChannelCache() {
@@ -87,21 +95,40 @@ export function sendMessageToFront(
   return client.sendIncomingMessages(message as Front.AppChannelInboundMessage);
 }
 
-async function findChannel(client: FrontCoreClient, channelName: string) {
+async function searchPages<T extends Front.PagedResource>(
+  loader: (params?: Front.PagedEndpointParams) => Promise<Front.List<T>>,
+  predicate: (resource: T) => boolean,
+) {
   let next: string | null = null;
-  let channel: Front.Channel | null | undefined = null;
+  let item: T | null | undefined = null;
 
-  while (!channel) {
-    const channels = await client.channels({ next });
-    channel = channels._results.find((channel) => channel.name === channelName);
-
-    if (channel || !channels._pagination.next) {
+  while (!item) {
+    const items = await loader({ next });
+    item = items._results.find(predicate);
+    next = items._pagination.next;
+    if (!next) {
       break;
     }
-    next = channels._pagination.next;
   }
 
-  return channel;
+  return item;
+}
+
+async function findChannel(
+  client: FrontCoreClient,
+  channelName: string,
+): Promise<Front.Channel | undefined> {
+  return searchPages(
+    client.channels,
+    (channel) => channel.name === channelName,
+  );
+}
+
+export async function findInbox(
+  client: FrontCoreClient,
+  inboxName: string,
+): Promise<Front.Inbox | undefined> {
+  return searchPages(client.inboxes, (inbox) => inbox.name === inboxName);
 }
 
 export async function createApplicationChannelClient(
@@ -156,14 +183,6 @@ export async function postMavenMessagesToFront({
     minTime: 200, // 5 requests per second per conversation
   });
   frontLimiter.on("failed", async (error, info) => {
-    enum RetryableStatusCodes {
-      TooManyRequests = 429,
-      InternalServerError = 500,
-      NotImplemented = 501,
-      BadGateway = 502,
-      ServiceUnavailable = 503,
-      GatewayTimeout = 504,
-    }
     const { retryCount } = info;
     const backoffs = [0.2, 0.4, 0.8, 1, 2];
     if (
