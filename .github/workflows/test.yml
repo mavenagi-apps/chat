@@ -44,7 +44,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - start
-      - lint
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -61,8 +60,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - start
-      - lint
-      - vitest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -78,12 +75,12 @@ jobs:
           TOKENS=($SUMMARY)
           echo "COVERAGE=$(echo ${TOKENS[2]})" >> $GITHUB_ENV
 
-      - name: Create badge
-        uses: schneegans/dynamic-badges-action@v1.7.0
-        with:
-          auth: ${{ secrets.GIST_SECRET }}
-          gistID: 46d409f23d2b17672adfa2dfe9b6b1f0
-          filename: coverage.svg
-          label: coverage
-          message: ${{ env.COVERAGE }}
-          color: lightgrey
+      # - name: Create badge
+      #   uses: schneegans/dynamic-badges-action@v1.7.0
+      #   with:
+      #     auth: ${{ secrets.GIST_SECRET }}
+      #     gistID: 28b96e029bcd1c4e542ffbcf91850062
+      #     filename: coverage.svg
+      #     label: coverage
+      #     message: ${{ env.COVERAGE }}
+      #     color: lightgrey
