@@ -30,7 +30,6 @@ export default function EscalationFormDisplay() {
       } catch (error) {
         console.error("Error initiating chat session:", error);
         setError("Failed to initiate chat session. Please try again.");
-        throw error;
       }
     },
   });
