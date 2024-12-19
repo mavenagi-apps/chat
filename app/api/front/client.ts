@@ -44,6 +44,21 @@ export class FrontCoreClient {
   public async inboxes(params?: Front.PagedEndpointParams) {
     return await this.fetchPagedResource<Front.Inbox>("/inboxes", params);
   }
+
+  public async importMessage(inboxId: string, message: Front.ImportedMessage) {
+    let url: string | URL = new URL(
+      `/inboxes/${inboxId}/imported_messages`,
+      this.host,
+    );
+
+    return await jsonFetch<Front.ImportMessageResponse>(url, {
+      method: "POST",
+      body: JSON.stringify(message),
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+      },
+    });
+  }
 }
 
 export class FrontApplicationClient {
