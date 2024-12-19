@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { useParams } from "next/dist/client/components/navigation";
+import { useAuth } from "@/app/providers/AuthProvider";
 import {
   HANDOFF_AUTH_HEADER,
   ORGANIZATION_HEADER,
@@ -18,15 +19,9 @@ import {
   type HandoffChatMessage,
 } from "@/types";
 import type { Front } from "@/types/front";
+import { HandoffStatus } from "@/app/constants/handoff";
 
 const HANDOFF_RECONNECT_INTERVAL = 500;
-
-export enum HandoffStatus {
-  INITIALIZED = "initialized",
-  INITIALIZING = "initializing",
-  NOT_INITIALIZED = "not_initialized",
-  FAILED = "failed",
-}
 
 type ChatEvent = {
   message: ZendeskWebhookMessage | Front.WebhookMessage;
@@ -35,7 +30,6 @@ type ChatEvent = {
 
 type HandoffProps = {
   messages: Message[];
-  signedUserData: string | null;
   mavenConversationId: string;
 };
 
@@ -44,11 +38,8 @@ type Params = {
   id: string;
 };
 
-export function useHandoff({
-  messages,
-  signedUserData,
-  mavenConversationId,
-}: HandoffProps) {
+export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
+  const { signedUserData } = useAuth();
   const { orgFriendlyId, id: agentId } = useParams<Params>();
   const { handoffConfiguration } = useSettings();
   const handoffTypeRef = useRef<HandoffConfiguration["type"] | null>(
@@ -250,31 +241,39 @@ export function useHandoff({
     }
   }, []);
 
-  const getOrCreateUserAndConversation = useCallback(async () => {
-    if (!handoffTypeRef.current) {
-      throw new Error("Handoff type is not set");
-    }
+  const getOrCreateUserAndConversation = useCallback(
+    async (email?: string) => {
+      if (!handoffTypeRef.current) {
+        throw new Error("Handoff type is not set");
+      }
 
-    const response = await fetch(
-      `/api/${handoffTypeRef.current}/conversations`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          messages: handoffMessages,
-          signedUserData,
-        }),
-        headers: generatedHeaders,
-      },
-    );
+      const response = await fetch(
+        `/api/${handoffTypeRef.current}/conversations`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            messages: handoffMessages,
+            signedUserData,
+            email,
+          }),
+          headers: generatedHeaders,
+        },
+      );
 
-    const handoffAuthToken = response.headers.get(HANDOFF_AUTH_HEADER);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-    if (!handoffAuthToken) {
-      throw new Error("Handoff auth token not found");
-    }
+      const handoffAuthToken = response.headers.get(HANDOFF_AUTH_HEADER);
 
-    setHandoffAuthToken(handoffAuthToken);
-  }, [handoffMessages, signedUserData, generatedHeaders]);
+      if (!handoffAuthToken) {
+        throw new Error("Handoff auth token not found");
+      }
+
+      setHandoffAuthToken(handoffAuthToken);
+    },
+    [handoffMessages, signedUserData, generatedHeaders],
+  );
 
   const handleEndHandoff = useCallback(async () => {
     resetAbortController();
@@ -358,21 +357,24 @@ export function useHandoff({
     handleEndHandoff,
   ]);
 
-  const initializeHandoff = useCallback(async () => {
-    if (!handoffTypeRef.current) {
-      console.error("Handoff type is not set");
-      return;
-    }
+  const initializeHandoff = useCallback(
+    async ({ email }: { email?: string }): Promise<void> => {
+      if (!handoffTypeRef.current) {
+        console.error("Handoff type is not set");
+        return;
+      }
 
-    if (!signedUserData) {
-      console.error("Signed user data is not set");
-      return;
-    }
+      void setHandoffStatus(HandoffStatus.INITIALIZING);
 
-    void setHandoffStatus(HandoffStatus.INITIALIZING);
-
-    void getOrCreateUserAndConversation();
-  }, [getOrCreateUserAndConversation, signedUserData]);
+      try {
+        await getOrCreateUserAndConversation(email);
+      } catch (error) {
+        console.error("Error initializing handoff:", error);
+        void handleEndHandoff();
+      }
+    },
+    [getOrCreateUserAndConversation, signedUserData, handleEndHandoff],
+  );
 
   useEffect(() => {
     handoffStatusRef.current = handoffStatus;

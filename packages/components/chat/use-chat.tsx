@@ -41,11 +41,8 @@ import {
 } from "@/app/constants/authentication";
 import { decodeJwt } from "jose";
 import { useParams } from "next/navigation";
+import { useAuth } from "@/app/providers/AuthProvider";
 const API_ENDPOINT = "/api/create";
-
-type UseChatOptions = {
-  signedUserData: string | null;
-};
 
 type UseChatReturn = {
   messages: Message[];
@@ -61,7 +58,8 @@ type UseChatParams = {
   id: string;
 };
 
-export function useChat({ signedUserData }: UseChatOptions): UseChatReturn {
+export function useChat(): UseChatReturn {
+  const { signedUserData } = useAuth();
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [conversationId, setConversationId] = React.useState<string>(nanoid());
   const [authToken, setAuthToken] = React.useState<string | null>(null);
