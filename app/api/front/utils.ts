@@ -7,6 +7,14 @@ import { Cacheable, KeyvCacheableMemory } from "cacheable";
 import { getRedisCache } from "@/app/api/server/lib/redis";
 import { JsonFetchError } from "@/lib/jsonFetch";
 import Bottleneck from "bottleneck";
+enum RetryableStatusCodes {
+  TooManyRequests = 429,
+  InternalServerError = 500,
+  NotImplemented = 501,
+  BadGateway = 502,
+  ServiceUnavailable = 503,
+  GatewayTimeout = 504,
+}
 
 let channelCache: Cacheable | undefined;
 async function getChannelCache() {
@@ -104,6 +112,23 @@ async function findChannel(client: FrontCoreClient, channelName: string) {
   return channel;
 }
 
+export async function findInbox(client: FrontCoreClient, inboxName: string) {
+  let next: string | null = null;
+  let inbox: Front.Inbox | null | undefined = null;
+
+  while (!inbox) {
+    const inboxes = await client.inboxes({ next });
+    inbox = inboxes._results.find((channel) => channel.name === inboxName);
+
+    if (inbox || !inboxes._pagination.next) {
+      break;
+    }
+    next = inboxes._pagination.next;
+  }
+
+  return inbox;
+}
+
 export async function createApplicationChannelClient(
   config: FrontHandoffConfiguration,
 ) {
@@ -156,14 +181,6 @@ export async function postMavenMessagesToFront({
     minTime: 200, // 5 requests per second per conversation
   });
   frontLimiter.on("failed", async (error, info) => {
-    enum RetryableStatusCodes {
-      TooManyRequests = 429,
-      InternalServerError = 500,
-      NotImplemented = 501,
-      BadGateway = 502,
-      ServiceUnavailable = 503,
-      GatewayTimeout = 504,
-    }
     const { retryCount } = info;
     const backoffs = [0.2, 0.4, 0.8, 1, 2];
     if (
