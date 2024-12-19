@@ -4,7 +4,6 @@ import { useChat } from "@/packages/components/chat/use-chat";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useParams } from "next/navigation";
 import { ChatMessage } from "@/types";
-import { waitUntil } from "@vercel/functions";
 
 // Mock dependencies
 vi.mock("next/navigation", () => ({
@@ -122,8 +121,6 @@ describe("useChat", () => {
 
         // Send each message as a separate chunk
         for (const msg of messages) {
-          console.log(msg);
-          console.log(encoder.encode(msg));
           controller.enqueue(encoder.encode(msg));
           // Add a small delay to simulate real streaming
           await new Promise((resolve) => setTimeout(resolve, 10));

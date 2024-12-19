@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import { vi, describe, expect, test, beforeEach } from "vitest";
 import BailoutFormDisplay from "@/packages/components/chat/BailoutFormDisplay";
 import { type AskStreamActionEvent } from "mavenagi/api";
@@ -76,12 +82,30 @@ describe("BailoutFormDisplay", () => {
   });
 
   test("should show loading state when form is submitting", async () => {
-    renderComponent({ action: mockActionWithFields });
+    const mockActionForTest = {
+      ...mockActionWithFields,
+      submitLabel: "Submit Form",
+    };
 
-    const submitButton = screen.getByRole("button");
+    vi.mocked(submitBailoutForm).mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ success: true, data: {} }), 100),
+        ),
+    );
+
+    renderComponent({ action: mockActionForTest });
+
+    const submitButton = screen.getByRole("button", { name: "Submit Form" });
+
     fireEvent.click(submitButton);
 
-    expect(screen.getByText("Submitting...")).toBeInTheDocument();
+    expect(submitButton).toBeDisabled();
+    expect(submitButton).toHaveTextContent("Submitting...");
+
+    await waitFor(() => {
+      expect(screen.getByText(/Success:/i)).toBeInTheDocument();
+    });
   });
 
   test("should display success message after successful submission", async () => {

@@ -26,6 +26,7 @@ vi.mock("@/app/api/server/utils", () => ({
   withAppSettings: vi.fn((req, handler) =>
     handler(req, {
       handoffConfiguration: {
+        type: "zendesk",
         apiKey: "test-key",
         apiSecret: "test-secret",
       },
@@ -159,7 +160,11 @@ describe("POST /api/zendesk/conversations", () => {
       const response = await POST(createMockRequest({ email: null }));
 
       expect(response.status).toBe(400);
-      expect(await response.json()).toEqual({ success: false });
+      expect(await response.json()).toEqual({
+        success: false,
+        error:
+          "User identification required. Please provide either an email or signed user data.",
+      });
     });
   });
 
