@@ -95,38 +95,40 @@ export function sendMessageToFront(
   return client.sendIncomingMessages(message as Front.AppChannelInboundMessage);
 }
 
-async function findChannel(client: FrontCoreClient, channelName: string) {
+async function searchPages<T extends Front.PagedResource>(
+  loader: (params?: Front.PagedEndpointParams) => Promise<Front.List<T>>,
+  predicate: (resource: T) => boolean,
+) {
   let next: string | null = null;
-  let channel: Front.Channel | null | undefined = null;
+  let item: T | null | undefined = null;
 
-  while (!channel) {
-    const channels = await client.channels({ next });
-    channel = channels._results.find((channel) => channel.name === channelName);
-
-    if (channel || !channels._pagination.next) {
+  while (!item) {
+    const items = await loader({ next });
+    item = items._results.find(predicate);
+    next = items._pagination.next;
+    if (!next) {
       break;
     }
-    next = channels._pagination.next;
   }
 
-  return channel;
+  return item;
 }
 
-export async function findInbox(client: FrontCoreClient, inboxName: string) {
-  let next: string | null = null;
-  let inbox: Front.Inbox | null | undefined = null;
+async function findChannel(
+  client: FrontCoreClient,
+  channelName: string,
+): Promise<Front.Channel | undefined> {
+  return searchPages(
+    client.channels,
+    (channel) => channel.name === channelName,
+  );
+}
 
-  while (!inbox) {
-    const inboxes = await client.inboxes({ next });
-    inbox = inboxes._results.find((channel) => channel.name === inboxName);
-
-    if (inbox || !inboxes._pagination.next) {
-      break;
-    }
-    next = inboxes._pagination.next;
-  }
-
-  return inbox;
+export async function findInbox(
+  client: FrontCoreClient,
+  inboxName: string,
+): Promise<Front.Inbox | undefined> {
+  return searchPages(client.inboxes, (inbox) => inbox.name === inboxName);
 }
 
 export async function createApplicationChannelClient(
