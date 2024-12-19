@@ -71,9 +71,8 @@ jobs:
 
       - name: Gather test coverage
         run: |
-          SUMMARY="$(pnpm test:coverage | tail -2 | head -1)"
-          TOKENS=($SUMMARY)
-          echo "COVERAGE=$(echo ${TOKENS[2]})" >> $GITHUB_ENV
+          pnpm test:coverage > coverage_report.txt
+          echo "COVERAGE=$(cat coverage_report.txt | grep -A1 "All files" | tail -1 | awk '{print $4}')"  >> $GITHUB_ENV
 
       - name: Add coverage comment to PR
         if: github.event_name == 'pull_request'
