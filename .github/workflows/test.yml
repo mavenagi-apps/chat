@@ -75,6 +75,14 @@ jobs:
           TOKENS=($SUMMARY)
           echo "COVERAGE=$(echo ${TOKENS[2]})" >> $GITHUB_ENV
 
+      - name: Add coverage comment to PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          message: |
+            ## Test Coverage Report
+            Current coverage: ${{ env.COVERAGE }}
+
       # - name: Create badge
       #   uses: schneegans/dynamic-badges-action@v1.7.0
       #   with:
