@@ -1,4 +1,6 @@
 export namespace Front {
+  export type PagedResource = {};
+
   export type AppChannelSyncResponse = {
     status: string;
     message_uid: string;
@@ -111,7 +113,7 @@ export namespace Front {
     };
   };
 
-  export type Channel = {
+  export type Channel = PagedResource & {
     _links: Links;
     address: string;
     id: string;
@@ -125,7 +127,7 @@ export namespace Front {
     webhook_url: string;
   };
 
-  export type Inbox = {
+  export type Inbox = PagedResource & {
     _links: Links;
     address: string;
     id: string;
@@ -139,7 +141,7 @@ export namespace Front {
     next: string | null;
     prev?: string;
   };
-  export type List<T> = {
+  export type List<T extends PagedResource> = {
     _pagination: Pagination;
     _links: Omit<Links, "related">;
     _results: T[];
