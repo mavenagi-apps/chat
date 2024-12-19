@@ -11,15 +11,18 @@ import { decryptAndVerifySignedUserData } from "@/app/api/server/utils";
 import jwt from "jsonwebtoken";
 import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
 import type { VerifiedUserData } from "@/types";
+import { nanoid } from "nanoid";
+
+const ANONYMOUS_USER_PREFIX = "maven-anonymous-user";
 
 const getOrCreateZendeskUser = async (
   SunshineConversationsClient: typeof SunshineConversationsClientModule,
-  verifiedUserData: VerifiedUserData,
+  verifiedUserData: VerifiedUserData | undefined,
   appId: string,
 ) => {
   const apiInstance = new SunshineConversationsClient.UsersApi();
 
-  if (verifiedUserData.email) {
+  if (verifiedUserData?.email) {
     try {
       const { user } = await apiInstance.getUser(appId, verifiedUserData.email);
       if (user) {
@@ -36,16 +39,22 @@ const getOrCreateZendeskUser = async (
     }
   }
 
+  const externalId =
+    verifiedUserData?.email || `${ANONYMOUS_USER_PREFIX}-${nanoid()}`;
+  const profile = verifiedUserData?.email
+    ? {
+        givenName: verifiedUserData?.firstName || undefined,
+        surname: verifiedUserData?.lastName || undefined,
+        email: verifiedUserData?.email || undefined,
+        locale: "en-US",
+      }
+    : undefined;
+
   const { user } = await apiInstance.createUser(appId, {
-    externalId: verifiedUserData.email,
-    profile: {
-      givenName: verifiedUserData.firstName,
-      surname: verifiedUserData.lastName,
-      email: verifiedUserData.email,
-      locale: "en-US",
-    },
+    externalId,
+    profile,
   });
-  console.log("User created");
+
   return user;
 };
 
@@ -80,28 +89,70 @@ const getOrCreateZendeskConversation = async (
   return conversation;
 };
 
+const createUnauthenticatedMessage = (userId: string, email: string) => ({
+  author: {
+    type: "business",
+    userId,
+  },
+  content: {
+    type: "text",
+    text: `Maven AGI is handing off this conversation to a \
+human agent but the user is not authenticated. The agent \
+will need to confirm the user's identity before continuing.
+
+Claiming email address: ${email}`,
+  },
+});
+
 export async function POST(req: NextRequest) {
   return withAppSettings(req, async (request, settings) => {
-    const { messages, signedUserData } = await request.json();
+    const { messages, signedUserData, email } = await request.json();
     const { handoffConfiguration } = settings;
 
     if (handoffConfiguration?.type !== "zendesk") {
-      throw new Error("Zendesk Handoff configuration not found");
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid handoff configuration type. Expected 'zendesk'.",
+        },
+        { status: 400 },
+      );
     }
 
     const { apiKey, apiSecret } = handoffConfiguration;
 
     if (!apiKey || !apiSecret) {
-      throw new Error("Invalid handoff configuration");
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Missing required Zendesk configuration. Both apiKey and apiSecret are required.",
+        },
+        { status: 400 },
+      );
+    }
+
+    if (!(email || signedUserData)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "User identification required. Please provide either an email or signed user data.",
+        },
+        { status: 400 },
+      );
     }
 
     const [SunshineConversationsClient, zendeskConversationsAppId] =
       await getSunshineConversationsClient(handoffConfiguration);
 
-    const verifiedUserInfo = (await decryptAndVerifySignedUserData(
-      signedUserData,
-      settings,
-    )) as VerifiedUserData;
+    let verifiedUserInfo: VerifiedUserData | undefined;
+    if (signedUserData) {
+      verifiedUserInfo = (await decryptAndVerifySignedUserData(
+        signedUserData,
+        settings,
+      )) as VerifiedUserData;
+    }
 
     const { id: userId } = await getOrCreateZendeskUser(
       SunshineConversationsClient,
@@ -117,6 +168,11 @@ export async function POST(req: NextRequest) {
 
     const { id: conversationId } = conversation;
 
+    const isAuthenticated = !!verifiedUserInfo;
+    if (!isAuthenticated) {
+      messages.push(createUnauthenticatedMessage(userId, email));
+    }
+
     await postMessagesToZendeskConversation(
       SunshineConversationsClient,
       conversationId,
@@ -126,7 +182,7 @@ export async function POST(req: NextRequest) {
     );
 
     const token = jwt.sign(
-      { scope: "appUser", userId, conversationId },
+      { scope: "appUser", userId, conversationId, isAuthenticated },
       apiSecret,
       {
         keyid: apiKey,
