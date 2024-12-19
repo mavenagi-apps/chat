@@ -46,10 +46,7 @@ export class FrontCoreClient {
   }
 
   public async importMessage(inboxId: string, message: Front.ImportedMessage) {
-    let url: string | URL = new URL(
-      `/inboxes/${inboxId}/imported_messages`,
-      this.host,
-    );
+    const url = new URL(`/inboxes/${inboxId}/imported_messages`, this.host);
 
     return await jsonFetch<Front.ImportMessageResponse>(url, {
       method: "POST",
