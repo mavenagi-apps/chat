@@ -442,5 +442,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
     askHandoff,
     handleEndHandoff,
     isConnected,
+    handoffType: handoffTypeRef.current,
+    handoffAuthToken,
   };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Chat from "@magi/components/chat/Chat";
 import { ChatInput } from "@magi/components/chat/ChatInput";
@@ -10,7 +10,7 @@ import { MagiEvent } from "@/lib/analytics/events";
 import { useAnalytics } from "@/lib/use-analytics";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { useIframeMessaging } from "@/lib/useIframeMessaging";
-import { AuthProvider } from "@/app/providers/AuthProvider";
+import { AuthProvider, useAuth } from "@/app/providers/AuthProvider";
 import { ChatHeader } from "@magi/components/chat/ChatHeader";
 import { WelcomeMessage } from "@magi/components/chat/WelcomeChatMessage";
 import { ChatMessages } from "@magi/components/chat/ChatMessages";
@@ -26,11 +26,18 @@ import type {
 } from "@/types";
 import type { Message } from "@/types";
 import type { Front } from "@/types/front";
+import {
+  AGENT_HEADER,
+  AUTHENTICATION_HEADER,
+  ORGANIZATION_HEADER,
+} from "@/app/constants/authentication";
 
 function ChatPage() {
   const analytics = useAnalytics();
-  const { id: agentFriendlyId }: { orgFriendlyId: string; id: string } =
-    useParams();
+  const {
+    id: agentFriendlyId,
+    orgFriendlyId,
+  }: { orgFriendlyId: string; id: string } = useParams();
   const { brandColor, logoUrl } = useSettings();
 
   // Maven chat logic
@@ -42,6 +49,7 @@ function ChatPage() {
     conversationId,
     mavenUserId,
   } = useChat();
+  const { signedUserData } = useAuth();
 
   const { scrollToLatest, latestChatBubbleRef } = useScrollToLatest();
 
@@ -58,10 +66,14 @@ function ChatPage() {
     handoffStatus,
     askHandoff,
     handleEndHandoff,
+    handoffType,
+    handoffAuthToken: authToken,
   } = useHandoff({
     messages,
     mavenConversationId: conversationId,
   });
+
+  const [wasEscalated, setWasEscalated] = useState(false);
 
   useEffect(() => {
     analytics.logEvent(MagiEvent.chatHomeView, { agentId: agentFriendlyId });
@@ -82,6 +94,41 @@ function ChatPage() {
     scrollToLatest();
   }, [combinedMessages.length, scrollToLatest]);
   const isHandoff = handoffStatus === HandoffStatus.INITIALIZED;
+
+  const handleUnload = useCallback(async () => {
+    if (!handoffType) return;
+    if (wasEscalated) return;
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+      [ORGANIZATION_HEADER]: orgFriendlyId,
+      [AGENT_HEADER]: agentFriendlyId,
+    };
+    if (authToken) {
+      headers[AUTHENTICATION_HEADER] = authToken;
+    }
+
+    await fetch(`/api/${handoffType}/conversations/unabridged`, {
+      keepalive: true, // required to send request on unload w/o it getting cancelled
+      method: "POST",
+      body: JSON.stringify({
+        conversationId: conversationId,
+        signedUserData,
+      }),
+      headers: headers,
+    });
+  }, [signedUserData, messages, conversationId]);
+
+  useEffect(() => {
+    if (handoffStatus === HandoffStatus.INITIALIZING) {
+      setWasEscalated(true);
+    }
+  }, [handoffStatus]);
+  useEffect(() => {
+    window.addEventListener("beforeunload", handleUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload);
+    };
+  }, [handleUnload]);
 
   return (
     <main className="flex h-screen flex-col bg-gray-50">
