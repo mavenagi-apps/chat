@@ -184,7 +184,7 @@ export async function postMavenMessagesToFront({
     try {
       await frontLimiter.schedule(() => sendMessageToFront(client, message));
     } catch (error) {
-      console.error(`Failed to deliver message to Front`, error);
+      console.error("Failed to deliver message to Front", error);
       throw new Error("Failed to deliver message");
     }
   }
