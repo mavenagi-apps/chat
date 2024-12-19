@@ -4,6 +4,7 @@ import { getRedisPublishClient } from "@/app/api/server/lib/redis";
 import type { ZendeskMessagePayload } from "@/types/zendesk";
 
 const ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX = "conversation:";
+const ENABLE_API_LOGGING = process.env.ENABLE_API_LOGGING === "true";
 
 export const POST = async (request: NextRequest) => {
   const rawBody = await request.text();
@@ -11,6 +12,10 @@ export const POST = async (request: NextRequest) => {
   const {
     webhook: { id: webhookId },
   } = body;
+
+  if (ENABLE_API_LOGGING) {
+    console.log(rawBody);
+  }
 
   for (const event of body.events || []) {
     if (!event.type.startsWith(ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX)) {
