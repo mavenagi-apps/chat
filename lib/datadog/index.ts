@@ -20,7 +20,14 @@ const options = {} as DDOptions;
 switch (env) {
   case "production":
   case "development":
-  //TODO: restrict or make dynamic based on DD_ENVIRONMENT
+    //TODO: restrict or make dynamic based on DD_ENVIRONMENT
+    options.sessionSampleRate = 100;
+    options.sessionReplaySampleRate = 20;
+    options.trackUserInteractions = true;
+    options.trackResources = true;
+    options.trackLongTasks = true;
+    options.defaultPrivacyLevel = "mask-user-input";
+    break;
   default:
     options.sessionSampleRate = 100;
     options.sessionReplaySampleRate = 20;
