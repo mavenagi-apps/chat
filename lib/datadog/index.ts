@@ -6,6 +6,8 @@ const applicationId = process.env.DD_APPLICATION_ID;
 const clientToken = process.env.DD_CLIENT_TOKEN;
 const env = process.env.DD_ENVIRONMENT || "disabled";
 
+console.log(applicationId, clientToken, env);
+
 type DDOptions = {
   sessionSampleRate: number;
   sessionReplaySampleRate: number;
