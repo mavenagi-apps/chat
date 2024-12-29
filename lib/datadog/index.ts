@@ -4,7 +4,7 @@ import { datadogRum as dd } from "@datadog/browser-rum";
 
 const applicationId = process.env.DD_APPLICATION_ID;
 const clientToken = process.env.DD_CLIENT_TOKEN;
-const env = process.env.DD_ENVIRONMENT || "development";
+const env = process.env.DD_ENVIRONMENT || "disabled";
 
 type DDOptions = {
   sessionSampleRate: number;
@@ -37,7 +37,7 @@ switch (env) {
     options.defaultPrivacyLevel = "mask-user-input";
 }
 
-if (applicationId && clientToken) {
+if ("disabled" != env && applicationId && clientToken) {
   const {
     sessionSampleRate,
     sessionReplaySampleRate,
@@ -62,9 +62,10 @@ if (applicationId && clientToken) {
     trackLongTasks,
     defaultPrivacyLevel,
   });
+  console.info("Initialized Datadog RUM with applicationId: %s", applicationId);
 } else {
-  console.info(
-    "Datadog RUM not initialized. Missing DD_APPLICATION_ID or DD_CLIENT_TOKEN",
+  console.warn(
+    "Datadog RUM not initialized, missing DD_ENVIRONMENT, DD_APPLICATION_ID or DD_CLIENT_TOKEN",
   );
 }
 
