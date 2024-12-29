@@ -4,7 +4,7 @@ import { datadogRum as dd } from "@datadog/browser-rum";
 
 const applicationId = process.env.DD_APPLICATION_ID;
 const clientToken = process.env.DD_CLIENT_TOKEN;
-const env = process.env.DD_ENVIRONMENT;
+const env = process.env.DD_ENVIRONMENT || "development";
 
 type DDOptions = {
   sessionSampleRate: number;
@@ -31,7 +31,7 @@ switch (env) {
 }
 
 if (applicationId && clientToken) {
-  let {
+  const {
     sessionSampleRate,
     sessionReplaySampleRate,
     trackUserInteractions,
