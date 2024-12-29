@@ -2,9 +2,9 @@
 
 import { datadogRum as dd } from "@datadog/browser-rum";
 
-const applicationId = process.env.DD_APPLICATION_ID;
-const clientToken = process.env.DD_CLIENT_TOKEN;
-const env = process.env.DD_ENVIRONMENT || "disabled";
+const applicationId = process.env.NEXT_PUBLIC_DD_APPLICATION_ID;
+const clientToken = process.env.NEXT_PUBLIC_DD_CLIENT_TOKEN;
+const env = process.env.NEXT_PUBLIC_DD_ENVIRONMENT || "disabled";
 
 console.log(applicationId, clientToken, env);
 
@@ -22,7 +22,7 @@ const options = {} as DDOptions;
 switch (env) {
   case "production":
   case "development":
-    //TODO: restrict or make dynamic based on DD_ENVIRONMENT
+    //TODO: restrict or make dynamic based on NEXT_PUBLIC_DD_ENVIRONMENT
     options.sessionSampleRate = 100;
     options.sessionReplaySampleRate = 20;
     options.trackUserInteractions = true;
@@ -67,7 +67,7 @@ if ("disabled" != env && applicationId && clientToken) {
   console.info("Initialized Datadog RUM with applicationId: %s", applicationId);
 } else {
   console.warn(
-    "Datadog RUM not initialized, missing DD_ENVIRONMENT, DD_APPLICATION_ID or DD_CLIENT_TOKEN",
+    "Datadog RUM not initialized, missing NEXT_PUBLIC_DD_ENVIRONMENT, NEXT_PUBLIC_DD_APPLICATION_ID or NEXT_PUBLIC_DD_CLIENT_TOKEN",
   );
 }
 
