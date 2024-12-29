@@ -1,3 +1,5 @@
+"use client";
+
 import { datadogRum as dd } from "@datadog/browser-rum";
 
 const applicationId = process.env.DD_APPLICATION_ID;
@@ -10,7 +12,7 @@ type DDOptions = {
   trackUserInteractions: boolean;
   trackResources: boolean;
   trackLongTasks: boolean;
-  defaultPrivacyLevel: "allow" | "mask" | "block";
+  defaultPrivacyLevel: "mask-user-input";
 };
 
 const options = {} as DDOptions;
@@ -25,7 +27,7 @@ switch (env) {
     options.trackUserInteractions = true;
     options.trackResources = true;
     options.trackLongTasks = true;
-    options.defaultPrivacyLevel = "allow";
+    options.defaultPrivacyLevel = "mask-user-input";
 }
 
 if (applicationId && clientToken) {
@@ -57,4 +59,8 @@ if (applicationId && clientToken) {
   console.info(
     "Datadog RUM not initialized. Missing DD_APPLICATION_ID or DD_CLIENT_TOKEN",
   );
+}
+
+export default function Datadog() {
+  return null;
 }
