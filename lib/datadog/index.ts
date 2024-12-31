@@ -14,7 +14,7 @@ type DDOptions = {
   trackUserInteractions: boolean;
   trackResources: boolean;
   trackLongTasks: boolean;
-  allowedTracingUrls: string;
+  allowedTracingUrls: "chat-develop.onmaven.app";
   defaultPrivacyLevel: "mask-user-input";
 };
 
