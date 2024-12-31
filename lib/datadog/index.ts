@@ -49,7 +49,7 @@ if ("disabled" != env && applicationId && clientToken) {
     trackUserInteractions,
     trackResources,
     trackLongTasks,
-    tracing;
+    tracing,
     defaultPrivacyLevel,
   } = options;
 
