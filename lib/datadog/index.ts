@@ -14,6 +14,7 @@ type DDOptions = {
   trackUserInteractions: boolean;
   trackResources: boolean;
   trackLongTasks: boolean;
+  tracing: boolean;
   defaultPrivacyLevel: "mask-user-input";
 };
 
@@ -28,6 +29,7 @@ switch (env) {
     options.trackUserInteractions = true;
     options.trackResources = true;
     options.trackLongTasks = true;
+    options.tracing = true;
     options.defaultPrivacyLevel = "mask-user-input";
     break;
   default:
@@ -36,6 +38,7 @@ switch (env) {
     options.trackUserInteractions = true;
     options.trackResources = true;
     options.trackLongTasks = true;
+    options.tracing = true;
     options.defaultPrivacyLevel = "mask-user-input";
 }
 
@@ -46,6 +49,7 @@ if ("disabled" != env && applicationId && clientToken) {
     trackUserInteractions,
     trackResources,
     trackLongTasks,
+    tracing;
     defaultPrivacyLevel,
   } = options;
 
@@ -62,6 +66,7 @@ if ("disabled" != env && applicationId && clientToken) {
     trackUserInteractions,
     trackResources,
     trackLongTasks,
+    tracing,
     defaultPrivacyLevel,
   });
   console.info("Initialized Datadog RUM with applicationId: %s", applicationId);
