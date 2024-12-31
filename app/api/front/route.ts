@@ -1,7 +1,5 @@
 import { type NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { MavenAPIClient } from "../server/lib/maven";
-import type { JsonFetchError } from "@/lib/jsonFetch";
 
 export const POST = async (request: NextRequest) => {
   const headers = request.headers;
@@ -18,36 +16,14 @@ export const POST = async (request: NextRequest) => {
     );
   }
 
-  const agentAPIKey = headers.get("authorization")?.split(" ")[1];
-  if (!agentAPIKey) {
+  const agentIdentifier = headers.get("authorization")?.split(" ")[1] ?? "";
+  const [orgFriendlyId, agentFriendlyId] = agentIdentifier
+    .split("-")
+    .map((id) => id.toLowerCase());
+  if (!orgFriendlyId || !agentFriendlyId) {
     return NextResponse.json(
       { type: "bad_request", message: "Authorization header is missing" },
       { status: 401 },
-    );
-  }
-  const mavenAPIClient = new MavenAPIClient(agentAPIKey);
-  let agentId: string;
-  let orgFriendlyId: string;
-  let agentFriendlyId: string;
-  try {
-    const agent = await mavenAPIClient.agentSelfId();
-    agentId = agent.id;
-    if (!agent.enabled) {
-      return NextResponse.json(
-        { type: "bad_request", message: "Agent is not enabled" },
-        { status: 400 },
-      );
-    }
-    [{ friendlyId: orgFriendlyId }, { friendlyId: agentFriendlyId }] =
-      await Promise.all([
-        mavenAPIClient.agentOrganization(agentId),
-        mavenAPIClient.agent(agentId),
-      ]);
-  } catch (error) {
-    console.error("Error getting agent", error);
-    return NextResponse.json(
-      { type: "bad_request", message: "API Token validation failed" },
-      { status: (error as JsonFetchError).response?.status ?? 400 },
     );
   }
 
