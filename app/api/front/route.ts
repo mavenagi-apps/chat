@@ -18,7 +18,7 @@ export const POST = async (request: NextRequest) => {
 
   const agentIdentifier = headers.get("authorization")?.split(" ")[1] ?? "";
   const [orgFriendlyId, agentFriendlyId] = agentIdentifier
-    .split(" ")
+    .split("-")
     .map((id) => id.toLowerCase());
   if (!orgFriendlyId || !agentFriendlyId) {
     return NextResponse.json(
