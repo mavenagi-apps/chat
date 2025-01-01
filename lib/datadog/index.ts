@@ -14,7 +14,7 @@ type DDOptions = {
   trackUserInteractions: boolean;
   trackResources: boolean;
   trackLongTasks: boolean;
-  allowedTracingUrls: "chat-develop.onmaven.app";
+  allowedTracingUrls: ["chat-develop.onmaven.app"];
   defaultPrivacyLevel: "mask-user-input";
 };
 
@@ -29,7 +29,7 @@ switch (env) {
     options.trackUserInteractions = true;
     options.trackResources = true;
     options.trackLongTasks = true;
-    options.allowedTracingUrls = "chat-develop.onmaven.app";
+    options.allowedTracingUrls = ["chat-develop.onmaven.app"];
     options.defaultPrivacyLevel = "mask-user-input";
     break;
   default:
@@ -38,7 +38,7 @@ switch (env) {
     options.trackUserInteractions = true;
     options.trackResources = true;
     options.trackLongTasks = true;
-    options.allowedTracingUrls = "chat-develop.onmaven.app";
+    options.allowedTracingUrls = ["chat-develop.onmaven.app"];
     options.defaultPrivacyLevel = "mask-user-input";
 }
 
