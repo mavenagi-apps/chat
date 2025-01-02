@@ -22,16 +22,16 @@ import { nanoid } from "nanoid";
 
 import { type MavenAGI } from "mavenagi";
 import {
-  type ConversationMessageResponse,
   BotConversationMessageType,
+  type ConversationMessageResponse,
 } from "mavenagi/api";
 import {
-  type Message,
   type ChatMessage,
-  type UserChatMessage,
   isBotMessage,
   isChatMessage,
   isChatUserMessage,
+  type Message,
+  type UserChatMessage,
 } from "@/types";
 import {
   AGENT_HEADER,
@@ -113,6 +113,8 @@ export function useChat(): UseChatReturn {
         method: "POST",
         body: JSON.stringify({
           question: (_messages[_messages.length - 1] as UserChatMessage).text,
+          attachments: (_messages[_messages.length - 1] as UserChatMessage)
+            .attachments,
           signedUserData: signedUserData || undefined,
         }),
         headers: requestHeaders,

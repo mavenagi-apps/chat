@@ -3,6 +3,8 @@ import {
   type AskStreamActionEvent,
 } from "mavenagi/api";
 
+import type { HandoffChatMessage } from "@/types/zendesk";
+import * as MavenAGI from "mavenagi/api";
 import type { ZendeskWebhookMessage } from "@/types/zendesk";
 import type { Front } from "./front";
 
@@ -18,7 +20,10 @@ type ChatMessage = {
   type: "USER" | "ERROR" | "SIMULATED";
   timestamp?: number;
 };
-type UserChatMessage = ChatMessage & { type: "USER" };
+type UserChatMessage = ChatMessage & {
+  type: "USER";
+  attachments?: MavenAGI.Attachment[];
+};
 type ActionChatMessage = ConversationMessageResponse.Bot & {
   action: AskStreamActionEvent;
 };
