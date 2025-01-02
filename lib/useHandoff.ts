@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { useParams } from "next/dist/client/components/navigation";
+import { useAuth } from "@/app/providers/AuthProvider";
 import {
   HANDOFF_AUTH_HEADER,
   ORGANIZATION_HEADER,
@@ -11,29 +12,25 @@ import {
   type Message,
   isBotMessage,
   isChatUserMessage,
-  type HandoffChatMessage,
+  type ZendeskWebhookMessage,
   type ChatEstablishedMessage,
   type UserChatMessage,
   type ChatEndedMessage,
+  type HandoffChatMessage,
 } from "@/types";
+import type { Front } from "@/types/front";
+import { HandoffStatus } from "@/app/constants/handoff";
 
 const HANDOFF_RECONNECT_INTERVAL = 500;
 
-export enum HandoffStatus {
-  INITIALIZED = "initialized",
-  INITIALIZING = "initializing",
-  NOT_INITIALIZED = "not_initialized",
-  FAILED = "failed",
-}
-
 type ChatEvent = {
-  message: HandoffChatMessage;
+  message: ZendeskWebhookMessage | Front.WebhookMessage;
   channel: string;
 };
 
 type HandoffProps = {
   messages: Message[];
-  signedUserData: string | null;
+  mavenConversationId: string;
 };
 
 type Params = {
@@ -41,7 +38,8 @@ type Params = {
   id: string;
 };
 
-export function useHandoff({ messages, signedUserData }: HandoffProps) {
+export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
+  const { signedUserData } = useAuth();
   const { orgFriendlyId, id: agentId } = useParams<Params>();
   const { handoffConfiguration } = useSettings();
   const handoffTypeRef = useRef<HandoffConfiguration["type"] | null>(
@@ -50,7 +48,8 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
   const [handoffError, _setHandoffError] = useState<string | null>(null);
   const [handoffChatEvents, setHandoffChatEvents] = useState<
     (
-      | HandoffChatMessage
+      | ZendeskWebhookMessage
+      | Front.WebhookMessage
       | ChatEstablishedMessage
       | UserChatMessage
       | ChatEndedMessage
@@ -89,7 +88,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     return headers;
   }, [handoffAuthToken, orgFriendlyId, agentId]);
 
-  const handoffMessages = useMemo(() => {
+  const handoffMessages: HandoffChatMessage[] = useMemo(() => {
     switch (handoffTypeRef.current) {
       case "zendesk":
         return messages
@@ -112,6 +111,32 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
             };
           });
       case "front":
+        return messages
+          .filter((message) => ["USER", "bot"].includes(message.type))
+          .map((message: any) => {
+            return {
+              author: {
+                type: isChatUserMessage(message) ? "user" : "business",
+              },
+              content: {
+                type: "text",
+                text: isChatUserMessage(message)
+                  ? message.text
+                  : isBotMessage(message)
+                    ? message.responses
+                        .map((response: any) => response.text)
+                        .join("")
+                    : "",
+              },
+              timestamp: message.timestamp,
+              mavenContext: {
+                conversationId: mavenConversationId,
+                conversationMessageId: {
+                  referenceId: message?.conversationMessageId?.referenceId,
+                },
+              },
+            };
+          });
       case "salesforce":
       case null:
       default:
@@ -120,29 +145,55 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
   }, [messages]);
 
   const handleHandoffChatEvent = useCallback(
-    (event: HandoffChatMessage) => {
-      const author = event.payload?.message?.author;
-      if (author?.type === "user") {
-        return;
-      }
+    (event: ZendeskWebhookMessage | Front.WebhookMessage) => {
+      switch (handoffTypeRef.current) {
+        case "zendesk": {
+          const zEvent = event as ZendeskWebhookMessage;
+          const payload = zEvent.payload;
+          const author = payload?.message?.author;
+          if (author?.type === "user") {
+            return;
+          }
 
-      if (author?.type === "business" && author.displayName) {
-        setAgentName(author.displayName);
-      }
+          if (author?.type === "business" && author.displayName) {
+            setAgentName(author.displayName);
+          }
 
-      const eventWithTimestamp = {
-        ...event,
-        type: "handoff-zendesk",
-        timestamp: new Date(event.createdAt).getTime(),
-      };
-      setHandoffChatEvents((prev) => [...prev, eventWithTimestamp]);
+          const eventWithTimestamp = {
+            ...event,
+            type: "handoff-zendesk",
+            timestamp: new Date(zEvent.createdAt).getTime(),
+          };
+          setHandoffChatEvents((prev) => [...prev, eventWithTimestamp]);
+          break;
+        }
+        case "front": {
+          const fEvent = event as Front.WebhookMessage;
+          setAgentName(
+            `${fEvent.author.first_name} ${fEvent.author.last_name}`.trim(),
+          );
+          setHandoffChatEvents((prev) => [
+            ...prev,
+            {
+              ...fEvent,
+              type: "front-agent",
+              timestamp: Math.trunc(fEvent.created_at * 1000),
+            },
+          ]);
+          break;
+        }
+        case "salesforce":
+        case null:
+        default:
+          break;
+      }
     },
     [setHandoffChatEvents],
   );
 
   const streamResponse = useCallback(async function* (
     response: Response,
-  ): AsyncGenerator<HandoffChatMessage> {
+  ): AsyncGenerator<ZendeskWebhookMessage | Front.WebhookMessage> {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -165,8 +216,19 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
           if (event.startsWith("data: ")) {
             try {
               const jsonData: ChatEvent = JSON.parse(event.slice(6));
-              if (jsonData?.message?.type === "conversation:message") {
-                yield jsonData.message;
+              const currentHandoffType = handoffTypeRef.current ?? "";
+              const messageType = jsonData.message.type ?? "";
+              switch (`${currentHandoffType}-${messageType}`) {
+                case "zendesk-conversation:message":
+                  yield jsonData.message as ZendeskWebhookMessage;
+                  break;
+                case "front-custom":
+                  yield jsonData.message as Front.WebhookMessage;
+                  break;
+                case "salesforce":
+                case null:
+                default:
+                  break;
               }
             } catch (error) {
               console.error("Error parsing JSON:", error);
@@ -179,31 +241,39 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     }
   }, []);
 
-  const getOrCreateUserAndConversation = useCallback(async () => {
-    if (!handoffTypeRef.current) {
-      throw new Error("Handoff type is not set");
-    }
+  const getOrCreateUserAndConversation = useCallback(
+    async (email?: string) => {
+      if (!handoffTypeRef.current) {
+        throw new Error("Handoff type is not set");
+      }
 
-    const response = await fetch(
-      `/api/${handoffTypeRef.current}/conversations`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          messages: handoffMessages,
-          signedUserData,
-        }),
-        headers: generatedHeaders,
-      },
-    );
+      const response = await fetch(
+        `/api/${handoffTypeRef.current}/conversations`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            messages: handoffMessages,
+            signedUserData,
+            email,
+          }),
+          headers: generatedHeaders,
+        },
+      );
 
-    const handoffAuthToken = response.headers.get(HANDOFF_AUTH_HEADER);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-    if (!handoffAuthToken) {
-      throw new Error("Handoff auth token not found");
-    }
+      const handoffAuthToken = response.headers.get(HANDOFF_AUTH_HEADER);
 
-    setHandoffAuthToken(handoffAuthToken);
-  }, [handoffMessages, signedUserData, generatedHeaders]);
+      if (!handoffAuthToken) {
+        throw new Error("Handoff auth token not found");
+      }
+
+      setHandoffAuthToken(handoffAuthToken);
+    },
+    [handoffMessages, signedUserData, generatedHeaders],
+  );
 
   const handleEndHandoff = useCallback(async () => {
     resetAbortController();
@@ -226,6 +296,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     void fetch(`/api/${handoffTypeRef.current}/conversations/passControl`, {
       method: "POST",
       headers: generatedHeaders,
+      body: JSON.stringify({ signedUserData }),
     });
   }, [
     setHandoffStatus,
@@ -286,21 +357,24 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
     handleEndHandoff,
   ]);
 
-  const initializeHandoff = useCallback(async () => {
-    if (!handoffTypeRef.current) {
-      console.error("Handoff type is not set");
-      return;
-    }
+  const initializeHandoff = useCallback(
+    async ({ email }: { email?: string }): Promise<void> => {
+      if (!handoffTypeRef.current) {
+        console.error("Handoff type is not set");
+        return;
+      }
 
-    if (!signedUserData) {
-      console.error("Signed user data is not set");
-      return;
-    }
+      void setHandoffStatus(HandoffStatus.INITIALIZING);
 
-    void setHandoffStatus(HandoffStatus.INITIALIZING);
-
-    void getOrCreateUserAndConversation();
-  }, [getOrCreateUserAndConversation, signedUserData]);
+      try {
+        await getOrCreateUserAndConversation(email);
+      } catch (error) {
+        console.error("Error initializing handoff:", error);
+        void handleEndHandoff();
+      }
+    },
+    [getOrCreateUserAndConversation, signedUserData, handleEndHandoff],
+  );
 
   useEffect(() => {
     handoffStatusRef.current = handoffStatus;
@@ -339,7 +413,7 @@ export function useHandoff({ messages, signedUserData }: HandoffProps) {
 
       const response = await fetch(`/api/${handoffTypeRef.current}/messages`, {
         method: "POST",
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, signedUserData }),
         headers: generatedHeaders,
       });
 

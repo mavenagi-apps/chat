@@ -5,6 +5,8 @@ import {
 
 import type { HandoffChatMessage } from "@/types/zendesk";
 import * as MavenAGI from "mavenagi/api";
+import type { ZendeskWebhookMessage } from "@/types/zendesk";
+import type { Front } from "./front";
 
 interface VerifiedUserData {
   firstName: string;
@@ -60,10 +62,28 @@ type ZendeskChatMessage = {
   event_timestamp?: string;
 };
 
+type HandoffChatMessage = {
+  author: {
+    type: "user" | "business";
+  };
+  content: {
+    type: "text";
+    text: string;
+  };
+  timestamp?: number;
+  mavenContext?: {
+    conversationId: string;
+    conversationMessageId?: {
+      referenceId?: string;
+    };
+  };
+};
+
 const isBotMessage = (
   message:
     | Message
-    | HandoffChatMessage
+    | ZendeskWebhookMessage
+    | Front.WebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage,
 ): message is ConversationMessageResponse.Bot =>
@@ -97,9 +117,10 @@ export {
   type ChatMessage,
   type Message,
   type UserChatMessage,
-  type HandoffChatMessage,
+  type ZendeskWebhookMessage,
   type ChatEstablishedMessage,
   type ChatEndedMessage,
   type ZendeskChatMessage,
   type VerifiedUserData,
+  type HandoffChatMessage,
 };

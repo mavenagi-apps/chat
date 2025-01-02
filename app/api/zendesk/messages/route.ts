@@ -9,6 +9,7 @@ import { getRedisSubscribeClient } from "@/app/api/server/lib/redis";
 import type { ZendeskMessagePayload } from "@/types/zendesk";
 
 const KEEP_ALIVE_INTERVAL = 30000;
+const ENABLE_API_LOGGING = process.env.ENABLE_API_LOGGING === "true";
 
 export async function POST(request: NextRequest) {
   return withSettingsAndAuthentication(
@@ -16,8 +17,8 @@ export async function POST(request: NextRequest) {
     async (req, settings, _orgId, _agentId, userId, conversationId) => {
       const { message } = await req.json();
 
-      if (!settings.handoffConfiguration) {
-        throw new Error("Handoff configuration not found");
+      if (settings.handoffConfiguration?.type !== "zendesk") {
+        throw new Error("Zendesk Handoff configuration not found");
       }
 
       const [SunshineConversationsClient, zendeskConversationsAppId] =
@@ -59,7 +60,8 @@ export async function GET(request: NextRequest) {
     ) => {
       const encoder = new TextEncoder();
       const { handoffConfiguration } = settings;
-      const { webhookId } = handoffConfiguration || {};
+      const { webhookId } =
+        (handoffConfiguration as ZendeskHandoffConfiguration) || {};
       if (!webhookId) {
         return NextResponse.json("Error: Webhook configuration not found", {
           status: 400,
@@ -70,6 +72,13 @@ export async function GET(request: NextRequest) {
       const redisClient = await getRedisSubscribeClient();
 
       let keepAliveInterval: NodeJS.Timeout;
+
+      if (ENABLE_API_LOGGING) {
+        console.log("user", _userId);
+        console.log("conversationId", conversationId);
+        console.log("webhookId", webhookId);
+        console.log("Subscribing to pattern:", pattern);
+      }
 
       const stream = new ReadableStream({
         async start(controller) {

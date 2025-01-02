@@ -4,22 +4,24 @@ import React, { useEffect, useState } from "react";
 import {
   type ChatEndedMessage,
   type ChatEstablishedMessage,
-  type HandoffChatMessage,
+  type ZendeskWebhookMessage,
   type Message,
   isBotMessage,
 } from "@/types";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { Attachment } from "mavenagi/api";
+import type { Front } from "@/types/front";
 
 interface ChatProps {
   messages: (
     | Message
-    | HandoffChatMessage
+    | ZendeskWebhookMessage
+    | Front.WebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage
   )[];
   askFn: (question: string) => Promise<void>;
-  initializeHandoff: () => Promise<void>;
+  initializeHandoff: (data: { email?: string }) => Promise<void>;
   brandColor?: string;
   className?: string;
   agentName: string | null;
@@ -30,14 +32,26 @@ interface ChatProps {
 export const ChatContext = React.createContext<{
   followUpQuestions: string[];
   ask: (question: string, attachments?: Attachment[]) => Promise<void>;
-  initializeHandoff: () => Promise<void>;
+  initializeHandoff: (data: { email?: string }) => Promise<
+    | void
+    | {
+        success: true;
+        data: {
+          [k: string]: FormDataEntryValue;
+        };
+      }
+    | {
+        success: false;
+        error: string;
+      }
+  >;
   agentName: string | null;
   isHandoff: boolean;
   handleEndHandoff: () => Promise<void>;
 }>({
   followUpQuestions: [],
   ask: async () => {},
-  initializeHandoff: async () => {},
+  initializeHandoff: async (_data: { email?: string }) => {},
   agentName: null,
   isHandoff: false,
   handleEndHandoff: async () => {},

@@ -11,6 +11,8 @@
   "plugins": ["tailwindcss", "i18next"],
   "ignorePatterns": ["app/mavenagi-cgi/"],
   "rules": {
+    "quotes": ["error", "double"],
+    "jsx-quotes": ["error", "prefer-double"],
     "@typescript-eslint/no-unused-expressions": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "tailwindcss/no-custom-classname": "off",

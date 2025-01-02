@@ -90,7 +90,7 @@ async function initializeConversation(
   client: MavenAGIClient,
   conversationId: string,
 ) {
-  const conversationInitializationPayload = {
+  const conversationInitializationPayload: MavenAGI.ConversationRequest = {
     conversationId: { referenceId: conversationId },
     messages: [],
     responseConfig: {
@@ -105,7 +105,7 @@ async function initializeConversation(
     metadata: {
       escalation_action_enabled: "true",
     },
-  } as MavenAGI.ConversationRequest;
+  };
 
   return client.conversation.initialize(conversationInitializationPayload);
 }
@@ -147,7 +147,6 @@ export async function POST(req: NextRequest) {
         await generateDecryptedSignedUserData(signedUserData, settings);
       let { userId, conversationId } =
         (await generateAuthData(req.headers)) || {};
-
       if (!userId || !conversationId) {
         conversationId = nanoid() as string;
         const userResponse = await createOrUpdateUser(
@@ -174,26 +173,40 @@ export async function POST(req: NextRequest) {
         if (!response) {
           return NextResponse.json("No response from server", { status: 500 });
         }
+        let isControllerClosed = false;
 
         const stream = new ReadableStream({
           async start(controller) {
             try {
               for await (const chunk of response) {
-                // Convert the chunk to a string (assuming it's an object)
-                const chunkString = JSON.stringify(chunk);
+                if (isControllerClosed) break;
 
-                // Send the chunk to the client as a data event
-                controller.enqueue(
-                  new TextEncoder().encode(`data: ${chunkString}\n\n`),
-                );
+                try {
+                  const chunkString = JSON.stringify(chunk);
+                  controller.enqueue(
+                    new TextEncoder().encode(`data: ${chunkString}\n\n`),
+                  );
+                } catch (err) {
+                  if (
+                    err instanceof TypeError &&
+                    err.message.includes("Invalid state")
+                  ) {
+                    break;
+                  }
+                  console.log("Error in stream:", err);
+                  throw err;
+                }
               }
 
-              // End the stream when done
               controller.close();
             } catch (err) {
               console.error("Stream error:", err);
               controller.error(err);
             }
+          },
+
+          cancel() {
+            isControllerClosed = true;
           },
         });
 
@@ -213,9 +226,15 @@ export async function POST(req: NextRequest) {
       } catch (error) {
         console.error(error);
         if (error instanceof MavenAGIError) {
-          return NextResponse.json(error.body, { status: error.statusCode });
+          return NextResponse.json(
+            { error: error.body },
+            { status: error.statusCode },
+          );
         }
-        return NextResponse.json("Error fetching response", { status: 500 });
+        return NextResponse.json(
+          { error: "Error fetching response" },
+          { status: 500 },
+        );
       }
     },
   );

@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { SignJWT } from "jose";
 import type { Front } from "@/types/front";
+import { jsonFetch } from "@/lib/jsonFetch";
 
 export const DEFAULT_API_HOST = "https://api2.frontapp.com";
 
@@ -10,39 +11,49 @@ export class FrontCoreClient {
     private host: string = DEFAULT_API_HOST,
   ) {}
 
-  private async fetch<T = any>({
-    method,
-    path,
-    body,
-  }: {
-    method: string;
-    path: string;
-    body?: any;
-  }) {
-    const url = new URL(path, this.host);
-    const init: RequestInit = {
-      method,
+  private async fetchPagedResource<T extends Front.PagedResource>(
+    resource: string,
+    params?: Front.PagedEndpointParams,
+  ) {
+    const { next, limit = 10 } = params ?? {};
+    let url: string | URL = new URL(resource, this.host);
+    if (next) {
+      url = next;
+    } else {
+      const queryParams = new URLSearchParams();
+      // max front limit is 100
+      // min is 10 anything less will be ignored
+      if (10 < limit && limit <= 100) {
+        queryParams.append("limit", limit.toString());
+      }
+
+      url.search = queryParams.toString();
+    }
+    return await jsonFetch<Front.List<T>>(url, {
+      method: "GET",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${this.apiKey}`,
       },
-    };
-    if (body) {
-      init.body = JSON.stringify(body);
-    }
-    const response = await fetch(url, init);
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch ${method} ${path} with status ${response.status}`,
-      );
-    }
-    return (await response.json()) as T;
+    });
   }
 
-  public async channels() {
-    return await this.fetch<Front.List<Front.Channel>>({
-      method: "GET",
-      path: "/channels/",
+  public channels = async (params?: Front.PagedEndpointParams) => {
+    return await this.fetchPagedResource<Front.Channel>("/channels", params);
+  };
+
+  public inboxes = async (params?: Front.PagedEndpointParams) => {
+    return await this.fetchPagedResource<Front.Inbox>("/inboxes", params);
+  };
+
+  public async importMessage(inboxId: string, message: Front.ImportedMessage) {
+    const url = new URL(`/inboxes/${inboxId}/imported_messages`, this.host);
+
+    return await jsonFetch<Front.ImportMessageResponse>(url, {
+      method: "POST",
+      body: JSON.stringify(message),
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+      },
     });
   }
 }
@@ -83,10 +94,9 @@ export class FrontApplicationClient {
       `/channels/${this.channelId}/inbound_messages`,
       this.host,
     );
-    return await fetch(url, {
+    return await jsonFetch<Front.AppChannelSyncResponse>(url, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(msg),
@@ -99,10 +109,9 @@ export class FrontApplicationClient {
       `/channels/${this.channelId}/outbound_messages`,
       this.host,
     );
-    return await fetch(url, {
+    return await jsonFetch<Front.AppChannelSyncResponse>(url, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(msg),

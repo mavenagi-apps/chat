@@ -173,6 +173,7 @@ export const ChatInput = ({
               className="w-0 grow resize-none border-0 p-2 text-xs outline-none focus:shadow-none focus:ring-0"
               {...methods.register("question")}
               autoComplete="off"
+              data-testid="chat-input"
             />
             <input
               type="file"

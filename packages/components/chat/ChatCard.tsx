@@ -12,6 +12,7 @@ export const ChatBubble = forwardRef<
 >(function ChatBubble({ children, direction, className, author }, ref) {
   return (
     <div
+      data-testid="chat-bubble"
       ref={ref}
       className={clsx(
         "mb-5 flex flex-col",

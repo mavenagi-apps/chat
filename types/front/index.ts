@@ -1,4 +1,13 @@
 export namespace Front {
+  export type PagedResource = {};
+
+  export type AppChannelSyncResponse = {
+    status: string;
+    message_uid: string;
+  };
+
+  export type ImportMessageResponse = AppChannelSyncResponse;
+
   export type AppChannelBaseMessage = {
     body: string;
     metadata: Metadata;
@@ -64,7 +73,7 @@ export namespace Front {
     attachments: any[];
     signature: string | null;
     is_draft: boolean;
-  };
+  } & { timestamp?: number }; // this is not part of the webhook message, but is used in the app
 
   export type Author = {
     _links: Links;
@@ -104,7 +113,7 @@ export namespace Front {
     };
   };
 
-  export type Channel = {
+  export type Channel = PagedResource & {
     _links: Links;
     address: string;
     id: string;
@@ -118,14 +127,55 @@ export namespace Front {
     webhook_url: string;
   };
 
+  export type Inbox = PagedResource & {
+    _links: Links;
+    address: string;
+    id: string;
+    name: string;
+    send_as: string;
+    type: string;
+  };
+
   export type Pagination = {
     limit: number;
     next: string | null;
     prev?: string;
   };
-  export type List<T> = {
+  export type List<T extends PagedResource> = {
     _pagination: Pagination;
     _links: Omit<Links, "related">;
     _results: T[];
+  };
+
+  export type PagedEndpointParams = {
+    next?: string | null;
+    limit?: number;
+  };
+
+  export type ImportedMessage = {
+    sender: {
+      author_id?: string;
+      handle: string;
+      name?: string;
+    };
+    body_format?: "html" | "markdown";
+    type?: "email";
+    metadata: {
+      thread_ref?: string;
+      is_inbound: boolean;
+      should_skip_rules?: boolean;
+      is_archived?: boolean;
+    };
+    assignee_id?: string;
+    attachments?: string[];
+    to: string[];
+    tags?: string[];
+    cc?: string[];
+    bcc?: string[];
+    subject?: string;
+    body: string;
+    external_id: string;
+    created_at: number;
+    conversation_id?: string;
   };
 }

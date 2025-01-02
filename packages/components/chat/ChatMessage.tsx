@@ -18,14 +18,20 @@ import {
   isEscalationChatMessage,
   type Message,
   type UserChatMessage,
+  type ZendeskWebhookMessage,
+  type ChatEstablishedMessage,
+  type ChatEndedMessage,
+
 } from "@/types";
 import { Attachment, type ConversationMessageResponse } from "mavenagi/api";
 import { useTranslations } from "next-intl";
+import type { Front } from "@/types/front";
 
 interface MessageProps {
   message:
     | Message
-    | HandoffChatMessage
+    | ZendeskWebhookMessage
+    | Front.WebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage;
   linkTargetInNewTab?: boolean;
@@ -68,7 +74,7 @@ function MessageCharts({
 }
 
 function renderHandoffMessage(
-  message: HandoffChatMessage,
+  message: ZendeskWebhookMessage,
   isLastMessage: boolean,
   latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
 ) {
@@ -81,6 +87,26 @@ function renderHandoffMessage(
     >
       <ReactMarkdown linkTargetInNewTab={true}>
         {message.payload.message?.content?.text || ""}
+      </ReactMarkdown>
+    </ChatBubble>
+  );
+}
+
+function renderFrontAgentMessage(
+  message: Front.WebhookMessage,
+  isLastMessage: boolean,
+  latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
+) {
+  const author =
+    `${message.author.first_name} ${message.author.last_name}`.trim();
+  return (
+    <ChatBubble
+      direction="left-hug"
+      author={author}
+      ref={isLastMessage ? latestChatBubbleRef : null}
+    >
+      <ReactMarkdown linkTargetInNewTab={true}>
+        {message.body || ""}
       </ReactMarkdown>
     </ChatBubble>
   );
@@ -172,7 +198,13 @@ export function ChatMessage({
         );
       case "handoff-zendesk":
         return renderHandoffMessage(
-          message as HandoffChatMessage,
+          message as ZendeskWebhookMessage,
+          isLastMessage,
+          latestChatBubbleRef,
+        );
+      case "front-agent":
+        return renderFrontAgentMessage(
+          message as Front.WebhookMessage,
           isLastMessage,
           latestChatBubbleRef,
         );
