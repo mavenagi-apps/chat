@@ -1,37 +1,34 @@
-import type { Message, Bot, ZendeskWebhookMessage } from "@/types";
+import type { Message, ChatMessage, ZendeskWebhookMessage } from "@/types";
 import type { Front } from "@/types/front";
+import {
+  type ConversationMessageResponse,
+  BotConversationMessageType,
+  EntityType,
+} from "mavenagi/api";
 
 export const createUserMessage = (text: string): Message => ({
   type: "USER",
   text,
   timestamp: 123456789,
-  conversationMessageId: {
-    type: "maven",
-    appId: "app-123",
-    organizationId: "org-123",
-    agentId: "agent-123",
-    referenceId: "msg-123",
-  },
 });
 
 export const createBotMessage = (
   responses: { text: string }[],
-): Bot & { timestamp?: number } => ({
+): ConversationMessageResponse.Bot => ({
   type: "bot",
-  botMessageType: "chat",
+  botMessageType: BotConversationMessageType.BotResponse,
   conversationMessageId: {
-    type: "maven",
     appId: "app-123",
     organizationId: "org-123",
     agentId: "agent-123",
     referenceId: "msg-123",
+    type: EntityType.ConversationMessage,
   },
   metadata: {
     followupQuestions: [],
     sources: [],
   },
   responses: responses.map((r) => ({ type: "text" as const, text: r.text })),
-  timestamp: 123456789,
 });
 
 export const createZendeskEvent = (
@@ -41,6 +38,7 @@ export const createZendeskEvent = (
   id: "123",
   type: "conversation:message",
   payload: {
+    type: "conversation:message",
     conversation: {
       id: "conv-123",
       type: "personal",
@@ -63,12 +61,21 @@ export const createFrontEvent = (
   lastName: string,
 ): Front.WebhookMessage => ({
   type: "custom",
-  payload: {},
   created_at: 1672531200,
   author: {
     _links: {
-      self: { href: "http://example.com" },
-      related: { href: "http://example.com" },
+      self: "https://api.front.com/v1/users/author-123",
+      related: {
+        channels: undefined,
+        comments: undefined,
+        conversation: undefined,
+        conversations: undefined,
+        contact: undefined,
+        events: undefined,
+        inboxes: undefined,
+        messages: undefined,
+        teammates: undefined,
+      },
     },
     id: "author-123",
     email: "agent@example.com",
@@ -77,5 +84,38 @@ export const createFrontEvent = (
     last_name: lastName,
     is_admin: false,
     is_available: true,
+    is_blocked: false,
   },
+  is_inbound: false,
+  blurb: "",
+  body: "",
+  text: "",
+  error_type: null,
+  version: "",
+  subject: "",
+  draft_mode: "",
+  metadata: {
+    headers: {
+      in_reply_to: null,
+    },
+  },
+  recipients: [],
+  attachments: [],
+  signature: null,
+  is_draft: false,
+  _links: {
+    self: "https://api.front.com/v1/users/author-123",
+    related: {
+      channels: undefined,
+      comments: undefined,
+      conversation: undefined,
+      conversations: undefined,
+      contact: undefined,
+      events: undefined,
+      inboxes: undefined,
+      messages: undefined,
+      teammates: undefined,
+    },
+  },
+  id: "msg-123",
 });

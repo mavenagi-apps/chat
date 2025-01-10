@@ -80,7 +80,7 @@ describe("Handoff Strategies", () => {
           mavenContext: {
             conversationId: "conv-123",
             conversationMessageId: {
-              referenceId: "msg-123",
+              referenceId: undefined,
             },
           },
         },
@@ -95,7 +95,6 @@ describe("Handoff Strategies", () => {
         {
           author: { type: "business" },
           content: { type: "text", text: "Hi there" },
-          timestamp: 123456789,
           mavenContext: {
             conversationId: "conv-123",
             conversationMessageId: {
