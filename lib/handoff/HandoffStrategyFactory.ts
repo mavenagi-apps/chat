@@ -11,7 +11,6 @@ export class HandoffStrategyFactory {
         return new ZendeskStrategy();
       case "front":
         return new FrontStrategy();
-      case null:
       default:
         return null;
     }
