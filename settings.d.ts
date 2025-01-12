@@ -16,6 +16,7 @@ declare global {
     apiKey: string;
     apiSecret: string;
     appId: string;
+    allowAnonymousHandoff?: boolean;
   };
   type ZendeskHandoffConfiguration = BaseHandoffConfiguration & {
     type: "zendesk";
@@ -28,8 +29,14 @@ declare global {
     channelName: string;
     host?: string;
   };
-  type SalesForceHandoffConfiguration = BaseHandoffConfiguration & {
+  type SalesForceHandoffConfiguration = {
     type: "salesforce";
+    orgId: string;
+    chatHostUrl: string;
+    chatButtonId: string;
+    deploymentId: string;
+    eswLiveAgentDevName: string;
+    allowAnonymousHandoff?: boolean;
   };
 
   type HandoffConfiguration =
