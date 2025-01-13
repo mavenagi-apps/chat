@@ -23,6 +23,9 @@ type Props = {
   horizontalPosition: "left" | "right";
   verticalPosition: "top" | "bottom";
   signedUserData?: string | null;
+  unsignedUserData?: Record<string, any> | null;
+  unverifiedUserData?: Record<string, any> | null;
+  customData?: Record<string, any> | null;
   orgFriendlyId: string;
   agentFriendlyId: string;
 };
@@ -34,6 +37,8 @@ const App = forwardRef<{ open: () => void; close: () => void }, Props>(
       orgFriendlyId: props.orgFriendlyId,
       agentFriendlyId: props.agentFriendlyId,
       signedUserData: props.signedUserData,
+      unsignedUserData: props.unsignedUserData || props.unverifiedUserData,
+      customData: props.customData,
       isWide,
       isOpen,
     });
@@ -83,6 +88,8 @@ export async function load({
   orgFriendlyId,
   agentFriendlyId,
   signedUserData = null,
+  unsignedUserData = null,
+  customData = null,
 }: Partial<Omit<Props, "agentId" | "baseUrl">> & {
   envPrefix?: string;
   apiKey: string;
@@ -91,6 +98,8 @@ export async function load({
   orgFriendlyId: string;
   agentFriendlyId: string;
   signedUserData?: string | null;
+  unsignedUserData?: Record<string, any> | null;
+  customData?: Record<string, any> | null;
 }) {
   const placeholder = document.createElement("div");
   placeholder.id = "maven-chat-widget";
@@ -105,6 +114,8 @@ export async function load({
       horizontalPosition={horizontalPosition}
       verticalPosition={verticalPosition}
       signedUserData={signedUserData}
+      unsignedUserData={unsignedUserData}
+      customData={customData}
       orgFriendlyId={orgFriendlyId}
       agentFriendlyId={agentFriendlyId}
     />,

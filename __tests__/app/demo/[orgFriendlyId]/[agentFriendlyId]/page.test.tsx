@@ -74,13 +74,27 @@ describe("DemoPage", () => {
       expect(scripts[0]).toHaveAttribute("defer");
 
       // Check if widget load script contains correct payload
-      const expectedPayload = {
-        envPrefix: "test-prefix",
-        orgFriendlyId: "test-org",
-        agentFriendlyId: "test-agent",
-        bgColor: "#123456",
-      };
-      expect(scripts[1].innerHTML).toContain(JSON.stringify(expectedPayload));
+      const payloadRegex = `addEventListener\\("load", function \\(\\) {
+        Maven\\.ChatWidget\\.load\\({
+          "envPrefix":"[^"]+",
+          "orgFriendlyId":"[^"]+",
+          "agentFriendlyId":"[^"]+",
+          "bgColor":"#[0-9a-fA-F]{6}",
+          "unsignedUserData":{
+            "firstName":"[^"]+",
+            "lastName":"[^"]+",
+            "id":"[^"]+",
+            "email":"[^"]+"
+          },
+          "customData":{
+            "buttonId":"[^"]+"
+          }
+        }\\);
+      }\\);`.replace(/\s+/g, "");
+
+      expect(scripts[1].innerHTML.replace(/\s+/g, "")).toMatch(
+        new RegExp(payloadRegex),
+      );
     });
   });
 

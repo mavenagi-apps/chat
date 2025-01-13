@@ -7,6 +7,8 @@ interface LegacyMessageEvent extends MessageEvent {
 
 enum MAVEN_MESSAGE_TYPES {
   SIGNED_USER_DATA = "SIGNED_USER_DATA",
+  UNSIGNED_USER_DATA = "UNSIGNED_USER_DATA",
+  CUSTOM_DATA = "CUSTOM_DATA",
   MAVEN_LOADED = "MAVEN_LOADED",
 }
 
@@ -16,6 +18,13 @@ const demoUrl = (orgFriendlyId: string, agentFriendlyId: string) =>
 export function useIframeMessaging() {
   const [loading, setLoading] = useState(true);
   const [signedUserData, setSignedUserData] = useState<string | null>(null);
+  const [unsignedUserData, setUnsignedUserData] = useState<Record<
+    string,
+    any
+  > | null>(null);
+  const [customData, setCustomData] = useState<Record<string, any> | null>(
+    null,
+  );
   const {
     orgFriendlyId,
     id: agentFriendlyId,
@@ -29,6 +38,12 @@ export function useIframeMessaging() {
     switch (data.type) {
       case MAVEN_MESSAGE_TYPES.SIGNED_USER_DATA:
         setSignedUserData(data.data);
+        break;
+      case MAVEN_MESSAGE_TYPES.UNSIGNED_USER_DATA:
+        setUnsignedUserData(data.data);
+        break;
+      case MAVEN_MESSAGE_TYPES.CUSTOM_DATA:
+        setCustomData(data.data);
         break;
       default:
         break;
@@ -65,5 +80,7 @@ export function useIframeMessaging() {
   return {
     loading,
     signedUserData,
+    unsignedUserData,
+    customData,
   };
 }
