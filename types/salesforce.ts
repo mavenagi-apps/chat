@@ -94,3 +94,45 @@ export type SalesforceEvent = {
   type: SalesforceMessageType;
   agentName: string;
 };
+
+export type SalesforceChatUserData = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  locationId: string;
+  locationType: string;
+  question: string;
+  screenResolution: string;
+  subject: string;
+  userAgent: string;
+  userId: string;
+  language: string;
+};
+
+export type SalesforceRequest = {
+  unsignedUserData?: SalesforceChatUserData;
+  signedUserData?: SalesforceChatUserData;
+  messages: any[];
+  mavenConversationId: string;
+  email?: string;
+  userAgent: string;
+  screenResolution: string;
+  language: string;
+};
+
+export type PrechatDetail = {
+  label: string;
+  value: string | boolean;
+  entityMaps: any[];
+  displayToAgent: boolean;
+  doKnowledgeSearch: boolean;
+  transcriptFields: string[];
+};
+
+export type EntityFieldMap = {
+  fieldName: string;
+  label: string;
+  doFind: boolean;
+  isExactMatch: boolean;
+  doCreate: boolean;
+};

@@ -37,6 +37,7 @@ declare global {
     deploymentId: string;
     eswLiveAgentDevName: string;
     allowAnonymousHandoff?: boolean;
+    apiSecret: string;
   };
 
   type HandoffConfiguration =

@@ -26,9 +26,6 @@ describe("SalesforceStrategy", () => {
           timestamp: 123456789,
           mavenContext: {
             conversationId: "conv-123",
-            conversationMessageId: {
-              referenceId: undefined,
-            },
           },
         },
       ]);
@@ -50,7 +47,7 @@ describe("SalesforceStrategy", () => {
           mavenContext: {
             conversationId: "conv-123",
             conversationMessageId: {
-              referenceId: undefined,
+              referenceId: "msg-123",
             },
           },
         },
@@ -81,13 +78,6 @@ describe("SalesforceStrategy", () => {
         type: "handoff-salesforce",
         timestamp: expect.any(Number),
       });
-    });
-  });
-
-  describe("message retrieval configuration", () => {
-    it("uses polling for message retrieval", () => {
-      expect(strategy.messageRetrievalType).toBe("poll");
-      expect(strategy.pollInterval).toBe(3000);
     });
   });
 

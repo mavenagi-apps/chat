@@ -28,6 +28,12 @@ vi.mock("@/app/providers/AuthProvider", () => ({
   }),
 }));
 
+vi.mock("@/app/providers/CustomDataProvider", () => ({
+  useCustomData: () => ({
+    customData: "test-custom-data",
+  }),
+}));
+
 // Mock the strategy factory
 vi.mock("@/lib/handoff/HandoffStrategyFactory", () => ({
   HandoffStrategyFactory: {

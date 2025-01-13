@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { useParams } from "next/dist/client/components/navigation";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { useCustomData } from "@/app/providers/CustomDataProvider";
 import {
   HANDOFF_AUTH_HEADER,
   ORGANIZATION_HEADER,
@@ -30,13 +31,14 @@ type HandoffProps = {
 };
 
 type Params = {
-  organizationId: string;
-  agentId: string;
+  orgFriendlyId: string;
+  id: string;
 };
 
 export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
-  const { signedUserData } = useAuth();
-  const { organizationId, agentId } = useParams<Params>();
+  const { signedUserData, unsignedUserData } = useAuth();
+  const { customData } = useCustomData();
+  const { orgFriendlyId, id: agentId } = useParams<Params>();
   const { handoffConfiguration } = useSettings();
   const handoffTypeRef = useRef<HandoffType>(
     (handoffConfiguration?.type as HandoffType) ?? null,
@@ -78,7 +80,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
   const generatedHeaders: HeadersInit = useMemo(() => {
     const headers: HeadersInit = {
       "Content-Type": "application/json",
-      [ORGANIZATION_HEADER]: organizationId,
+      [ORGANIZATION_HEADER]: orgFriendlyId,
       [AGENT_HEADER]: agentId,
     };
 
@@ -87,7 +89,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
     }
 
     return headers;
-  }, [handoffAuthToken, organizationId, agentId]);
+  }, [handoffAuthToken, orgFriendlyId, agentId]);
 
   const handleHandoffChatEvent = useCallback(
     (event: ZendeskWebhookMessage | Front.WebhookMessage) => {
@@ -161,6 +163,11 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
               mavenConversationId,
             ),
             signedUserData,
+            unsignedUserData,
+            userAgent: navigator.userAgent,
+            screenResolution: `${window.screen.width}x${window.screen.height}`,
+            language: navigator.language,
+            customData,
             email,
           }),
           headers: generatedHeaders,
@@ -179,7 +186,14 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
 
       setHandoffAuthToken(handoffAuthToken);
     },
-    [messages, signedUserData, generatedHeaders, mavenConversationId],
+    [
+      messages,
+      customData,
+      signedUserData,
+      unsignedUserData,
+      generatedHeaders,
+      mavenConversationId,
+    ],
   );
 
   const handleEndHandoff = useCallback(async () => {
@@ -203,7 +217,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
     void fetch(`${strategyRef.current.getMessagesEndpoint}/passControl`, {
       method: "POST",
       headers: generatedHeaders,
-      body: JSON.stringify({ signedUserData }),
+      body: JSON.stringify({ signedUserData, unsignedUserData }),
     });
   }, [
     setHandoffStatus,
@@ -319,7 +333,11 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
 
       const response = await fetch(strategyRef.current.getMessagesEndpoint, {
         method: "POST",
-        body: JSON.stringify({ message, signedUserData }),
+        body: JSON.stringify({
+          message,
+          signedUserData,
+          unsignedUserData,
+        }),
         headers: generatedHeaders,
       });
 

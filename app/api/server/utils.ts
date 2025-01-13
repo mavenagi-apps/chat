@@ -176,6 +176,7 @@ export type RouteHandlerWithAuth<T> = (
   agentId: string,
   userId: string,
   conversationId: string,
+  authPayload: AuthJWTPayload,
 ) => Promise<T>;
 
 export async function withApiAuthentication<T>(
@@ -197,13 +198,14 @@ export async function withApiAuthentication<T>(
 
   let userId: string;
   let conversationId: string;
-
+  let authPayload: AuthJWTPayload;
   try {
     const encoder = new TextEncoder();
     const secret = encoder.encode(settings.handoffConfiguration.apiSecret);
     const { payload } = await jwtVerify(apiToken, secret);
     userId = payload.userId as string;
     conversationId = payload.conversationId as string;
+    authPayload = payload;
   } catch (error) {
     throw new Error("Invalid API token", { cause: error });
   }
@@ -215,6 +217,7 @@ export async function withApiAuthentication<T>(
     agentId,
     userId,
     conversationId,
+    authPayload,
   );
 }
 
@@ -225,6 +228,7 @@ export type RouteHandlerWithSettingsAndAuth<T> = (
   agentId: string,
   userId: string,
   conversationId: string,
+  authPayload: AuthJWTPayload,
 ) => Promise<T>;
 
 export async function withSettingsAndAuthentication<T>(
@@ -246,6 +250,7 @@ export async function withSettingsAndAuthentication<T>(
           agentId,
           userId,
           conversationId,
+          authPayload,
         ) => {
           return handler(
             req,
@@ -254,6 +259,7 @@ export async function withSettingsAndAuthentication<T>(
             agentId,
             userId,
             conversationId,
+            authPayload,
           );
         },
       );
