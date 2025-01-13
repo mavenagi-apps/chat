@@ -11,6 +11,10 @@ const mockUserData = {
   lastName: faker.person.lastName(),
   id: faker.string.uuid(),
   email: faker.internet.email(),
+  userId: `ta-user-id-${faker.string.uuid()}`,
+  businessName: faker.company.name(),
+  locationId: faker.number.int(),
+  locationType: "Hotel",
 };
 
 export default async function Page({
