@@ -11,6 +11,7 @@ import { useAnalytics } from "@/lib/use-analytics";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { useIframeMessaging } from "@/lib/useIframeMessaging";
 import { AuthProvider } from "@/app/providers/AuthProvider";
+import { CustomDataProvider } from "@/app/providers/CustomDataProvider";
 import { ChatHeader } from "@magi/components/chat/ChatHeader";
 import { WelcomeMessage } from "@magi/components/chat/WelcomeChatMessage";
 import { ChatMessages } from "@magi/components/chat/ChatMessages";
@@ -128,13 +129,19 @@ function ChatPage() {
 }
 
 export default function ChatPageWrapper() {
-  const { loading, signedUserData } = useIframeMessaging();
+  const { loading, signedUserData, unsignedUserData, customData } =
+    useIframeMessaging();
 
   if (loading) return null;
 
   return (
-    <AuthProvider signedUserData={signedUserData}>
-      <ChatPage />
+    <AuthProvider
+      signedUserData={signedUserData}
+      unsignedUserData={unsignedUserData}
+    >
+      <CustomDataProvider customData={customData}>
+        <ChatPage />
+      </CustomDataProvider>
     </AuthProvider>
   );
 }
