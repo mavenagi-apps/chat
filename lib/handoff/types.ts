@@ -12,8 +12,8 @@ export type HandoffProps = {
 };
 
 export type Params = {
-  orgFriendlyId: string;
-  id: string;
+  organizationId: string;
+  agentId: string;
 };
 
 export type HandoffState = {

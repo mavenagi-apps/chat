@@ -55,7 +55,7 @@ export function useHandoff({
   // Context hooks
   const { signedUserData, unsignedUserData } = useAuth();
   const { customData } = useCustomData();
-  const { orgFriendlyId, id: agentId } = useParams<Params>();
+  const { organizationId, agentId } = useParams<Params>();
 
   useEffect(() => {
     strategyRef.current = HandoffStrategyFactory.createStrategy(
@@ -69,8 +69,8 @@ export function useHandoff({
   }, []);
 
   const generatedHeaders = useMemo(() => {
-    return generateHeaders(orgFriendlyId, agentId, state.handoffAuthToken);
-  }, [state.handoffAuthToken, orgFriendlyId, agentId]);
+    return generateHeaders(organizationId, agentId, state.handoffAuthToken);
+  }, [state.handoffAuthToken, organizationId, agentId]);
 
   const handleHandoffChatEvent = useCallback(
     (event: IncomingHandoffEvent) => {
