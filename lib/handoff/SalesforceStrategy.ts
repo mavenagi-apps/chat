@@ -1,4 +1,7 @@
-import type { HandoffStrategy } from "./HandoffStrategy";
+import {
+  type HandoffStrategy,
+  MESSAGE_TYPES_FOR_HANDOFF_CREATION,
+} from "./HandoffStrategy";
 import type {
   IncomingHandoffConnectionEvent,
   IncomingHandoffEvent,
@@ -6,11 +9,7 @@ import type {
   UserChatMessage,
 } from "@/types";
 import type { SalesforceChatMessage } from "@/types/salesforce";
-import {
-  isSalesforceMessage,
-  SALESFORCE_CHAT_SUBJECT_HEADER_KEY,
-} from "@/types/salesforce";
-
+import { SALESFORCE_CHAT_SUBJECT_HEADER_KEY } from "@/types/salesforce";
 export class SalesforceStrategy implements HandoffStrategy<Message> {
   readonly messagesEndpoint = "/api/salesforce/messages";
   readonly conversationsEndpoint = "/api/salesforce/conversations";
@@ -18,7 +17,9 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
   readonly connectedToAgentMessageType = "ChatConnecting";
 
   formatMessages(messages: Message[], _mavenConversationId: string): Message[] {
-    return messages.filter((message) => ["USER", "bot"].includes(message.type));
+    return messages.filter((message) =>
+      MESSAGE_TYPES_FOR_HANDOFF_CREATION.includes(message.type),
+    );
   }
 
   handleChatEvent(event: SalesforceChatMessage): {

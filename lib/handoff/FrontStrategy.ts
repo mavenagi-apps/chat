@@ -1,4 +1,7 @@
-import type { HandoffStrategy } from "./HandoffStrategy";
+import {
+  type HandoffStrategy,
+  MESSAGE_TYPES_FOR_HANDOFF_CREATION,
+} from "./HandoffStrategy";
 import type { Message, HandoffChatMessage } from "@/types";
 import type { Front } from "@/types/front";
 import { isChatUserMessage, isBotMessage } from "@/types";
@@ -12,7 +15,9 @@ export class FrontStrategy implements HandoffStrategy {
     mavenConversationId: string,
   ): HandoffChatMessage[] {
     return messages
-      .filter((message) => ["USER", "bot"].includes(message.type))
+      .filter((message) =>
+        MESSAGE_TYPES_FOR_HANDOFF_CREATION.includes(message.type),
+      )
       .map((message: any) => ({
         author: {
           type: isChatUserMessage(message) ? "user" : "business",

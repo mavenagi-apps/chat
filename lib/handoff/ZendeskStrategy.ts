@@ -1,4 +1,7 @@
-import type { HandoffStrategy } from "./HandoffStrategy";
+import {
+  type HandoffStrategy,
+  MESSAGE_TYPES_FOR_HANDOFF_CREATION,
+} from "./HandoffStrategy";
 import type {
   Message,
   HandoffChatMessage,
@@ -15,7 +18,9 @@ export class ZendeskStrategy implements HandoffStrategy {
     _mavenConversationId: string,
   ): HandoffChatMessage[] {
     return messages
-      .filter((message) => ["USER", "bot"].includes(message.type))
+      .filter((message) =>
+        MESSAGE_TYPES_FOR_HANDOFF_CREATION.includes(message.type),
+      )
       .map((message) => ({
         author: {
           type: isChatUserMessage(message) ? "user" : "business",
