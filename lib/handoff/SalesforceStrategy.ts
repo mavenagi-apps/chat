@@ -66,7 +66,7 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
     return false;
   }
 
-  shouldSupressHandoffInputDisplay(agentName: string): boolean {
+  shouldSupressHandoffInputDisplay(agentName: string | null): boolean {
     return !agentName;
   }
 }

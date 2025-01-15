@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
       try {
         const chatSessionEndResponse = await fetch(
-          url + `/chat/rest/System/SessionId/${sessionKey}`,
+          url + `/chat/rest/System/SessionId/${sessionKey || ""}`,
           {
             method: "DELETE",
             headers: generateSessionInitRequestHeaders(

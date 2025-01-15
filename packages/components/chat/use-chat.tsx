@@ -202,7 +202,7 @@ export function useChat(): UseChatReturn {
           if (!responseAuthData.conversationId) {
             throw new Error("Conversation ID not found");
           }
-          setMavenUserId(responseAuthData.userId);
+          setMavenUserId(responseAuthData.userId || null);
           setAuthToken(authToken);
           setConversationId(responseAuthData.conversationId);
           await streamResponse(response);
