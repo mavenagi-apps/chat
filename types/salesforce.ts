@@ -1,18 +1,22 @@
-export type SalesforceMessageType =
-  | "AgentDisconnect"
-  | "AgentNotTyping"
-  | "AgentTyping"
-  | "ChasitorSessionData"
-  | "ChatEnded"
-  | "ChatEstablished"
-  | "ChatMessage"
-  | "ChatRequestFail"
-  | "ChatRequestSuccess"
-  | "ChatTransferred"
-  | "CustomEvent"
-  | "NewVisitorBreadcrumb"
-  | "QueueUpdate"
-  | "SensitiveDataRules";
+import { Message } from ".";
+
+export const SALESFORCE_MESSAGE_TYPES = [
+  "AgentDisconnect",
+  "AgentNotTyping",
+  "AgentTyping",
+  "ChasitorSessionData",
+  "ChatEnded",
+  "ChatEstablished",
+  "ChatMessage",
+  "ChatRequestFail",
+  "ChatRequestSuccess",
+  "ChatTransferred",
+  "CustomEvent",
+  "NewVisitorBreadcrumb",
+  "QueueUpdate",
+] as const;
+
+export type SalesforceMessageType = (typeof SALESFORCE_MESSAGE_TYPES)[number];
 
 export type SalesforceChatMessage = {
   type: SalesforceMessageType;
@@ -24,6 +28,12 @@ export type SalesforceChatMessage = {
     };
     agentId: string;
   };
+};
+
+export const isSalesforceMessage = (
+  message: any,
+): message is SalesforceChatMessage => {
+  return message.type in SALESFORCE_MESSAGE_TYPES;
 };
 
 export type ChatSessionResponse = {
@@ -90,11 +100,6 @@ export type ChatMessageResponse = {
   offset: number;
 };
 
-export type SalesforceEvent = {
-  type: SalesforceMessageType;
-  agentName: string;
-};
-
 export type SalesforceChatUserData = {
   email: string;
   firstName: string;
@@ -112,7 +117,7 @@ export type SalesforceChatUserData = {
 export type SalesforceRequest = {
   unsignedUserData?: SalesforceChatUserData;
   signedUserData?: SalesforceChatUserData;
-  messages: any[];
+  messages: Message[];
   mavenConversationId: string;
   email?: string;
   userAgent: string;
@@ -136,3 +141,5 @@ export type EntityFieldMap = {
   isExactMatch: boolean;
   doCreate: boolean;
 };
+
+export const SALESFORCE_CHAT_SUBJECT_HEADER_KEY = "MAVEN-CHAT-SUBJECT";

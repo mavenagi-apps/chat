@@ -29,7 +29,7 @@ declare global {
     channelName: string;
     host?: string;
   };
-  type SalesForceHandoffConfiguration = {
+  type SalesforceHandoffConfiguration = {
     type: "salesforce";
     orgId: string;
     chatHostUrl: string;
@@ -43,7 +43,7 @@ declare global {
   type HandoffConfiguration =
     | ZendeskHandoffConfiguration
     | FrontHandoffConfiguration
-    | SalesForceHandoffConfiguration;
+    | SalesforceHandoffConfiguration;
 
   interface ClientSafeAppSettings extends Partial<AppSettings> {
     handoffConfiguration?: { type: HandoffConfiguration["type"] } | undefined;

@@ -23,10 +23,9 @@ import { PoweredByMaven } from "@magi/components/chat/PoweredByMaven";
 import type {
   ChatEndedMessage,
   ChatEstablishedMessage,
-  ZendeskWebhookMessage,
+  IncomingHandoffEvent,
 } from "@/types";
 import type { Message } from "@/types";
-import type { Front } from "@/types/front";
 
 function ChatPage() {
   const analytics = useAnalytics();
@@ -69,14 +68,16 @@ function ChatPage() {
 
   const combinedMessages: (
     | Message
-    | ZendeskWebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage
-    | Front.WebhookMessage
+    | IncomingHandoffEvent
   )[] = useMemo(() => {
     return [...messages, ...handoffChatEvents]
-      .filter(({ timestamp }) => !!timestamp)
-      .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+      .filter(
+        (message): message is typeof message & { timestamp: number } =>
+          "timestamp" in message && !!message.timestamp,
+      )
+      .sort((a, b) => a.timestamp - b.timestamp);
   }, [messages, handoffChatEvents]);
   useEffect(() => {
     scrollToLatest();

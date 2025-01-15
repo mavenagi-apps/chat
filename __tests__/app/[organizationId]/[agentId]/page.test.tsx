@@ -6,17 +6,15 @@ import {
   ChatEstablishedMessage,
   Message,
   UserChatMessage,
-  ZendeskWebhookMessage,
+  IncomingHandoffEvent,
 } from "@/types";
-import { Front } from "@/types/front";
 import { HandoffStatus } from "@/app/constants/handoff";
 import { useChat } from "@magi/components/chat/use-chat";
 import { useHandoff } from "@/lib/useHandoff";
 
 let chatMessages = [] as Message[];
 let handoffMessages = [] as (
-  | ZendeskWebhookMessage
-  | Front.WebhookMessage
+  | IncomingHandoffEvent
   | ChatEstablishedMessage
   | UserChatMessage
   | ChatEndedMessage

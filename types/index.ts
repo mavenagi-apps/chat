@@ -5,6 +5,12 @@ import {
 
 import type { ZendeskWebhookMessage } from "@/types/zendesk";
 import type { Front } from "./front";
+import { SalesforceChatMessage } from "./salesforce";
+
+type IncomingHandoffEvent =
+  | SalesforceChatMessage
+  | ZendeskWebhookMessage
+  | Front.WebhookMessage;
 
 interface VerifiedUserData {
   firstName: string;
@@ -77,10 +83,9 @@ type HandoffChatMessage = {
 const isBotMessage = (
   message:
     | Message
-    | ZendeskWebhookMessage
-    | Front.WebhookMessage
     | ChatEstablishedMessage
-    | ChatEndedMessage,
+    | ChatEndedMessage
+    | IncomingHandoffEvent,
 ): message is ConversationMessageResponse.Bot =>
   "type" in message && message.type === "bot";
 
@@ -118,4 +123,6 @@ export {
   type ZendeskChatMessage,
   type VerifiedUserData,
   type HandoffChatMessage,
+  type SalesforceChatMessage,
+  type IncomingHandoffEvent,
 };

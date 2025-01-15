@@ -4,9 +4,9 @@ import React, { useEffect, useState } from "react";
 import {
   type ChatEndedMessage,
   type ChatEstablishedMessage,
-  type ZendeskWebhookMessage,
   type Message,
   isBotMessage,
+  IncomingHandoffEvent,
 } from "@/types";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import type { Front } from "@/types/front";
@@ -14,10 +14,9 @@ import type { Front } from "@/types/front";
 interface ChatProps {
   messages: (
     | Message
-    | ZendeskWebhookMessage
-    | Front.WebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage
+    | IncomingHandoffEvent
   )[];
   askFn: (question: string) => Promise<void>;
   initializeHandoff: (data: { email?: string }) => Promise<void>;

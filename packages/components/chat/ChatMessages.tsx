@@ -1,21 +1,19 @@
 import { forwardRef, RefObject } from "react";
 import type {
   Message,
-  ZendeskWebhookMessage,
   ChatEstablishedMessage,
   ChatEndedMessage,
+  IncomingHandoffEvent,
 } from "@/types";
 import { ChatMessage } from "@magi/components/chat/ChatMessage";
 import Spinner from "@magi/components/Spinner";
-import type { Front } from "@/types/front";
 
 interface ChatMessagesProps {
   messages: (
     | Message
-    | ZendeskWebhookMessage
-    | Front.WebhookMessage
     | ChatEstablishedMessage
     | ChatEndedMessage
+    | IncomingHandoffEvent
   )[];
   isLoading: boolean;
   isResponseAvailable: boolean;
