@@ -1,10 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { sendChatMessage } from "@/app/api/salesforce/utils";
-import {
-  withAppSettings,
-  withSettingsAndAuthentication,
-} from "@/app/api/server/utils";
+import { withAppSettings } from "@/app/api/server/utils";
 import type {
   ChatSessionResponse,
   SalesforceRequest,
@@ -139,51 +136,4 @@ export async function POST(req: NextRequest) {
   });
 }
 
-export async function DELETE(req: NextRequest) {
-  return withSettingsAndAuthentication(req, async (req, settings) => {
-    const affinityToken = req.headers.get("X-LIVEAGENT-AFFINITY");
-    const key = req.headers.get("X-LIVEAGENT-SESSION-KEY");
-    const { handoffConfiguration } = settings;
-
-    if (handoffConfiguration?.type !== "salesforce") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Invalid handoff configuration type. Expected 'salesforce'.",
-        },
-        { status: 400 },
-      );
-    }
-
-    const { chatHostUrl } = handoffConfiguration;
-
-    try {
-      if (!affinityToken || !key) {
-        return Response.json("Missing auth headers", {
-          status: 401,
-        });
-      }
-
-      const chatSessionEndResponse = await fetch(
-        chatHostUrl + `/chat/rest/System/SessionId/${key}`,
-        {
-          method: "DELETE",
-          headers: generateSessionInitRequestHeaders(key, affinityToken),
-        },
-      );
-
-      if (!chatSessionEndResponse.ok) {
-        console.log("Failed to end chat session", chatSessionEndResponse);
-        throw new Error("Failed to end chat session");
-      }
-
-      return NextResponse.json({ success: true });
-    } catch (error) {
-      console.log("endChatSession failed:", error);
-      return NextResponse.json(
-        { error: "Internal Server Error" },
-        { status: 500 },
-      );
-    }
-  });
-}
+export const maxDuration = 300;

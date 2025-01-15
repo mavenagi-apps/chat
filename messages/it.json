@@ -36,7 +36,15 @@
     },
     "Handoff": {
       "connected_to_agent": "Connesso con l'agente",
-      "chat_has_ended": "La chat è terminata"
+      "connecting_to_agent": "Connessione con un agente in diretta...",
+      "chat_has_ended": "La chat è terminata",
+      "chat_queue_position": "Sei in posizione {position} nella coda. Sarai connesso a un agente a breve.",
+      "chat_queue_position_next": "Sei il prossimo in coda. Il tuo agente sarà con te a breve.",
+      "chat_queue_position_in_queue": "Sei in coda. Attendi il prossimo agente disponibile.",
+      "chat_queue_position_estimated_wait_time": "Il tuo tempo di attesa stimato è di {estimatedWaitTime} secondi.",
+      "chat_queue_position_estimated_wait_time_singular": "Il tuo tempo di attesa stimato è di {estimatedWaitTime} secondo.",
+      "idle_message": "Siamo qui per aiutarti. Per favore fai una domanda.",
+      "idle_message_with_survey": "Grazie per averci contattato. Puoi compilare questo [sondaggio](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_djaQzPxGLklaZ0O?chatKey={conversationId}{additionalUrlParams}) per raccontarci la tua esperienza?"
     },
     "ChatInput": {
       "see_more": "Vedi di più",

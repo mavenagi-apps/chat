@@ -51,8 +51,8 @@ vi.mock("@/lib/handoff/HandoffStrategyFactory", () => ({
         agentName: "Test Agent",
         formattedEvent: { ...event, type: "handoff-test" },
       })),
-      getMessagesEndpoint: "/api/test/messages",
-      getConversationsEndpoint: "/api/test/conversations",
+      messagesEndpoint: "/api/test/messages",
+      conversationsEndpoint: "/api/test/conversations",
     })),
   },
 }));

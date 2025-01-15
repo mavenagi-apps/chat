@@ -4,8 +4,8 @@ import type { Front } from "@/types/front";
 import { isChatUserMessage, isBotMessage } from "@/types";
 
 export class FrontStrategy implements HandoffStrategy {
-  getMessagesEndpoint = "/api/front/messages";
-  getConversationsEndpoint = "/api/front/conversations";
+  messagesEndpoint = "/api/front/messages";
+  conversationsEndpoint = "/api/front/conversations";
 
   formatMessages(
     messages: Message[],

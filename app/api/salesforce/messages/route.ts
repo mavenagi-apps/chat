@@ -1,19 +1,122 @@
 import { type NextRequest, NextResponse } from "next/server";
-
-import { type ChatMessageResponse } from "@/types/salesforce";
+import {
+  type ChatMessageResponse,
+  type SalesforceChatMessage,
+  SALESFORCE_CHAT_SUBJECT_HEADER_KEY,
+} from "@/types/salesforce";
 
 import {
   SALESFORCE_ALLOWED_MESSAGE_TYPES,
   SALESFORCE_API_BASE_HEADERS,
+  SALESFORCE_CHAT_PROMPT_MESSAGE_NAMES,
+  SALESFORCE_CHAT_PROMPT_MESSAGE_TEXTS,
   sendChatMessage,
+  validateSalesforceConfig,
+  validateAuthHeaders,
 } from "@/app/api/salesforce/utils";
 import { withSettingsAndAuthentication } from "../../server/utils";
 
-const SALESFORCE_CHAT_PROMPT_MESSAGE_NAMES = [
-  "Management Center",
-  "Management Center with Maven",
-];
-const SALESFORCE_CHAT_PROMPT_MESSAGE_TEXTS = ["Please enter the subject"];
+async function fetchChatMessages(
+  url: string,
+  ack: number,
+  affinityToken: string,
+  sessionKey: string,
+): Promise<ChatMessageResponse> {
+  console.log("Sending request with ack:", ack);
+  const response = await fetch(`${url}/chat/rest/System/Messages?ack=${ack}`, {
+    method: "GET",
+    headers: {
+      ...SALESFORCE_API_BASE_HEADERS,
+      "X-LIVEAGENT-AFFINITY": affinityToken,
+      "X-LIVEAGENT-SESSION-KEY": sessionKey,
+    },
+  });
+
+  if (response.status === 204) {
+    return {
+      messages: [],
+      sequence: ack,
+      offset: 0,
+    };
+  }
+
+  if (!response.ok) {
+    throw new Error("Failed to get chat messages");
+  }
+
+  return response.json();
+}
+
+function filterMessages(messages: SalesforceChatMessage[]) {
+  return messages.filter((message) =>
+    SALESFORCE_ALLOWED_MESSAGE_TYPES.includes(message.type),
+  );
+}
+
+function isSubjectPromptMessage(message: SalesforceChatMessage) {
+  return (
+    SALESFORCE_CHAT_PROMPT_MESSAGE_NAMES.includes(message.message.name || "") &&
+    SALESFORCE_CHAT_PROMPT_MESSAGE_TEXTS.includes(message.message.text || "")
+  );
+}
+
+async function handleMessageStreaming(
+  req: NextRequest,
+  url: string,
+  affinityToken: string,
+  sessionKey: string,
+) {
+  const stream = new ReadableStream({
+    async start(controller) {
+      let ack = -1;
+      try {
+        while (!req.signal.aborted) {
+          const { sequence, messages } = await fetchChatMessages(
+            url,
+            ack,
+            affinityToken,
+            sessionKey,
+          );
+          const filteredMessages = filterMessages(messages);
+          ack = sequence;
+
+          for (const message of filteredMessages) {
+            console.log("message", message);
+            if (isSubjectPromptMessage(message)) {
+              void sendChatMessage(
+                req.headers.get(SALESFORCE_CHAT_SUBJECT_HEADER_KEY) ||
+                  "I need assistance",
+                affinityToken,
+                sessionKey,
+                url,
+              );
+              continue;
+            }
+
+            controller.enqueue(
+              new TextEncoder().encode(
+                `data: ${JSON.stringify({
+                  message: message as SalesforceChatMessage,
+                })}\n\n`,
+              ),
+            );
+          }
+        }
+      } catch (error) {
+        console.log("Failed to get chat messages:", error);
+      } finally {
+        controller.close();
+      }
+    },
+    cancel() {
+      console.log("Stream cancelled by client");
+    },
+  });
+
+  return new NextResponse(stream, {
+    headers: { "Content-Type": "text/event-stream" },
+  });
+}
 
 export async function GET(req: NextRequest) {
   return withSettingsAndAuthentication(
@@ -28,88 +131,22 @@ export async function GET(req: NextRequest) {
       authPayload,
     ) => {
       const { handoffConfiguration } = settings;
-      if (handoffConfiguration?.type !== "salesforce") {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Invalid handoff configuration type. Expected 'salesforce'.",
-          },
-          { status: 400 },
-        );
-      }
-      const { searchParams } = req.nextUrl;
-      const [ack, subject] = [
-        searchParams.get("ack") || (-1 as number),
-        searchParams.get("subject") || ("I need assistance" as string),
-      ];
+      const validationError = validateSalesforceConfig(handoffConfiguration);
+      if (validationError) return validationError;
 
       const { affinityToken, sessionKey } = authPayload;
+      const { chatHostUrl: url } =
+        handoffConfiguration as SalesforceHandoffConfiguration;
 
-      if (!affinityToken || !sessionKey) {
-        return Response.json("Missing auth headers", {
-          status: 401,
-        });
-      }
+      const authError = validateAuthHeaders(affinityToken, sessionKey);
+      if (authError) return authError;
 
-      const { chatHostUrl: url } = handoffConfiguration;
-
-      try {
-        const response = await fetch(
-          `${url}/chat/rest/System/Messages?ack=${ack}`,
-          {
-            method: "GET",
-            headers: {
-              ...SALESFORCE_API_BASE_HEADERS,
-              "X-LIVEAGENT-AFFINITY": affinityToken,
-              "X-LIVEAGENT-SESSION-KEY": sessionKey,
-            },
-          },
-        );
-
-        console.log("GET chat messages response:", response.status);
-
-        if (response.status === 204) {
-          // No new messages, return an empty response with the same ack value
-          return Response.json({
-            messages: [],
-            sequence: ack,
-            offset: 0,
-          });
-        }
-
-        if (!response.ok) {
-          // throw new Error('Failed to get chat messages');
-          return Response.json("Failed to get chat messages", {
-            status: response.status,
-          });
-        }
-
-        const result: ChatMessageResponse = await response.json();
-        console.log("Chat messages retrieved:", result);
-
-        const filteredMessages = result.messages.filter((message) => {
-          if (message.type === "ChatMessage") {
-            if (
-              SALESFORCE_CHAT_PROMPT_MESSAGE_NAMES.includes(
-                message.message.name || "",
-              ) &&
-              SALESFORCE_CHAT_PROMPT_MESSAGE_TEXTS.includes(
-                message.message.text || "",
-              )
-            ) {
-              // Send the subject
-              void sendChatMessage(subject, affinityToken, sessionKey, url);
-              return false;
-            }
-          }
-          return SALESFORCE_ALLOWED_MESSAGE_TYPES.includes(message.type);
-        });
-
-        return Response.json({ ...result, messages: filteredMessages });
-      } catch (error) {
-        console.log("getChatMessages failed:", error);
-        throw error;
-      }
+      return handleMessageStreaming(
+        req,
+        url,
+        affinityToken as string,
+        sessionKey as string,
+      );
     },
   );
 }
@@ -127,28 +164,30 @@ export async function POST(req: NextRequest) {
       authPayload,
     ) => {
       const { handoffConfiguration } = settings;
-      if (handoffConfiguration?.type !== "salesforce") {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Invalid handoff configuration type. Expected 'salesforce'.",
-          },
-          { status: 400 },
-        );
-      }
+      const validationError = validateSalesforceConfig(handoffConfiguration);
+      if (validationError) return validationError;
 
-      const { text } = await req.json();
-      const { chatHostUrl: url } = handoffConfiguration;
+      const {
+        message,
+      }: {
+        message: string;
+        signedUserData: string | null;
+        unsignedUserData: Record<string, any> | null;
+      } = await req.json();
+      const { chatHostUrl: url } =
+        handoffConfiguration as SalesforceHandoffConfiguration;
       const { affinityToken, sessionKey } = authPayload;
 
-      if (!affinityToken || !sessionKey) {
-        return Response.json("Missing auth headers", {
-          status: 401,
-        });
-      }
+      const authError = validateAuthHeaders(affinityToken, sessionKey);
+      if (authError) return authError;
 
       try {
-        await sendChatMessage(text, affinityToken, sessionKey, url);
+        await sendChatMessage(
+          message,
+          affinityToken as string,
+          sessionKey as string,
+          url as string,
+        );
         return Response.json("Chat message sent");
       } catch (error) {
         console.log("Failed to send chat message:", error);

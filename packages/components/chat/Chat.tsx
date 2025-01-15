@@ -2,22 +2,15 @@ import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 
 import {
-  type ChatEndedMessage,
-  type ChatEstablishedMessage,
   type Message,
   isBotMessage,
-  IncomingHandoffEvent,
+  type IncomingHandoffConnectionEvent,
+  type IncomingHandoffEvent,
 } from "@/types";
 import { useSettings } from "@/app/providers/SettingsProvider";
-import type { Front } from "@/types/front";
 
 interface ChatProps {
-  messages: (
-    | Message
-    | ChatEstablishedMessage
-    | ChatEndedMessage
-    | IncomingHandoffEvent
-  )[];
+  messages: (Message | IncomingHandoffEvent | IncomingHandoffConnectionEvent)[];
   askFn: (question: string) => Promise<void>;
   initializeHandoff: (data: { email?: string }) => Promise<void>;
   brandColor?: string;
@@ -25,6 +18,7 @@ interface ChatProps {
   agentName: string | null;
   isHandoff: boolean;
   handleEndHandoff: () => Promise<void>;
+  shouldSupressHandoffInputDisplay: boolean;
 }
 
 export const ChatContext = React.createContext<{
@@ -46,6 +40,7 @@ export const ChatContext = React.createContext<{
   agentName: string | null;
   isHandoff: boolean;
   handleEndHandoff: () => Promise<void>;
+  shouldSupressHandoffInputDisplay: boolean;
 }>({
   followUpQuestions: [],
   ask: async () => {},
@@ -53,6 +48,7 @@ export const ChatContext = React.createContext<{
   agentName: null,
   isHandoff: false,
   handleEndHandoff: async () => {},
+  shouldSupressHandoffInputDisplay: false,
 });
 
 export default function Chat({
@@ -62,6 +58,7 @@ export default function Chat({
   agentName,
   isHandoff,
   handleEndHandoff,
+  shouldSupressHandoffInputDisplay,
   className,
   children,
 }: React.PropsWithChildren<ChatProps>) {
@@ -88,6 +85,7 @@ export default function Chat({
         agentName,
         isHandoff,
         handleEndHandoff,
+        shouldSupressHandoffInputDisplay,
       }}
     >
       <div

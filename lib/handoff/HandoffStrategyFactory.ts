@@ -6,7 +6,9 @@ import { SalesforceStrategy } from "./SalesforceStrategy";
 export type HandoffType = "zendesk" | "front" | "salesforce" | null;
 
 export class HandoffStrategyFactory {
-  static createStrategy(type: HandoffType): HandoffStrategy | null {
+  static createStrategy(
+    type: HandoffType,
+  ): HandoffStrategy<Record<string, any>> | null {
     switch (type) {
       case "zendesk":
         return new ZendeskStrategy();

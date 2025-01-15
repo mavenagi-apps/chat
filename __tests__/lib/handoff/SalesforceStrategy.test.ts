@@ -83,8 +83,8 @@ describe("SalesforceStrategy", () => {
 
   describe("endpoints", () => {
     it("has correct endpoints", () => {
-      expect(strategy.getMessagesEndpoint).toBe("/api/salesforce/messages");
-      expect(strategy.getConversationsEndpoint).toBe(
+      expect(strategy.messagesEndpoint).toBe("/api/salesforce/messages");
+      expect(strategy.conversationsEndpoint).toBe(
         "/api/salesforce/conversations",
       );
     });

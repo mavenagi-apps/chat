@@ -82,10 +82,8 @@ describe("FrontStrategy", () => {
 
   describe("endpoints", () => {
     it("has correct endpoints", () => {
-      expect(strategy.getMessagesEndpoint).toBe("/api/front/messages");
-      expect(strategy.getConversationsEndpoint).toBe(
-        "/api/front/conversations",
-      );
+      expect(strategy.messagesEndpoint).toBe("/api/front/messages");
+      expect(strategy.conversationsEndpoint).toBe("/api/front/conversations");
     });
   });
 });

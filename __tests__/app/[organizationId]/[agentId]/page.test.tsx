@@ -2,8 +2,7 @@ import { render, screen } from "@testing-library/react";
 import ChatPage from "@/app/[organizationId]/[agentId]/page";
 import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
 import {
-  ChatEndedMessage,
-  ChatEstablishedMessage,
+  IncomingHandoffConnectionEvent,
   Message,
   UserChatMessage,
   IncomingHandoffEvent,
@@ -11,14 +10,17 @@ import {
 import { HandoffStatus } from "@/app/constants/handoff";
 import { useChat } from "@magi/components/chat/use-chat";
 import { useHandoff } from "@/lib/useHandoff";
+import { useScrollToBottom } from "@/lib/useScrollToBottom";
 
 let chatMessages = [] as Message[];
 let handoffMessages = [] as (
   | IncomingHandoffEvent
-  | ChatEstablishedMessage
   | UserChatMessage
-  | ChatEndedMessage
+  | IncomingHandoffConnectionEvent
 )[];
+
+vi.mock("@/lib/useScrollToBottom");
+const useScrollToBottomMock = vi.mocked(useScrollToBottom);
 
 vi.mock("@magi/components/chat/use-chat");
 const useChatMock = vi.mocked(useChat);
@@ -37,14 +39,6 @@ vi.mock("@/lib/useAskQuestion", () => ({
   useAskQuestion: vi.fn().mockReturnValue({
     askQuestion: vi.fn(),
     isLoading: false,
-  }),
-}));
-
-let mockScrollToLatest = vi.fn();
-vi.mock("@/lib/useScrollToLatest", () => ({
-  useScrollToLatest: () => ({
-    scrollToLatest: mockScrollToLatest,
-    latestChatBubbleRef: { current: null },
   }),
 }));
 
@@ -77,6 +71,13 @@ describe("ChatPage", () => {
   afterEach(() => {
     [chatMessages, handoffMessages] = [[], []];
     vi.restoreAllMocks();
+  });
+
+  describe("scroll behavior", () => {
+    test("should call scrollToLatest when messages change", () => {
+      render(<ChatPage />);
+      expect(useScrollToBottomMock).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("when there are no messages", () => {
@@ -173,25 +174,6 @@ describe("ChatPage", () => {
           expect(getAllChatBubbles[index]).toHaveTextContent(text);
         });
       });
-    });
-  });
-
-  describe("scroll behavior", () => {
-    beforeEach(() => {
-      chatMessages = [
-        { timestamp: 100, text: "First message", type: "USER" },
-        { timestamp: 300, text: "Third message", type: "USER" },
-      ];
-    });
-
-    test("should call scrollToLatest when messages change", () => {
-      render(<ChatPage />);
-      expect(mockScrollToLatest).toHaveBeenCalledTimes(1);
-
-      chatMessages.push({ timestamp: 500, text: "New message", type: "USER" });
-
-      render(<ChatPage />);
-      expect(mockScrollToLatest).toHaveBeenCalledTimes(2);
     });
   });
 });

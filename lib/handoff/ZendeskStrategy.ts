@@ -7,8 +7,8 @@ import type {
 import { isChatUserMessage, isBotMessage } from "@/types";
 
 export class ZendeskStrategy implements HandoffStrategy {
-  getMessagesEndpoint = "/api/zendesk/messages";
-  getConversationsEndpoint = "/api/zendesk/conversations";
+  messagesEndpoint = "/api/zendesk/messages";
+  conversationsEndpoint = "/api/zendesk/conversations";
 
   formatMessages(
     messages: Message[],

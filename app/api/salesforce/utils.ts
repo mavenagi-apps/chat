@@ -1,9 +1,19 @@
-import {
+import { NextResponse } from "next/server";
+import type { Message } from "@/types";
+import type {
   ChatSessionResponse,
   EntityFieldMap,
   SalesforceChatUserData,
   PrechatDetail,
 } from "@/types/salesforce";
+
+export const SALESFORCE_CHAT_PROMPT_MESSAGE_NAMES = [
+  "Management Center",
+  "Management Center with Maven",
+];
+export const SALESFORCE_CHAT_PROMPT_MESSAGE_TEXTS = [
+  "Please enter the subject",
+];
 
 export const SALESFORCE_ALLOWED_MESSAGE_TYPES = [
   // 'ChatRequestSuccess',
@@ -21,6 +31,31 @@ export const SALESFORCE_API_BASE_HEADERS = {
   "X-LIVEAGENT-API-VERSION": "34",
   "Access-Control-Allow-Origin": "*",
 };
+
+export function validateSalesforceConfig(handoffConfiguration: any) {
+  if (handoffConfiguration?.type !== "salesforce") {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Invalid handoff configuration type. Expected 'salesforce'.",
+      },
+      { status: 400 },
+    );
+  }
+  return null;
+}
+
+export function validateAuthHeaders(
+  affinityToken: string | undefined,
+  sessionKey: string | undefined,
+) {
+  if (!affinityToken || !sessionKey) {
+    return Response.json("Missing auth headers", {
+      status: 401,
+    });
+  }
+  return null;
+}
 
 export async function sendChatMessage(
   text: string,
@@ -45,6 +80,13 @@ export async function sendChatMessage(
     });
 
     if (!response.ok) {
+      console.log({
+        affinityToken,
+        sessionKey,
+        url,
+        body,
+      });
+      console.error("Failed to send chat message", response);
       throw new Error("Failed to send chat message");
     }
 
@@ -76,7 +118,9 @@ export const generateSessionInitRequestHeaders = (
   "X-LIVEAGENT-AFFINITY": affinityToken,
 });
 
-export const convertMessagesToTranscriptText = (messages: any[]): string => {
+export const convertMessagesToTranscriptText = (
+  messages: Message[],
+): string => {
   let transcriptText = "MAVEN TRANSCRIPT HISTORY\n\n";
   messages.forEach((message) => {
     if (message.type === "USER") {
