@@ -80,12 +80,6 @@ export async function sendChatMessage(
     });
 
     if (!response.ok) {
-      console.log({
-        affinityToken,
-        sessionKey,
-        url,
-        body,
-      });
       console.error("Failed to send chat message", response);
       throw new Error("Failed to send chat message");
     }

@@ -22,7 +22,6 @@ async function fetchChatMessages(
   affinityToken: string,
   sessionKey: string,
 ): Promise<ChatMessageResponse> {
-  console.log("Sending request with ack:", ack);
   const response = await fetch(`${url}/chat/rest/System/Messages?ack=${ack}`, {
     method: "GET",
     headers: {
@@ -81,7 +80,6 @@ async function handleMessageStreaming(
           ack = sequence;
 
           for (const message of filteredMessages) {
-            console.log("message", message);
             if (isSubjectPromptMessage(message)) {
               void sendChatMessage(
                 req.headers.get(SALESFORCE_CHAT_SUBJECT_HEADER_KEY) ||

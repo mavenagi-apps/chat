@@ -27,10 +27,13 @@ export const POST = async (request: NextRequest) => {
     );
   }
 
-  console.log("Received Front application channel installation request", {
-    orgId: organizationId,
-    agentId: agentId,
-  });
+  if (process.env.ENABLE_API_LOGGING) {
+    console.log("Received Front application channel installation request", {
+      orgId: organizationId,
+      agentId: agentId,
+    });
+  }
+
   const host =
     process.env.VERCEL_PRODUCTION_URL ??
     process.env.LOCAL_DEV_TUNNEL_URL ??

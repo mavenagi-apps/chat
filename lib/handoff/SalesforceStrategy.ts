@@ -26,7 +26,6 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
     agentName: string | null;
     formattedEvent: SalesforceChatMessage;
   } {
-    console.log("handleChatEvent", event);
     let agentName = null;
 
     if (event.type === "ChatTransferred" && event.message?.name) {
@@ -49,7 +48,6 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
       | IncomingHandoffConnectionEvent
     )[],
   ): boolean {
-    console.log("showAgentTypingIndicator", messages);
     const lastMessage = messages[messages.length - 1];
     const lastMessageTimestamp =
       "timestamp" in lastMessage ? lastMessage.timestamp : 0;

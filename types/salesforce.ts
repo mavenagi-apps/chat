@@ -123,6 +123,7 @@ export type SalesforceRequest = {
   userAgent: string;
   screenResolution: string;
   language: string;
+  customData?: Record<string, any>;
 };
 
 export type PrechatDetail = {

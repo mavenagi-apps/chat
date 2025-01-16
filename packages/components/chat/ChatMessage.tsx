@@ -77,7 +77,6 @@ function renderHandoffMessage(message: ZendeskWebhookMessage) {
 }
 
 function renderSalesforceMessage(message: SalesforceChatMessage) {
-  console.log("renderSalesforceMessage", message);
   const author = message.message.name;
   return (
     <ChatBubble direction="left-hug" author={author}>
@@ -312,9 +311,6 @@ function renderBotMessage(
   }
   const showActionForm = isActionChatMessage(message);
   const showEscalationForm = isEscalationChatMessage(message);
-  console.log("showActionForm", showActionForm);
-  console.log("showEscalationForm", showEscalationForm);
-  console.log("message", message);
   return (
     <ChatBubble direction="left">
       <BotMessage message={message} linkTargetInNewTab={linkTargetInNewTab} />

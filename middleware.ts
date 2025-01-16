@@ -107,7 +107,7 @@ export async function middleware(request: NextRequest) {
 
       if (security.headers) {
         response.headers.set("Content-Security-Policy", security.headers);
-        console.log(request.url, security.headers);
+
         if (security.blocked) {
           return notFound();
         }

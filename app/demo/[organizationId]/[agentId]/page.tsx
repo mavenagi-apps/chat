@@ -57,7 +57,8 @@ export default async function Page({
     signedUserData: signedUserData || undefined,
     unsignedUserData: mockUserData,
     customData: {
-      buttonId: "123",
+      buttonId: process.env.SF_BUTTON_ID,
+      eswLiveAgentDevName: process.env.ESW_LIVE_AGENT_DEV_NAME,
     },
   };
 

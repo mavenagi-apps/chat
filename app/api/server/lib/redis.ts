@@ -11,7 +11,6 @@ const createRedisClient = async (mode?: "Publish" | "Subscribe") => {
   client.on("error", (err) =>
     console.error("Redis Client Error", { mode }, err),
   );
-  client.on("ready", () => console.log("Redis Client Ready", { mode }));
 
   await client.connect();
 

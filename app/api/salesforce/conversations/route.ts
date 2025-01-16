@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
       userAgent,
       screenResolution,
       language,
+      customData,
     } = (await req.json()) as SalesforceRequest;
     if (!userData) {
       return NextResponse.json({ error: "Missing user data" }, { status: 400 });
@@ -71,11 +72,10 @@ export async function POST(req: NextRequest) {
         { ...userData, userAgent, screenResolution, language },
         orgId,
         deploymentId,
-        chatButtonId,
-        eswLiveAgentDevName,
+        customData?.buttonId || chatButtonId,
+        customData?.eswLiveAgentDevName || eswLiveAgentDevName,
         chatSessionCredentials.key,
       );
-      console.log("requestBody", JSON.stringify(requestBody));
 
       const chatSessionInitResponse = await fetch(
         chatHostUrl + "/chat/rest/Chasitor/ChasitorInit",
