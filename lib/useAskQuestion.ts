@@ -5,14 +5,12 @@ import { useParams } from "next/dist/client/components/navigation";
 
 interface UseAskQuestionProps {
   conversationId?: string;
-  askQuestion: (params: { text: string; type: "USER" }) => void;
-  scrollToLatest: () => void;
+  addMessage: (params: { text: string; type: "USER" }) => void;
 }
 
 export function useAskQuestion({
   conversationId,
-  askQuestion,
-  scrollToLatest,
+  addMessage,
 }: UseAskQuestionProps) {
   const { agentId }: { organizationId: string; agentId: string } = useParams();
 
@@ -21,18 +19,16 @@ export function useAskQuestion({
   const ask = useCallback(
     async (question: string) => {
       analytics.logEvent(MagiEvent.chatAskClick, {
-        agentId: agentId,
+        agentId,
         conversationId: conversationId || "",
       });
 
-      askQuestion({
+      addMessage({
         text: question,
         type: "USER",
       });
-
-      scrollToLatest();
     },
-    [agentId, conversationId, analytics, askQuestion, scrollToLatest],
+    [agentId, conversationId, analytics, addMessage],
   );
 
   return ask;

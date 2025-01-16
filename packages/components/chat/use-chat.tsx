@@ -8,9 +8,9 @@
  * - Processes different types of responses (text, metadata, actions)
  *
  * Usage:
- * const { messages, askQuestion, isLoading, isResponseAvailable } = useChat({
+ * const { messages, addMessage, isLoading, isResponseAvailable } = useChat({
  *   organizationId: 'org-id',
- *   agent-id: 'agent-id',
+ *   agentId: 'agent-id',
  *   signedUserData: 'signed-data'
  * });
  */
@@ -46,7 +46,7 @@ const API_ENDPOINT = "/api/create";
 
 type UseChatReturn = {
   messages: Message[];
-  askQuestion: (message: ChatMessage) => void;
+  addMessage: (message: ChatMessage) => void;
   isLoading: boolean;
   isResponseAvailable: boolean | undefined;
   conversationId: string;
@@ -329,7 +329,7 @@ export function useChat(): UseChatReturn {
 
   return {
     messages,
-    askQuestion: (message: ChatMessage) => {
+    addMessage: (message: ChatMessage) => {
       setMessages((prevState) => [...prevState, message]);
       if (message.type === "USER") {
         void ask([...messages, message]);

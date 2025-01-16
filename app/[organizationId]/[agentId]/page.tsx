@@ -16,62 +16,54 @@ import { ChatHeader } from "@magi/components/chat/ChatHeader";
 import { WelcomeMessage } from "@magi/components/chat/WelcomeChatMessage";
 import { ChatMessages } from "@magi/components/chat/ChatMessages";
 import { useAskQuestion } from "@/lib/useAskQuestion";
-import { useScrollToLatest } from "@/lib/useScrollToLatest";
+import { useScrollToBottom } from "@/lib/useScrollToBottom";
 import { useHandoff } from "@/lib/useHandoff";
 import { HandoffStatus } from "@/app/constants/handoff";
 import { PoweredByMaven } from "@magi/components/chat/PoweredByMaven";
-import type {
-  ChatEndedMessage,
-  ChatEstablishedMessage,
-  IncomingHandoffEvent,
-} from "@/types";
-import type { Message } from "@/types";
+import type { CombinedMessage } from "@/types";
+import { TypingIndicator } from "@magi/components/chat/TypingIndicator";
 
 function ChatPage() {
   const analytics = useAnalytics();
   const { agentId }: { organizationId: string; agentId: string } = useParams();
   const { brandColor, logoUrl } = useSettings();
+  const [messagesContainerRef, messagesEndRef] =
+    useScrollToBottom<HTMLDivElement>();
 
   // Maven chat logic
   const {
-    messages,
+    addMessage,
+    conversationId,
     isLoading,
     isResponseAvailable,
-    askQuestion,
-    conversationId,
     mavenUserId,
+    messages,
   } = useChat();
 
-  const { scrollToLatest, latestChatBubbleRef } = useScrollToLatest();
-
   const ask = useAskQuestion({
+    addMessage,
     conversationId,
-    askQuestion,
-    scrollToLatest,
   });
 
   const {
-    initializeHandoff,
-    handoffChatEvents,
     agentName,
-    handoffStatus,
     askHandoff,
     handleEndHandoff,
+    handoffChatEvents,
+    handoffStatus,
+    initializeHandoff,
+    shouldSupressHandoffInputDisplay,
+    showTypingIndicator,
   } = useHandoff({
     messages,
     mavenConversationId: conversationId,
   });
 
   useEffect(() => {
-    analytics.logEvent(MagiEvent.chatHomeView, { agentId: agentId });
+    analytics.logEvent(MagiEvent.chatHomeView, { agentId });
   }, [agentId, analytics]);
 
-  const combinedMessages: (
-    | Message
-    | ChatEstablishedMessage
-    | ChatEndedMessage
-    | IncomingHandoffEvent
-  )[] = useMemo(() => {
+  const combinedMessages: CombinedMessage[] = useMemo(() => {
     return [...messages, ...handoffChatEvents]
       .filter(
         (message): message is typeof message & { timestamp: number } =>
@@ -79,34 +71,52 @@ function ChatPage() {
       )
       .sort((a, b) => a.timestamp - b.timestamp);
   }, [messages, handoffChatEvents]);
-  useEffect(() => {
-    scrollToLatest();
-  }, [combinedMessages.length, scrollToLatest]);
+
   const isHandoff = handoffStatus === HandoffStatus.INITIALIZED;
 
   return (
     <main className="flex h-screen flex-col bg-gray-50">
       <ChatHeader logoUrl={logoUrl} />
       <Chat
-        brandColor={brandColor}
-        messages={combinedMessages}
-        askFn={handoffStatus === HandoffStatus.INITIALIZED ? askHandoff : ask}
-        initializeHandoff={initializeHandoff}
-        agentName={agentName}
-        isHandoff={isHandoff}
-        handleEndHandoff={handleEndHandoff}
+        {...{
+          addMessage,
+          agentName,
+          ask: handoffStatus === HandoffStatus.INITIALIZED ? askHandoff : ask,
+          brandColor,
+          conversationId,
+          handleEndHandoff,
+          initializeHandoff,
+          isHandoff,
+          messages: combinedMessages,
+          shouldSupressHandoffInputDisplay,
+        }}
       >
         <div className="flex flex-1 flex-col overflow-auto text-xs">
-          <div className="mx-auto w-full max-w-3xl flex-1 text-gray-800 sm:mt-5 sm:px-5">
-            <WelcomeMessage agentId={agentId} conversationId={conversationId} />
+          <div
+            ref={messagesContainerRef}
+            className="mx-auto w-full max-w-3xl flex-1 text-gray-800 sm:mt-5 sm:px-5"
+          >
+            <WelcomeMessage
+              {...{
+                agentId,
+                conversationId,
+              }}
+            />
 
             <ChatMessages
-              messages={combinedMessages}
-              isLoading={isLoading}
-              isResponseAvailable={isResponseAvailable || false}
-              conversationId={conversationId}
-              ref={latestChatBubbleRef}
-              mavenUserId={mavenUserId}
+              {...{
+                conversationId,
+                isLoading,
+                isResponseAvailable: isResponseAvailable || false,
+                mavenUserId,
+                messages: combinedMessages,
+              }}
+            />
+
+            {showTypingIndicator && <TypingIndicator />}
+            <div
+              ref={messagesEndRef}
+              className="shrink-0 min-w-[24px] min-h-[24px]"
             />
           </div>
 
@@ -116,9 +126,9 @@ function ChatPage() {
         </div>
 
         <ChatInput
-          questionPlaceholder={"question_placeholder"}
-          isSubmitting={isLoading}
           data-testid="chat-input"
+          isSubmitting={isLoading}
+          questionPlaceholder={"question_placeholder"}
         />
       </Chat>
     </main>
