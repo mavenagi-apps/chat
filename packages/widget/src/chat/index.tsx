@@ -26,16 +26,17 @@ type Props = {
   unsignedUserData?: Record<string, any> | null;
   unverifiedUserData?: Record<string, any> | null;
   customData?: Record<string, any> | null;
-  orgFriendlyId: string;
-  agentFriendlyId: string;
+  organizationId: string;
+  agentId: string;
 };
+
 const App = forwardRef<{ open: () => void; close: () => void }, Props>(
   (props, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const isWide = useMediaQuery("(min-width: 500px)");
     const { iframeRef, iframeUrl, iframeStyle } = useIframeCommunication({
-      orgFriendlyId: props.orgFriendlyId,
-      agentFriendlyId: props.agentFriendlyId,
+      organizationId: props.organizationId,
+      agentId: props.agentId,
       signedUserData: props.signedUserData,
       unsignedUserData: props.unsignedUserData || props.unverifiedUserData,
       customData: props.customData,
@@ -79,28 +80,38 @@ export function close() {
   appRef.current?.close();
 }
 
+type LoadProps = Partial<Omit<Props, "iframeUrl">> & {
+  envPrefix?: string;
+  apiKey: string;
+} & (
+    | {
+        organizationId: string;
+        agentId: string;
+        orgFriendlyId?: never;
+        agentFriendlyId?: never;
+      }
+    | {
+        orgFriendlyId: string;
+        agentFriendlyId: string;
+        organizationId?: never;
+        agentId?: never;
+      }
+  );
+
 export async function load({
   envPrefix: _envPrefix,
   bgColor,
   textColor = "white",
   horizontalPosition = "right",
   verticalPosition = "bottom",
+  organizationId,
   orgFriendlyId,
+  agentId,
   agentFriendlyId,
   signedUserData = null,
   unsignedUserData = null,
   customData = null,
-}: Partial<Omit<Props, "agentId" | "baseUrl">> & {
-  envPrefix?: string;
-  apiKey: string;
-  horizontalPosition?: "left" | "right";
-  verticalPosition?: "top" | "bottom";
-  orgFriendlyId: string;
-  agentFriendlyId: string;
-  signedUserData?: string | null;
-  unsignedUserData?: Record<string, any> | null;
-  customData?: Record<string, any> | null;
-}) {
+}: LoadProps) {
   const placeholder = document.createElement("div");
   placeholder.id = "maven-chat-widget";
   document.body.appendChild(placeholder);
@@ -116,8 +127,8 @@ export async function load({
       signedUserData={signedUserData}
       unsignedUserData={unsignedUserData}
       customData={customData}
-      orgFriendlyId={orgFriendlyId}
-      agentFriendlyId={agentFriendlyId}
+      organizationId={organizationId || orgFriendlyId || ""}
+      agentId={agentId || agentFriendlyId || ""}
     />,
     placeholder,
   );

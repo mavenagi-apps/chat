@@ -14,9 +14,7 @@ const KNOWN_MESSAGE_TYPES = [
 
 export const POST = async (
   request: NextRequest,
-  {
-    params,
-  }: { params: Promise<{ orgFriendlyId: string; agentFriendlyId: string }> },
+  { params }: { params: Promise<{ organizationId: string; agentId: string }> },
 ) => {
   const body = (await request.json()) as Front.WebhookPayload;
 
@@ -44,7 +42,7 @@ export const POST = async (
     );
   }
 
-  const { orgFriendlyId: orgId, agentFriendlyId: agentId } = await params;
+  const { organizationId: orgId, agentId: agentId } = await params;
   // ignore messages with a bad agent configuration
   const agentAppSettings = await getAppSettings(orgId, agentId);
   if (agentAppSettings?.handoffConfiguration?.type !== "front") {
@@ -97,12 +95,10 @@ export const POST = async (
 
 export const DELETE = async (
   request: NextRequest,
-  {
-    params,
-  }: { params: Promise<{ orgFriendlyId: string; agentFriendlyId: string }> },
+  { params }: { params: Promise<{ organizationId: string; agentId: string }> },
 ) => {
   const body = await request.json();
-  const { orgFriendlyId: orgId, agentFriendlyId: agentId } = await params;
+  const { organizationId: orgId, agentId: agentId } = await params;
   const agentAppSettings = await getAppSettings(orgId, agentId);
   if (agentAppSettings?.handoffConfiguration?.type !== "front") {
     return NextResponse.json(

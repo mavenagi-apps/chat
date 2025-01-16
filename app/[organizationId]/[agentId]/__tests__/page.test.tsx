@@ -42,8 +42,8 @@ describe("ChatPage", () => {
   beforeEach(() => {
     // Setup default mock implementations
     vi.mocked(useParams).mockReturnValue({
-      orgFriendlyId: "test-org",
-      id: "test-id",
+      organizationId: "test-org",
+      agentId: "test-id",
     });
 
     vi.mocked(useIframeMessaging).mockReturnValue({

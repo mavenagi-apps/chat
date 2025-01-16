@@ -5,13 +5,13 @@ import { notFound } from "next/navigation";
 
 // Constants
 const PATHNAMES = [
-  "/demo/:orgFriendlyId/:agentId/:path*",
-  "/:orgFriendlyId/:agentId/:path*",
+  "/demo/:organizationId/:agentId/:path*",
+  "/:organizationId/:agentId/:path*",
 ] as const;
 
 // Types
 interface PathParams {
-  orgFriendlyId?: string;
+  organizationId?: string;
   agentId?: string;
   [key: string]: string | undefined;
 }
@@ -91,9 +91,9 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  const { orgFriendlyId, agentId } = extractPathParams(request.url);
+  const { organizationId, agentId } = extractPathParams(request.url);
 
-  if (orgFriendlyId && agentId) {
+  if (organizationId && agentId) {
     // Add 15-minute cache header
     response.headers.set(
       "Cache-Control",
@@ -101,7 +101,7 @@ export async function middleware(request: NextRequest) {
     );
 
     try {
-      const appSettings = await getAppSettings(orgFriendlyId, agentId);
+      const appSettings = await getAppSettings(organizationId, agentId);
 
       const security = processSecuritySettings(appSettings, request);
 

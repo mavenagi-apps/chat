@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import ChatPage from "@/app/[orgFriendlyId]/[id]/page";
+import ChatPage from "@/app/[organizationId]/[agentId]/page";
 import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
 import {
   ChatEndedMessage,

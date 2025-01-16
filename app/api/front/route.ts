@@ -17,10 +17,10 @@ export const POST = async (request: NextRequest) => {
   }
 
   const agentIdentifier = headers.get("authorization")?.split(" ")[1] ?? "";
-  const [orgFriendlyId, agentFriendlyId] = agentIdentifier
+  const [organizationId, agentId] = agentIdentifier
     .split("-")
     .map((id) => id.toLowerCase());
-  if (!orgFriendlyId || !agentFriendlyId) {
+  if (!organizationId || !agentId) {
     return NextResponse.json(
       { type: "bad_request", message: "Authorization header is missing" },
       { status: 401 },
@@ -28,8 +28,8 @@ export const POST = async (request: NextRequest) => {
   }
 
   console.log("Received Front application channel installation request", {
-    orgId: orgFriendlyId,
-    agentId: agentFriendlyId,
+    orgId: organizationId,
+    agentId: agentId,
   });
   const host =
     process.env.VERCEL_PRODUCTION_URL ??
@@ -42,7 +42,7 @@ export const POST = async (request: NextRequest) => {
   return NextResponse.json(
     {
       type: "success",
-      webhook_url: `${url.protocol}//${hostname}${portStr}/api/front/webhook/${orgFriendlyId}/${agentFriendlyId}`,
+      webhook_url: `${url.protocol}//${hostname}${portStr}/api/front/webhook/${organizationId}/${agentId}`,
     },
     { status: 200 },
   );

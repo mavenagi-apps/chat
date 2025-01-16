@@ -30,13 +30,13 @@ type HandoffProps = {
 };
 
 type Params = {
-  orgFriendlyId: string;
-  id: string;
+  organizationId: string;
+  agentId: string;
 };
 
 export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
   const { signedUserData } = useAuth();
-  const { orgFriendlyId, id: agentId } = useParams<Params>();
+  const { organizationId, agentId } = useParams<Params>();
   const { handoffConfiguration } = useSettings();
   const handoffTypeRef = useRef<HandoffType>(
     (handoffConfiguration?.type as HandoffType) ?? null,
@@ -78,7 +78,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
   const generatedHeaders: HeadersInit = useMemo(() => {
     const headers: HeadersInit = {
       "Content-Type": "application/json",
-      [ORGANIZATION_HEADER]: orgFriendlyId,
+      [ORGANIZATION_HEADER]: organizationId,
       [AGENT_HEADER]: agentId,
     };
 
@@ -87,7 +87,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
     }
 
     return headers;
-  }, [handoffAuthToken, orgFriendlyId, agentId]);
+  }, [handoffAuthToken, organizationId, agentId]);
 
   const handleHandoffChatEvent = useCallback(
     (event: ZendeskWebhookMessage | Front.WebhookMessage) => {

@@ -34,16 +34,16 @@ interface LegacyMessageEvent extends MessageEvent {
 }
 
 export function useIframeCommunication({
-  orgFriendlyId,
-  agentFriendlyId,
+  organizationId,
+  agentId,
   signedUserData,
   unsignedUserData,
   customData,
   isWide,
   isOpen,
 }: {
-  orgFriendlyId: string;
-  agentFriendlyId: string;
+  organizationId: string;
+  agentId: string;
   signedUserData?: string | null;
   unsignedUserData?: Record<string, any> | null;
   customData?: Record<string, any> | null;
@@ -64,10 +64,10 @@ export function useIframeCommunication({
     const iframeDomain = isLocalEnvironment
       ? `${currentDomain || "localhost"}:${window.location.port}`
       : __IFRAME_DOMAIN__;
-    let iframeUrl = `${iframeProtocol}://${iframeDomain}/${orgFriendlyId}/${agentFriendlyId}`;
+    let iframeUrl = `${iframeProtocol}://${iframeDomain}/${organizationId}/${agentId}`;
 
     return iframeUrl;
-  }, [orgFriendlyId, agentFriendlyId]);
+  }, [organizationId, agentId]);
 
   const iframeStyle = useMemo(() => {
     return {

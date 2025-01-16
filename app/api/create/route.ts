@@ -28,8 +28,8 @@ import {
   type AuthJWTPayload,
 } from "@/app/constants/authentication";
 interface CreateOptions {
-  orgFriendlyId: string;
-  id: string;
+  organizationId: string;
+  agentId: string;
   question: string;
   conversationId: string;
   initialize: boolean;

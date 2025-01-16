@@ -93,7 +93,7 @@ export default function FeedbackForm({
     }
 
     const response = (await createOrUpdateFeedback({
-      orgFriendlyId: message.conversationMessageId.organizationId,
+      organizationId: message.conversationMessageId.organizationId,
       agentId: message.conversationMessageId.agentId,
       feedbackId: feedbackId || "",
       conversationId: conversationId,

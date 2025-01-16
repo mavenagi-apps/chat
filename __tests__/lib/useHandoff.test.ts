@@ -9,8 +9,8 @@ import { HandoffStrategyFactory } from "@/lib/handoff/HandoffStrategyFactory";
 // Mock the required providers and hooks
 vi.mock("next/dist/client/components/navigation", () => ({
   useParams: () => ({
-    orgFriendlyId: "test-org",
-    id: "test-agent",
+    organizationId: "test-org",
+    agentId: "test-agent",
   }),
 }));
 
