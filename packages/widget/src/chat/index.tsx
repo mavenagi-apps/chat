@@ -83,8 +83,13 @@ export function close() {
 type LoadProps = Partial<Omit<Props, "iframeUrl">> & {
   envPrefix?: string;
   apiKey: string;
-} & (
-    | {
+} & // This union type ensures backwards compatibility during the migration from the
+  // "orgFriendlyId" and "agentFriendlyId" to "organizationId" and "agentId".
+  // It enforces that either:
+  // 1. Both organizationId and agentId are provided (new spec) OR
+  // 2. Both orgFriendlyId and agentFriendlyId are provided (legacy spec)
+  // This prevents mixing of old and new ID formats while supporting both patterns
+  (| {
         organizationId: string;
         agentId: string;
         orgFriendlyId?: never;
@@ -127,6 +132,8 @@ export async function load({
       signedUserData={signedUserData}
       unsignedUserData={unsignedUserData}
       customData={customData}
+      // This fallback is to support the legacy spec
+      // TODO: Remove this fallback once the legacy spec is deprecated
       organizationId={organizationId || orgFriendlyId || ""}
       agentId={agentId || agentFriendlyId || ""}
     />,
