@@ -27,8 +27,8 @@ export function useIframeMessaging() {
   );
   const {
     organizationId,
-    id: agentId,
-  }: { organizationId: string; id: string } = useParams();
+    agentId,
+  }: { organizationId: string; agentId: string } = useParams();
 
   const handleMessage = useCallback((event: LegacyMessageEvent) => {
     const key = event.message ? "message" : "data";
