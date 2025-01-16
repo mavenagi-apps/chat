@@ -63,10 +63,8 @@ describe("ZendeskStrategy", () => {
 
   describe("endpoints", () => {
     it("has correct endpoints", () => {
-      expect(strategy.getMessagesEndpoint).toBe("/api/zendesk/messages");
-      expect(strategy.getConversationsEndpoint).toBe(
-        "/api/zendesk/conversations",
-      );
+      expect(strategy.messagesEndpoint).toBe("/api/zendesk/messages");
+      expect(strategy.conversationsEndpoint).toBe("/api/zendesk/conversations");
     });
   });
 });

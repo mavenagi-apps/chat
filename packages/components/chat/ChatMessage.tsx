@@ -23,14 +23,9 @@ import {
 import { type ConversationMessageResponse } from "mavenagi/api";
 import { useTranslations } from "next-intl";
 import type { Front } from "@/types/front";
-
+import { CombinedMessage } from "@/types";
 interface MessageProps {
-  message:
-    | Message
-    | ZendeskWebhookMessage
-    | Front.WebhookMessage
-    | ChatEstablishedMessage
-    | ChatEndedMessage;
+  message: CombinedMessage;
   linkTargetInNewTab?: boolean;
   isLastMessage?: boolean;
   latestChatBubbleRef?: React.RefObject<HTMLDivElement>;
@@ -145,7 +140,6 @@ export function ChatMessage({
   conversationId,
   mavenUserId,
 }: MessageProps) {
-  const t = useTranslations("chat.ChatPage");
   if ("type" in message) {
     switch (message.type) {
       case "USER":
