@@ -2,65 +2,60 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { useParams } from "next/dist/client/components/navigation";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { useCustomData } from "@/app/providers/CustomDataProvider";
+import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
 import {
-  HANDOFF_AUTH_HEADER,
-  ORGANIZATION_HEADER,
-  AGENT_HEADER,
-} from "@/app/constants/authentication";
-import type {
-  Message,
-  ZendeskWebhookMessage,
-  ChatEstablishedMessage,
-  UserChatMessage,
-  ChatEndedMessage,
+  type ChatEndedMessage,
+  type IncomingHandoffConnectionEvent,
+  type IncomingHandoffEvent,
+  isChatUserMessage,
+  type UserChatMessage,
 } from "@/types";
-import type { Front } from "@/types/front";
 import { HandoffStatus } from "@/app/constants/handoff";
-import {
-  HandoffStrategyFactory,
-  type HandoffType,
-} from "./handoff/HandoffStrategyFactory";
-import type { HandoffStrategy } from "./handoff/HandoffStrategy";
+import { HandoffStrategyFactory } from "./handoff/HandoffStrategyFactory";
+import { streamResponse } from "./handoff/streamUtils";
+import type {
+  HandoffProps,
+  HandoffState,
+  HandoffHookReturn,
+  Params,
+} from "./handoff/types";
+import { generateHeaders } from "./handoff/headerUtils";
 
 const HANDOFF_RECONNECT_INTERVAL = 500;
+const TYPING_INDICATOR_REFRESH_INTERVAL = 3000;
 
-type HandoffProps = {
-  messages: Message[];
-  mavenConversationId: string;
+const initialState: HandoffState = {
+  handoffError: null,
+  handoffChatEvents: [],
+  isConnected: false,
+  handoffAuthToken: null,
+  agentName: null,
+  handoffStatus: HandoffStatus.NOT_INITIALIZED,
 };
 
-type Params = {
-  organizationId: string;
-  agentId: string;
-};
-
-export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
-  const { signedUserData } = useAuth();
-  const { organizationId, agentId } = useParams<Params>();
+export function useHandoff({
+  messages,
+  mavenConversationId,
+}: HandoffProps): HandoffHookReturn {
+  // Configuration and refs
   const { handoffConfiguration } = useSettings();
-  const handoffTypeRef = useRef<HandoffType>(
-    (handoffConfiguration?.type as HandoffType) ?? null,
+  const handoffTypeRef = useRef(handoffConfiguration?.type ?? null);
+  const strategyRef = useRef(
+    HandoffStrategyFactory.createStrategy(handoffTypeRef.current),
   );
-  const [handoffError, _setHandoffError] = useState<string | null>(null);
-  const [handoffChatEvents, setHandoffChatEvents] = useState<
-    (
-      | ZendeskWebhookMessage
-      | Front.WebhookMessage
-      | ChatEstablishedMessage
-      | UserChatMessage
-      | ChatEndedMessage
-    )[]
-  >([]);
-  const [isConnected, setIsConnected] = useState(false);
+  const abortController = useRef(new AbortController());
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
-  const [handoffAuthToken, setHandoffAuthToken] = useState<string | null>(null);
-  const [agentName, setAgentName] = useState<string | null>(null);
-  const [handoffStatus, setHandoffStatus] = useState<HandoffStatus>(
-    HandoffStatus.NOT_INITIALIZED,
-  );
-  const handoffStatusRef = useRef<HandoffStatus>(handoffStatus);
-  const [abortController, setAbortController] = useState(new AbortController());
-  const strategyRef = useRef<HandoffStrategy | null>(null);
+
+  // State
+  const [state, setState] = useState<HandoffState>(initialState);
+  const [typingRefreshCounter, setTypingRefreshCounter] = useState(0);
+  const handoffStatusRef = useRef<HandoffStatus>(state.handoffStatus);
+
+  // Context hooks
+  const { signedUserData, unsignedUserData } = useAuth();
+  const { customData } = useCustomData();
+  const { organizationId, agentId } = useParams<Params>();
 
   useEffect(() => {
     strategyRef.current = HandoffStrategyFactory.createStrategy(
@@ -69,28 +64,16 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
   }, []);
 
   const resetAbortController = useCallback(() => {
-    abortController.abort();
-    const newAbortController = new AbortController();
-    setAbortController(newAbortController);
-    return newAbortController;
-  }, [abortController]);
+    abortController.current.abort();
+    abortController.current = new AbortController();
+  }, []);
 
-  const generatedHeaders: HeadersInit = useMemo(() => {
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-      [ORGANIZATION_HEADER]: organizationId,
-      [AGENT_HEADER]: agentId,
-    };
-
-    if (handoffAuthToken) {
-      headers[HANDOFF_AUTH_HEADER] = handoffAuthToken;
-    }
-
-    return headers;
-  }, [handoffAuthToken, organizationId, agentId]);
+  const generatedHeaders = useMemo(() => {
+    return generateHeaders(organizationId, agentId, state.handoffAuthToken);
+  }, [state.handoffAuthToken, organizationId, agentId]);
 
   const handleHandoffChatEvent = useCallback(
-    (event: ZendeskWebhookMessage | Front.WebhookMessage) => {
+    (event: IncomingHandoffEvent) => {
       if (!strategyRef.current) return;
 
       const { agentName: newAgentName, formattedEvent } =
@@ -98,52 +81,16 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
 
       if (formattedEvent) {
         if (newAgentName) {
-          setAgentName(newAgentName);
+          setState((prev) => ({ ...prev, agentName: newAgentName }));
         }
-        setHandoffChatEvents((prev) => [...prev, formattedEvent]);
+        setState((prev) => ({
+          ...prev,
+          handoffChatEvents: [...prev.handoffChatEvents, formattedEvent],
+        }));
       }
     },
-    [],
+    [state, setState],
   );
-
-  const streamResponse = useCallback(async function* (
-    response: Response,
-  ): AsyncGenerator<ZendeskWebhookMessage | Front.WebhookMessage> {
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const reader = response.body?.getReader();
-    if (!reader) {
-      throw new Error("No reader");
-    }
-
-    const decoder = new TextDecoder();
-
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const events = chunk.split("\n\n");
-        for (const event of events) {
-          if (event.startsWith("data: ")) {
-            try {
-              const jsonData = JSON.parse(event.slice(6));
-              if (jsonData.message.type !== "keep-alive") {
-                yield jsonData.message;
-              }
-            } catch (error) {
-              console.error("Error parsing JSON:", error);
-            }
-          }
-        }
-      }
-    } finally {
-      reader.releaseLock();
-    }
-  }, []);
 
   const getOrCreateUserAndConversation = useCallback(
     async (email?: string) => {
@@ -151,21 +98,23 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
         throw new Error("Handoff strategy is not set");
       }
 
-      const response = await fetch(
-        strategyRef.current.getConversationsEndpoint,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            messages: strategyRef.current.formatMessages(
-              messages,
-              mavenConversationId,
-            ),
-            signedUserData,
-            email,
-          }),
-          headers: generatedHeaders,
-        },
-      );
+      const response = await fetch(strategyRef.current.conversationsEndpoint, {
+        method: "POST",
+        body: JSON.stringify({
+          messages: strategyRef.current.formatMessages(
+            messages,
+            mavenConversationId,
+          ),
+          signedUserData,
+          unsignedUserData,
+          userAgent: navigator.userAgent,
+          screenResolution: `${window.screen.width}x${window.screen.height}`,
+          language: navigator.language,
+          customData,
+          email,
+        }),
+        headers: generatedHeaders,
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -177,66 +126,85 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
         throw new Error("Handoff auth token not found");
       }
 
-      setHandoffAuthToken(handoffAuthToken);
+      setState((prev) => ({ ...prev, handoffAuthToken: handoffAuthToken }));
     },
-    [messages, signedUserData, generatedHeaders, mavenConversationId],
+    [
+      messages,
+      customData,
+      signedUserData,
+      unsignedUserData,
+      generatedHeaders,
+      mavenConversationId,
+    ],
   );
 
   const handleEndHandoff = useCallback(async () => {
     resetAbortController();
-    setHandoffAuthToken(null);
-    setAgentName(null);
-    setHandoffChatEvents((prev) => [
+    setState((prev) => ({
       ...prev,
-      {
-        type: "ChatEnded",
-        timestamp: new Date().getTime(),
-      } as ChatEndedMessage,
-    ]);
+      handoffAuthToken: null,
+      agentName: null,
+      handoffChatEvents: [
+        ...prev.handoffChatEvents,
+        {
+          type: "ChatEnded",
+          timestamp: new Date().getTime(),
+        } as ChatEndedMessage,
+      ],
+    }));
 
-    void setHandoffStatus(HandoffStatus.NOT_INITIALIZED);
+    setState((prev) => ({
+      ...prev,
+      handoffStatus: HandoffStatus.NOT_INITIALIZED,
+    }));
 
-    if (!handoffAuthToken || !strategyRef.current) {
+    if (!state.handoffAuthToken || !strategyRef.current) {
       return;
     }
 
-    void fetch(`${strategyRef.current.getMessagesEndpoint}/passControl`, {
+    void fetch(`${strategyRef.current.conversationsEndpoint}/passControl`, {
       method: "POST",
       headers: generatedHeaders,
-      body: JSON.stringify({ signedUserData }),
+      body: JSON.stringify({ signedUserData, unsignedUserData }),
     });
-  }, [
-    setHandoffStatus,
-    setHandoffAuthToken,
-    setAgentName,
-    generatedHeaders,
-    resetAbortController,
-  ]);
+  }, [setState, generatedHeaders, resetAbortController]);
 
   const getMessages = useCallback(async () => {
-    if (!handoffAuthToken || !strategyRef.current) {
+    if (!state.handoffAuthToken || !strategyRef.current) {
       return;
     }
 
     if (
-      isConnected ||
+      state.isConnected ||
       handoffStatusRef.current === HandoffStatus.NOT_INITIALIZED
     ) {
       return;
     }
-    setIsConnected(true);
+    setState((prev) => ({ ...prev, isConnected: true }));
 
-    const newAbortController = resetAbortController();
+    resetAbortController();
 
     try {
-      const response = await fetch(strategyRef.current.getMessagesEndpoint, {
+      if (strategyRef.current.subjectHeaderKey) {
+        const firstUserMessage: UserChatMessage | undefined = messages.find(
+          (message) => isChatUserMessage(message),
+        );
+        if (firstUserMessage) {
+          generatedHeaders[strategyRef.current.subjectHeaderKey] =
+            firstUserMessage.text || "I need assistance";
+        }
+      }
+      const response = await fetch(strategyRef.current.messagesEndpoint, {
         method: "GET",
         headers: generatedHeaders,
-        signal: newAbortController.signal,
+        signal: abortController.current.signal,
       });
 
-      for await (const event of streamResponse(response)) {
-        if (newAbortController.signal.aborted) break;
+      for await (const event of streamResponse(
+        response,
+        abortController.current,
+      )) {
+        if (abortController.current.signal.aborted) break;
         handleHandoffChatEvent(event);
       }
     } catch (error) {
@@ -247,7 +215,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
         void handleEndHandoff();
       }
     } finally {
-      setIsConnected(false);
+      setState((prev) => ({ ...prev, isConnected: false }));
       // Attempt to reconnect after interval
       if (handoffStatusRef.current === HandoffStatus.INITIALIZED) {
         reconnectTimeoutRef.current = setTimeout(() => {
@@ -256,9 +224,8 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
       }
     }
   }, [
-    handoffAuthToken,
+    state.handoffAuthToken,
     generatedHeaders,
-    streamResponse,
     resetAbortController,
     handleEndHandoff,
   ]);
@@ -270,7 +237,10 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
         return;
       }
 
-      void setHandoffStatus(HandoffStatus.INITIALIZING);
+      setState((prev) => ({
+        ...prev,
+        handoffStatus: HandoffStatus.INITIALIZING,
+      }));
 
       try {
         await getOrCreateUserAndConversation(email);
@@ -283,43 +253,61 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
   );
 
   useEffect(() => {
-    handoffStatusRef.current = handoffStatus;
-    if (handoffStatus === HandoffStatus.INITIALIZED) {
-      setHandoffChatEvents((prev) => [
+    handoffStatusRef.current = state.handoffStatus;
+    if (state.handoffStatus === HandoffStatus.INITIALIZED) {
+      setState((prev) => ({
         ...prev,
-        {
-          type: "ChatEstablished",
-          timestamp: new Date().getTime(),
-        } as ChatEstablishedMessage,
-      ]);
+        handoffChatEvents: [
+          ...prev.handoffChatEvents,
+          {
+            type:
+              strategyRef.current?.connectedToAgentMessageType ||
+              "ChatEstablished",
+            timestamp: new Date().getTime(),
+          } as IncomingHandoffConnectionEvent,
+        ],
+      }));
     }
-  }, [handoffStatus]);
+  }, [state.handoffStatus]);
 
   useEffect(() => {
-    if (handoffAuthToken && handoffStatus === HandoffStatus.INITIALIZING) {
+    if (
+      state.handoffAuthToken &&
+      state.handoffStatus === HandoffStatus.INITIALIZING
+    ) {
       void getMessages();
-      void setHandoffStatus(HandoffStatus.INITIALIZED);
+      setState((prev) => ({
+        ...prev,
+        handoffStatus: HandoffStatus.INITIALIZED,
+      }));
     }
-  }, [handoffAuthToken, getMessages]);
+  }, [state.handoffAuthToken, getMessages]);
 
   const askHandoff = useCallback(
     async (message: string) => {
-      setHandoffChatEvents((prev) => [
+      setState((prev) => ({
         ...prev,
-        {
-          text: message,
-          timestamp: new Date().getTime(),
-          type: "USER",
-        } as UserChatMessage,
-      ]);
+        handoffChatEvents: [
+          ...prev.handoffChatEvents,
+          {
+            text: message,
+            timestamp: new Date().getTime(),
+            type: "USER",
+          } as UserChatMessage,
+        ],
+      }));
 
-      if (!handoffAuthToken || !strategyRef.current) {
+      if (!state.handoffAuthToken || !strategyRef.current) {
         return;
       }
 
-      const response = await fetch(strategyRef.current.getMessagesEndpoint, {
+      const response = await fetch(strategyRef.current.messagesEndpoint, {
         method: "POST",
-        body: JSON.stringify({ message, signedUserData }),
+        body: JSON.stringify({
+          message,
+          signedUserData,
+          unsignedUserData,
+        }),
         headers: generatedHeaders,
       });
 
@@ -332,21 +320,51 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
 
   useEffect(() => {
     return () => {
-      abortController?.abort();
+      abortController.current?.abort();
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
   }, []);
 
+  const showTypingIndicator = useMemo(() => {
+    if (!state.agentName) {
+      return false;
+    }
+
+    return (
+      strategyRef.current?.showAgentTypingIndicator?.(
+        state.handoffChatEvents,
+      ) ?? false
+    );
+  }, [state.handoffChatEvents, typingRefreshCounter]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTypingRefreshCounter((prev) => prev + 1);
+    }, TYPING_INDICATOR_REFRESH_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const shouldSupressHandoffInputDisplay = useMemo(() => {
+    return (
+      strategyRef.current?.shouldSupressHandoffInputDisplay?.(
+        state.agentName,
+      ) ?? false
+    );
+  }, [state.agentName]);
+
   return {
     initializeHandoff,
-    handoffStatus,
-    handoffError,
-    handoffChatEvents,
-    agentName,
+    handoffStatus: state.handoffStatus,
+    handoffError: state.handoffError,
+    handoffChatEvents: state.handoffChatEvents,
+    agentName: state.agentName,
+    isConnected: state.isConnected,
     askHandoff,
     handleEndHandoff,
-    isConnected,
+    showTypingIndicator,
+    shouldSupressHandoffInputDisplay,
   };
 }

@@ -20,13 +20,7 @@ import { useScrollToLatest } from "@/lib/useScrollToLatest";
 import { useHandoff } from "@/lib/useHandoff";
 import { HandoffStatus } from "@/app/constants/handoff";
 import { PoweredByMaven } from "@magi/components/chat/PoweredByMaven";
-import type {
-  ChatEndedMessage,
-  ChatEstablishedMessage,
-  ZendeskWebhookMessage,
-} from "@/types";
-import type { Message } from "@/types";
-import type { Front } from "@/types/front";
+import type { CombinedMessage } from "@/types";
 
 function ChatPage() {
   const analytics = useAnalytics();
@@ -67,17 +61,15 @@ function ChatPage() {
     analytics.logEvent(MagiEvent.chatHomeView, { agentId: agentId });
   }, [agentId, analytics]);
 
-  const combinedMessages: (
-    | Message
-    | ZendeskWebhookMessage
-    | ChatEstablishedMessage
-    | ChatEndedMessage
-    | Front.WebhookMessage
-  )[] = useMemo(() => {
+  const combinedMessages: CombinedMessage[] = useMemo(() => {
     return [...messages, ...handoffChatEvents]
-      .filter(({ timestamp }) => !!timestamp)
-      .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+      .filter(
+        (message): message is typeof message & { timestamp: number } =>
+          "timestamp" in message && !!message.timestamp,
+      )
+      .sort((a, b) => a.timestamp - b.timestamp);
   }, [messages, handoffChatEvents]);
+
   useEffect(() => {
     scrollToLatest();
   }, [combinedMessages.length, scrollToLatest]);

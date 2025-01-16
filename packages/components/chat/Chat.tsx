@@ -1,24 +1,11 @@
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 
-import {
-  type ChatEndedMessage,
-  type ChatEstablishedMessage,
-  type ZendeskWebhookMessage,
-  type Message,
-  isBotMessage,
-} from "@/types";
+import { isBotMessage, ChatMessage, CombinedMessage } from "@/types";
 import { useSettings } from "@/app/providers/SettingsProvider";
-import type { Front } from "@/types/front";
 
 interface ChatProps {
-  messages: (
-    | Message
-    | ZendeskWebhookMessage
-    | Front.WebhookMessage
-    | ChatEstablishedMessage
-    | ChatEndedMessage
-  )[];
+  messages: CombinedMessage[];
   askFn: (question: string) => Promise<void>;
   initializeHandoff: (data: { email?: string }) => Promise<void>;
   brandColor?: string;

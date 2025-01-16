@@ -1,16 +1,31 @@
-import type { Message, HandoffChatMessage } from "@/types";
+import type {
+  Message,
+  HandoffChatMessage,
+  IncomingHandoffConnectionEvent,
+  IncomingHandoffEvent,
+  UserChatMessage,
+} from "@/types";
 
-export interface HandoffStrategy {
-  formatMessages: (
-    messages: Message[],
-    mavenConversationId: string,
-  ) => HandoffChatMessage[];
+export const MESSAGE_TYPES_FOR_HANDOFF_CREATION = ["USER", "bot"];
+
+export interface HandoffStrategy<T = HandoffChatMessage> {
+  formatMessages: (messages: Message[], mavenConversationId: string) => T[];
   handleChatEvent: (event: any) => {
     agentName: string | null;
     formattedEvent: any;
   };
-  getMessagesEndpoint: string;
-  getConversationsEndpoint: string;
+  showAgentTypingIndicator?: (
+    messages: (
+      | UserChatMessage
+      | IncomingHandoffEvent
+      | IncomingHandoffConnectionEvent
+    )[],
+  ) => boolean;
+  messagesEndpoint: string;
+  conversationsEndpoint: string;
+  connectedToAgentMessageType?: string;
+  subjectHeaderKey?: string;
+  shouldSupressHandoffInputDisplay?: (agentName: string | null) => boolean;
 }
 
 export interface HandoffContext {
