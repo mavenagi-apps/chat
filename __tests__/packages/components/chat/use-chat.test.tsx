@@ -29,8 +29,8 @@ describe("useChat", () => {
 
     // Setup default mocks
     (useParams as any).mockReturnValue({
-      orgFriendlyId: "test-org",
-      id: "test-agent",
+      organizationId: "test-org",
+      agentId: "test-agent",
     });
 
     (useAuth as any).mockReturnValue({

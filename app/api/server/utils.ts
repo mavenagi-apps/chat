@@ -22,10 +22,10 @@ const CONVERSATIONS_API_PRIVATE_KEY = process.env.CONVERSATIONS_API_PRIVATE_KEY;
 const CONVERSATIONS_API_PUBLIC_KEY = process.env.CONVERSATIONS_API_PUBLIC_KEY;
 
 export async function getAppSettings(
-  orgFriendlyId: string,
+  organizationId: string,
   agentId: string,
 ): Promise<ParsedAppSettings> {
-  const client = getMavenAGIClient(orgFriendlyId, agentId);
+  const client = getMavenAGIClient(organizationId, agentId);
   const settings = (await client.appSettings.get()) as unknown as AppSettings;
 
   if (settings?.handoffConfiguration) {
@@ -40,7 +40,7 @@ export async function getAppSettings(
   const handoffConfiguration =
     settings?.handoffConfiguration as unknown as HandoffConfiguration;
   if (handoffConfiguration?.type === "front") {
-    handoffConfiguration.channelName = `${orgFriendlyId}-${agentId}`;
+    handoffConfiguration.channelName = `${organizationId}-${agentId}`;
   }
 
   return settings as ParsedAppSettings;

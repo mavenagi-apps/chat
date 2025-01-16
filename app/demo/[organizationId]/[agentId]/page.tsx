@@ -17,16 +17,16 @@ export default async function Page({
   params,
   searchParams,
 }: {
-  params: Promise<{ orgFriendlyId: string; agentFriendlyId: string }>;
+  params: Promise<{ organizationId: string; agentId: string }>;
   searchParams: Promise<{ anonymous?: string }>;
 }) {
   const anonymous = "anonymous" in (await searchParams);
   const envPrefix = (await headers()).get("x-magi-env-prefix") ?? "";
-  const { orgFriendlyId, agentFriendlyId } = await params;
-  const settings = await getPublicAppSettings(orgFriendlyId, agentFriendlyId);
+  const { organizationId, agentId } = await params;
+  const settings = await getPublicAppSettings(organizationId, agentId);
   const brandColor = settings?.brandColor;
 
-  if (!orgFriendlyId || !agentFriendlyId) {
+  if (!organizationId || !agentId) {
     notFound();
   }
 
@@ -37,8 +37,8 @@ export default async function Page({
     try {
       signedUserData = await generateSignedUserData(
         mockUserData,
-        orgFriendlyId,
-        agentFriendlyId,
+        organizationId,
+        agentId,
       );
     } catch (error) {
       console.error("Error generating signed user data", error);
@@ -47,8 +47,8 @@ export default async function Page({
 
   const widgetLoadPayload = {
     envPrefix,
-    orgFriendlyId,
-    agentFriendlyId,
+    organizationId,
+    agentId,
     bgColor: brandColor || "#00202b",
     signedUserData: signedUserData || undefined,
     unsignedUserData: mockUserData,

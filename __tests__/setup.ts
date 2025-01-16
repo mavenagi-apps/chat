@@ -33,8 +33,8 @@ vi.mock("next-intl", () => ({
 // Mock next/navigation (including useParams)
 vi.mock("next/navigation", () => ({
   useParams: () => ({
-    orgFriendlyId: "test-org",
-    id: "test-id",
+    organizationId: "test-org",
+    agentId: "test-id",
   }),
   useRouter: () => ({
     push: vi.fn(),

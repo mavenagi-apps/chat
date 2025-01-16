@@ -6,7 +6,7 @@ import { type FeedbackType } from "mavenagi/api";
 import { nanoid } from "nanoid";
 
 interface CreateOrUpdateFeedbackProps {
-  orgFriendlyId: string;
+  organizationId: string;
   agentId: string;
   feedbackId: string | undefined;
   conversationId: string;
@@ -17,7 +17,7 @@ interface CreateOrUpdateFeedbackProps {
 }
 
 export async function createOrUpdateFeedback({
-  orgFriendlyId,
+  organizationId,
   agentId,
   feedbackId,
   conversationId,
@@ -26,7 +26,7 @@ export async function createOrUpdateFeedback({
   feedbackText,
   userId,
 }: CreateOrUpdateFeedbackProps) {
-  const client: MavenAGIClient = getMavenAGIClient(orgFriendlyId, agentId);
+  const client: MavenAGIClient = getMavenAGIClient(organizationId, agentId);
 
   const feedbackRequest = {
     feedbackId: {
@@ -81,14 +81,14 @@ const parseHandoffConfiguration = (
 };
 
 export async function getPublicAppSettings(
-  orgFriendlyId: string,
+  organizationId: string,
   agentId: string,
 ): Promise<ClientSafeAppSettings | null> {
-  if (!orgFriendlyId || !agentId) {
+  if (!organizationId || !agentId) {
     return null;
   }
 
-  const client = getMavenAGIClient(orgFriendlyId, agentId);
+  const client = getMavenAGIClient(organizationId, agentId);
   try {
     const settings = (await client.appSettings.get()) as unknown as AppSettings;
     const parsedHandoffConfiguration = parseHandoffConfiguration(
@@ -117,14 +117,14 @@ export async function getPublicAppSettings(
 export async function submitBailoutForm(_prevState: any, formData: FormData) {
   try {
     const {
-      orgFriendlyId,
+      organizationId,
       agentId,
       conversationId,
       actionFormId,
       ...parameters
     } = Object.fromEntries(formData.entries());
     const client = getMavenAGIClient(
-      orgFriendlyId as string,
+      organizationId as string,
       agentId as string,
     );
 

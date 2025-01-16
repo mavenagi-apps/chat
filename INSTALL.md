@@ -24,8 +24,8 @@ This guide provides instructions for surfacing Maven AGI Chat via the JavaScript
 ```javascript
 addEventListener("load", function () {
   Maven.ChatWidget.load({
-    orgFriendlyId: "replace-with-org-id",
-    agentFriendlyId: "replace-with-agent-id",
+    organizationId: "replace-with-org-id",
+    agentId: "replace-with-agent-id",
     bgColor: "#004f32",
     signedUserData: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9...",
   });
@@ -43,8 +43,8 @@ interface WidgetConfig {
   horizontalPosition?: "left" | "right"; // Widget position (default: 'right')
   verticalPosition?: "top" | "bottom"; // Widget position (default: 'bottom')
   signedUserData: string;
-  orgFriendlyId: string; // Required: Your organization ID
-  agentFriendlyId: string; // Required: Your agent ID
+  organizationId: string; // Required: Your organization ID
+  agentId: string; // Required: Your agent ID
   signedUserData?: string; // See below
 }
 ```

@@ -1,9 +1,9 @@
 import { render } from "@testing-library/react";
-import DemoPage from "@/app/demo/[orgFriendlyId]/[agentFriendlyId]/page";
+import DemoPage from "@/app/demo/[organizationId]/[agentId]/page";
 import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
 import { headers } from "next/headers";
 import { getPublicAppSettings } from "@/app/actions";
-import { generateSignedUserData } from "@/app/demo/[orgFriendlyId]/[agentFriendlyId]/actions";
+import { generateSignedUserData } from "@/app/demo/[organizationId]/[agentId]/actions";
 import { notFound } from "next/navigation";
 
 // Mock the dependencies
@@ -15,7 +15,7 @@ vi.mock("@/app/actions", () => ({
   getPublicAppSettings: vi.fn(),
 }));
 
-vi.mock("@/app/demo/[orgFriendlyId]/[agentFriendlyId]/actions", () => ({
+vi.mock("@/app/demo/[organizationId]/[agentId]/actions", () => ({
   generateSignedUserData: vi.fn(),
 }));
 
@@ -30,8 +30,8 @@ vi.mock("@/assets/background/bg.jpg", () => ({
 
 describe("DemoPage", () => {
   const mockParams = {
-    orgFriendlyId: "test-org",
-    agentFriendlyId: "test-agent",
+    organizationId: "test-org",
+    agentId: "test-agent",
   };
 
   const mockHeaders = new Headers();
@@ -77,8 +77,8 @@ describe("DemoPage", () => {
       const payloadRegex = `addEventListener\\("load", function \\(\\) {
         Maven\\.ChatWidget\\.load\\({
           "envPrefix":"[^"]+",
-          "orgFriendlyId":"[^"]+",
-          "agentFriendlyId":"[^"]+",
+          "organizationId":"[^"]+",
+          "agentId":"[^"]+",
           "bgColor":"#[0-9a-fA-F]{6}",
           "unsignedUserData":{
             "firstName":"[^"]+",
@@ -99,22 +99,22 @@ describe("DemoPage", () => {
   });
 
   describe("when parameters are missing", () => {
-    test("should call notFound when orgFriendlyId is missing", async () => {
+    test("should call notFound when organizationId is missing", async () => {
       await DemoPage({
         params: Promise.resolve({
           ...mockParams,
-          orgFriendlyId: "",
+          organizationId: "",
         }),
         searchParams: Promise.resolve({ anonymous: "anything" }),
       });
       expect(notFound).toHaveBeenCalled();
     });
 
-    test("should call notFound when agentFriendlyId is missing", async () => {
+    test("should call notFound when agentId is missing", async () => {
       await DemoPage({
         params: Promise.resolve({
           ...mockParams,
-          agentFriendlyId: "",
+          agentId: "",
         }),
         searchParams: Promise.resolve({ anonymous: "anything" }),
       });

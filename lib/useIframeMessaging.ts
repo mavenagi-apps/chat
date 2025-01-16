@@ -12,8 +12,8 @@ enum MAVEN_MESSAGE_TYPES {
   MAVEN_LOADED = "MAVEN_LOADED",
 }
 
-const demoUrl = (orgFriendlyId: string, agentFriendlyId: string) =>
-  `/demo/${orgFriendlyId}/${agentFriendlyId}`;
+const demoUrl = (organizationId: string, agentId: string) =>
+  `/demo/${organizationId}/${agentId}`;
 
 export function useIframeMessaging() {
   const [loading, setLoading] = useState(true);
@@ -26,9 +26,9 @@ export function useIframeMessaging() {
     null,
   );
   const {
-    orgFriendlyId,
-    id: agentFriendlyId,
-  }: { orgFriendlyId: string; id: string } = useParams();
+    organizationId,
+    agentId,
+  }: { organizationId: string; agentId: string } = useParams();
 
   const handleMessage = useCallback((event: LegacyMessageEvent) => {
     const key = event.message ? "message" : "data";
@@ -61,7 +61,7 @@ export function useIframeMessaging() {
     };
 
     if (!isInIframe()) {
-      window.location.href = demoUrl(orgFriendlyId, agentFriendlyId);
+      window.location.href = demoUrl(organizationId, agentId);
       return;
     }
 
@@ -75,7 +75,7 @@ export function useIframeMessaging() {
     }
 
     return () => window.removeEventListener("message", handleMessage);
-  }, [orgFriendlyId, agentFriendlyId, handleMessage]);
+  }, [organizationId, agentId, handleMessage]);
 
   return {
     loading,
