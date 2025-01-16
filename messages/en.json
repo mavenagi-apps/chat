@@ -43,9 +43,11 @@
       "chat_queue_position_next": "You are next in line in the queue. Your agent will be with you shortly.",
       "chat_queue_position_in_queue": "You are in the queue. Please wait for the next available agent.",
       "chat_queue_position_estimated_wait_time": "Your estimated wait time is {estimatedWaitTime} seconds.",
-      "chat_queue_position_estimated_wait_time_singular": "Your estimated wait time is {estimatedWaitTime} second.",
+      "chat_queue_position_estimated_wait_time_singular": "Your estimated wait time is {estimatedWaitTime} second."
+    },
+    "IdleMessage": {
       "idle_message": "We are here to help you. Please ask a question.",
-      "idle_message_with_survey": "Thank you for reaching out. Can you please fill out this [survey](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_djaQzPxGLklaZ0O?chatKey={conversationId}{additionalUrlParams}) to tell us about your experience?"
+      "idle_message_with_survey": "Thank you for reaching out. Can you please fill out this [survey]({surveyLink}?chatKey={conversationId}{additionalUrlParams}) to tell us about your experience?"
     },
     "ChatInput": {
       "see_more": "See more",

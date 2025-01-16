@@ -1,4 +1,4 @@
-import { forwardRef, RefObject } from "react";
+import { forwardRef, useContext } from "react";
 import type {
   Message,
   IncomingHandoffEvent,
@@ -6,20 +6,17 @@ import type {
 } from "@/types";
 import { ChatMessage } from "@magi/components/chat/ChatMessage";
 import Spinner from "@magi/components/Spinner";
+import { ChatContext } from "./Chat";
 
 interface ChatMessagesProps {
-  messages: (Message | IncomingHandoffEvent | IncomingHandoffConnectionEvent)[];
   isLoading: boolean;
   isResponseAvailable: boolean;
-  conversationId?: string;
   mavenUserId: string | null;
 }
 
 export const ChatMessages = forwardRef<HTMLDivElement, ChatMessagesProps>(
-  function ChatMessages(
-    { messages, isLoading, isResponseAvailable, conversationId, mavenUserId },
-    ref,
-  ) {
+  function ChatMessages({ isLoading, isResponseAvailable, mavenUserId }, _ref) {
+    const { messages, conversationId } = useContext(ChatContext);
     return (
       <>
         {messages.map((message, index) => (

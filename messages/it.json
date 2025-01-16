@@ -42,9 +42,11 @@
       "chat_queue_position_next": "Sei il prossimo in coda. Il tuo agente sarà con te a breve.",
       "chat_queue_position_in_queue": "Sei in coda. Attendi il prossimo agente disponibile.",
       "chat_queue_position_estimated_wait_time": "Il tuo tempo di attesa stimato è di {estimatedWaitTime} secondi.",
-      "chat_queue_position_estimated_wait_time_singular": "Il tuo tempo di attesa stimato è di {estimatedWaitTime} secondo.",
+      "chat_queue_position_estimated_wait_time_singular": "Il tuo tempo di attesa stimato è di {estimatedWaitTime} secondo."
+    },
+    "IdleMessage": {
       "idle_message": "Siamo qui per aiutarti. Per favore fai una domanda.",
-      "idle_message_with_survey": "Grazie per averci contattato. Puoi compilare questo [sondaggio](https://tripadvisor.co1.qualtrics.com/jfe/form/SV_djaQzPxGLklaZ0O?chatKey={conversationId}{additionalUrlParams}) per raccontarci la tua esperienza?"
+      "idle_message_with_survey": "Grazie per averci contattato. Puoi compilare questo [sondaggio]({surveyLink}?chatKey={conversationId}{additionalUrlParams}) per raccontarci la tua esperienza?"
     },
     "ChatInput": {
       "see_more": "Vedi di più",

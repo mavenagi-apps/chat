@@ -17,6 +17,7 @@ declare global {
     apiSecret: string;
     appId: string;
     allowAnonymousHandoff?: boolean;
+    surveyLink?: string;
   };
   type ZendeskHandoffConfiguration = BaseHandoffConfiguration & {
     type: "zendesk";
@@ -38,6 +39,7 @@ declare global {
     eswLiveAgentDevName: string;
     allowAnonymousHandoff?: boolean;
     apiSecret: string;
+    surveyLink?: string;
   };
 
   type HandoffConfiguration =
@@ -46,7 +48,12 @@ declare global {
     | SalesforceHandoffConfiguration;
 
   interface ClientSafeAppSettings extends Partial<AppSettings> {
-    handoffConfiguration?: { type: HandoffConfiguration["type"] } | undefined;
+    handoffConfiguration?:
+      | {
+          type: HandoffConfiguration["type"];
+          surveyLink?: string;
+        }
+      | undefined;
   }
 
   interface ParsedAppSettings extends AppSettings {
