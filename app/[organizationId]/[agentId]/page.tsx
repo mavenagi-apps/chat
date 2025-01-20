@@ -11,6 +11,7 @@ import { useAnalytics } from "@/lib/use-analytics";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { useIframeMessaging } from "@/lib/useIframeMessaging";
 import { AuthProvider } from "@/app/providers/AuthProvider";
+import { CustomDataProvider } from "@/app/providers/CustomDataProvider";
 import { ChatHeader } from "@magi/components/chat/ChatHeader";
 import { WelcomeMessage } from "@magi/components/chat/WelcomeChatMessage";
 import { ChatMessages } from "@magi/components/chat/ChatMessages";
@@ -29,8 +30,7 @@ import type { Front } from "@/types/front";
 
 function ChatPage() {
   const analytics = useAnalytics();
-  const { id: agentFriendlyId }: { orgFriendlyId: string; id: string } =
-    useParams();
+  const { agentId }: { organizationId: string; agentId: string } = useParams();
   const { brandColor, logoUrl } = useSettings();
 
   // Maven chat logic
@@ -64,8 +64,8 @@ function ChatPage() {
   });
 
   useEffect(() => {
-    analytics.logEvent(MagiEvent.chatHomeView, { agentId: agentFriendlyId });
-  }, [agentFriendlyId, analytics]);
+    analytics.logEvent(MagiEvent.chatHomeView, { agentId: agentId });
+  }, [agentId, analytics]);
 
   const combinedMessages: (
     | Message
@@ -97,10 +97,7 @@ function ChatPage() {
       >
         <div className="flex flex-1 flex-col overflow-auto text-xs">
           <div className="mx-auto w-full max-w-3xl flex-1 text-gray-800 sm:mt-5 sm:px-5">
-            <WelcomeMessage
-              agentFriendlyId={agentFriendlyId}
-              conversationId={conversationId}
-            />
+            <WelcomeMessage agentId={agentId} conversationId={conversationId} />
 
             <ChatMessages
               messages={combinedMessages}
@@ -128,13 +125,19 @@ function ChatPage() {
 }
 
 export default function ChatPageWrapper() {
-  const { loading, signedUserData } = useIframeMessaging();
+  const { loading, signedUserData, unsignedUserData, customData } =
+    useIframeMessaging();
 
   if (loading) return null;
 
   return (
-    <AuthProvider signedUserData={signedUserData}>
-      <ChatPage />
+    <AuthProvider
+      signedUserData={signedUserData}
+      unsignedUserData={unsignedUserData}
+    >
+      <CustomDataProvider customData={customData}>
+        <ChatPage />
+      </CustomDataProvider>
     </AuthProvider>
   );
 }

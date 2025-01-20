@@ -19,8 +19,8 @@ async function importPrivateKey(privateKeyString: string) {
 
 export async function generateSignedUserData(
   payload: any,
-  orgFriendlyId: string,
-  agentFriendlyId: string,
+  organizationId: string,
+  agentId: string,
 ): Promise<string | null> {
   if (!DEMO_SIGNING_PRIVATE_KEY) {
     return null;
@@ -28,10 +28,7 @@ export async function generateSignedUserData(
 
   const privateKey = await importPrivateKey(DEMO_SIGNING_PRIVATE_KEY);
 
-  const { encryptionSecret } = await getAppSettings(
-    orgFriendlyId,
-    agentFriendlyId,
-  );
+  const { encryptionSecret } = await getAppSettings(organizationId, agentId);
 
   if (!encryptionSecret) {
     throw new Error("Encryption secret not found");

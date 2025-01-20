@@ -1,13 +1,26 @@
 import { render, screen } from "@testing-library/react";
-import ChatPage from "@/app/[orgFriendlyId]/[id]/page";
+import ChatPage from "@/app/[organizationId]/[agentId]/page";
 import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
-import { HandoffChatMessage, Message } from "@/types";
+import {
+  ChatEndedMessage,
+  ChatEstablishedMessage,
+  Message,
+  UserChatMessage,
+  ZendeskWebhookMessage,
+} from "@/types";
+import { Front } from "@/types/front";
 import { HandoffStatus } from "@/app/constants/handoff";
 import { useChat } from "@magi/components/chat/use-chat";
 import { useHandoff } from "@/lib/useHandoff";
 
 let chatMessages = [] as Message[];
-let handoffMessages = [] as HandoffChatMessage[];
+let handoffMessages = [] as (
+  | ZendeskWebhookMessage
+  | Front.WebhookMessage
+  | ChatEstablishedMessage
+  | UserChatMessage
+  | ChatEndedMessage
+)[];
 
 vi.mock("@magi/components/chat/use-chat");
 const useChatMock = vi.mocked(useChat);
@@ -46,10 +59,14 @@ describe("ChatPage", () => {
       isResponseAvailable: false,
       askQuestion: vi.fn(),
       conversationId: "test-conversation-id",
+      mavenUserId: "test-maven-user-id",
     });
 
     useHandoffMock.mockReturnValue({
-      ...useHandoffMock({ messages: chatMessages }),
+      ...useHandoffMock({
+        messages: chatMessages,
+        mavenConversationId: "test-maven-conversation-id",
+      }),
       handoffChatEvents: handoffMessages,
       initializeHandoff: vi.fn(),
       agentName: "Lenny",
@@ -124,7 +141,10 @@ describe("ChatPage", () => {
       });
 
       useHandoffMock.mockReturnValue({
-        ...useHandoffMock({ messages: chatMessages }),
+        ...useHandoffMock({
+          messages: chatMessages,
+          mavenConversationId: "test-maven-conversation-id",
+        }),
         handoffChatEvents: handoffMessages,
       });
     });

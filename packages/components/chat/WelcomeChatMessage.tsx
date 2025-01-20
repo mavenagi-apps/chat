@@ -8,12 +8,12 @@ import { useSettings } from "@/app/providers/SettingsProvider";
 import { ChatContext } from "./Chat";
 
 interface WelcomeMessageProps {
-  agentFriendlyId: string;
+  agentId: string;
   conversationId?: string;
 }
 
 export function WelcomeMessage({
-  agentFriendlyId,
+  agentId,
   conversationId,
 }: WelcomeMessageProps) {
   const t = useTranslations("chat.ChatPage");
@@ -52,13 +52,13 @@ export function WelcomeMessage({
   const handleQuestionClick = useCallback(
     (question: string) => {
       analytics.logEvent(MagiEvent.popularQuestionClick, {
-        agentId: agentFriendlyId,
+        agentId: agentId,
         conversationId: conversationId || "",
         question,
       });
       ask(question);
     },
-    [analytics, agentFriendlyId, conversationId, ask],
+    [analytics, agentId, conversationId, ask],
   );
 
   return (

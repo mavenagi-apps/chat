@@ -7,19 +7,28 @@ interface LegacyMessageEvent extends MessageEvent {
 
 enum MAVEN_MESSAGE_TYPES {
   SIGNED_USER_DATA = "SIGNED_USER_DATA",
+  UNSIGNED_USER_DATA = "UNSIGNED_USER_DATA",
+  CUSTOM_DATA = "CUSTOM_DATA",
   MAVEN_LOADED = "MAVEN_LOADED",
 }
 
-const demoUrl = (orgFriendlyId: string, agentFriendlyId: string) =>
-  `/demo/${orgFriendlyId}/${agentFriendlyId}`;
+const demoUrl = (organizationId: string, agentId: string) =>
+  `/demo/${organizationId}/${agentId}`;
 
 export function useIframeMessaging() {
   const [loading, setLoading] = useState(true);
   const [signedUserData, setSignedUserData] = useState<string | null>(null);
+  const [unsignedUserData, setUnsignedUserData] = useState<Record<
+    string,
+    any
+  > | null>(null);
+  const [customData, setCustomData] = useState<Record<string, any> | null>(
+    null,
+  );
   const {
-    orgFriendlyId,
-    id: agentFriendlyId,
-  }: { orgFriendlyId: string; id: string } = useParams();
+    organizationId,
+    agentId,
+  }: { organizationId: string; agentId: string } = useParams();
 
   const handleMessage = useCallback((event: LegacyMessageEvent) => {
     const key = event.message ? "message" : "data";
@@ -29,6 +38,12 @@ export function useIframeMessaging() {
     switch (data.type) {
       case MAVEN_MESSAGE_TYPES.SIGNED_USER_DATA:
         setSignedUserData(data.data);
+        break;
+      case MAVEN_MESSAGE_TYPES.UNSIGNED_USER_DATA:
+        setUnsignedUserData(data.data);
+        break;
+      case MAVEN_MESSAGE_TYPES.CUSTOM_DATA:
+        setCustomData(data.data);
         break;
       default:
         break;
@@ -46,7 +61,7 @@ export function useIframeMessaging() {
     };
 
     if (!isInIframe()) {
-      window.location.href = demoUrl(orgFriendlyId, agentFriendlyId);
+      window.location.href = demoUrl(organizationId, agentId);
       return;
     }
 
@@ -60,10 +75,12 @@ export function useIframeMessaging() {
     }
 
     return () => window.removeEventListener("message", handleMessage);
-  }, [orgFriendlyId, agentFriendlyId, handleMessage]);
+  }, [organizationId, agentId, handleMessage]);
 
   return {
     loading,
     signedUserData,
+    unsignedUserData,
+    customData,
   };
 }

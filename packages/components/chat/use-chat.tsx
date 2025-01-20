@@ -9,8 +9,8 @@
  *
  * Usage:
  * const { messages, askQuestion, isLoading, isResponseAvailable } = useChat({
- *   orgFriendlyId: 'org-id',
- *   id: 'agent-id',
+ *   organizationId: 'org-id',
+ *   agent-id: 'agent-id',
  *   signedUserData: 'signed-data'
  * });
  */
@@ -54,8 +54,8 @@ type UseChatReturn = {
 };
 
 type UseChatParams = {
-  orgFriendlyId: string;
-  id: string;
+  organizationId: string;
+  agentId: string;
 };
 
 export function useChat(): UseChatReturn {
@@ -69,19 +69,19 @@ export function useChat(): UseChatReturn {
     new AbortController(),
   );
 
-  const { orgFriendlyId, id: agentId }: UseChatParams = useParams();
+  const { organizationId, agentId }: UseChatParams = useParams();
 
   const requestHeaders = useMemo(() => {
     const headers: HeadersInit = {
       "Content-Type": "application/json",
-      [ORGANIZATION_HEADER]: orgFriendlyId,
+      [ORGANIZATION_HEADER]: organizationId,
       [AGENT_HEADER]: agentId,
     };
     if (authToken) {
       headers[AUTHENTICATION_HEADER] = authToken;
     }
     return headers;
-  }, [authToken, orgFriendlyId, agentId]);
+  }, [authToken, organizationId, agentId]);
 
   const resetAbortController = useCallback(() => {
     abortController.abort();

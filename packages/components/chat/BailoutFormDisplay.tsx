@@ -14,16 +14,16 @@ export default function BailoutFormDisplay({
   action: AskStreamActionEvent;
   conversationId: string;
 }) {
-  const { orgFriendlyId, id: agentId } = useParams();
+  const { organizationId, agentId } = useParams();
   const formActionCallback = useCallback(
     async (formData: FormData) => {
       formData.append("actionFormId", action.id);
-      formData.append("orgFriendlyId", orgFriendlyId as string);
+      formData.append("organizationId", organizationId as string);
       formData.append("agentId", agentId as string);
       formData.append("conversationId", conversationId as string);
       return await submitBailoutForm(null, formData);
     },
-    [orgFriendlyId, agentId, conversationId, action.id],
+    [organizationId, agentId, conversationId, action.id],
   );
 
   const [state, formAction] = useActionState(

@@ -7,26 +7,22 @@ import {
   ORGANIZATION_HEADER,
   AGENT_HEADER,
 } from "@/app/constants/authentication";
-import {
-  // type ZendeskChatMessage,
-  type Message,
-  isBotMessage,
-  isChatUserMessage,
-  type ZendeskWebhookMessage,
-  type ChatEstablishedMessage,
-  type UserChatMessage,
-  type ChatEndedMessage,
-  type HandoffChatMessage,
+import type {
+  Message,
+  ZendeskWebhookMessage,
+  ChatEstablishedMessage,
+  UserChatMessage,
+  ChatEndedMessage,
 } from "@/types";
 import type { Front } from "@/types/front";
 import { HandoffStatus } from "@/app/constants/handoff";
+import {
+  HandoffStrategyFactory,
+  type HandoffType,
+} from "./handoff/HandoffStrategyFactory";
+import type { HandoffStrategy } from "./handoff/HandoffStrategy";
 
 const HANDOFF_RECONNECT_INTERVAL = 500;
-
-type ChatEvent = {
-  message: ZendeskWebhookMessage | Front.WebhookMessage;
-  channel: string;
-};
 
 type HandoffProps = {
   messages: Message[];
@@ -34,16 +30,16 @@ type HandoffProps = {
 };
 
 type Params = {
-  orgFriendlyId: string;
-  id: string;
+  organizationId: string;
+  agentId: string;
 };
 
 export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
   const { signedUserData } = useAuth();
-  const { orgFriendlyId, id: agentId } = useParams<Params>();
+  const { organizationId, agentId } = useParams<Params>();
   const { handoffConfiguration } = useSettings();
-  const handoffTypeRef = useRef<HandoffConfiguration["type"] | null>(
-    handoffConfiguration?.type ?? null,
+  const handoffTypeRef = useRef<HandoffType>(
+    (handoffConfiguration?.type as HandoffType) ?? null,
   );
   const [handoffError, _setHandoffError] = useState<string | null>(null);
   const [handoffChatEvents, setHandoffChatEvents] = useState<
@@ -59,13 +55,18 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
   const [handoffAuthToken, setHandoffAuthToken] = useState<string | null>(null);
   const [agentName, setAgentName] = useState<string | null>(null);
-
   const [handoffStatus, setHandoffStatus] = useState<HandoffStatus>(
     HandoffStatus.NOT_INITIALIZED,
   );
   const handoffStatusRef = useRef<HandoffStatus>(handoffStatus);
-
   const [abortController, setAbortController] = useState(new AbortController());
+  const strategyRef = useRef<HandoffStrategy | null>(null);
+
+  useEffect(() => {
+    strategyRef.current = HandoffStrategyFactory.createStrategy(
+      handoffTypeRef.current,
+    );
+  }, []);
 
   const resetAbortController = useCallback(() => {
     abortController.abort();
@@ -77,7 +78,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
   const generatedHeaders: HeadersInit = useMemo(() => {
     const headers: HeadersInit = {
       "Content-Type": "application/json",
-      [ORGANIZATION_HEADER]: orgFriendlyId,
+      [ORGANIZATION_HEADER]: organizationId,
       [AGENT_HEADER]: agentId,
     };
 
@@ -86,109 +87,23 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
     }
 
     return headers;
-  }, [handoffAuthToken, orgFriendlyId, agentId]);
-
-  const handoffMessages: HandoffChatMessage[] = useMemo(() => {
-    switch (handoffTypeRef.current) {
-      case "zendesk":
-        return messages
-          .filter((message) => ["USER", "bot"].includes(message.type))
-          .map((message) => {
-            return {
-              author: {
-                type: isChatUserMessage(message) ? "user" : "business",
-              },
-              content: {
-                type: "text",
-                text: isChatUserMessage(message)
-                  ? message.text
-                  : isBotMessage(message)
-                    ? message.responses
-                        .map((response: any) => response.text)
-                        .join("")
-                    : "",
-              },
-            };
-          });
-      case "front":
-        return messages
-          .filter((message) => ["USER", "bot"].includes(message.type))
-          .map((message: any) => {
-            return {
-              author: {
-                type: isChatUserMessage(message) ? "user" : "business",
-              },
-              content: {
-                type: "text",
-                text: isChatUserMessage(message)
-                  ? message.text
-                  : isBotMessage(message)
-                    ? message.responses
-                        .map((response: any) => response.text)
-                        .join("")
-                    : "",
-              },
-              timestamp: message.timestamp,
-              mavenContext: {
-                conversationId: mavenConversationId,
-                conversationMessageId: {
-                  referenceId: message?.conversationMessageId?.referenceId,
-                },
-              },
-            };
-          });
-      case "salesforce":
-      case null:
-      default:
-        return [];
-    }
-  }, [messages]);
+  }, [handoffAuthToken, organizationId, agentId]);
 
   const handleHandoffChatEvent = useCallback(
     (event: ZendeskWebhookMessage | Front.WebhookMessage) => {
-      switch (handoffTypeRef.current) {
-        case "zendesk": {
-          const zEvent = event as ZendeskWebhookMessage;
-          const payload = zEvent.payload;
-          const author = payload?.message?.author;
-          if (author?.type === "user") {
-            return;
-          }
+      if (!strategyRef.current) return;
 
-          if (author?.type === "business" && author.displayName) {
-            setAgentName(author.displayName);
-          }
+      const { agentName: newAgentName, formattedEvent } =
+        strategyRef.current.handleChatEvent(event);
 
-          const eventWithTimestamp = {
-            ...event,
-            type: "handoff-zendesk",
-            timestamp: new Date(zEvent.createdAt).getTime(),
-          };
-          setHandoffChatEvents((prev) => [...prev, eventWithTimestamp]);
-          break;
+      if (formattedEvent) {
+        if (newAgentName) {
+          setAgentName(newAgentName);
         }
-        case "front": {
-          const fEvent = event as Front.WebhookMessage;
-          setAgentName(
-            `${fEvent.author.first_name} ${fEvent.author.last_name}`.trim(),
-          );
-          setHandoffChatEvents((prev) => [
-            ...prev,
-            {
-              ...fEvent,
-              type: "front-agent",
-              timestamp: Math.trunc(fEvent.created_at * 1000),
-            },
-          ]);
-          break;
-        }
-        case "salesforce":
-        case null:
-        default:
-          break;
+        setHandoffChatEvents((prev) => [...prev, formattedEvent]);
       }
     },
-    [setHandoffChatEvents],
+    [],
   );
 
   const streamResponse = useCallback(async function* (
@@ -215,20 +130,9 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
         for (const event of events) {
           if (event.startsWith("data: ")) {
             try {
-              const jsonData: ChatEvent = JSON.parse(event.slice(6));
-              const currentHandoffType = handoffTypeRef.current ?? "";
-              const messageType = jsonData.message.type ?? "";
-              switch (`${currentHandoffType}-${messageType}`) {
-                case "zendesk-conversation:message":
-                  yield jsonData.message as ZendeskWebhookMessage;
-                  break;
-                case "front-custom":
-                  yield jsonData.message as Front.WebhookMessage;
-                  break;
-                case "salesforce":
-                case null:
-                default:
-                  break;
+              const jsonData = JSON.parse(event.slice(6));
+              if (jsonData.message.type !== "keep-alive") {
+                yield jsonData.message;
               }
             } catch (error) {
               console.error("Error parsing JSON:", error);
@@ -243,16 +147,19 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
 
   const getOrCreateUserAndConversation = useCallback(
     async (email?: string) => {
-      if (!handoffTypeRef.current) {
-        throw new Error("Handoff type is not set");
+      if (!strategyRef.current) {
+        throw new Error("Handoff strategy is not set");
       }
 
       const response = await fetch(
-        `/api/${handoffTypeRef.current}/conversations`,
+        strategyRef.current.getConversationsEndpoint,
         {
           method: "POST",
           body: JSON.stringify({
-            messages: handoffMessages,
+            messages: strategyRef.current.formatMessages(
+              messages,
+              mavenConversationId,
+            ),
             signedUserData,
             email,
           }),
@@ -272,7 +179,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
 
       setHandoffAuthToken(handoffAuthToken);
     },
-    [handoffMessages, signedUserData, generatedHeaders],
+    [messages, signedUserData, generatedHeaders, mavenConversationId],
   );
 
   const handleEndHandoff = useCallback(async () => {
@@ -289,11 +196,11 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
 
     void setHandoffStatus(HandoffStatus.NOT_INITIALIZED);
 
-    if (!handoffAuthToken || !handoffTypeRef.current) {
+    if (!handoffAuthToken || !strategyRef.current) {
       return;
     }
 
-    void fetch(`/api/${handoffTypeRef.current}/conversations/passControl`, {
+    void fetch(`${strategyRef.current.getMessagesEndpoint}/passControl`, {
       method: "POST",
       headers: generatedHeaders,
       body: JSON.stringify({ signedUserData }),
@@ -307,7 +214,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
   ]);
 
   const getMessages = useCallback(async () => {
-    if (!handoffAuthToken || !handoffTypeRef.current) {
+    if (!handoffAuthToken || !strategyRef.current) {
       return;
     }
 
@@ -322,7 +229,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
     const newAbortController = resetAbortController();
 
     try {
-      const response = await fetch(`/api/${handoffTypeRef.current}/messages`, {
+      const response = await fetch(strategyRef.current.getMessagesEndpoint, {
         method: "GET",
         headers: generatedHeaders,
         signal: newAbortController.signal,
@@ -330,7 +237,6 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
 
       for await (const event of streamResponse(response)) {
         if (newAbortController.signal.aborted) break;
-        if (event.type === "keep-alive") continue; // Ignore keep-alive messages
         handleHandoffChatEvent(event);
       }
     } catch (error) {
@@ -342,7 +248,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
       }
     } finally {
       setIsConnected(false);
-      // Attempt to reconnect after 5 seconds
+      // Attempt to reconnect after interval
       if (handoffStatusRef.current === HandoffStatus.INITIALIZED) {
         reconnectTimeoutRef.current = setTimeout(() => {
           void getMessages();
@@ -359,8 +265,8 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
 
   const initializeHandoff = useCallback(
     async ({ email }: { email?: string }): Promise<void> => {
-      if (!handoffTypeRef.current) {
-        console.error("Handoff type is not set");
+      if (!strategyRef.current) {
+        console.error("Handoff strategy is not set");
         return;
       }
 
@@ -373,7 +279,7 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
         void handleEndHandoff();
       }
     },
-    [getOrCreateUserAndConversation, signedUserData, handleEndHandoff],
+    [getOrCreateUserAndConversation, handleEndHandoff],
   );
 
   useEffect(() => {
@@ -407,11 +313,11 @@ export function useHandoff({ messages, mavenConversationId }: HandoffProps) {
         } as UserChatMessage,
       ]);
 
-      if (!handoffAuthToken || !handoffTypeRef.current) {
+      if (!handoffAuthToken || !strategyRef.current) {
         return;
       }
 
-      const response = await fetch(`/api/${handoffTypeRef.current}/messages`, {
+      const response = await fetch(strategyRef.current.getMessagesEndpoint, {
         method: "POST",
         body: JSON.stringify({ message, signedUserData }),
         headers: generatedHeaders,

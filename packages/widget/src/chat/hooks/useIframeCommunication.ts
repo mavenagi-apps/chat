@@ -9,6 +9,8 @@ import {
 enum MAVEN_MESSAGE_TYPES {
   USER_DATA = "USER_DATA",
   SIGNED_USER_DATA = "SIGNED_USER_DATA",
+  UNSIGNED_USER_DATA = "UNSIGNED_USER_DATA",
+  CUSTOM_DATA = "CUSTOM_DATA",
   MAVEN_LOADED = "MAVEN_LOADED",
 }
 
@@ -16,26 +18,43 @@ type SignedUserDataMessage = {
   type: MAVEN_MESSAGE_TYPES.SIGNED_USER_DATA;
   data: string;
 };
+
+type UnsignedUserDataMessage = {
+  type: MAVEN_MESSAGE_TYPES.UNSIGNED_USER_DATA;
+  data: Record<string, any>;
+};
+
+type CustomDataMessage = {
+  type: MAVEN_MESSAGE_TYPES.CUSTOM_DATA;
+  data: Record<string, any>;
+};
+
 interface LegacyMessageEvent extends MessageEvent {
   message?: any; // Support for older browsers
 }
 
 export function useIframeCommunication({
-  orgFriendlyId,
-  agentFriendlyId,
+  organizationId,
+  agentId,
   signedUserData,
+  unsignedUserData,
+  customData,
   isWide,
   isOpen,
 }: {
-  orgFriendlyId: string;
-  agentFriendlyId: string;
+  organizationId: string;
+  agentId: string;
   signedUserData?: string | null;
+  unsignedUserData?: Record<string, any> | null;
+  customData?: Record<string, any> | null;
   isWide: boolean;
   isOpen: boolean;
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const messageQueue = useRef<SignedUserDataMessage[]>([]);
+  const messageQueue = useRef<
+    (SignedUserDataMessage | UnsignedUserDataMessage | CustomDataMessage)[]
+  >([]);
 
   const iframeUrl = useMemo((): string => {
     const currentDomain = window.location.hostname;
@@ -45,10 +64,10 @@ export function useIframeCommunication({
     const iframeDomain = isLocalEnvironment
       ? `${currentDomain || "localhost"}:${window.location.port}`
       : __IFRAME_DOMAIN__;
-    let iframeUrl = `${iframeProtocol}://${iframeDomain}/${orgFriendlyId}/${agentFriendlyId}`;
+    let iframeUrl = `${iframeProtocol}://${iframeDomain}/${organizationId}/${agentId}`;
 
     return iframeUrl;
-  }, [orgFriendlyId, agentFriendlyId]);
+  }, [organizationId, agentId]);
 
   const iframeStyle = useMemo(() => {
     return {
@@ -72,7 +91,12 @@ export function useIframeCommunication({
   }, [isWide, isOpen]);
 
   const postMessageToIframe = useCallback(
-    (message: SignedUserDataMessage) => {
+    (
+      message:
+        | SignedUserDataMessage
+        | UnsignedUserDataMessage
+        | CustomDataMessage,
+    ) => {
       if (isLoaded && iframeRef.current?.contentWindow) {
         iframeRef.current.contentWindow.postMessage(message, "*");
       } else {
@@ -83,12 +107,31 @@ export function useIframeCommunication({
   );
 
   useEffect(() => {
-    if (signedUserData) {
-      postMessageToIframe({
+    const messages = [
+      {
         type: MAVEN_MESSAGE_TYPES.SIGNED_USER_DATA,
         data: signedUserData,
-      });
-    }
+      },
+      {
+        type: MAVEN_MESSAGE_TYPES.UNSIGNED_USER_DATA,
+        data: unsignedUserData,
+      },
+      {
+        type: MAVEN_MESSAGE_TYPES.CUSTOM_DATA,
+        data: customData,
+      },
+    ];
+
+    messages.forEach((message) => {
+      if (message.data) {
+        postMessageToIframe(
+          message as
+            | SignedUserDataMessage
+            | UnsignedUserDataMessage
+            | CustomDataMessage,
+        );
+      }
+    });
   }, [postMessageToIframe]);
 
   useEffect(() => {

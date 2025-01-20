@@ -7,6 +7,7 @@ import React, {
 
 type AuthContextType = {
   signedUserData: string | null;
+  unsignedUserData: Record<string, any> | null;
   isAuthenticated: boolean;
 } | null;
 
@@ -14,13 +15,16 @@ const AuthContext = createContext<AuthContextType>(null);
 
 export const AuthProvider = ({
   signedUserData,
+  unsignedUserData,
   children,
 }: PropsWithChildren<{
   signedUserData: string | null;
+  unsignedUserData: Record<string, any> | null;
 }>) => {
   const isAuthenticated = useMemo(() => !!signedUserData, [signedUserData]);
   const value = {
     signedUserData,
+    unsignedUserData,
     isAuthenticated,
   };
 

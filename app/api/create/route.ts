@@ -30,8 +30,8 @@ import {
 import { type Attachment } from "mavenagi/api";
 
 interface CreateOptions {
-  orgFriendlyId: string;
-  id: string;
+  organizationId: string;
+  agentId: string;
   question: string;
   attachments: Attachment[];
   conversationId: string;

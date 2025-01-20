@@ -19,15 +19,14 @@ export function useAskQuestion({
   askQuestion,
   scrollToLatest,
 }: UseAskQuestionProps) {
-  const { id: agentFriendlyId }: { orgFriendlyId: string; id: string } =
-    useParams();
+  const { agentId }: { organizationId: string; agentId: string } = useParams();
 
   const analytics = useAnalytics();
 
   return useCallback(
     async (question: string, attachments?: Attachment[]) => {
       analytics.logEvent(MagiEvent.chatAskClick, {
-        agentId: agentFriendlyId,
+        agentId: agentId,
         conversationId: conversationId || "",
       });
 
@@ -39,6 +38,6 @@ export function useAskQuestion({
 
       scrollToLatest();
     },
-    [agentFriendlyId, conversationId, analytics, askQuestion, scrollToLatest],
+    [agentId, conversationId, analytics, askQuestion, scrollToLatest],
   );
 }

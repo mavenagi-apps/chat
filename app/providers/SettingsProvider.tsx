@@ -13,13 +13,15 @@ export const SettingsProvider = ({
   children: React.ReactNode;
 }) => {
   const [settings, setSettings] = useState<SettingsContextType>(null);
-  const { orgFriendlyId, id: agentId }: { orgFriendlyId: string; id: string } =
-    useParams();
+  const {
+    organizationId,
+    agentId,
+  }: { organizationId: string; agentId: string } = useParams();
 
   useEffect(() => {
     const loadSettings = async () => {
-      if (orgFriendlyId && agentId) {
-        const appSettings = await getPublicAppSettings(orgFriendlyId, agentId);
+      if (organizationId && agentId) {
+        const appSettings = await getPublicAppSettings(organizationId, agentId);
         setSettings(appSettings);
       } else {
         setSettings(null);
@@ -27,7 +29,7 @@ export const SettingsProvider = ({
     };
 
     void loadSettings();
-  }, [orgFriendlyId, agentId]);
+  }, [organizationId, agentId]);
 
   if (!settings) {
     return (
