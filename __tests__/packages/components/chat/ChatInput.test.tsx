@@ -53,7 +53,7 @@ describe("ChatInput", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockAsk).toHaveBeenCalledWith("test question");
+      expect(mockAsk).toHaveBeenCalledWith("test question", []);
     });
   });
 
