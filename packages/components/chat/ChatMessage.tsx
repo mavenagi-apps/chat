@@ -10,9 +10,6 @@ import EscalationFormDisplay from "@magi/components/chat/EscalationFormDisplay";
 import { showBotAnswer } from "@/lib/chat/chat-helpers";
 import {
   type ActionChatMessage,
-  type ChatEndedMessage,
-  type ChatEstablishedMessage,
-  type HandoffChatMessage,
   isActionChatMessage,
   isBotMessage,
   isEscalationChatMessage,
@@ -21,7 +18,6 @@ import {
   type ZendeskWebhookMessage,
   type ChatEstablishedMessage,
   type ChatEndedMessage,
-
 } from "@/types";
 import { Attachment, type ConversationMessageResponse } from "mavenagi/api";
 import { useTranslations } from "next-intl";
