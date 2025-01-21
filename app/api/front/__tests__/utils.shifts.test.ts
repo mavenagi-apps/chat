@@ -102,7 +102,7 @@ describe("utils.shifts", () => {
 
       for (let index = 0; index < test.length; index++) {
         const [date, shifts, isOpen] = test[index];
-        const frontShifts = shifts.map((shift, i) => {
+        const frontShifts = shifts.map((shift) => {
           return {
             _links: {
               self: "",
