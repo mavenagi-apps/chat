@@ -5,12 +5,12 @@ import { useParams } from "next/dist/client/components/navigation";
 
 interface UseAskQuestionProps {
   conversationId?: string;
-  askQuestion: (params: { text: string; type: "USER" }) => void;
+  addMessage: (params: { text: string; type: "USER" }) => void;
 }
 
 export function useAskQuestion({
   conversationId,
-  askQuestion,
+  addMessage,
 }: UseAskQuestionProps) {
   const { agentId }: { organizationId: string; agentId: string } = useParams();
 
@@ -23,12 +23,12 @@ export function useAskQuestion({
         conversationId: conversationId || "",
       });
 
-      askQuestion({
+      addMessage({
         text: question,
         type: "USER",
       });
     },
-    [agentId, conversationId, analytics, askQuestion],
+    [agentId, conversationId, analytics, addMessage],
   );
 
   return ask;

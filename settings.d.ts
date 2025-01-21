@@ -16,6 +16,8 @@ declare global {
     apiKey: string;
     apiSecret: string;
     appId: string;
+    allowAnonymousHandoff?: boolean;
+    surveyLink?: string;
   };
   type ZendeskHandoffConfiguration = BaseHandoffConfiguration & {
     type: "zendesk";
@@ -27,20 +29,31 @@ declare global {
     type: "front";
     channelName: string;
     host?: string;
-    shiftNames?: string[];
   };
-
-  type SalesForceHandoffConfiguration = BaseHandoffConfiguration & {
+  type SalesforceHandoffConfiguration = {
     type: "salesforce";
+    orgId: string;
+    chatHostUrl: string;
+    chatButtonId: string;
+    deploymentId: string;
+    eswLiveAgentDevName: string;
+    allowAnonymousHandoff?: boolean;
+    apiSecret: string;
+    surveyLink?: string;
   };
 
   type HandoffConfiguration =
     | ZendeskHandoffConfiguration
     | FrontHandoffConfiguration
-    | SalesForceHandoffConfiguration;
+    | SalesforceHandoffConfiguration;
 
   interface ClientSafeAppSettings extends Partial<AppSettings> {
-    handoffConfiguration?: { type: HandoffConfiguration["type"] } | undefined;
+    handoffConfiguration?:
+      | {
+          type: HandoffConfiguration["type"];
+          surveyLink?: string;
+        }
+      | undefined;
   }
 
   interface ParsedAppSettings extends AppSettings {

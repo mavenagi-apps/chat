@@ -36,7 +36,17 @@
     },
     "Handoff": {
       "connected_to_agent": "Connecté avec l'agent",
-      "chat_has_ended": "Le chat est terminé"
+      "connecting_to_agent": "Connexion à un agent en direct...",
+      "chat_has_ended": "Le chat est terminé",
+      "chat_queue_position": "Vous êtes en position {position} dans la file d'attente. Vous serez connecté à un agent sous peu.",
+      "chat_queue_position_next": "Vous êtes le prochain dans la file d'attente. Votre agent sera avec vous sous peu.",
+      "chat_queue_position_in_queue": "Vous êtes dans la file d'attente. Veuillez attendre l'agent disponible suivant.",
+      "chat_queue_position_estimated_wait_time": "Votre temps d'attente estimé est de {estimatedWaitTime} secondes.",
+      "chat_queue_position_estimated_wait_time_singular": "Votre temps d'attente estimé est de {estimatedWaitTime} seconde."
+    },
+    "IdleMessage": {
+      "idle_message": "Nous sommes là pour vous aider. Veuillez poser une question.",
+      "idle_message_with_survey": "Merci de nous avoir contacté. Pouvez-vous remplir ce [sondage]({surveyLink}?chatKey={conversationId}{additionalUrlParams}) pour nous parler de votre expérience ?"
     },
     "ChatInput": {
       "see_more": "Voir plus",
