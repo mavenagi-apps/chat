@@ -10,6 +10,7 @@ import {
 import { HandoffStatus } from "@/app/constants/handoff";
 import { useChat } from "@magi/components/chat/use-chat";
 import { useHandoff } from "@/lib/useHandoff";
+import { useScrollToBottom } from "@/lib/useScrollToBottom";
 
 let chatMessages = [] as Message[];
 let handoffMessages = [] as (
@@ -17,6 +18,9 @@ let handoffMessages = [] as (
   | IncomingHandoffEvent
   | IncomingHandoffConnectionEvent
 )[];
+
+vi.mock("@/lib/useScrollToBottom");
+const useScrollToBottomMock = vi.mocked(useScrollToBottom);
 
 vi.mock("@magi/components/chat/use-chat");
 const useChatMock = vi.mocked(useChat);
@@ -38,17 +42,14 @@ vi.mock("@/lib/useAskQuestion", () => ({
   }),
 }));
 
-let mockScrollToLatest = vi.fn();
-vi.mock("@/lib/useScrollToLatest", () => ({
-  useScrollToLatest: () => ({
-    scrollToLatest: mockScrollToLatest,
-    latestChatBubbleRef: { current: null },
-  }),
-}));
-
 describe("ChatPage", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    useScrollToBottomMock.mockReturnValue([
+      { current: null },
+      { current: null },
+    ] as const);
+
     useChatMock.mockReturnValue({
       messages: chatMessages,
       isLoading: false,
@@ -171,25 +172,6 @@ describe("ChatPage", () => {
           expect(getAllChatBubbles[index]).toHaveTextContent(text);
         });
       });
-    });
-  });
-
-  describe("scroll behavior", () => {
-    beforeEach(() => {
-      chatMessages = [
-        { timestamp: 100, text: "First message", type: "USER" },
-        { timestamp: 300, text: "Third message", type: "USER" },
-      ];
-    });
-
-    test("should call scrollToLatest when messages change", () => {
-      render(<ChatPage />);
-      expect(mockScrollToLatest).toHaveBeenCalledTimes(1);
-
-      chatMessages.push({ timestamp: 500, text: "New message", type: "USER" });
-
-      render(<ChatPage />);
-      expect(mockScrollToLatest).toHaveBeenCalledTimes(2);
     });
   });
 });

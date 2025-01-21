@@ -16,7 +16,7 @@ import { ChatHeader } from "@magi/components/chat/ChatHeader";
 import { WelcomeMessage } from "@magi/components/chat/WelcomeChatMessage";
 import { ChatMessages } from "@magi/components/chat/ChatMessages";
 import { useAskQuestion } from "@/lib/useAskQuestion";
-import { useScrollToLatest } from "@/lib/useScrollToLatest";
+import { useScrollToBottom } from "@/lib/useScrollToBottom";
 import { useHandoff } from "@/lib/useHandoff";
 import { HandoffStatus } from "@/app/constants/handoff";
 import { PoweredByMaven } from "@magi/components/chat/PoweredByMaven";
@@ -26,6 +26,8 @@ function ChatPage() {
   const analytics = useAnalytics();
   const { agentId }: { organizationId: string; agentId: string } = useParams();
   const { brandColor, logoUrl } = useSettings();
+  const [messagesContainerRef, messagesEndRef] =
+    useScrollToBottom<HTMLDivElement>();
 
   // Maven chat logic
   const {
@@ -37,12 +39,9 @@ function ChatPage() {
     mavenUserId,
   } = useChat();
 
-  const { scrollToLatest, latestChatBubbleRef } = useScrollToLatest();
-
   const ask = useAskQuestion({
     conversationId,
     askQuestion,
-    scrollToLatest,
   });
 
   const {
@@ -58,7 +57,7 @@ function ChatPage() {
   });
 
   useEffect(() => {
-    analytics.logEvent(MagiEvent.chatHomeView, { agentId: agentId });
+    analytics.logEvent(MagiEvent.chatHomeView, { agentId });
   }, [agentId, analytics]);
 
   const combinedMessages: CombinedMessage[] = useMemo(() => {
@@ -70,9 +69,6 @@ function ChatPage() {
       .sort((a, b) => a.timestamp - b.timestamp);
   }, [messages, handoffChatEvents]);
 
-  useEffect(() => {
-    scrollToLatest();
-  }, [combinedMessages.length, scrollToLatest]);
   const isHandoff = handoffStatus === HandoffStatus.INITIALIZED;
 
   return (
@@ -88,7 +84,10 @@ function ChatPage() {
         handleEndHandoff={handleEndHandoff}
       >
         <div className="flex flex-1 flex-col overflow-auto text-xs">
-          <div className="mx-auto w-full max-w-3xl flex-1 text-gray-800 sm:mt-5 sm:px-5">
+          <div
+            ref={messagesContainerRef}
+            className="mx-auto w-full max-w-3xl flex-1 text-gray-800 sm:mt-5 sm:px-5"
+          >
             <WelcomeMessage agentId={agentId} conversationId={conversationId} />
 
             <ChatMessages
@@ -96,8 +95,12 @@ function ChatPage() {
               isLoading={isLoading}
               isResponseAvailable={isResponseAvailable || false}
               conversationId={conversationId}
-              ref={latestChatBubbleRef}
               mavenUserId={mavenUserId}
+            />
+
+            <div
+              ref={messagesEndRef}
+              className="shrink-0 min-w-[24px] min-h-[24px]"
             />
           </div>
 
