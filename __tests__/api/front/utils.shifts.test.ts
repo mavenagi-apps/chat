@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isShiftActive } from "../utils";
+import { isShiftActive } from "@/app/api/front/utils";
 import { DateTime } from "luxon";
 
 const shift_9_to_5 = {
