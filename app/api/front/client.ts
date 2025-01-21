@@ -45,6 +45,10 @@ export class FrontCoreClient {
     return await this.fetchPagedResource<Front.Inbox>("/inboxes", params);
   };
 
+  public shifts = async (params?: Front.PagedEndpointParams) => {
+    return await this.fetchPagedResource<Front.Shift>("/shifts", params);
+  };
+
   public async importMessage(inboxId: string, message: Front.ImportedMessage) {
     const url = new URL(`/inboxes/${inboxId}/imported_messages`, this.host);
 
