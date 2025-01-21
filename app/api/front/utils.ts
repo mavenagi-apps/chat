@@ -114,6 +114,22 @@ async function searchPages<T extends Front.PagedResource>(
   return item;
 }
 
+async function searchPagesMany<T extends Front.PagedResource>(
+  loader: (params?: Front.PagedEndpointParams) => Promise<Front.List<T>>,
+  predicate: (resource: T) => boolean,
+) {
+  let next: string | null = "";
+  const results: T[] = [];
+
+  while (next !== null) {
+    const items = await loader({ next });
+    results.push(...items._results.filter(predicate));
+    next = items._pagination.next;
+  }
+
+  return results;
+}
+
 async function findChannel(
   client: FrontCoreClient,
   channelName: string,
@@ -131,6 +147,15 @@ export async function findInbox(
   return searchPages(client.inboxes, (inbox) => inbox.name === inboxName);
 }
 
+export async function findShifts(
+  client: FrontCoreClient,
+  shiftNames: string[],
+): Promise<Front.Shift[]> {
+  const shiftNamesSet = new Set(shiftNames);
+  return searchPagesMany(client.shifts, (shift) =>
+    shiftNamesSet.has(shift.name),
+  );
+}
 export async function createApplicationChannelClient(
   config: FrontHandoffConfiguration,
 ) {

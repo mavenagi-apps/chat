@@ -136,6 +136,32 @@ export namespace Front {
     type: string;
   };
 
+  interface Range {
+    start: string;
+    end: string;
+  }
+
+  export type ShiftDays = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+
+  export type Shift = PagedResource & {
+    _links: {
+      self: string;
+      related: {
+        teammates: string;
+        owner: string;
+      };
+    };
+    id: string;
+    name: string;
+    color: string;
+    timezone: string;
+    times: {
+      [key in ShiftDays]?: Range;
+    };
+    created_at: number;
+    updated_at: number;
+  };
+
   export type Pagination = {
     limit: number;
     next: string | null;
