@@ -1,5 +1,4 @@
-import { Front } from "@/types/front";
-import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { isShiftActive } from "../utils";
 import { DateTime } from "luxon";
 
