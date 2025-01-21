@@ -119,7 +119,7 @@ async function searchPagesMany<T extends Front.PagedResource>(
   predicate: (resource: T) => boolean,
 ) {
   let next: string | null = "";
-  let results: T[] = [];
+  const results: T[] = [];
 
   while (next !== null) {
     const items = await loader({ next });
