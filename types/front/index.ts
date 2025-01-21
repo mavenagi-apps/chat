@@ -141,6 +141,8 @@ export namespace Front {
     end: string;
   }
 
+  export type ShiftDays = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+
   export type Shift = PagedResource & {
     _links: {
       self: string;
@@ -154,13 +156,7 @@ export namespace Front {
     color: string;
     timezone: string;
     times: {
-      mon?: Range;
-      tue?: Range;
-      wed?: Range;
-      thu?: Range;
-      fri?: Range;
-      sat?: Range;
-      sun?: Range;
+      [key in ShiftDays]?: Range;
     };
     created_at: number;
     updated_at: number;
