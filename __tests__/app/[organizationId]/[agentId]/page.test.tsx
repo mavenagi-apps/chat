@@ -2,24 +2,20 @@ import { render, screen } from "@testing-library/react";
 import ChatPage from "@/app/[organizationId]/[agentId]/page";
 import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
 import {
-  ChatEndedMessage,
-  ChatEstablishedMessage,
   Message,
   UserChatMessage,
-  ZendeskWebhookMessage,
+  IncomingHandoffEvent,
+  IncomingHandoffConnectionEvent,
 } from "@/types";
-import { Front } from "@/types/front";
 import { HandoffStatus } from "@/app/constants/handoff";
 import { useChat } from "@magi/components/chat/use-chat";
 import { useHandoff } from "@/lib/useHandoff";
 
 let chatMessages = [] as Message[];
 let handoffMessages = [] as (
-  | ZendeskWebhookMessage
-  | Front.WebhookMessage
-  | ChatEstablishedMessage
   | UserChatMessage
-  | ChatEndedMessage
+  | IncomingHandoffEvent
+  | IncomingHandoffConnectionEvent
 )[];
 
 vi.mock("@magi/components/chat/use-chat");

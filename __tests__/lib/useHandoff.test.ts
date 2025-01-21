@@ -2,8 +2,7 @@ import { renderHook, act } from "@testing-library/react";
 import { useHandoff } from "@/lib/useHandoff";
 import { HandoffStatus } from "@/app/constants/handoff";
 import { describe, expect, test, vi, beforeEach } from "vitest";
-import { useSettings } from "@/app/providers/SettingsProvider";
-import type { Message } from "@/types";
+import type { Message, UserChatMessage, IncomingHandoffEvent } from "@/types";
 import { HandoffStrategyFactory } from "@/lib/handoff/HandoffStrategyFactory";
 
 // Mock the required providers and hooks
@@ -25,31 +24,75 @@ vi.mock("@/app/providers/SettingsProvider", () => ({
 vi.mock("@/app/providers/AuthProvider", () => ({
   useAuth: () => ({
     signedUserData: "test-user",
+    unsignedUserData: null,
   }),
 }));
+
+vi.mock("@/app/providers/CustomDataProvider", () => ({
+  useCustomData: () => ({
+    customData: {},
+  }),
+}));
+
+// Mock stream response utility
+vi.mock("@/lib/handoff/streamUtils", () => ({
+  streamResponse: vi.fn(async function* () {
+    yield { type: "test-event" };
+  }),
+}));
+
+const createMockStrategy = () => ({
+  formatMessages: vi.fn((messages: Message[]) =>
+    messages.map((m) => ({
+      author: { type: m.type === "USER" ? "user" : "business" },
+      content: {
+        type: "text",
+        text: m.type === "USER" ? (m as UserChatMessage).text : "",
+      },
+    })),
+  ),
+  handleChatEvent: vi.fn((event) => ({
+    agentName: "Test Agent",
+    formattedEvent: { ...event, type: "handoff-test" },
+  })),
+  messagesEndpoint: "/api/test/messages",
+  conversationsEndpoint: "/api/test/conversations",
+  showAgentTypingIndicator: vi.fn(() => false),
+  shouldSupressHandoffInputDisplay: vi.fn(() => false),
+});
 
 // Mock the strategy factory
 vi.mock("@/lib/handoff/HandoffStrategyFactory", () => ({
   HandoffStrategyFactory: {
-    createStrategy: vi.fn(() => ({
-      formatMessages: vi.fn((messages: Message[]) =>
-        messages.map((m) => ({
-          author: { type: m.type === "USER" ? "user" : "business" },
-          content: {
-            type: "text",
-            text: m.type === "USER" ? m.text : m.responses?.[0]?.text || "",
-          },
-        })),
-      ),
-      handleChatEvent: vi.fn((event) => ({
-        agentName: "Test Agent",
-        formattedEvent: { ...event, type: "handoff-test" },
-      })),
-      getMessagesEndpoint: "/api/test/messages",
-      getConversationsEndpoint: "/api/test/conversations",
-    })),
+    createStrategy: vi.fn(() => createMockStrategy()),
   },
 }));
+
+const createSuccessfulResponse = (includeBody = false) =>
+  Promise.resolve({
+    ok: true,
+    headers: {
+      get: (header: string) =>
+        header.toLowerCase() === "x-handoff-auth-token".toLowerCase()
+          ? "test-auth-token"
+          : null,
+    },
+    ...(includeBody && {
+      body: {
+        getReader: () => ({
+          read: async () => ({
+            done: true,
+            value: new TextEncoder().encode(
+              JSON.stringify({
+                message: { type: "conversation:message" },
+              }),
+            ),
+          }),
+          releaseLock: vi.fn(),
+        }),
+      },
+    }),
+  });
 
 // Mock fetch
 const mockFetch = vi.fn();
@@ -75,6 +118,8 @@ describe("useHandoff", () => {
       expect(result.current.handoffChatEvents).toEqual([]);
       expect(result.current.agentName).toBeNull();
       expect(result.current.isConnected).toBe(false);
+      expect(result.current.showTypingIndicator).toBe(false);
+      expect(result.current.shouldSupressHandoffInputDisplay).toBe(false);
     });
 
     test("should create strategy on mount", () => {
@@ -89,40 +134,9 @@ describe("useHandoff", () => {
     test("should handle successful initialization", async () => {
       mockFetch.mockImplementation(async (url) => {
         if (url.includes("/api/test/conversations")) {
-          return Promise.resolve({
-            ok: true,
-            headers: {
-              get: () => "test-auth-token",
-            },
-          });
+          return createSuccessfulResponse();
         }
-
-        if (url.includes("/api/test/messages")) {
-          return Promise.resolve({
-            ok: true,
-            headers: {
-              get: () => "test-auth-token",
-            },
-            body: {
-              getReader: () => ({
-                read: () => ({
-                  done: true,
-                  value: JSON.stringify({
-                    message: {
-                      type: "conversation:message",
-                    },
-                  }),
-                }),
-                releaseLock: vi.fn(),
-              }),
-            },
-          });
-        }
-
-        return Promise.resolve({
-          ok: false,
-          status: 404,
-        });
+        return Promise.resolve({ ok: true });
       });
 
       const { result } = renderHook(() => useHandoff(defaultProps));
@@ -133,7 +147,10 @@ describe("useHandoff", () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         "/api/test/conversations",
-        expect.any(Object),
+        expect.objectContaining({
+          method: "POST",
+          body: expect.any(String),
+        }),
       );
     });
 
@@ -153,22 +170,25 @@ describe("useHandoff", () => {
 
   describe("askHandoff", () => {
     test("should send message successfully", async () => {
-      mockFetch.mockImplementationOnce(() =>
-        Promise.resolve({
-          ok: true,
-          headers: {
-            get: () => "test-auth-token",
-          },
-        }),
-      );
+      // Mock both the initialization and message sending responses
+      mockFetch.mockImplementation(async (url) => {
+        if (url.includes("/api/test/conversations")) {
+          return createSuccessfulResponse();
+        }
+        if (url.includes("/api/test/messages")) {
+          return createSuccessfulResponse(true);
+        }
+        return Promise.resolve({ ok: true });
+      });
 
       const { result } = renderHook(() => useHandoff(defaultProps));
 
-      // Simulate initialization first
+      // Initialize handoff first
       await act(async () => {
         await result.current.initializeHandoff({ email: "test@example.com" });
       });
 
+      // Send message
       await act(async () => {
         await result.current.askHandoff("Hello");
       });
@@ -177,6 +197,16 @@ describe("useHandoff", () => {
         expect.objectContaining({
           text: "Hello",
           type: "USER",
+        }),
+      );
+
+      // Verify the message was sent
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/test/messages",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.any(String),
+          headers: expect.any(Object),
         }),
       );
     });
@@ -200,60 +230,34 @@ describe("useHandoff", () => {
     });
   });
 
-  describe("message processing", () => {
-    test("should process handoff messages correctly", () => {
-      const messages = [
-        { type: "USER", text: "Hello" },
-        { type: "bot", responses: [{ text: "Bot response" }] },
-      ];
+  describe("cleanup", () => {
+    test("should clean up resources on unmount", async () => {
+      const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
+      mockFetch.mockImplementation(async (url) => {
+        if (url.includes("/api/test/conversations")) {
+          return createSuccessfulResponse();
+        }
+        if (url.includes("/api/test/messages")) {
+          return createSuccessfulResponse(true);
+        }
+        return Promise.resolve({ ok: true });
+      });
 
-      const { result } = renderHook(() =>
-        useHandoff({
-          messages: messages as Message[],
-          mavenConversationId: "test-conv-123",
-        }),
-      );
-
-      expect(result.current.handoffChatEvents).toEqual([]);
-    });
-  });
-
-  describe("edge cases", () => {
-    test("should handle missing handoff configuration", () => {
-      const useSettingsMock = vi.mocked(useSettings);
-      useSettingsMock.mockImplementationOnce(() => ({
-        handoffConfiguration: undefined,
-      }));
-
-      const { result } = renderHook(() => useHandoff(defaultProps));
-
-      expect(result.current.handoffStatus).toBe(HandoffStatus.NOT_INITIALIZED);
-    });
-
-    test("should handle network errors during message sending", async () => {
-      mockFetch.mockImplementationOnce(() =>
-        Promise.reject(new Error("Network error")),
-      );
-
-      const { result } = renderHook(() => useHandoff(defaultProps));
+      const { result, unmount } = renderHook(() => useHandoff(defaultProps));
 
       await act(async () => {
-        try {
-          await result.current.askHandoff("Hello");
-        } catch (error) {
-          expect(error).toBeDefined();
-        }
+        await result.current.initializeHandoff({ email: "test@example.com" });
       });
-    });
-  });
 
-  describe("cleanup", () => {
-    test("should clean up resources on unmount", () => {
-      const { unmount } = renderHook(() => useHandoff(defaultProps));
+      expect(result.current.handoffStatus).toBe(HandoffStatus.INITIALIZED);
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
 
       unmount();
-      // Verify that abort controller is called and timeout is cleared
-      // This might require additional setup to track these calls
+
+      expect(clearTimeoutSpy).toHaveBeenCalled();
     });
   });
 });

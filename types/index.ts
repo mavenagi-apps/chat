@@ -5,6 +5,12 @@ import {
 
 import type { ZendeskWebhookMessage } from "@/types/zendesk";
 import type { Front } from "./front";
+import { SalesforceChatMessage } from "./salesforce";
+
+type IncomingHandoffEvent =
+  | SalesforceChatMessage
+  | ZendeskWebhookMessage
+  | Front.WebhookMessage;
 
 interface VerifiedUserData {
   firstName: string;
@@ -37,6 +43,63 @@ type ChatEndedMessage = {
   timestamp: number;
 };
 
+type ChatConnectingMessage = {
+  type: "ChatConnecting";
+  timestamp: number;
+};
+
+type ChatTransferredMessage = {
+  type: "ChatTransferred";
+  message: {
+    name: string;
+    userId: string;
+    sneakPeakEnabled: boolean;
+    isTransferToBot: boolean;
+    chasitorIdleTimeout: {
+      isEnabled: boolean;
+      warningTime: number;
+      timeout: number;
+    };
+  };
+  timestamp: number;
+};
+
+type QueueUpdateMessage = {
+  type: "QueueUpdate";
+  timestamp: number;
+  message: {
+    estimatedWaitTime: number;
+    position: number;
+  };
+};
+
+type AgentTypingMessage = {
+  type: "AgentTyping";
+  timestamp: number;
+  message: {
+    name: string;
+    agentId: string;
+  };
+};
+
+type AgentNotTypingMessage = {
+  type: "AgentNotTyping";
+  timestamp: number;
+  message: {
+    name: string;
+    agentId: string;
+  };
+};
+
+type IncomingHandoffConnectionEvent =
+  | ChatEstablishedMessage
+  | ChatEndedMessage
+  | ChatConnectingMessage
+  | ChatTransferredMessage
+  | QueueUpdateMessage
+  | AgentTypingMessage
+  | AgentNotTypingMessage;
+
 type Message = (
   | ConversationMessageResponse
   | ActionChatMessage
@@ -44,6 +107,11 @@ type Message = (
 ) & {
   timestamp?: number;
 };
+
+type CombinedMessage =
+  | Message
+  | IncomingHandoffConnectionEvent
+  | IncomingHandoffEvent;
 
 type ZendeskChatMessage = {
   id?: string;
@@ -75,12 +143,7 @@ type HandoffChatMessage = {
 };
 
 const isBotMessage = (
-  message:
-    | Message
-    | ZendeskWebhookMessage
-    | Front.WebhookMessage
-    | ChatEstablishedMessage
-    | ChatEndedMessage,
+  message: Message | IncomingHandoffConnectionEvent | IncomingHandoffEvent,
 ): message is ConversationMessageResponse.Bot =>
   "type" in message && message.type === "bot";
 
@@ -118,4 +181,9 @@ export {
   type ZendeskChatMessage,
   type VerifiedUserData,
   type HandoffChatMessage,
+  type SalesforceChatMessage,
+  type IncomingHandoffEvent,
+  type IncomingHandoffConnectionEvent,
+  type QueueUpdateMessage,
+  type CombinedMessage,
 };
