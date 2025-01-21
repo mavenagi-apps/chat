@@ -11,32 +11,29 @@ interface ChatMessagesProps {
   mavenUserId: string | null;
 }
 
-export const ChatMessages = forwardRef<HTMLDivElement, ChatMessagesProps>(
-  function ChatMessages(
-    { messages, isLoading, isResponseAvailable, conversationId, mavenUserId },
-    ref,
-  ) {
-    return (
-      <>
-        {messages.map((message, index) => (
-          <ChatMessage
-            key={index}
-            message={message}
-            isLastMessage={index === messages.length - 1}
-            latestChatBubbleRef={ref as RefObject<HTMLDivElement>}
-            conversationId={conversationId}
-            mavenUserId={mavenUserId}
-          />
-        ))}
+export function ChatMessages({
+  messages,
+  isLoading,
+  isResponseAvailable,
+  conversationId,
+  mavenUserId,
+}: ChatMessagesProps) {
+  return (
+    <>
+      {messages.map((message, index) => (
+        <ChatMessage
+          key={index}
+          message={message}
+          conversationId={conversationId}
+          mavenUserId={mavenUserId}
+        />
+      ))}
 
-        {isLoading && !isResponseAvailable && (
-          <div className="my-5">
-            <Spinner color={"#000000"} />
-          </div>
-        )}
-      </>
-    );
-  },
-);
-
-ChatMessages.displayName = "ChatMessages";
+      {isLoading && !isResponseAvailable && (
+        <div className="my-5">
+          <Spinner color={"#000000"} />
+        </div>
+      )}
+    </>
+  );
+}
