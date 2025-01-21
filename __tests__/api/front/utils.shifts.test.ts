@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { isShiftActive } from "@/app/api/front/utils";
 import { DateTime } from "luxon";
 
@@ -102,6 +102,7 @@ describe("utils.shifts", () => {
 
       for (let index = 0; index < test.length; index++) {
         const [date, shifts, isOpen] = test[index];
+        vi.setSystemTime(date.toJSDate());
         const frontShifts = shifts.map((shift) => {
           return {
             _links: {
