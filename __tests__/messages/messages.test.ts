@@ -7,7 +7,6 @@ import esJson from "@/messages/es.json";
 
 describe("messages", () => {
   test("should have the correct keys", () => {
-    // create a function that accepts two objects and recursively checks if all keys are present in both objects
     const checkKeys = (obj1: any, obj2: any) => {
       const keys1 = Object.keys(obj1);
       const keys2 = Object.keys(obj2);

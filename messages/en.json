@@ -10,7 +10,6 @@
       "error_rendering_chart": "Error rendering chart",
       "idle_message": "We are here to help you. Please ask a question.",
       "idle_message_with_survey": "Thank you for reaching out. Can you please fill out this [survey]({url}{urlParams}) to tell us about your experience?",
-      "chat_transferred": "Agent {name} has joined the chat",
       "chat_queue_position": "You are in position {position} in the queue. You will be connected to an agent shortly.",
       "chat_queue_position_next": "You are next in line in the queue. Your agent will be with you shortly.",
       "chat_queue_position_in_queue": "You are in the queue. Please wait for the next available agent.",
