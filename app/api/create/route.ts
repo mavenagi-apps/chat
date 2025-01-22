@@ -93,8 +93,13 @@ async function initializeConversation(
     settings.handoffConfiguration?.type,
     settings.handoffConfiguration as HandoffConfiguration,
   );
-  const isHandoffAvailable =
-    (await strategy?.isLiveHandoffAvailable?.()) ?? true;
+  let isHandoffAvailable = false;
+  try {
+    isHandoffAvailable = (await strategy?.isLiveHandoffAvailable?.()) ?? false;
+  } catch (error) {
+    isHandoffAvailable = false;
+    console.error("Error checking handoff availability:", error);
+  }
   const conversationInitializationPayload: MavenAGI.ConversationRequest = {
     conversationId: { referenceId: conversationId },
     messages: [],
