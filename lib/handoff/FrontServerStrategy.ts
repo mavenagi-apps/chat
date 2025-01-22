@@ -1,5 +1,5 @@
 import { createCoreClient, isAnyoneAvailable } from "@/app/api/front/utils";
-import { ServerHandoffStrategy } from "./HandoffStrategy";
+import type { ServerHandoffStrategy } from "./HandoffStrategy";
 
 export class FrontServerStrategy implements ServerHandoffStrategy {
   constructor(private configuration: FrontHandoffConfiguration) {}

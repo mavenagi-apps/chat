@@ -1,6 +1,6 @@
 import { FrontServerStrategy } from "./FrontServerStrategy";
 import type { ServerHandoffStrategy } from "./HandoffStrategy";
-import { HandoffType } from "./HandoffStrategyFactory";
+import type { HandoffType } from "./HandoffStrategyFactory";
 import { SalesforceServerStrategy } from "./SalesforceStrategy";
 import { ZendeskServerStrategy } from "./ZendeskStrategy";
 
@@ -23,6 +23,7 @@ export class ServerHandoffStrategyFactory {
           configuration as SalesForceHandoffConfiguration,
         );
       case null:
+      case undefined:
       default:
         return null;
     }

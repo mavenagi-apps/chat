@@ -17,6 +17,7 @@ export class HandoffStrategyFactory {
       case "salesforce":
         return new SalesforceStrategy();
       case null:
+      case undefined:
       default:
         return null;
     }

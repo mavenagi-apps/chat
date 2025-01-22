@@ -1,7 +1,7 @@
 import {
   type HandoffStrategy,
   MESSAGE_TYPES_FOR_HANDOFF_CREATION,
-  ServerHandoffStrategy,
+  type ServerHandoffStrategy,
 } from "./HandoffStrategy";
 import type {
   Message,

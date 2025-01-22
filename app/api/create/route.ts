@@ -27,8 +27,6 @@ import {
   AUTHENTICATION_HEADER,
   type AuthJWTPayload,
 } from "@/app/constants/authentication";
-import { createCoreClient, isAnyoneAvailable } from "../front/utils";
-import { HandoffStrategyFactory } from "@/lib/handoff/HandoffStrategyFactory";
 import { ServerHandoffStrategyFactory } from "@/lib/handoff/ServerHandoffStrategyFactory";
 interface CreateOptions {
   organizationId: string;
