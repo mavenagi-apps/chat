@@ -130,10 +130,13 @@ export const DELETE = async (
   }
 
   // TODO: track this event in amplitude?
-  console.log(`Received ${request.method} ${request.url} request`, {
-    orgId,
-    agentId,
-  });
+  if (process.env.ENABLE_API_LOGGING) {
+    console.log(`Received ${request.method} ${request.url} request`, {
+      orgId,
+      agentId,
+    });
+  }
+
   return NextResponse.json(
     {
       type: "success",
