@@ -1,6 +1,7 @@
 import {
   type HandoffStrategy,
   MESSAGE_TYPES_FOR_HANDOFF_CREATION,
+  ServerHandoffStrategy,
 } from "./HandoffStrategy";
 import type {
   IncomingHandoffConnectionEvent,
@@ -10,6 +11,7 @@ import type {
 } from "@/types";
 import type { SalesforceChatMessage } from "@/types/salesforce";
 import { SALESFORCE_CHAT_SUBJECT_HEADER_KEY } from "@/types/salesforce";
+
 export class SalesforceStrategy implements HandoffStrategy<Message> {
   readonly messagesEndpoint = "/api/salesforce/messages";
   readonly conversationsEndpoint = "/api/salesforce/conversations";
@@ -67,4 +69,9 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
   shouldSupressHandoffInputDisplay(agentName: string | null): boolean {
     return !agentName;
   }
+}
+
+export class SalesforceServerStrategy implements ServerHandoffStrategy {
+  constructor(private configuration: SalesForceHandoffConfiguration) {}
+  isLiveHandoffAvailable? = () => Promise.resolve(true);
 }

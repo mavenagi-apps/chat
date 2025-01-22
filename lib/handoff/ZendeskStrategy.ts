@@ -1,6 +1,7 @@
 import {
   type HandoffStrategy,
   MESSAGE_TYPES_FOR_HANDOFF_CREATION,
+  ServerHandoffStrategy,
 } from "./HandoffStrategy";
 import type {
   Message,
@@ -57,4 +58,11 @@ export class ZendeskStrategy implements HandoffStrategy {
 
     return { agentName, formattedEvent };
   }
+
+  isLiveHandoffAvailable? = () => Promise.resolve(true);
+}
+
+export class ZendeskServerStrategy implements ServerHandoffStrategy {
+  constructor(private configuration: ZendeskHandoffConfiguration) {}
+  isLiveHandoffAvailable? = () => Promise.resolve(true);
 }

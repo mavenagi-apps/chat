@@ -163,6 +163,10 @@ export async function isAnyoneAvailable(
   client: FrontCoreClient,
   shiftNames: string[],
 ): Promise<boolean> {
+  // TODO: If no shifts are provided, we assume that someone is always available
+  if (!shiftNames.length) {
+    return false;
+  }
   const shifts = await findShifts(client, shiftNames);
   if (!shifts.length) {
     return false;

@@ -68,12 +68,26 @@ const defaultModule = {
       ],
       buttonName: "Connect to live agent",
       precondition: {
-        preconditionType: "conversation",
-        value: {
-          conversationPreconditionType: "metadata",
-          key: "escalation_action_enabled",
-          value: "true",
-        },
+        preconditionType: "group",
+        operator: "AND",
+        preconditions: [
+          {
+            preconditionType: "conversation",
+            value: {
+              conversationPreconditionType: "metadata",
+              key: "escalation_action_enabled",
+              value: "true",
+            },
+          },
+          {
+            preconditionType: "conversation",
+            value: {
+              conversationPreconditionType: "metadata",
+              key: "handoff_available",
+              value: "true",
+            },
+          },
+        ],
       },
     });
   },
