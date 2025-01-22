@@ -29,6 +29,7 @@ declare global {
     type: "front";
     channelName: string;
     host?: string;
+    shiftNames?: string[];
   };
   type SalesforceHandoffConfiguration = {
     type: "salesforce";
