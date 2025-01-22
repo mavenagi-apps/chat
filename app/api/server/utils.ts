@@ -40,7 +40,7 @@ export async function getAppSettings(
   const handoffConfiguration =
     settings?.handoffConfiguration as unknown as HandoffConfiguration;
   if (handoffConfiguration?.type === "front") {
-    handoffConfiguration.channelName = `${organizationId}-${agentId}`;
+    handoffConfiguration.channelName ??= `${organizationId}-${agentId}`;
   }
 
   return settings as ParsedAppSettings;
