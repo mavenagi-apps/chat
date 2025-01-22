@@ -117,7 +117,10 @@ describe("POST /api/create", () => {
           isCopilot: false,
           responseLength: MavenAGI.ResponseLength.Medium,
         },
-        metadata: { escalation_action_enabled: "true" },
+        metadata: {
+          escalation_action_enabled: "true",
+          handoff_available: "false",
+        },
       });
     });
   };

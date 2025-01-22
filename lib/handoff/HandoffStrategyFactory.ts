@@ -3,7 +3,7 @@ import { ZendeskStrategy } from "./ZendeskStrategy";
 import { FrontStrategy } from "./FrontStrategy";
 import { SalesforceStrategy } from "./SalesforceStrategy";
 
-export type HandoffType = "zendesk" | "front" | "salesforce" | null;
+export type HandoffType = "zendesk" | "front" | "salesforce" | null | undefined;
 
 export class HandoffStrategyFactory {
   static createStrategy(
@@ -17,6 +17,7 @@ export class HandoffStrategyFactory {
       case "salesforce":
         return new SalesforceStrategy();
       case null:
+      case undefined:
       default:
         return null;
     }

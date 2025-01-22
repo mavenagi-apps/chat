@@ -28,6 +28,10 @@ export interface HandoffStrategy<T = HandoffChatMessage> {
   shouldSupressHandoffInputDisplay?: (agentName: string | null) => boolean;
 }
 
+export interface ServerHandoffStrategy {
+  isLiveHandoffAvailable?: () => Promise<boolean>;
+}
+
 export interface HandoffContext {
   messages: Message[];
   mavenConversationId: string;
