@@ -1,5 +1,3 @@
-import { forwardRef, RefObject } from "react";
-
 import { CombinedMessage } from "@/types";
 import { ChatMessage } from "@magi/components/chat/ChatMessage";
 import Spinner from "@magi/components/Spinner";
