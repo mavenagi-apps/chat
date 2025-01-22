@@ -21,6 +21,7 @@ import { useHandoff } from "@/lib/useHandoff";
 import { HandoffStatus } from "@/app/constants/handoff";
 import { PoweredByMaven } from "@magi/components/chat/PoweredByMaven";
 import type { CombinedMessage } from "@/types";
+import { TypingIndicator } from "@magi/components/chat/TypingIndicator";
 
 function ChatPage() {
   const analytics = useAnalytics();
@@ -31,26 +32,28 @@ function ChatPage() {
 
   // Maven chat logic
   const {
-    messages,
+    addMessage,
+    conversationId,
     isLoading,
     isResponseAvailable,
-    askQuestion,
-    conversationId,
     mavenUserId,
+    messages,
   } = useChat();
 
   const ask = useAskQuestion({
+    addMessage,
     conversationId,
-    askQuestion,
   });
 
   const {
-    initializeHandoff,
-    handoffChatEvents,
     agentName,
-    handoffStatus,
     askHandoff,
     handleEndHandoff,
+    handoffChatEvents,
+    handoffStatus,
+    initializeHandoff,
+    shouldSupressHandoffInputDisplay,
+    showTypingIndicator,
   } = useHandoff({
     messages,
     mavenConversationId: conversationId,
@@ -75,29 +78,42 @@ function ChatPage() {
     <main className="flex h-screen flex-col bg-gray-50">
       <ChatHeader logoUrl={logoUrl} />
       <Chat
-        brandColor={brandColor}
-        messages={combinedMessages}
-        askFn={handoffStatus === HandoffStatus.INITIALIZED ? askHandoff : ask}
-        initializeHandoff={initializeHandoff}
-        agentName={agentName}
-        isHandoff={isHandoff}
-        handleEndHandoff={handleEndHandoff}
+        {...{
+          addMessage,
+          agentName,
+          ask: handoffStatus === HandoffStatus.INITIALIZED ? askHandoff : ask,
+          brandColor,
+          conversationId,
+          handleEndHandoff,
+          initializeHandoff,
+          isHandoff,
+          messages: combinedMessages,
+          shouldSupressHandoffInputDisplay,
+        }}
       >
         <div className="flex flex-1 flex-col overflow-auto text-xs">
           <div
             ref={messagesContainerRef}
             className="mx-auto w-full max-w-3xl flex-1 text-gray-800 sm:mt-5 sm:px-5"
           >
-            <WelcomeMessage agentId={agentId} conversationId={conversationId} />
-
-            <ChatMessages
-              messages={combinedMessages}
-              isLoading={isLoading}
-              isResponseAvailable={isResponseAvailable || false}
-              conversationId={conversationId}
-              mavenUserId={mavenUserId}
+            <WelcomeMessage
+              {...{
+                agentId,
+                conversationId,
+              }}
             />
 
+            <ChatMessages
+              {...{
+                conversationId,
+                isLoading,
+                isResponseAvailable: isResponseAvailable || false,
+                mavenUserId,
+                messages: combinedMessages,
+              }}
+            />
+
+            {showTypingIndicator && <TypingIndicator />}
             <div
               ref={messagesEndRef}
               className="shrink-0 min-w-[24px] min-h-[24px]"
@@ -110,9 +126,9 @@ function ChatPage() {
         </div>
 
         <ChatInput
-          questionPlaceholder={"question_placeholder"}
-          isSubmitting={isLoading}
           data-testid="chat-input"
+          isSubmitting={isLoading}
+          questionPlaceholder={"question_placeholder"}
         />
       </Chat>
     </main>

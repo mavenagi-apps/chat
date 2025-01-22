@@ -57,7 +57,7 @@ describe("useChat", () => {
     } as ChatMessage;
 
     await act(async () => {
-      result.current.askQuestion(userMessage);
+      result.current.addMessage(userMessage);
     });
 
     expect(result.current.messages).toHaveLength(1);
@@ -85,7 +85,7 @@ describe("useChat", () => {
     } as ChatMessage;
 
     await act(async () => {
-      result.current.askQuestion(userMessage);
+      result.current.addMessage(userMessage);
     });
 
     expect(global.fetch).toHaveBeenCalledWith(
@@ -140,7 +140,7 @@ describe("useChat", () => {
     const { result } = renderHook(() => useChat());
 
     await act(async () => {
-      result.current.askQuestion({
+      result.current.addMessage({
         type: "USER",
         text: "Hello",
         timestamp: Date.now(),

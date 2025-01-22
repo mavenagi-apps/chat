@@ -2,20 +2,21 @@ import { render, screen } from "@testing-library/react";
 import ChatPage from "@/app/[organizationId]/[agentId]/page";
 import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
 import {
+  IncomingHandoffConnectionEvent,
   Message,
   UserChatMessage,
   IncomingHandoffEvent,
-  IncomingHandoffConnectionEvent,
 } from "@/types";
 import { HandoffStatus } from "@/app/constants/handoff";
 import { useChat } from "@magi/components/chat/use-chat";
 import { useHandoff } from "@/lib/useHandoff";
 import { useScrollToBottom } from "@/lib/useScrollToBottom";
+import { useIdleMessage } from "@/lib/useIdleMessage";
 
 let chatMessages = [] as Message[];
 let handoffMessages = [] as (
-  | UserChatMessage
   | IncomingHandoffEvent
+  | UserChatMessage
   | IncomingHandoffConnectionEvent
 )[];
 
@@ -28,6 +29,8 @@ const useChatMock = vi.mocked(useChat);
 vi.mock("@/lib/useHandoff");
 const useHandoffMock = vi.mocked(useHandoff);
 
+vi.mock("@/lib/useIdleMessage");
+
 vi.mock("@/lib/useIframeMessaging", () => ({
   useIframeMessaging: () => ({
     loading: false,
@@ -37,7 +40,7 @@ vi.mock("@/lib/useIframeMessaging", () => ({
 
 vi.mock("@/lib/useAskQuestion", () => ({
   useAskQuestion: vi.fn().mockReturnValue({
-    askQuestion: vi.fn(),
+    addMessage: vi.fn(),
     isLoading: false,
   }),
 }));
@@ -45,6 +48,7 @@ vi.mock("@/lib/useAskQuestion", () => ({
 describe("ChatPage", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+
     useScrollToBottomMock.mockReturnValue([
       { current: null },
       { current: null },
@@ -54,7 +58,7 @@ describe("ChatPage", () => {
       messages: chatMessages,
       isLoading: false,
       isResponseAvailable: false,
-      askQuestion: vi.fn(),
+      addMessage: vi.fn(),
       conversationId: "test-conversation-id",
       mavenUserId: "test-maven-user-id",
     });
