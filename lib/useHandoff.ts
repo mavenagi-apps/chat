@@ -23,7 +23,6 @@ import type {
 import { generateHeaders } from "./handoff/headerUtils";
 
 const HANDOFF_RECONNECT_INTERVAL = 500;
-const TYPING_INDICATOR_REFRESH_INTERVAL = 3000;
 
 const initialState: HandoffState = {
   handoffError: null,
@@ -49,7 +48,6 @@ export function useHandoff({
 
   // State
   const [state, setState] = useState<HandoffState>(initialState);
-  const [typingRefreshCounter, setTypingRefreshCounter] = useState(0);
   const handoffStatusRef = useRef<HandoffStatus>(state.handoffStatus);
 
   // Context hooks
@@ -328,23 +326,7 @@ export function useHandoff({
   }, []);
 
   const showTypingIndicator = useMemo(() => {
-    if (!state.agentName) {
-      return false;
-    }
-
-    return (
-      strategyRef.current?.showAgentTypingIndicator?.(
-        state.handoffChatEvents,
-      ) ?? false
-    );
-  }, [state.handoffChatEvents, typingRefreshCounter]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTypingRefreshCounter((prev) => prev + 1);
-    }, TYPING_INDICATOR_REFRESH_INTERVAL);
-
-    return () => clearInterval(interval);
+    return false;
   }, []);
 
   const shouldSupressHandoffInputDisplay = useMemo(() => {

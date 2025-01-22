@@ -18,7 +18,7 @@ export function useScrollToBottom<T extends HTMLElement>(): [
 
       observer.observe(container, {
         childList: true,
-        subtree: true,
+        subtree: false,
         attributes: false,
         characterData: false,
       });
