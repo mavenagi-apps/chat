@@ -20,7 +20,7 @@ export class ServerHandoffStrategyFactory {
         );
       case "salesforce":
         return new SalesforceServerStrategy(
-          configuration as SalesForceHandoffConfiguration,
+          configuration as SalesforceHandoffConfiguration,
         );
       case null:
       case undefined:

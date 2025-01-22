@@ -72,6 +72,6 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
 }
 
 export class SalesforceServerStrategy implements ServerHandoffStrategy {
-  constructor(private configuration: SalesForceHandoffConfiguration) {}
+  constructor(private configuration: SalesforceHandoffConfiguration) {}
   isLiveHandoffAvailable? = () => Promise.resolve(true);
 }
