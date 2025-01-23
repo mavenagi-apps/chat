@@ -52,6 +52,7 @@ describe("FrontStrategy", () => {
               referenceId: "msg-123",
             },
           },
+          timestamp: 123456789,
         },
       ]);
     });
@@ -66,7 +67,7 @@ describe("FrontStrategy", () => {
       expect(formattedEvent).toEqual({
         ...event,
         type: "front-agent",
-        timestamp: 1672531200000,
+        timestamp: 123456789000,
       });
     });
 
@@ -75,7 +76,7 @@ describe("FrontStrategy", () => {
 
       const { agentName, formattedEvent } = strategy.handleChatEvent(event);
       expect(agentName).toBe("Agent");
-      expect(formattedEvent.timestamp).toBe(1672531200000);
+      expect(formattedEvent.timestamp).toBe(123456789000);
     });
   });
 
