@@ -109,6 +109,16 @@ export async function middleware(request: NextRequest) {
         response.headers.set("Content-Security-Policy", security.headers);
         if (process.env.ENABLE_CSP_LOGGING) {
           console.log(request.url, security.headers);
+          console.log("blocked", security.blocked);
+          console.log("supportsCsp", supportsCsp(request));
+          console.log("referrer", request.headers.get("referer"));
+          console.log(
+            "isAllowedDomain",
+            isAllowedDomain(
+              request.headers.get("referer"),
+              appSettings.embedAllowlist || [],
+            ),
+          );
         }
 
         if (security.blocked) {
