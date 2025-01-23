@@ -6,7 +6,7 @@ import { type Attachment } from "mavenagi/api";
 
 interface UseAskQuestionProps {
   conversationId?: string;
-  askQuestion: (params: {
+  addMessage: (params: {
     text: string;
     type: "USER";
     attachments?: Attachment[];
