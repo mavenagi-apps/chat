@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       );
 
       if (!chatSessionInitResponse.ok) {
-        console.log("Failed to initiate chat session", chatSessionInitResponse);
+        console.error("Failed to initiate chat session", chatSessionInitResponse);
         throw new Error("Failed to initiate chat session");
       }
 
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
         },
       );
     } catch (error) {
-      console.log("initiateChatSession failed:", error);
+      console.error("initiateChatSession failed:", error);
       return NextResponse.json(
         { error: "Internal Server Error" },
         { status: 500 },

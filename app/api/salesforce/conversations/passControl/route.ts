@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ success: true });
       } catch (error) {
-        console.log("endChatSession failed:", error);
+        console.error("endChatSession failed:", error);
         return NextResponse.json(
           { error: "Internal Server Error" },
           { status: 500 },
