@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       );
 
       if (!chatSessionInitResponse.ok) {
-        console.log("Failed to initiate chat session", chatSessionInitResponse);
+        console.error("Failed to initiate chat session", chatSessionInitResponse);
         throw new Error("Failed to initiate chat session");
       }
 
