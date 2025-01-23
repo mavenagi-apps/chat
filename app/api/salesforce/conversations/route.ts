@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
         },
       );
     } catch (error) {
-      console.log("initiateChatSession failed:", error);
+      console.error("initiateChatSession failed:", error);
       return NextResponse.json(
         { error: "Internal Server Error" },
         { status: 500 },
