@@ -15,23 +15,20 @@ describe("SalesforceStrategy", () => {
   });
 
   describe("formatMessages", () => {
-    it("formats user messages correctly", () => {
+    it("formats user messages correctly (passthrough)", () => {
       const messages = [createUserMessage("Hello")];
 
       const formatted = strategy.formatMessages(messages, "conv-123");
       expect(formatted).toEqual([
         {
-          author: { type: "user" },
-          content: { type: "text", text: "Hello" },
+          type: "USER",
+          text: "Hello",
           timestamp: 123456789,
-          mavenContext: {
-            conversationId: "conv-123",
-          },
         },
       ]);
     });
 
-    it("formats bot messages correctly", () => {
+    it("formats bot messages correctly (passthrough)", () => {
       const responses: BotResponse[] = [
         { type: "text", text: "Hi" },
         { type: "text", text: " there" },
@@ -41,15 +38,24 @@ describe("SalesforceStrategy", () => {
       const formatted = strategy.formatMessages(messages, "conv-123");
       expect(formatted).toEqual([
         {
-          author: { type: "business" },
-          content: { type: "text", text: "Hi there" },
-          timestamp: 123456789,
-          mavenContext: {
-            conversationId: "conv-123",
-            conversationMessageId: {
-              referenceId: "msg-123",
-            },
+          botMessageType: "BOT_RESPONSE",
+          conversationMessageId: {
+            agentId: "agent-123",
+            appId: "app-123",
+            organizationId: "org-123",
+            referenceId: "msg-123",
+            type: "CONVERSATION_MESSAGE",
           },
+          metadata: {
+            followupQuestions: [],
+            sources: [],
+          },
+          type: "bot",
+          responses: [
+            { type: "text", text: "Hi" },
+            { type: "text", text: " there" },
+          ],
+          timestamp: 123456789,
         },
       ]);
     });
@@ -63,7 +69,7 @@ describe("SalesforceStrategy", () => {
       expect(agentName).toBe("John Agent");
       expect(formattedEvent).toEqual({
         ...event,
-        type: "handoff-salesforce",
+        type: "ChatTransferred",
         timestamp: expect.any(Number),
       });
     });
@@ -75,7 +81,7 @@ describe("SalesforceStrategy", () => {
       expect(agentName).toBeNull();
       expect(formattedEvent).toEqual({
         ...event,
-        type: "handoff-salesforce",
+        type: "ChatMessage",
         timestamp: expect.any(Number),
       });
     });

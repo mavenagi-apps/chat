@@ -111,6 +111,7 @@ describe("Handoff Strategies", () => {
               referenceId: "msg-123",
             },
           },
+          timestamp: 123456789,
         },
       ]);
     });
@@ -123,7 +124,7 @@ describe("Handoff Strategies", () => {
       expect(formattedEvent).toEqual({
         ...event,
         type: "front-agent",
-        timestamp: 1672531200000,
+        timestamp: 123456789000,
       });
     });
 
@@ -132,7 +133,7 @@ describe("Handoff Strategies", () => {
 
       const { agentName, formattedEvent } = strategy.handleChatEvent(event);
       expect(agentName).toBe("Agent");
-      expect(formattedEvent.timestamp).toBe(1672531200000);
+      expect(formattedEvent.timestamp).toBe(123456789000);
     });
   });
 });
