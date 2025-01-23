@@ -107,6 +107,9 @@ export async function middleware(request: NextRequest) {
 
       if (security.headers) {
         response.headers.set("Content-Security-Policy", security.headers);
+        if (process.env.ENABLE_CSP_LOGGING) {
+          console.log(request.url, security.headers);
+        }
 
         if (security.blocked) {
           return notFound();
