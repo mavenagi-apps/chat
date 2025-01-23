@@ -1,370 +1,263 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSettings } from "@/app/providers/SettingsProvider";
-import { useParams } from "next/dist/client/components/navigation";
-import { useAuth } from "@/app/providers/AuthProvider";
-import { useCustomData } from "@/app/providers/CustomDataProvider";
-import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
-import {
-  type ChatEndedMessage,
-  type IncomingHandoffConnectionEvent,
-  type IncomingHandoffEvent,
-  isChatUserMessage,
-  type UserChatMessage,
-} from "@/types";
+import { renderHook, act } from "@testing-library/react";
+import { useHandoff } from "@/lib/useHandoff";
 import { HandoffStatus } from "@/app/constants/handoff";
-import { HandoffStrategyFactory } from "./handoff/HandoffStrategyFactory";
-import { streamResponse } from "./handoff/streamUtils";
-import type {
-  HandoffProps,
-  HandoffState,
-  HandoffHookReturn,
-  Params,
-} from "./handoff/types";
-import { generateHeaders } from "./handoff/headerUtils";
+import { describe, expect, test, vi, beforeEach } from "vitest";
+import type { Message, UserChatMessage, IncomingHandoffEvent } from "@/types";
+import { HandoffStrategyFactory } from "@/lib/handoff/HandoffStrategyFactory";
 
-const HANDOFF_RECONNECT_INTERVAL = 500;
-const TYPING_INDICATOR_REFRESH_INTERVAL = 3000;
+// Mock the required providers and hooks
+vi.mock("next/dist/client/components/navigation", () => ({
+  useParams: () => ({
+    organizationId: "test-org",
+    agentId: "test-agent",
+  }),
+}));
 
-const initialState: HandoffState = {
-  handoffError: null,
-  handoffChatEvents: [],
-  isConnected: false,
-  handoffAuthToken: null,
-  agentName: null,
-  handoffStatus: HandoffStatus.NOT_INITIALIZED,
-};
-
-export function useHandoff({
-  messages,
-  mavenConversationId,
-}: HandoffProps): HandoffHookReturn {
-  // Configuration and refs
-  const { handoffConfiguration } = useSettings();
-  const handoffTypeRef = useRef(handoffConfiguration?.type ?? null);
-  const strategyRef = useRef(
-    HandoffStrategyFactory.createStrategy(handoffTypeRef.current),
-  );
-  const abortController = useRef(new AbortController());
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
-
-  // State
-  const [state, setState] = useState<HandoffState>(initialState);
-  const [typingRefreshCounter, setTypingRefreshCounter] = useState(0);
-  const handoffStatusRef = useRef<HandoffStatus>(state.handoffStatus);
-
-  // Context hooks
-  const { signedUserData, unsignedUserData } = useAuth();
-  const { customData } = useCustomData();
-  const { organizationId, agentId } = useParams<Params>();
-
-  useEffect(() => {
-    strategyRef.current = HandoffStrategyFactory.createStrategy(
-      handoffTypeRef.current,
-    );
-  }, []);
-
-  const resetAbortController = useCallback(() => {
-    abortController.current.abort();
-    abortController.current = new AbortController();
-  }, []);
-
-  const generatedHeaders = useMemo(() => {
-    return generateHeaders(organizationId, agentId, state.handoffAuthToken);
-  }, [state.handoffAuthToken, organizationId, agentId]);
-
-  const handleHandoffChatEvent = useCallback(
-    (event: IncomingHandoffEvent) => {
-      if (!strategyRef.current) return;
-
-      const { agentName: newAgentName, formattedEvent } =
-        strategyRef.current.handleChatEvent(event);
-
-      if (formattedEvent) {
-        if (newAgentName) {
-          setState((prev) => ({ ...prev, agentName: newAgentName }));
-        }
-        setState((prev) => ({
-          ...prev,
-          handoffChatEvents: [...prev.handoffChatEvents, formattedEvent],
-        }));
-      }
+vi.mock("@/app/providers/SettingsProvider", () => ({
+  useSettings: vi.fn(() => ({
+    handoffConfiguration: {
+      type: "zendesk",
     },
-    [state, setState],
-  );
+  })),
+}));
 
-  const getOrCreateUserAndConversation = useCallback(
-    async (email?: string) => {
-      if (!strategyRef.current) {
-        throw new Error("Handoff strategy is not set");
-      }
+vi.mock("@/app/providers/AuthProvider", () => ({
+  useAuth: () => ({
+    signedUserData: "test-user",
+    unsignedUserData: null,
+  }),
+}));
 
-      const response = await fetch(strategyRef.current.conversationsEndpoint, {
-        method: "POST",
-        body: JSON.stringify({
-          messages: strategyRef.current.formatMessages(
-            messages,
-            mavenConversationId,
-          ),
-          signedUserData,
-          unsignedUserData,
-          userAgent: navigator.userAgent,
-          screenResolution: `${window.screen.width}x${window.screen.height}`,
-          language: navigator.language,
-          customData,
-          email,
+vi.mock("@/app/providers/CustomDataProvider", () => ({
+  useCustomData: () => ({
+    customData: {},
+  }),
+}));
+
+// Mock stream response utility
+vi.mock("@/lib/handoff/streamUtils", () => ({
+  streamResponse: vi.fn(async function* () {
+    yield { type: "test-event" };
+  }),
+}));
+
+const createMockStrategy = () => ({
+  formatMessages: vi.fn((messages: Message[]) =>
+    messages.map((m) => ({
+      author: { type: m.type === "USER" ? "user" : "business" },
+      content: {
+        type: "text",
+        text: m.type === "USER" ? (m as UserChatMessage).text : "",
+      },
+    })),
+  ),
+  handleChatEvent: vi.fn((event) => ({
+    agentName: "Test Agent",
+    formattedEvent: { ...event, type: "handoff-test" },
+  })),
+  messagesEndpoint: "/api/test/messages",
+  conversationsEndpoint: "/api/test/conversations",
+  showAgentTypingIndicator: vi.fn(() => false),
+  shouldSupressHandoffInputDisplay: vi.fn(() => false),
+});
+
+// Mock the strategy factory
+vi.mock("@/lib/handoff/HandoffStrategyFactory", () => ({
+  HandoffStrategyFactory: {
+    createStrategy: vi.fn(() => createMockStrategy()),
+  },
+}));
+
+const createSuccessfulResponse = (includeBody = false) =>
+  Promise.resolve({
+    ok: true,
+    headers: {
+      get: (header: string) =>
+        header.toLowerCase() === "x-handoff-auth-token".toLowerCase()
+          ? "test-auth-token"
+          : null,
+    },
+    ...(includeBody && {
+      body: {
+        getReader: () => ({
+          read: async () => ({
+            done: true,
+            value: new TextEncoder().encode(
+              JSON.stringify({
+                message: { type: "conversation:message" },
+              }),
+            ),
+          }),
+          releaseLock: vi.fn(),
         }),
-        headers: generatedHeaders,
-      });
+      },
+    }),
+  });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+// Mock fetch
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
 
-      const handoffAuthToken = response.headers.get(HANDOFF_AUTH_HEADER);
-
-      if (!handoffAuthToken) {
-        throw new Error("Handoff auth token not found");
-      }
-
-      setState((prev) => ({ ...prev, handoffAuthToken: handoffAuthToken }));
-    },
-    [
-      messages,
-      customData,
-      signedUserData,
-      unsignedUserData,
-      generatedHeaders,
-      mavenConversationId,
-    ],
-  );
-
-  const handleEndHandoff = useCallback(async () => {
-    resetAbortController();
-    setState((prev) => ({
-      ...prev,
-      handoffAuthToken: null,
-      agentName: null,
-      handoffChatEvents: [
-        ...prev.handoffChatEvents,
-        {
-          type: "ChatEnded",
-          timestamp: new Date().getTime(),
-        } as ChatEndedMessage,
-      ],
-    }));
-
-    setState((prev) => ({
-      ...prev,
-      handoffStatus: HandoffStatus.NOT_INITIALIZED,
-    }));
-
-    if (!state.handoffAuthToken || !strategyRef.current) {
-      return;
-    }
-
-    void fetch(`${strategyRef.current.conversationsEndpoint}/passControl`, {
-      method: "POST",
-      headers: generatedHeaders,
-      body: JSON.stringify({ signedUserData, unsignedUserData }),
-    });
-  }, [setState, generatedHeaders, resetAbortController]);
-
-  const getMessages = useCallback(async () => {
-    if (!state.handoffAuthToken || !strategyRef.current) {
-      return;
-    }
-
-    if (
-      state.isConnected ||
-      handoffStatusRef.current === HandoffStatus.NOT_INITIALIZED
-    ) {
-      return;
-    }
-    setState((prev) => ({ ...prev, isConnected: true }));
-
-    resetAbortController();
-
-    try {
-      if (strategyRef.current.subjectHeaderKey) {
-        const firstUserMessage: UserChatMessage | undefined = messages.find(
-          (message) => isChatUserMessage(message),
-        );
-        if (firstUserMessage) {
-          generatedHeaders[strategyRef.current.subjectHeaderKey] =
-            firstUserMessage.text || "I need assistance";
-        }
-      }
-      const response = await fetch(strategyRef.current.messagesEndpoint, {
-        method: "GET",
-        headers: generatedHeaders,
-        signal: abortController.current.signal,
-      });
-
-      for await (const event of streamResponse(
-        response,
-        abortController.current,
-      )) {
-        if (abortController.current.signal.aborted) break;
-        handleHandoffChatEvent(event);
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") {
-        console.log("Fetch aborted");
-      } else {
-        console.error("Error streaming response:", error);
-        void handleEndHandoff();
-      }
-    } finally {
-      setState((prev) => ({ ...prev, isConnected: false }));
-      // Attempt to reconnect after interval
-      if (handoffStatusRef.current === HandoffStatus.INITIALIZED) {
-        reconnectTimeoutRef.current = setTimeout(() => {
-          void getMessages();
-        }, HANDOFF_RECONNECT_INTERVAL);
-      }
-    }
-  }, [
-    state.handoffAuthToken,
-    generatedHeaders,
-    resetAbortController,
-    handleEndHandoff,
-  ]);
-
-  const initializeHandoff = useCallback(
-    async ({ email }: { email?: string }): Promise<void> => {
-      if (!strategyRef.current) {
-        console.error("Handoff strategy is not set");
-        return;
-      }
-
-      setState((prev) => ({
-        ...prev,
-        handoffStatus: HandoffStatus.INITIALIZING,
-      }));
-
-      try {
-        await getOrCreateUserAndConversation(email);
-      } catch (error) {
-        console.error("Error initializing handoff:", error);
-        void handleEndHandoff();
-      }
-    },
-    [getOrCreateUserAndConversation, handleEndHandoff],
-  );
-
-  useEffect(() => {
-    handoffStatusRef.current = state.handoffStatus;
-    if (state.handoffStatus === HandoffStatus.INITIALIZED) {
-      setState((prev) => ({
-        ...prev,
-        handoffChatEvents: [
-          ...prev.handoffChatEvents,
-          {
-            type:
-              strategyRef.current?.connectedToAgentMessageType ||
-              "ChatEstablished",
-            timestamp: new Date().getTime(),
-          } as IncomingHandoffConnectionEvent,
-        ],
-      }));
-    }
-  }, [state.handoffStatus]);
-
-  useEffect(() => {
-    if (
-      state.handoffAuthToken &&
-      state.handoffStatus === HandoffStatus.INITIALIZING
-    ) {
-      void getMessages();
-      setState((prev) => ({
-        ...prev,
-        handoffStatus: HandoffStatus.INITIALIZED,
-      }));
-    }
-  }, [state.handoffAuthToken, getMessages]);
-
-  const askHandoff = useCallback(
-    async (message: string) => {
-      setState((prev) => ({
-        ...prev,
-        handoffChatEvents: [
-          ...prev.handoffChatEvents,
-          {
-            text: message,
-            timestamp: new Date().getTime(),
-            type: "USER",
-          } as UserChatMessage,
-        ],
-      }));
-
-      if (!state.handoffAuthToken || !strategyRef.current) {
-        return;
-      }
-
-      const response = await fetch(strategyRef.current.messagesEndpoint, {
-        method: "POST",
-        body: JSON.stringify({
-          message,
-          signedUserData,
-          unsignedUserData,
-        }),
-        headers: generatedHeaders,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    },
-    [generatedHeaders],
-  );
-
-  useEffect(() => {
-    return () => {
-      abortController.current?.abort();
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const showTypingIndicator = useMemo(() => {
-    if (!state.agentName) {
-      return false;
-    }
-
-    return (
-      strategyRef.current?.showAgentTypingIndicator?.(
-        state.handoffChatEvents,
-      ) ?? false
-    );
-  }, [state.handoffChatEvents, typingRefreshCounter]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTypingRefreshCounter((prev) => prev + 1);
-    }, TYPING_INDICATOR_REFRESH_INTERVAL);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const shouldSupressHandoffInputDisplay = useMemo(() => {
-    return (
-      strategyRef.current?.shouldSupressHandoffInputDisplay?.(
-        state.agentName,
-      ) ?? false
-    );
-  }, [state.agentName]);
-
-  return {
-    initializeHandoff,
-    handoffStatus: state.handoffStatus,
-    handoffError: state.handoffError,
-    handoffChatEvents: state.handoffChatEvents,
-    agentName: state.agentName,
-    isConnected: state.isConnected,
-    askHandoff,
-    handleEndHandoff,
-    showTypingIndicator,
-    shouldSupressHandoffInputDisplay,
+describe("useHandoff", () => {
+  const defaultProps = {
+    messages: [],
+    mavenConversationId: "test-conv-123",
   };
-}
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockReset();
+  });
+
+  describe("initialization", () => {
+    test("should initialize with default values", () => {
+      const { result } = renderHook(() => useHandoff(defaultProps));
+
+      expect(result.current.handoffStatus).toBe(HandoffStatus.NOT_INITIALIZED);
+      expect(result.current.handoffError).toBeNull();
+      expect(result.current.handoffChatEvents).toEqual([]);
+      expect(result.current.agentName).toBeNull();
+      expect(result.current.isConnected).toBe(false);
+      expect(result.current.showTypingIndicator).toBe(false);
+      expect(result.current.shouldSupressHandoffInputDisplay).toBe(false);
+    });
+
+    test("should create strategy on mount", () => {
+      renderHook(() => useHandoff(defaultProps));
+      expect(HandoffStrategyFactory.createStrategy).toHaveBeenCalledWith(
+        "zendesk",
+      );
+    });
+  });
+
+  describe("initializeHandoff", () => {
+    test("should handle successful initialization", async () => {
+      mockFetch.mockImplementation(async (url) => {
+        if (url.includes("/api/test/conversations")) {
+          return createSuccessfulResponse();
+        }
+        return Promise.resolve({ ok: true });
+      });
+
+      const { result } = renderHook(() => useHandoff(defaultProps));
+
+      await act(async () => {
+        await result.current.initializeHandoff({ email: "test@example.com" });
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/test/conversations",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.any(String),
+        }),
+      );
+    });
+
+    test("should handle initialization failure", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+      const { result } = renderHook(() => useHandoff(defaultProps));
+
+      await act(async () => {
+        await result.current.initializeHandoff({ email: "test@example.com" });
+      });
+
+      expect(result.current.handoffStatus).toBe(HandoffStatus.NOT_INITIALIZED);
+    });
+  });
+
+  describe("askHandoff", () => {
+    test("should send message successfully", async () => {
+      // Mock both the initialization and message sending responses
+      mockFetch.mockImplementation(async (url) => {
+        if (url.includes("/api/test/conversations")) {
+          return createSuccessfulResponse();
+        }
+        if (url.includes("/api/test/messages")) {
+          return createSuccessfulResponse(true);
+        }
+        return Promise.resolve({ ok: true });
+      });
+
+      const { result } = renderHook(() => useHandoff(defaultProps));
+
+      // Initialize handoff first
+      await act(async () => {
+        await result.current.initializeHandoff({ email: "test@example.com" });
+      });
+
+      // Send message
+      await act(async () => {
+        await result.current.askHandoff("Hello");
+      });
+
+      expect(result.current.handoffChatEvents).toContainEqual(
+        expect.objectContaining({
+          text: "Hello",
+          type: "USER",
+        }),
+      );
+
+      // Verify the message was sent
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/test/messages",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.any(String),
+          headers: expect.any(Object),
+        }),
+      );
+    });
+  });
+
+  describe("handleEndHandoff", () => {
+    test("should clean up handoff state", async () => {
+      const { result } = renderHook(() => useHandoff(defaultProps));
+
+      await act(async () => {
+        await result.current.handleEndHandoff();
+      });
+
+      expect(result.current.handoffStatus).toBe(HandoffStatus.NOT_INITIALIZED);
+      expect(result.current.agentName).toBeNull();
+      expect(result.current.handoffChatEvents).toContainEqual(
+        expect.objectContaining({
+          type: "ChatEnded",
+        }),
+      );
+    });
+  });
+
+  describe("cleanup", () => {
+    test("should clean up resources on unmount", async () => {
+      const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
+      mockFetch.mockImplementation(async (url) => {
+        if (url.includes("/api/test/conversations")) {
+          return createSuccessfulResponse();
+        }
+        if (url.includes("/api/test/messages")) {
+          return createSuccessfulResponse(true);
+        }
+        return Promise.resolve({ ok: true });
+      });
+
+      const { result, unmount } = renderHook(() => useHandoff(defaultProps));
+
+      await act(async () => {
+        await result.current.initializeHandoff({ email: "test@example.com" });
+      });
+
+      expect(result.current.handoffStatus).toBe(HandoffStatus.INITIALIZED);
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      unmount();
+
+      expect(clearTimeoutSpy).toHaveBeenCalled();
+    });
+  });
+});
