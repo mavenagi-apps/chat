@@ -152,8 +152,6 @@ describe("POST /api/zendesk/conversations", () => {
         createMockRequest() as unknown as NextRequest,
       );
 
-      console.log(await response.json());
-
       expect(response.status).toBe(200);
 
       expect(mockApiInstances.users.createUser).toHaveBeenCalledWith(

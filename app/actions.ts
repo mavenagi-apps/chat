@@ -65,14 +65,17 @@ const parseHandoffConfiguration = (
   }
 
   try {
-    const parsedHandoffConfiguration = JSON.parse(handoffConfiguration);
+    const parsedHandoffConfiguration = JSON.parse(
+      handoffConfiguration,
+    ) as ClientSafeAppSettings["handoffConfiguration"];
 
-    if (!parsedHandoffConfiguration.type) {
+    if (!parsedHandoffConfiguration?.type) {
       return undefined;
     }
 
     return {
       type: parsedHandoffConfiguration.type,
+      surveyLink: parsedHandoffConfiguration.surveyLink,
     };
   } catch (error) {
     console.error("Error parsing handoff configuration:", error);

@@ -1,21 +1,20 @@
-import { CombinedMessage } from "@/types";
+import { useContext } from "react";
 import { ChatMessage } from "@magi/components/chat/ChatMessage";
 import Spinner from "@magi/components/Spinner";
+import { ChatContext } from "./Chat";
+
 interface ChatMessagesProps {
-  messages: CombinedMessage[];
   isLoading: boolean;
   isResponseAvailable: boolean;
-  conversationId?: string;
   mavenUserId: string | null;
 }
 
-export function ChatMessages({
-  messages,
+export const ChatMessages = ({
   isLoading,
   isResponseAvailable,
-  conversationId,
   mavenUserId,
-}: ChatMessagesProps) {
+}: ChatMessagesProps) => {
+  const { messages, conversationId } = useContext(ChatContext);
   return (
     <>
       {messages.map((message, index) => (
@@ -34,4 +33,4 @@ export function ChatMessages({
       )}
     </>
   );
-}
+};

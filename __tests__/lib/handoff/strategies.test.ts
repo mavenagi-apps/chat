@@ -29,7 +29,12 @@ describe("Handoff Strategies", () => {
     });
 
     it("should format bot messages correctly", () => {
-      const messages = [createBotMessage([{ text: "Hi" }, { text: " there" }])];
+      const messages = [
+        createBotMessage([
+          { type: "text", text: "Hi" },
+          { type: "text", text: " there" },
+        ]),
+      ];
 
       const formatted = strategy.formatMessages(messages, "conv-123");
       expect(formatted).toEqual([
@@ -88,7 +93,12 @@ describe("Handoff Strategies", () => {
     });
 
     it("should format bot messages correctly", () => {
-      const messages = [createBotMessage([{ text: "Hi" }, { text: " there" }])];
+      const messages = [
+        createBotMessage([
+          { text: "Hi", type: "text" },
+          { text: " there", type: "text" },
+        ]),
+      ];
 
       const formatted = strategy.formatMessages(messages, "conv-123");
       expect(formatted).toEqual([
@@ -101,6 +111,7 @@ describe("Handoff Strategies", () => {
               referenceId: "msg-123",
             },
           },
+          timestamp: 123456789,
         },
       ]);
     });
@@ -113,7 +124,7 @@ describe("Handoff Strategies", () => {
       expect(formattedEvent).toEqual({
         ...event,
         type: "front-agent",
-        timestamp: 1672531200000,
+        timestamp: 123456789000,
       });
     });
 
@@ -122,7 +133,7 @@ describe("Handoff Strategies", () => {
 
       const { agentName, formattedEvent } = strategy.handleChatEvent(event);
       expect(agentName).toBe("Agent");
-      expect(formattedEvent.timestamp).toBe(1672531200000);
+      expect(formattedEvent.timestamp).toBe(123456789000);
     });
   });
 });
