@@ -4,6 +4,7 @@ import { useChat } from "@/packages/components/chat/use-chat";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useParams } from "next/navigation";
 import { ChatMessage } from "@/types";
+import { NextResponse } from "next/server";
 
 // Mock dependencies
 vi.mock("next/navigation", () => ({
@@ -36,6 +37,22 @@ describe("useChat", () => {
     (useAuth as any).mockReturnValue({
       signedUserData: "test-signed-data",
     });
+
+    // Enhanced mock with stream and response.ok
+    const mockStream = new ReadableStream({
+      start(controller) {
+        controller.close();
+      },
+    });
+
+    (global.fetch as any).mockResolvedValue(
+      new NextResponse(mockStream, {
+        headers: {
+          "X-Maven-Auth-Token": "mock-token",
+        },
+        status: 200,
+      }),
+    );
   });
 
   it("should initialize with empty messages", () => {
