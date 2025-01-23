@@ -29,7 +29,12 @@ describe("Handoff Strategies", () => {
     });
 
     it("should format bot messages correctly", () => {
-      const messages = [createBotMessage([{ text: "Hi" }, { text: " there" }])];
+      const messages = [
+        createBotMessage([
+          { type: "text", text: "Hi" },
+          { type: "text", text: " there" },
+        ]),
+      ];
 
       const formatted = strategy.formatMessages(messages, "conv-123");
       expect(formatted).toEqual([
@@ -88,7 +93,12 @@ describe("Handoff Strategies", () => {
     });
 
     it("should format bot messages correctly", () => {
-      const messages = [createBotMessage([{ text: "Hi" }, { text: " there" }])];
+      const messages = [
+        createBotMessage([
+          { text: "Hi", type: "text" },
+          { text: " there", type: "text" },
+        ]),
+      ];
 
       const formatted = strategy.formatMessages(messages, "conv-123");
       expect(formatted).toEqual([
