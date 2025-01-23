@@ -28,6 +28,7 @@ import {
   type AuthJWTPayload,
 } from "@/app/constants/authentication";
 import { type Attachment } from "mavenagi/api";
+import { ServerHandoffStrategyFactory } from "@/lib/handoff/ServerHandoffStrategyFactory";
 
 interface CreateOptions {
   organizationId: string;
@@ -89,7 +90,19 @@ async function createOrUpdateUser(
 async function initializeConversation(
   client: MavenAGIClient,
   conversationId: string,
+  settings: ParsedAppSettings,
 ) {
+  const strategy = ServerHandoffStrategyFactory.createStrategy(
+    settings.handoffConfiguration?.type,
+    settings.handoffConfiguration as HandoffConfiguration,
+  );
+  let isHandoffAvailable = false;
+  try {
+    isHandoffAvailable = (await strategy?.isLiveHandoffAvailable?.()) ?? false;
+  } catch (error) {
+    isHandoffAvailable = false;
+    console.error("Error checking handoff availability:", error);
+  }
   const conversationInitializationPayload: MavenAGI.ConversationRequest = {
     conversationId: { referenceId: conversationId },
     messages: [],
@@ -104,6 +117,7 @@ async function initializeConversation(
     },
     metadata: {
       escalation_action_enabled: "true",
+      handoff_available: isHandoffAvailable.toString(),
     },
   };
 
@@ -155,7 +169,7 @@ export async function POST(req: NextRequest) {
           decryptedSignedUserData,
         );
         userId = userResponse.userId.referenceId;
-        await initializeConversation(client, conversationId);
+        await initializeConversation(client, conversationId, settings);
       }
 
       try {

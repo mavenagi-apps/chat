@@ -15,12 +15,15 @@ const mockUseSettings = vi.mocked(useSettings);
 
 describe("Chat", () => {
   const defaultProps = {
-    messages: [],
-    askFn: vi.fn(),
-    initializeHandoff: vi.fn(),
+    addMessage: vi.fn(),
     agentName: null,
-    isHandoff: false,
+    ask: vi.fn(),
+    conversationId: "123",
     handleEndHandoff: vi.fn(),
+    initializeHandoff: vi.fn(),
+    isHandoff: false,
+    messages: [],
+    shouldSupressHandoffInputDisplay: false,
   };
 
   beforeEach(() => {
@@ -132,7 +135,7 @@ describe("Chat", () => {
     render(
       <Chat
         {...defaultProps}
-        askFn={askFn}
+        ask={askFn}
         initializeHandoff={initializeHandoff}
         handleEndHandoff={handleEndHandoff}
         agentName="Test Agent"

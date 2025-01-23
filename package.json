@@ -40,6 +40,8 @@
     "jose": "^5.9.6",
     "jsonwebtoken": "^9.0.2",
     "keyv": "^5.2.2",
+    "lottie-web": "^5.12.2",
+    "luxon": "^3.5.0",
     "mavenagi": "1.0.2",
     "nanoid": "^5.0.7",
     "next": "15.0.3",
@@ -63,6 +65,7 @@
     "@tailwindcss/typography": "^0.5.14",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
+    "@types/luxon": "^3.4.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -86,7 +89,8 @@
     "turbo": "^2.1.3",
     "typescript": "^5",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^2.1.3"
+    "vitest": "^2.1.3",
+    "vitest-canvas-mock": "^0.3.3"
   },
   "engines": {
     "node": ">=20"

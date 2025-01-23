@@ -32,7 +32,9 @@ export const POST = async (request: NextRequest) => {
     agentId: agentId,
   });
   const host =
-    process.env.VERCEL_PRODUCTION_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL?.length
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : null) ??
     process.env.LOCAL_DEV_TUNNEL_URL ??
     "http://localhost:3000";
   const url = new URL(host);

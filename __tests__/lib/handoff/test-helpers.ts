@@ -119,3 +119,12 @@ export const createFrontEvent = (
   },
   id: "msg-123",
 });
+
+export const createSalesforceEvent = (
+  type: string,
+  message: Record<string, any>,
+) => ({
+  type,
+  message,
+  timestamp: 1672531200000, // 2023-01-01
+});

@@ -1,4 +1,8 @@
-import type { HandoffStrategy } from "./HandoffStrategy";
+import {
+  type HandoffStrategy,
+  MESSAGE_TYPES_FOR_HANDOFF_CREATION,
+  type ServerHandoffStrategy,
+} from "./HandoffStrategy";
 import type {
   Message,
   HandoffChatMessage,
@@ -7,15 +11,17 @@ import type {
 import { isChatUserMessage, isBotMessage } from "@/types";
 
 export class ZendeskStrategy implements HandoffStrategy {
-  getMessagesEndpoint = "/api/zendesk/messages";
-  getConversationsEndpoint = "/api/zendesk/conversations";
+  messagesEndpoint = "/api/zendesk/messages";
+  conversationsEndpoint = "/api/zendesk/conversations";
 
   formatMessages(
     messages: Message[],
     _mavenConversationId: string,
   ): HandoffChatMessage[] {
     return messages
-      .filter((message) => ["USER", "bot"].includes(message.type))
+      .filter((message) =>
+        MESSAGE_TYPES_FOR_HANDOFF_CREATION.includes(message.type),
+      )
       .map((message) => ({
         author: {
           type: isChatUserMessage(message) ? "user" : "business",
@@ -52,4 +58,11 @@ export class ZendeskStrategy implements HandoffStrategy {
 
     return { agentName, formattedEvent };
   }
+
+  isLiveHandoffAvailable? = () => Promise.resolve(true);
+}
+
+export class ZendeskServerStrategy implements ServerHandoffStrategy {
+  constructor(private configuration: ZendeskHandoffConfiguration) {}
+  isLiveHandoffAvailable? = () => Promise.resolve(true);
 }

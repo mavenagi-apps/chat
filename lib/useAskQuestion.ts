@@ -11,13 +11,11 @@ interface UseAskQuestionProps {
     type: "USER";
     attachments?: Attachment[];
   }) => void;
-  scrollToLatest: () => void;
 }
 
 export function useAskQuestion({
   conversationId,
-  askQuestion,
-  scrollToLatest,
+  addMessage,
 }: UseAskQuestionProps) {
   const { agentId }: { organizationId: string; agentId: string } = useParams();
 
@@ -26,18 +24,16 @@ export function useAskQuestion({
   return useCallback(
     async (question: string, attachments?: Attachment[]) => {
       analytics.logEvent(MagiEvent.chatAskClick, {
-        agentId: agentId,
+        agentId,
         conversationId: conversationId || "",
       });
 
-      askQuestion({
+      addMessage({
         text: question,
         type: "USER",
         attachments,
       });
-
-      scrollToLatest();
     },
-    [agentId, conversationId, analytics, askQuestion, scrollToLatest],
+    [agentId, conversationId, analytics, addMessage],
   );
 }

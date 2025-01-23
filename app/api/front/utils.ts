@@ -7,6 +7,8 @@ import { Cacheable, KeyvCacheableMemory } from "cacheable";
 import { getRedisCache } from "@/app/api/server/lib/redis";
 import { JsonFetchError } from "@/lib/jsonFetch";
 import Bottleneck from "bottleneck";
+import { DateTime } from "luxon";
+
 enum RetryableStatusCodes {
   TooManyRequests = 429,
   InternalServerError = 500,
@@ -114,6 +116,22 @@ async function searchPages<T extends Front.PagedResource>(
   return item;
 }
 
+async function searchPagesMany<T extends Front.PagedResource>(
+  loader: (params?: Front.PagedEndpointParams) => Promise<Front.List<T>>,
+  predicate: (resource: T) => boolean,
+) {
+  let next: string | null = "";
+  const results: T[] = [];
+
+  while (next !== null) {
+    const items = await loader({ next });
+    results.push(...items._results.filter(predicate));
+    next = items._pagination.next;
+  }
+
+  return results;
+}
+
 async function findChannel(
   client: FrontCoreClient,
   channelName: string,
@@ -129,6 +147,66 @@ export async function findInbox(
   inboxName: string,
 ): Promise<Front.Inbox | undefined> {
   return searchPages(client.inboxes, (inbox) => inbox.name === inboxName);
+}
+
+export async function findShifts(
+  client: FrontCoreClient,
+  shiftNames: string[],
+): Promise<Front.Shift[]> {
+  const shiftNamesSet = new Set(shiftNames);
+  return searchPagesMany(client.shifts, (shift) =>
+    shiftNamesSet.has(shift.name),
+  );
+}
+
+export async function isAnyoneAvailable(
+  client: FrontCoreClient,
+  shiftNames: string[],
+): Promise<boolean> {
+  // If no shifts are provided, we assume that someone is always available
+  if (!shiftNames.length) {
+    return true;
+  }
+  const shifts = await findShifts(client, shiftNames);
+  if (!shifts.length) {
+    return false;
+  }
+  return isShiftActive(shifts, new Date());
+}
+
+export function isShiftActive(shifts: Front.Shift[], moment: Date) {
+  const now = moment.getTime();
+  const utcShifts = shifts.flatMap((shiftInfo) => {
+    const { timezone, times } = shiftInfo;
+    const timeAtZone = DateTime.fromObject({}, { zone: timezone });
+    const dayAtZone = (timeAtZone.weekdayShort?.toLowerCase() ??
+      "") as Front.ShiftDays;
+    const shiftForDay = times[dayAtZone];
+
+    return [shiftForDay]
+      .filter((shift) => !!shift)
+      .map((shiftHours) => {
+        const { start, end } = shiftHours;
+        const [startHour, startMinute] = start.split(":").map(Number);
+        const [endHour, endMinute] = end.split(":").map(Number);
+        return {
+          start: DateTime.fromObject(
+            { hour: startHour, minute: startMinute },
+            { zone: timezone },
+          )
+            .toUTC()
+            .toMillis(),
+          end: DateTime.fromObject(
+            { hour: endHour, minute: endMinute },
+            { zone: timezone },
+          )
+            .toUTC()
+            .toMillis(),
+        };
+      });
+  });
+
+  return utcShifts.some((s) => s.start <= now && now <= s.end);
 }
 
 export async function createApplicationChannelClient(

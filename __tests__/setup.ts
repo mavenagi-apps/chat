@@ -1,6 +1,7 @@
 import { beforeAll, vi } from "vitest";
 import React from "react";
 import "@testing-library/jest-dom";
+import "vitest-canvas-mock";
 
 // Mock ResizeObserver which isn't available in jsdom
 global.ResizeObserver = vi.fn().mockImplementation(() => ({

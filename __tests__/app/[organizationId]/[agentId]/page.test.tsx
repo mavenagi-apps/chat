@@ -2,31 +2,34 @@ import { render, screen } from "@testing-library/react";
 import ChatPage from "@/app/[organizationId]/[agentId]/page";
 import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
 import {
-  ChatEndedMessage,
-  ChatEstablishedMessage,
+  IncomingHandoffConnectionEvent,
   Message,
   UserChatMessage,
-  ZendeskWebhookMessage,
+  IncomingHandoffEvent,
 } from "@/types";
-import { Front } from "@/types/front";
 import { HandoffStatus } from "@/app/constants/handoff";
 import { useChat } from "@magi/components/chat/use-chat";
 import { useHandoff } from "@/lib/useHandoff";
+import { useScrollToBottom } from "@/lib/useScrollToBottom";
+import { useIdleMessage } from "@/lib/useIdleMessage";
 
 let chatMessages = [] as Message[];
 let handoffMessages = [] as (
-  | ZendeskWebhookMessage
-  | Front.WebhookMessage
-  | ChatEstablishedMessage
+  | IncomingHandoffEvent
   | UserChatMessage
-  | ChatEndedMessage
+  | IncomingHandoffConnectionEvent
 )[];
+
+vi.mock("@/lib/useScrollToBottom");
+const useScrollToBottomMock = vi.mocked(useScrollToBottom);
 
 vi.mock("@magi/components/chat/use-chat");
 const useChatMock = vi.mocked(useChat);
 
 vi.mock("@/lib/useHandoff");
 const useHandoffMock = vi.mocked(useHandoff);
+
+vi.mock("@/lib/useIdleMessage");
 
 vi.mock("@/lib/useIframeMessaging", () => ({
   useIframeMessaging: () => ({
@@ -37,27 +40,25 @@ vi.mock("@/lib/useIframeMessaging", () => ({
 
 vi.mock("@/lib/useAskQuestion", () => ({
   useAskQuestion: vi.fn().mockReturnValue({
-    askQuestion: vi.fn(),
+    addMessage: vi.fn(),
     isLoading: false,
-  }),
-}));
-
-let mockScrollToLatest = vi.fn();
-vi.mock("@/lib/useScrollToLatest", () => ({
-  useScrollToLatest: () => ({
-    scrollToLatest: mockScrollToLatest,
-    latestChatBubbleRef: { current: null },
   }),
 }));
 
 describe("ChatPage", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+
+    useScrollToBottomMock.mockReturnValue([
+      { current: null },
+      { current: null },
+    ] as const);
+
     useChatMock.mockReturnValue({
       messages: chatMessages,
       isLoading: false,
       isResponseAvailable: false,
-      askQuestion: vi.fn(),
+      addMessage: vi.fn(),
       conversationId: "test-conversation-id",
       mavenUserId: "test-maven-user-id",
     });
@@ -175,25 +176,6 @@ describe("ChatPage", () => {
           expect(getAllChatBubbles[index]).toHaveTextContent(text);
         });
       });
-    });
-  });
-
-  describe("scroll behavior", () => {
-    beforeEach(() => {
-      chatMessages = [
-        { timestamp: 100, text: "First message", type: "USER" },
-        { timestamp: 300, text: "Third message", type: "USER" },
-      ];
-    });
-
-    test("should call scrollToLatest when messages change", () => {
-      render(<ChatPage />);
-      expect(mockScrollToLatest).toHaveBeenCalledTimes(1);
-
-      chatMessages.push({ timestamp: 500, text: "New message", type: "USER" });
-
-      render(<ChatPage />);
-      expect(mockScrollToLatest).toHaveBeenCalledTimes(2);
     });
   });
 });

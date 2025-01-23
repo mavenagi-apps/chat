@@ -22,17 +22,10 @@ import {
 import { Attachment, type ConversationMessageResponse } from "mavenagi/api";
 import { useTranslations } from "next-intl";
 import type { Front } from "@/types/front";
-
+import { CombinedMessage } from "@/types";
 interface MessageProps {
-  message:
-    | Message
-    | ZendeskWebhookMessage
-    | Front.WebhookMessage
-    | ChatEstablishedMessage
-    | ChatEndedMessage;
+  message: CombinedMessage;
   linkTargetInNewTab?: boolean;
-  isLastMessage?: boolean;
-  latestChatBubbleRef?: React.RefObject<HTMLDivElement>;
   conversationId?: string;
   initialUserChatMessage?: UserChatMessage | null;
   mavenUserId: string | null;
@@ -69,18 +62,10 @@ function MessageCharts({
     });
 }
 
-function renderHandoffMessage(
-  message: ZendeskWebhookMessage,
-  isLastMessage: boolean,
-  latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
-) {
+function renderHandoffMessage(message: ZendeskWebhookMessage) {
   const author = message.payload.message?.author?.displayName;
   return (
-    <ChatBubble
-      direction="left-hug"
-      author={author}
-      ref={isLastMessage ? latestChatBubbleRef : null}
-    >
+    <ChatBubble direction="left-hug" author={author}>
       <ReactMarkdown linkTargetInNewTab={true}>
         {message.payload.message?.content?.text || ""}
       </ReactMarkdown>
@@ -88,19 +73,11 @@ function renderHandoffMessage(
   );
 }
 
-function renderFrontAgentMessage(
-  message: Front.WebhookMessage,
-  isLastMessage: boolean,
-  latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
-) {
+function renderFrontAgentMessage(message: Front.WebhookMessage) {
   const author =
     `${message.author.first_name} ${message.author.last_name}`.trim();
   return (
-    <ChatBubble
-      direction="left-hug"
-      author={author}
-      ref={isLastMessage ? latestChatBubbleRef : null}
-    >
+    <ChatBubble direction="left-hug" author={author}>
       <ReactMarkdown linkTargetInNewTab={true}>
         {message.body || ""}
       </ReactMarkdown>
@@ -110,8 +87,6 @@ function renderFrontAgentMessage(
 
 function renderHandoffEventMessage(
   message: ChatEstablishedMessage | ChatEndedMessage,
-  isLastMessage: boolean,
-  latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
 ) {
   const t = useTranslations("chat.Handoff");
   const messageMap = {
@@ -123,10 +98,7 @@ function renderHandoffEventMessage(
     return null;
   }
   return (
-    <div
-      ref={isLastMessage ? latestChatBubbleRef : null}
-      className="my-5 flex items-center justify-center h-auto text-gray-500"
-    >
+    <div className="my-5 flex items-center justify-center h-auto text-gray-500">
       <div className="grow border-t border-gray-300"></div>
       <span className="mx-4 prose max-w-full text-xs whitespace-nowrap">
         {messageText}
@@ -143,12 +115,9 @@ function attachmentsToDataUrls(attachments?: Attachment[]) {
 export function ChatMessage({
   message,
   linkTargetInNewTab = true,
-  isLastMessage = false,
-  latestChatBubbleRef,
   conversationId,
   mavenUserId,
 }: MessageProps) {
-  const t = useTranslations("chat.ChatPage");
   if ("type" in message) {
     switch (message.type) {
       case "USER":
@@ -156,7 +125,6 @@ export function ChatMessage({
           <ChatBubble
             direction="right"
             className="bg-[--brand-color] text-[--brand-font-color]"
-            ref={isLastMessage ? latestChatBubbleRef : null}
           >
             <UserMessage
               text={"text" in message ? message.text : ""}
@@ -172,7 +140,6 @@ export function ChatMessage({
           <ChatBubble
             direction="left"
             className="border-red-500 bg-red-50 text-xs"
-            ref={isLastMessage ? latestChatBubbleRef : null}
           >
             <ErrorMessage
               text={"text" in message ? message.text : ""}
@@ -182,10 +149,7 @@ export function ChatMessage({
         );
       case "SIMULATED":
         return (
-          <ChatBubble
-            direction="left"
-            ref={isLastMessage ? latestChatBubbleRef : null}
-          >
+          <ChatBubble direction="left">
             <SimulatedMessage
               text={"text" in message ? message.text : ""}
               linkTargetInNewTab={linkTargetInNewTab}
@@ -193,35 +157,17 @@ export function ChatMessage({
           </ChatBubble>
         );
       case "handoff-zendesk":
-        return renderHandoffMessage(
-          message as ZendeskWebhookMessage,
-          isLastMessage,
-          latestChatBubbleRef,
-        );
+        return renderHandoffMessage(message as ZendeskWebhookMessage);
       case "front-agent":
-        return renderFrontAgentMessage(
-          message as Front.WebhookMessage,
-          isLastMessage,
-          latestChatBubbleRef,
-        );
+        return renderFrontAgentMessage(message as Front.WebhookMessage);
       case "ChatEstablished":
-        return renderHandoffEventMessage(
-          message as ChatEstablishedMessage,
-          isLastMessage,
-          latestChatBubbleRef,
-        );
+        return renderHandoffEventMessage(message as ChatEstablishedMessage);
       case "ChatEnded":
-        return renderHandoffEventMessage(
-          message as ChatEndedMessage,
-          isLastMessage,
-          latestChatBubbleRef,
-        );
+        return renderHandoffEventMessage(message as ChatEndedMessage);
       default:
         if (isBotMessage(message as Message)) {
           return renderBotMessage(
             message as ConversationMessageResponse.Bot,
-            isLastMessage,
-            latestChatBubbleRef,
             conversationId,
             linkTargetInNewTab,
             mavenUserId,
@@ -311,8 +257,6 @@ function SimulatedMessage({
 
 function renderBotMessage(
   message: ConversationMessageResponse.Bot | ActionChatMessage,
-  isLastMessage: boolean,
-  latestChatBubbleRef: React.RefObject<HTMLDivElement> | undefined,
   conversationId: string | undefined,
   linkTargetInNewTab: boolean,
   mavenUserId: string | null,
@@ -323,10 +267,7 @@ function renderBotMessage(
   const showActionForm = isActionChatMessage(message);
   const showEscalationForm = isEscalationChatMessage(message);
   return (
-    <ChatBubble
-      direction="left"
-      ref={isLastMessage ? latestChatBubbleRef : null}
-    >
+    <ChatBubble direction="left">
       <BotMessage message={message} linkTargetInNewTab={linkTargetInNewTab} />
       {showActionForm && (
         <BailoutFormDisplay

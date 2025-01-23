@@ -1,74 +1,74 @@
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 
-import {
-  type ChatEndedMessage,
-  type ChatEstablishedMessage,
-  type ZendeskWebhookMessage,
-  type Message,
-  isBotMessage,
-} from "@/types";
+import { isBotMessage, ChatMessage, CombinedMessage } from "@/types";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { Attachment } from "mavenagi/api";
 import type { Front } from "@/types/front";
+import { useIdleMessage } from "@/lib/useIdleMessage";
 
-interface ChatProps {
-  messages: (
-    | Message
-    | ZendeskWebhookMessage
-    | Front.WebhookMessage
-    | ChatEstablishedMessage
-    | ChatEndedMessage
-  )[];
-  askFn: (question: string) => Promise<void>;
-  initializeHandoff: (data: { email?: string }) => Promise<void>;
-  brandColor?: string;
-  className?: string;
+interface ChatContextProps {
+  addMessage: (message: ChatMessage) => void;
   agentName: string | null;
-  isHandoff: boolean;
-  handleEndHandoff: () => Promise<void>;
-}
-
-export const ChatContext = React.createContext<{
-  followUpQuestions: string[];
   ask: (question: string, attachments?: Attachment[]) => Promise<void>;
+  conversationId: string;
+  followUpQuestions: string[];
+  handleEndHandoff: () => Promise<void>;
   initializeHandoff: (data: { email?: string }) => Promise<
     | void
     | {
         success: true;
-        data: {
-          [k: string]: FormDataEntryValue;
-        };
+        data: { [k: string]: FormDataEntryValue };
       }
     | {
         success: false;
         error: string;
       }
   >;
-  agentName: string | null;
   isHandoff: boolean;
-  handleEndHandoff: () => Promise<void>;
-}>({
-  followUpQuestions: [],
-  ask: async () => {},
-  initializeHandoff: async (_data: { email?: string }) => {},
+  messages: CombinedMessage[];
+  shouldSupressHandoffInputDisplay: boolean;
+}
+
+interface ChatProps extends Omit<ChatContextProps, "followUpQuestions"> {
+  brandColor?: string;
+  className?: string;
+}
+
+export const ChatContext = React.createContext<ChatContextProps>({
+  addMessage: () => {},
   agentName: null,
-  isHandoff: false,
+  ask: async () => {},
+  conversationId: "",
+  followUpQuestions: [],
   handleEndHandoff: async () => {},
+  initializeHandoff: async () => {},
+  isHandoff: false,
+  messages: [],
+  shouldSupressHandoffInputDisplay: false,
 });
 
 export default function Chat({
-  messages,
-  askFn,
-  initializeHandoff,
+  addMessage,
   agentName,
-  isHandoff,
-  handleEndHandoff,
+  ask,
   className,
+  conversationId,
+  handleEndHandoff,
+  initializeHandoff,
+  isHandoff,
+  messages,
+  shouldSupressHandoffInputDisplay,
   children,
 }: React.PropsWithChildren<ChatProps>) {
   const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
   const { brandColor, brandFontColor } = useSettings();
+  useIdleMessage({
+    messages: messages as ChatMessage[],
+    conversationId,
+    agentName: agentName || "",
+    addMessage,
+  });
   useEffect(() => {
     if (messages.length > 0) {
       const lastMsg = messages[messages.length - 1];
@@ -85,11 +85,15 @@ export default function Chat({
     <ChatContext.Provider
       value={{
         followUpQuestions,
-        ask: askFn,
+        ask,
         initializeHandoff,
         agentName,
         isHandoff,
         handleEndHandoff,
+        shouldSupressHandoffInputDisplay,
+        messages,
+        addMessage,
+        conversationId,
       }}
     >
       <div
