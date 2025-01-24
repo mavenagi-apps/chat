@@ -36,6 +36,7 @@ describe("useChat", () => {
 
     (useAuth as any).mockReturnValue({
       signedUserData: "test-signed-data",
+      unsignedUserData: null,
     });
 
     // Enhanced mock with stream and response.ok
@@ -174,6 +175,103 @@ describe("useChat", () => {
         });
       },
       { timeout: 1000 },
+    );
+  });
+
+  it("should include unsignedUserData in API call when available", async () => {
+    const mockUnsignedData = {
+      customField: "value",
+      otherField: 123,
+    };
+
+    (useAuth as any).mockReturnValue({
+      signedUserData: "test-signed-data",
+      unsignedUserData: mockUnsignedData,
+    });
+
+    const mockResponse = new Response(
+      'data: {"eventType":"start","conversationMessageId":{"referenceId":"123"}}\n\n',
+      {
+        headers: {
+          "X-Maven-Auth-Token": "mock-token",
+        },
+      },
+    );
+    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+
+    const { result } = renderHook(() => useChat());
+
+    const userMessage = {
+      type: "USER",
+      text: "Hello",
+      timestamp: expect.any(Number),
+    } as ChatMessage;
+
+    await act(async () => {
+      result.current.addMessage(userMessage);
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/create",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          "Content-Type": "application/json",
+          "X-Agent-Id": "test-agent",
+          "X-Organization-Id": "test-org",
+        }),
+        body: JSON.stringify({
+          question: "Hello",
+          signedUserData: "test-signed-data",
+          unsignedUserData: mockUnsignedData,
+        }),
+      }),
+    );
+  });
+
+  it("should not include unsignedUserData in API call when not available", async () => {
+    (useAuth as any).mockReturnValue({
+      signedUserData: "test-signed-data",
+      unsignedUserData: null,
+    });
+
+    const mockResponse = new Response(
+      'data: {"eventType":"start","conversationMessageId":{"referenceId":"123"}}\n\n',
+      {
+        headers: {
+          "X-Maven-Auth-Token": "mock-token",
+        },
+      },
+    );
+    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+
+    const { result } = renderHook(() => useChat());
+
+    const userMessage = {
+      type: "USER",
+      text: "Hello",
+      timestamp: expect.any(Number),
+    } as ChatMessage;
+
+    await act(async () => {
+      result.current.addMessage(userMessage);
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/create",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          "Content-Type": "application/json",
+          "X-Agent-Id": "test-agent",
+          "X-Organization-Id": "test-org",
+        }),
+        body: JSON.stringify({
+          question: "Hello",
+          signedUserData: "test-signed-data",
+          unsignedUserData: undefined,
+        }),
+      }),
     );
   });
 });

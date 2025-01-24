@@ -43,7 +43,13 @@ async function fetchChatMessages(
     throw new Error("Failed to get chat messages");
   }
 
-  return response.json();
+  const data = await response.json();
+
+  if (process.env.ENABLE_API_LOGGING) {
+    console.log("GET MESSAGES RESPONSE", JSON.stringify(data, null, 2));
+  }
+
+  return data;
 }
 
 function filterMessages(messages: SalesforceChatMessage[]) {
