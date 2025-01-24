@@ -18,9 +18,10 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ organizationId: string; agentId: string }>;
-  searchParams: Promise<{ anonymous?: string }>;
+  searchParams: Promise<{ anonymous?: string; customData?: string }>;
 }) {
   const anonymous = "anonymous" in (await searchParams);
+  const { customData: searchParamsCustomData = "{}" } = await searchParams;
   const envPrefix = (await headers()).get("x-magi-env-prefix") ?? "";
   const { organizationId, agentId } = await params;
   const settings = await getPublicAppSettings(organizationId, agentId);
@@ -45,6 +46,14 @@ export default async function Page({
     }
   }
 
+  let parsedCustomData = {};
+
+  try {
+    parsedCustomData = JSON.parse(searchParamsCustomData);
+  } catch (error) {
+    console.error("Error parsing customData", error);
+  }
+
   const widgetLoadPayload = {
     envPrefix,
     organizationId,
@@ -54,6 +63,7 @@ export default async function Page({
     unsignedUserData: mockUserData,
     customData: {
       buttonId: "123",
+      ...parsedCustomData,
     },
   };
 
