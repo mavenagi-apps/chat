@@ -78,10 +78,15 @@ describe("POST /api/create", () => {
     },
   });
 
-  const setupMockRequest = (signedUserData: string | null = null) => ({
-    json: vi
-      .fn()
-      .mockResolvedValue({ question: "Test question", signedUserData }),
+  const setupMockRequest = (
+    signedUserData: string | null = null,
+    unsignedUserData: Record<string, any> | null = null,
+  ) => ({
+    json: vi.fn().mockResolvedValue({
+      question: "Test question",
+      signedUserData,
+      unsignedUserData,
+    }),
     headers: new Headers(),
   });
 
@@ -102,10 +107,13 @@ describe("POST /api/create", () => {
     vi.clearAllMocks();
   });
 
-  const testConversationInitialization = () => {
+  const testConversationInitialization = (
+    unsignedUserData?: Record<string, any>,
+  ) => {
     test("should create a new conversation", async () => {
       await POST(mockRequest as NextRequest);
-      expect(mockClient.conversation.initialize).toHaveBeenCalledWith({
+
+      const expectedInitPayload: any = {
         conversationId: { referenceId: "mock-id" },
         messages: [],
         responseConfig: {
@@ -121,7 +129,22 @@ describe("POST /api/create", () => {
           escalation_action_enabled: "true",
           handoff_available: "false",
         },
-      });
+      };
+
+      if (unsignedUserData) {
+        expectedInitPayload.messages = [
+          {
+            conversationMessageId: { referenceId: "mock-id" },
+            userId: { referenceId: "system" },
+            text: `Customer's Information: ${JSON.stringify(unsignedUserData)}`,
+            userMessageType: "EXTERNAL_SYSTEM",
+          },
+        ];
+      }
+
+      expect(mockClient.conversation.initialize).toHaveBeenCalledWith(
+        expectedInitPayload,
+      );
     });
   };
 
@@ -170,7 +193,46 @@ describe("POST /api/create", () => {
       testResponseStructure();
     });
 
-    describe("and the user has signed user data", () => {
+    describe("and the user has unsigned user data", () => {
+      const mockUnsignedData = {
+        customField: "value",
+        otherField: 123,
+      };
+
+      beforeEach(() => {
+        mockRequest = setupMockRequest(null, mockUnsignedData);
+      });
+
+      testConversationInitialization(mockUnsignedData);
+
+      test("should create a new user with anonymous user id", async () => {
+        await POST(mockRequest as NextRequest);
+        expect(mockClient.users.createOrUpdate).toHaveBeenCalledWith({
+          userId: { referenceId: "chat-anonymous-user-mock-id" },
+          identifiers: [],
+          data: {},
+        });
+      });
+
+      test("should call askStream with the correct parameters", async () => {
+        await POST(mockRequest as NextRequest);
+        expect(mockClient.conversation.askStream).toHaveBeenCalledWith(
+          "mock-id",
+          {
+            userId: { referenceId: "chat-anonymous-user-mock-id" },
+            conversationMessageId: { referenceId: "mock-id" },
+            text: "Test question",
+          },
+        );
+      });
+    });
+
+    describe("and the user has both signed and unsigned user data", () => {
+      const mockUnsignedData = {
+        customField: "value",
+        otherField: 123,
+      };
+
       beforeEach(() => {
         mockRequest = setupMockRequest(
           JSON.stringify({
@@ -180,10 +242,11 @@ describe("POST /api/create", () => {
             firstName: "John",
             lastName: "Doe",
           }),
+          mockUnsignedData,
         );
       });
 
-      testConversationInitialization();
+      testConversationInitialization(mockUnsignedData);
 
       test("should create a new user", async () => {
         await POST(mockRequest as NextRequest);

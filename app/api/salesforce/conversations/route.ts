@@ -77,6 +77,10 @@ export async function POST(req: NextRequest) {
         chatSessionCredentials.key,
       );
 
+      if (process.env.ENABLE_API_LOGGING) {
+        console.log("REQUEST BODY", JSON.stringify(requestBody, null, 2));
+      }
+
       const chatSessionInitResponse = await fetch(
         chatHostUrl + "/chat/rest/Chasitor/ChasitorInit",
         {
@@ -90,7 +94,10 @@ export async function POST(req: NextRequest) {
       );
 
       if (!chatSessionInitResponse.ok) {
-        console.error("Failed to initiate chat session", chatSessionInitResponse);
+        console.error(
+          "Failed to initiate chat session",
+          chatSessionInitResponse,
+        );
         throw new Error("Failed to initiate chat session");
       }
 
