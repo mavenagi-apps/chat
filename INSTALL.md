@@ -55,11 +55,17 @@ NOTE: The ID values for the organization and agent are the plain-text versions.
 
 When integrating Maven's widget, you'll need to securely transmit user data using a two-step process: signing and encryption. First, generate a key-pair and encryption secret. Then, configure your app settings by adding your encryption secret and public key during the app installation. Finally, implement a server-side function similar to this example:
 
-### Generating Key-pair
+### Generate private/public Key-pair
 
 ```bash
-openssl ecparam -name prime256v1 -genkey -noout -out private.ec.key
-openssl ec -in private.ec.key -pubout -out public.pem
+openssl ecparam -name prime256v1 -genkey -noout -out private.ec.key # private key located in private.ec.key
+openssl ec -in private.ec.key -pubout -out public.pem # public key located in public.pem
+```
+
+### Generate encryption secret
+
+```bash
+openssl rand -base64 32 # copy the printed value
 ```
 
 ### Using private key and encryption secret
