@@ -53,10 +53,33 @@ NOTE: The ID values for the organization and agent are the plain-text versions.
 
 ## Encrypting and Signing User Data
 
-When integrating Maven's widget, you'll need to securely transmit user data using a two-step process: signing and encryption. First, configure your app settings by adding your encryption secret and public key during the app installation. Then, implement a server-side function similar to this example:
+When integrating Maven's widget, you'll need to securely transmit user data using a two-step process: signing and encryption. First, generate a key-pair and encryption secret. Then, configure your app settings by adding your encryption secret and public key during the app installation.
+
+### Generate private/public Key-pair
+
+```bash
+openssl ecparam -name prime256v1 -genkey -noout -out private.ec.key # private key located in private.ec.key
+openssl ec -in private.ec.key -pubout -out public.pem # public key located in public.pem
+```
+
+### Generate encryption secret
+
+```bash
+openssl rand -base64 32 | tr -d '=' | tr '/+' '_-' | cut -c1-44 # copy the printed value
+```
+
+Finally, implement a server-side function similar to this example:
+
+### Using private key and encryption secret
 
 ```typescript
+import crypto from "node:crypto";
 import { SignJWT, EncryptJWT } from "jose";
+
+const privateKey = `-----BEGIN EC PRIVATE KEY-----
+...replace-with-your-private-key
+-----END EC PRIVATE KEY-----`;
+const encryptionSecret = "replace-with-your-encryption-secret";
 
 async function secureUserData(
   userData: Record<string, string> & {
@@ -73,7 +96,12 @@ async function secureUserData(
     .setProtectedHeader({ alg: "ES256" })
     .setIssuedAt()
     .setExpirationTime("1d")
-    .sign(yourPrivateKey);
+    .sign(
+      crypto.createPrivateKey({
+        key: privateKey,
+        format: "pem",
+      }),
+    );
 
   // 2. Encrypt the signed JWT using your encryption secret
   const encryptedJWT = await new EncryptJWT({ jwt: signedJWT })
