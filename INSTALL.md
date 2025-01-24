@@ -65,7 +65,7 @@ openssl ec -in private.ec.key -pubout -out public.pem # public key located in pu
 ### Generate encryption secret
 
 ```bash
-openssl rand -base64 32 # copy the printed value
+openssl rand -base64 32 | tr -d '=' | tr '/+' '_-' | cut -c1-44 # copy the printed value
 ```
 
 Finally, implement a server-side function similar to this example:
