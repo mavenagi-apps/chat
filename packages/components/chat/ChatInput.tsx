@@ -1,6 +1,6 @@
 import { Input as HeadlessInput } from "@headlessui/react";
 import { useTranslations } from "next-intl";
-import React, { type HTMLAttributes, useState } from "react";
+import React, { type HTMLAttributes, useState, useMemo } from "react";
 import { HiArrowNarrowRight } from "react-icons/hi";
 import { RiAttachmentLine, RiCustomerService2Line } from "react-icons/ri";
 import { z } from "zod";
@@ -43,7 +43,12 @@ export const ChatInput = ({
   ...props
 }: ChatInputProps) => {
   const t = useTranslations("chat.ChatInput");
-  const { followUpQuestions, ask, isHandoff } = React.useContext(ChatContext);
+  const {
+    followUpQuestions,
+    ask,
+    isHandoff,
+    shouldSupressHandoffInputDisplay,
+  } = React.useContext(ChatContext);
 
   const [seeMoreFollowupQuestions, setSeeMoreFollowupQuestions] =
     React.useState<boolean>(false);
@@ -113,12 +118,19 @@ export const ChatInput = ({
       methods.setValue("files", files);
     }
   };
+  const showHandoffInput = useMemo(() => {
+    if (!isHandoff) {
+      return false;
+    }
+
+    return !shouldSupressHandoffInputDisplay;
+  }, [isHandoff, shouldSupressHandoffInputDisplay]);
 
   return (
     <div className="min-h-14 border-t border-gray-300 bg-white p-3">
       <div className="mx-auto">
-        {isHandoff && <HandoffChatBar />}
-        {!isHandoff && !isSubmitting && followUpQuestions.length > 0 && (
+        {showHandoffInput && <HandoffChatBar />}
+        {!showHandoffInput && !isSubmitting && followUpQuestions.length > 0 && (
           <div>
             {followUpQuestions
               .slice(0, seeMoreFollowupQuestions ? 3 : 1)

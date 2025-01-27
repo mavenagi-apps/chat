@@ -38,6 +38,7 @@ interface CreateOptions {
   conversationId: string;
   initialize: boolean;
   signedUserData: string | null;
+  unsignedUserData?: Record<string, any>;
 }
 
 async function createOrUpdateUser(
@@ -63,7 +64,7 @@ async function createOrUpdateUser(
     const data: Record<string, MavenAGI.UserData> = {};
     Object.entries(rest).forEach(([key, value]) => {
       data[key] = {
-        value: value as string,
+        value: (value as any).toString?.() || value,
         visibility: MavenAGI.VisibilityType.Visible,
       };
     });
@@ -89,8 +90,9 @@ async function createOrUpdateUser(
 
 async function initializeConversation(
   client: MavenAGIClient,
-  conversationId: string,
+  conversationId: CreateOptions["conversationId"],
   settings: ParsedAppSettings,
+  unsignedUserData?: CreateOptions["unsignedUserData"],
 ) {
   const strategy = ServerHandoffStrategyFactory.createStrategy(
     settings.handoffConfiguration?.type,
@@ -121,6 +123,21 @@ async function initializeConversation(
     },
   };
 
+  try {
+    if (unsignedUserData) {
+      conversationInitializationPayload.messages.push({
+        conversationMessageId: {
+          referenceId: nanoid(),
+        },
+        userId: { referenceId: "system" },
+        text: `Customer's Information: ${JSON.stringify(unsignedUserData)}`,
+        userMessageType: "EXTERNAL_SYSTEM",
+      });
+    }
+  } catch (error) {
+    console.error("Error adding unsigned user data to conversation:", error);
+  }
+
   return client.conversation.initialize(conversationInitializationPayload);
 }
 
@@ -135,7 +152,7 @@ const generateDecryptedSignedUserData = async (
   try {
     return await decryptAndVerifySignedUserData(signedUserData, settings);
   } catch (error) {
-    console.log("Failed to decrypt signed user data:", error);
+    console.error("Failed to decrypt signed user data:", error);
     return null;
   }
 };
@@ -154,7 +171,7 @@ export async function POST(req: NextRequest) {
   return withAppSettings(
     req,
     async (req, settings, organizationId, agentId) => {
-      const { question, signedUserData, attachments } =
+      const { question, signedUserData, attachments, unsignedUserData } =
         (await req.json()) as CreateOptions;
       const client: MavenAGIClient = getMavenAGIClient(organizationId, agentId);
       const decryptedSignedUserData: any | null =
@@ -169,7 +186,12 @@ export async function POST(req: NextRequest) {
           decryptedSignedUserData,
         );
         userId = userResponse.userId.referenceId;
-        await initializeConversation(client, conversationId, settings);
+        await initializeConversation(
+          client,
+          conversationId,
+          settings,
+          unsignedUserData,
+        );
       }
 
       try {
@@ -207,7 +229,7 @@ export async function POST(req: NextRequest) {
                   ) {
                     break;
                   }
-                  console.log("Error in stream:", err);
+                  console.error("Error in stream:", err);
                   throw err;
                 }
               }

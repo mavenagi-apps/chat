@@ -70,6 +70,7 @@ export function useChat(): UseChatReturn {
   );
 
   const { organizationId, agentId }: UseChatParams = useParams();
+  const { unsignedUserData } = useAuth();
 
   const requestHeaders = useMemo(() => {
     const headers: HeadersInit = {
@@ -116,12 +117,13 @@ export function useChat(): UseChatReturn {
           attachments: (_messages[_messages.length - 1] as UserChatMessage)
             .attachments,
           signedUserData: signedUserData || undefined,
+          unsignedUserData: unsignedUserData || undefined,
         }),
         headers: requestHeaders,
         signal: newAbortController.signal,
       });
     },
-    [signedUserData, requestHeaders],
+    [signedUserData, requestHeaders, unsignedUserData],
   );
 
   const streamResponse = useCallback(async (response: Response) => {

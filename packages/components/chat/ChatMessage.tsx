@@ -16,13 +16,15 @@ import {
   type Message,
   type UserChatMessage,
   type ZendeskWebhookMessage,
-  type ChatEstablishedMessage,
-  type ChatEndedMessage,
+  type SalesforceChatMessage,
+  type IncomingHandoffConnectionEvent,
+  type QueueUpdateMessage,
 } from "@/types";
 import { Attachment, type ConversationMessageResponse } from "mavenagi/api";
 import { useTranslations } from "next-intl";
 import type { Front } from "@/types/front";
 import { CombinedMessage } from "@/types";
+
 interface MessageProps {
   message: CombinedMessage;
   linkTargetInNewTab?: boolean;
@@ -73,6 +75,17 @@ function renderHandoffMessage(message: ZendeskWebhookMessage) {
   );
 }
 
+function renderSalesforceMessage(message: SalesforceChatMessage) {
+  const author = message.message.name;
+  return (
+    <ChatBubble direction="left-hug" author={author}>
+      <ReactMarkdown linkTargetInNewTab={true}>
+        {message.message.text}
+      </ReactMarkdown>
+    </ChatBubble>
+  );
+}
+
 function renderFrontAgentMessage(message: Front.WebhookMessage) {
   const author =
     `${message.author.first_name} ${message.author.last_name}`.trim();
@@ -85,18 +98,53 @@ function renderFrontAgentMessage(message: Front.WebhookMessage) {
   );
 }
 
-function renderHandoffEventMessage(
-  message: ChatEstablishedMessage | ChatEndedMessage,
-) {
+function getHandoffEventMessageText(
+  message: IncomingHandoffConnectionEvent,
+): string | null {
   const t = useTranslations("chat.Handoff");
   const messageMap = {
-    ChatEstablished: t("connected_to_agent"),
-    ChatEnded: t("chat_has_ended"),
+    ChatConnecting: () => t("connecting_to_agent"),
+    ChatEstablished: () => t("connected_to_agent"),
+    ChatEnded: () => t("chat_has_ended"),
+    ChatTransferred: (message: IncomingHandoffConnectionEvent) => {
+      const agentName =
+        "message" in message && "name" in message.message
+          ? message.message.name
+          : undefined;
+      return t("chat_transferred", { name: agentName });
+    },
+    QueueUpdate: (message: QueueUpdateMessage) => {
+      const { estimatedWaitTime, position } = message.message;
+
+      if (estimatedWaitTime && estimatedWaitTime > -1) {
+        return t("chat_queue_position_estimated_wait_time", {
+          estimatedWaitTime,
+        });
+      }
+
+      if (position === 0) {
+        return t("chat_queue_position_next");
+      }
+
+      if (position && position > 0) {
+        return t("chat_queue_position_in_queue", { position });
+      }
+
+      return t("chat_queue_position_in_queue");
+    },
   };
-  const messageText = messageMap[message.type];
+  const messageText = messageMap[message.type as keyof typeof messageMap]?.(
+    message as QueueUpdateMessage,
+  );
+  return messageText || null;
+}
+
+function renderHandoffEventMessage(message: IncomingHandoffConnectionEvent) {
+  const messageText = getHandoffEventMessageText(message);
   if (!messageText) {
     return null;
   }
+
   return (
     <div className="my-5 flex items-center justify-center h-auto text-gray-500">
       <div className="grow border-t border-gray-300"></div>
@@ -156,14 +204,20 @@ export function ChatMessage({
             />
           </ChatBubble>
         );
+      case "ChatMessage":
+        return renderSalesforceMessage(message as SalesforceChatMessage);
       case "handoff-zendesk":
         return renderHandoffMessage(message as ZendeskWebhookMessage);
       case "front-agent":
         return renderFrontAgentMessage(message as Front.WebhookMessage);
       case "ChatEstablished":
-        return renderHandoffEventMessage(message as ChatEstablishedMessage);
       case "ChatEnded":
-        return renderHandoffEventMessage(message as ChatEndedMessage);
+      case "ChatConnecting":
+      case "ChatTransferred":
+      case "QueueUpdate":
+        return renderHandoffEventMessage(
+          message as IncomingHandoffConnectionEvent,
+        );
       default:
         if (isBotMessage(message as Message)) {
           return renderBotMessage(

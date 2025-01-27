@@ -55,7 +55,10 @@ describe("DemoPage", () => {
       const { container } = render(
         await DemoPage({
           params: Promise.resolve(mockParams),
-          searchParams: Promise.resolve({ anonymous: "anything" }),
+          searchParams: Promise.resolve({
+            anonymous: "anything",
+            customData: "{}",
+          }),
         }),
       );
 
@@ -98,14 +101,86 @@ describe("DemoPage", () => {
     });
   });
 
+  describe("custom data handling", () => {
+    test("should parse and include valid custom data from search params", async () => {
+      const customData = {
+        testKey: "testValue",
+        numberKey: 123,
+      };
+
+      const { container } = render(
+        await DemoPage({
+          params: Promise.resolve(mockParams),
+          searchParams: Promise.resolve({
+            anonymous: "anything",
+            customData: JSON.stringify(customData),
+          }),
+        }),
+      );
+
+      const widgetScript = container.getElementsByTagName("script")[1];
+      expect(widgetScript.innerHTML).toContain(
+        `"customData":${JSON.stringify({
+          buttonId: "123",
+          ...customData,
+        })}`,
+      );
+    });
+
+    test("should handle invalid custom data JSON gracefully", async () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      const { container } = render(
+        await DemoPage({
+          params: Promise.resolve(mockParams),
+          searchParams: Promise.resolve({
+            anonymous: "anything",
+            customData: "invalid-json",
+          }),
+        }),
+      );
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error parsing customData",
+        expect.any(Error),
+      );
+
+      const widgetScript = container.getElementsByTagName("script")[1];
+      expect(widgetScript.innerHTML).toContain(
+        `"customData":{"buttonId":"123"}`,
+      );
+    });
+
+    test("should use default custom data when customData param is not provided", async () => {
+      const { container } = render(
+        await DemoPage({
+          params: Promise.resolve(mockParams),
+          searchParams: Promise.resolve({ anonymous: "anything" }),
+        }),
+      );
+
+      const widgetScript = container.getElementsByTagName("script")[1];
+      expect(widgetScript.innerHTML).toContain(
+        `"customData":{"buttonId":"123"}`,
+      );
+    });
+  });
+
   describe("when parameters are missing", () => {
+    const mockSearchParams: {
+      anonymous?: string;
+      customData?: string;
+    } = { anonymous: "anything" };
+
     test("should call notFound when organizationId is missing", async () => {
       await DemoPage({
         params: Promise.resolve({
           ...mockParams,
           organizationId: "",
         }),
-        searchParams: Promise.resolve({ anonymous: "anything" }),
+        searchParams: Promise.resolve(mockSearchParams),
       });
       expect(notFound).toHaveBeenCalled();
     });
@@ -116,7 +191,7 @@ describe("DemoPage", () => {
           ...mockParams,
           agentId: "",
         }),
-        searchParams: Promise.resolve({ anonymous: "anything" }),
+        searchParams: Promise.resolve(mockSearchParams),
       });
       expect(notFound).toHaveBeenCalled();
     });
@@ -145,7 +220,10 @@ describe("DemoPage", () => {
       const { container } = render(
         await DemoPage({
           params: Promise.resolve(mockParams),
-          searchParams: Promise.resolve({ anonymous: "anything" }),
+          searchParams: Promise.resolve({
+            anonymous: "anything",
+            customData: "{}",
+          }),
         }),
       );
 
