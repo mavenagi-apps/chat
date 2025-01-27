@@ -94,7 +94,6 @@ export const ChatInput = ({
     "image/webp",
   ];
 
-  //TODO to be used to add visual feedback to drag and drop
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragOver: React.DragEventHandler<HTMLDivElement> = (
@@ -127,7 +126,16 @@ export const ChatInput = ({
   }, [isHandoff, shouldSupressHandoffInputDisplay]);
 
   return (
-    <div className="min-h-14 border-t border-gray-300 bg-white p-3">
+    <div
+      className={
+        isDragging
+          ? "min-h-14 border-t border-gray-300 bg-gray-300 p-3"
+          : "min-h-14 border-t border-gray-300 bg-white p-3"
+      }
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      onDragLeave={handleDragLeave}
+    >
       <div className="mx-auto">
         {showHandoffInput && <HandoffChatBar />}
         {!showHandoffInput && !isSubmitting && followUpQuestions.length > 0 && (
@@ -172,11 +180,7 @@ export const ChatInput = ({
           </div>
         )}
 
-        <div
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragLeave={handleDragLeave}
-        >
+        <div>
           <Form.Form {...methods} className="flex items-center relative">
             <HeadlessInput
               {...props}
