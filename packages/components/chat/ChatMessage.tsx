@@ -256,7 +256,7 @@ function BotMessage({
     .join("")
     .replaceAll("\\n", "\n");
   return (
-    <div className="prose max-w-full overflow-auto text-xs">
+    <div dir="auto" className="prose max-w-full overflow-auto text-xs">
       <ReactMarkdown linkTargetInNewTab={linkTargetInNewTab}>
         {messageText}
       </ReactMarkdown>
@@ -273,7 +273,7 @@ function ErrorMessage({
   linkTargetInNewTab?: boolean;
 }) {
   return (
-    <div className="flex items-center">
+    <div dir="auto" className="flex items-center">
       <HiOutlineExclamationCircle className="size-5 text-red-500" />
       <div className="ml-3 flex-1 content-center">
         <ReactMarkdown linkTargetInNewTab={linkTargetInNewTab}>
@@ -292,7 +292,7 @@ function SimulatedMessage({
   linkTargetInNewTab?: boolean;
 }) {
   return (
-    <div className="prose max-w-full text-xs">
+    <div dir="auto" className="prose max-w-full text-xs">
       <ReactMarkdown linkTargetInNewTab={linkTargetInNewTab}>
         {text}
       </ReactMarkdown>
