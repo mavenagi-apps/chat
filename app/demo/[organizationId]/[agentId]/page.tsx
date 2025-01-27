@@ -67,6 +67,20 @@ export default async function Page({
     },
   };
 
+  // TA
+  // const chatSettings = {
+  //   organizationId: "00DVA0000037MYL",
+  //   buttonId: "5735d000000blix",
+  //   deploymentId: "5725d000000blNa",
+  // }
+
+  // TIVO
+  const chatSettings = {
+    organizationId: "00D0U0000009Hbl",
+    buttonId: "573O9000001AyGr",
+    deploymentId: "572O90000054FIX",
+  };
+
   return (
     <div
       style={{
@@ -75,6 +89,37 @@ export default async function Page({
         height: "100vh",
       }}
     >
+      <div
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{
+          __html: `
+
+      <script type='text/javascript' src='https://c.la12s-core1.sfdc-lywfpd.salesforceliveagent.com/content/g/js/63.0/deployment.js'></script>
+<script type='text/javascript'>
+liveagent.init('https://d.la12s-core1.sfdc-lywfpd.salesforceliveagent.com/chat', '${chatSettings.deploymentId}', '${chatSettings.organizationId}');
+</script>
+      
+      
+      <a
+      id="liveagent_button_online_${chatSettings.buttonId}"
+      href="javascript://Chat"
+      style="display: none;"
+      onclick="liveagent.startChat('${chatSettings.buttonId}')"
+      >ONLINE<!-- Online Chat Content -->
+      </a>
+      <div id="liveagent_button_offline_${chatSettings.buttonId}" style="display: none;">OFFLINE<!-- Offline Chat Content --></div><script type="text/javascript">
+
+
+
+
+if (!window._laq) { window._laq = []; }
+window._laq.push(function(){liveagent.showWhenOnline('${chatSettings.buttonId}', document.getElementById('liveagent_button_online_${chatSettings.buttonId}'));
+liveagent.showWhenOffline('${chatSettings.buttonId}', document.getElementById('liveagent_button_offline_${chatSettings.buttonId}'));
+});</script>
+
+`,
+        }}
+      />
       <script src="/js/widget.js" defer></script>
       <script
         dangerouslySetInnerHTML={{
