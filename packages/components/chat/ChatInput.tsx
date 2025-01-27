@@ -61,7 +61,6 @@ export const ChatInput = ({
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = (error) => reject(error);
     });
-
     return {
       type: mimeType,
       content: base64content.split(",")[1], // Remove the data URL prefix
@@ -196,6 +195,7 @@ export const ChatInput = ({
               id="file-input"
               className="hidden"
               accept={allowedAttachmentTypes.join(",")}
+              data-testid="chat-file-input"
               {...methods.register("files")}
             />
             {methods.watch("files")?.[0] &&

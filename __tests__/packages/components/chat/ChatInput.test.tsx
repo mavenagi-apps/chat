@@ -39,6 +39,34 @@ describe("ChatInput", () => {
     expect(screen.getByTestId("submit-question")).toBeInTheDocument();
   });
 
+  it("submits question with attachment ", async () => {
+    render(
+      <ChatContext.Provider value={mockContextValue}>
+        <ChatInput {...defaultProps} />
+      </ChatContext.Provider>,
+    );
+
+    const input = screen.getByTestId("chat-input");
+    const fileInput = screen.getByTestId("chat-file-input");
+    const submitButton = screen.getByTestId("submit-question");
+
+    const file = new File(["hello"], "hello.png", { type: "image/png" });
+
+    // simulate upload event and wait until finish
+    await waitFor(() =>
+      fireEvent.change(fileInput, {
+        target: { files: [file] },
+      }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("hello.png")).toBeInTheDocument();
+    });
+
+    fireEvent.change(input, { target: { value: "test question" } });
+    expect(fileInput.files[0]).toStrictEqual(file);
+  });
+
   it("submits question when form is submitted", async () => {
     render(
       <ChatContext.Provider value={mockContextValue}>
