@@ -7,7 +7,7 @@ type ChipProps = {
 
 const Chip: React.FC<ChipProps> = ({ displayText, onRemove }) => {
   return (
-    <div className="flex items-center space-x-2 bg-gray-200 px-2 py-1 rounded-full text-gray-700">
+    <div className="flex text-xs items-center space-x-2 bg-gray-200 px-2 py-1 rounded-full text-gray-700">
       <RiCloseLine className="cursor-pointer" onClick={onRemove} />
       <span>{displayText}</span>
     </div>

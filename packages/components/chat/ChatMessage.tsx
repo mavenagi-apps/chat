@@ -247,7 +247,9 @@ function UserMessage({
       <ReactMarkdown linkTargetInNewTab={linkTargetInNewTab}>
         {text}
       </ReactMarkdown>
-      {attachmentUrls && <img src={attachmentUrls[0]} />}
+      {attachmentUrls && (
+        <img className="max-w-80 max-h-80" src={attachmentUrls[0]} />
+      )}
     </div>
   );
 }
