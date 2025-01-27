@@ -27,11 +27,14 @@ import {
   AUTHENTICATION_HEADER,
   type AuthJWTPayload,
 } from "@/app/constants/authentication";
+import { type Attachment } from "mavenagi/api";
 import { ServerHandoffStrategyFactory } from "@/lib/handoff/ServerHandoffStrategyFactory";
+
 interface CreateOptions {
   organizationId: string;
   agentId: string;
   question: string;
+  attachments: Attachment[];
   conversationId: string;
   initialize: boolean;
   signedUserData: string | null;
@@ -168,7 +171,7 @@ export async function POST(req: NextRequest) {
   return withAppSettings(
     req,
     async (req, settings, organizationId, agentId) => {
-      const { question, signedUserData, unsignedUserData } =
+      const { question, signedUserData, attachments, unsignedUserData } =
         (await req.json()) as CreateOptions;
       const client: MavenAGIClient = getMavenAGIClient(organizationId, agentId);
       const decryptedSignedUserData: any | null =
@@ -200,6 +203,7 @@ export async function POST(req: NextRequest) {
             referenceId: nanoid(),
           },
           text: question,
+          attachments,
         });
 
         if (!response) {

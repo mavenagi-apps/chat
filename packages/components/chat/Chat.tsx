@@ -3,12 +3,14 @@ import React, { useEffect, useState } from "react";
 
 import { isBotMessage, ChatMessage, CombinedMessage } from "@/types";
 import { useSettings } from "@/app/providers/SettingsProvider";
+import { Attachment } from "mavenagi/api";
+import type { Front } from "@/types/front";
 import { useIdleMessage } from "@/lib/useIdleMessage";
 
 interface ChatContextProps {
   addMessage: (message: ChatMessage) => void;
   agentName: string | null;
-  ask: (question: string) => Promise<void>;
+  ask: (question: string, attachments?: Attachment[]) => Promise<void>;
   conversationId: string;
   followUpQuestions: string[];
   handleEndHandoff: () => Promise<void>;

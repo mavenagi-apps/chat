@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { ChatInput } from "@magi/components/chat/ChatInput";
 import { ChatContext } from "@magi/components/chat/Chat";
+import userEvent from "@testing-library/user-event";
 
 // Mock next-intl
 vi.mock("next-intl", () => ({
@@ -39,6 +40,40 @@ describe("ChatInput", () => {
     expect(screen.getByTestId("submit-question")).toBeInTheDocument();
   });
 
+  it("submits question with attachment ", async () => {
+    render(
+      <ChatContext.Provider value={mockContextValue}>
+        <ChatInput {...defaultProps} />
+      </ChatContext.Provider>,
+    );
+
+    const input = screen.getByTestId("chat-input");
+    const fileInput = screen.getByTestId("chat-file-input");
+    const submitButton = screen.getByTestId("submit-question");
+
+    const file = new File(["hello"], "hello.png", { type: "image/png" });
+
+    // simulate upload event and wait until finish
+    await waitFor(() => userEvent.upload(fileInput, file));
+
+    await waitFor(() => {
+      expect(screen.getByText("hello.png")).toBeInTheDocument();
+    });
+
+    fireEvent.change(input, { target: { value: "test question" } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockAsk).toHaveBeenCalledWith("test question", [
+        {
+          type: "image/png",
+          content: "aGVsbG8=",
+        },
+      ]);
+    });
+    expect(fileInput.files[0]).toStrictEqual(file);
+  });
+
   it("submits question when form is submitted", async () => {
     render(
       <ChatContext.Provider value={mockContextValue}>
@@ -53,7 +88,7 @@ describe("ChatInput", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockAsk).toHaveBeenCalledWith("test question");
+      expect(mockAsk).toHaveBeenCalledWith("test question", []);
     });
   });
 

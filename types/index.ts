@@ -1,6 +1,7 @@
 import {
   type ConversationMessageResponse,
   type AskStreamActionEvent,
+  type Attachment,
 } from "mavenagi/api";
 
 import type { ZendeskWebhookMessage } from "@/types/zendesk";
@@ -24,7 +25,10 @@ type ChatMessage = {
   type: "USER" | "ERROR" | "SIMULATED";
   timestamp?: number;
 };
-type UserChatMessage = ChatMessage & { type: "USER" };
+type UserChatMessage = ChatMessage & {
+  type: "USER";
+  attachments?: Attachment[];
+};
 type ActionChatMessage = ConversationMessageResponse.Bot & {
   action: AskStreamActionEvent;
 };

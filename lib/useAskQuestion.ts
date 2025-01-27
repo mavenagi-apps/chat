@@ -2,10 +2,15 @@ import { useCallback } from "react";
 import { useAnalytics } from "@/lib/use-analytics";
 import { MagiEvent } from "@/lib/analytics/events";
 import { useParams } from "next/dist/client/components/navigation";
+import { type Attachment } from "mavenagi/api";
 
 interface UseAskQuestionProps {
   conversationId?: string;
-  addMessage: (params: { text: string; type: "USER" }) => void;
+  addMessage: (params: {
+    text: string;
+    type: "USER";
+    attachments?: Attachment[];
+  }) => void;
 }
 
 export function useAskQuestion({
@@ -16,8 +21,8 @@ export function useAskQuestion({
 
   const analytics = useAnalytics();
 
-  const ask = useCallback(
-    async (question: string) => {
+  return useCallback(
+    async (question: string, attachments?: Attachment[]) => {
       analytics.logEvent(MagiEvent.chatAskClick, {
         agentId,
         conversationId: conversationId || "",
@@ -26,10 +31,9 @@ export function useAskQuestion({
       addMessage({
         text: question,
         type: "USER",
+        attachments,
       });
     },
     [agentId, conversationId, analytics, addMessage],
   );
-
-  return ask;
 }

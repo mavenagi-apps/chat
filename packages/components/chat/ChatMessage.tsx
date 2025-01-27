@@ -9,11 +9,10 @@ import BailoutFormDisplay from "@magi/components/chat/BailoutFormDisplay";
 import EscalationFormDisplay from "@magi/components/chat/EscalationFormDisplay";
 import { showBotAnswer } from "@/lib/chat/chat-helpers";
 import {
-  isBotMessage,
-  isActionChatMessage,
-  isEscalationChatMessage,
-  type ChatMessage,
   type ActionChatMessage,
+  isActionChatMessage,
+  isBotMessage,
+  isEscalationChatMessage,
   type Message,
   type UserChatMessage,
   type ZendeskWebhookMessage,
@@ -21,7 +20,7 @@ import {
   type IncomingHandoffConnectionEvent,
   type QueueUpdateMessage,
 } from "@/types";
-import { type ConversationMessageResponse } from "mavenagi/api";
+import { Attachment, type ConversationMessageResponse } from "mavenagi/api";
 import { useTranslations } from "next-intl";
 import type { Front } from "@/types/front";
 import { CombinedMessage } from "@/types";
@@ -157,6 +156,10 @@ function renderHandoffEventMessage(message: IncomingHandoffConnectionEvent) {
   );
 }
 
+function attachmentsToDataUrls(attachments?: Attachment[]) {
+  return (attachments ?? []).map((a) => `data:${a.type};base64,${a.content}`);
+}
+
 export function ChatMessage({
   message,
   linkTargetInNewTab = true,
@@ -173,6 +176,9 @@ export function ChatMessage({
           >
             <UserMessage
               text={"text" in message ? message.text : ""}
+              attachmentUrls={attachmentsToDataUrls(
+                (message as UserChatMessage).attachments,
+              )}
               linkTargetInNewTab={linkTargetInNewTab}
             />
           </ChatBubble>
@@ -229,9 +235,11 @@ export function ChatMessage({
 
 function UserMessage({
   text,
+  attachmentUrls,
   linkTargetInNewTab = true,
 }: {
   text: string;
+  attachmentUrls?: string[];
   linkTargetInNewTab?: boolean;
 }) {
   return (
@@ -239,6 +247,9 @@ function UserMessage({
       <ReactMarkdown linkTargetInNewTab={linkTargetInNewTab}>
         {text}
       </ReactMarkdown>
+      {attachmentUrls && (
+        <img className="max-w-80 max-h-80" src={attachmentUrls[0]} />
+      )}
     </div>
   );
 }
