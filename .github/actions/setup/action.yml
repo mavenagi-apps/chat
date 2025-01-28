@@ -3,7 +3,7 @@ description: Shared setup for Node.js with pnpm
 
 inputs:
   node-version-file:
-    description: Path to .nvmrc file
+    description: Path to .node-version file
     required: true
 
 runs:

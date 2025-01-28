@@ -6,7 +6,8 @@ import {
 
 import type { ZendeskWebhookMessage } from "@/types/zendesk";
 import type { Front } from "./front";
-import { SalesforceChatMessage } from "./salesforce";
+import type { SalesforceChatMessage } from "./salesforce";
+import { SALESFORCE_MESSAGE_TYPES } from "./salesforce";
 
 type IncomingHandoffEvent =
   | SalesforceChatMessage
@@ -38,22 +39,22 @@ type EscalationChatMessage = ConversationMessageResponse.Bot & {
 };
 
 type ChatEstablishedMessage = {
-  type: "ChatEstablished";
+  type: typeof SALESFORCE_MESSAGE_TYPES.ChatEstablished;
   timestamp: number;
 };
 
 type ChatEndedMessage = {
-  type: "ChatEnded";
+  type: typeof SALESFORCE_MESSAGE_TYPES.ChatEnded;
   timestamp: number;
 };
 
 type ChatConnectingMessage = {
-  type: "ChatConnecting";
+  type: typeof SALESFORCE_MESSAGE_TYPES.ChatConnecting;
   timestamp: number;
 };
 
 type ChatTransferredMessage = {
-  type: "ChatTransferred";
+  type: typeof SALESFORCE_MESSAGE_TYPES.ChatTransferred;
   message: {
     name: string;
     userId: string;
@@ -69,7 +70,7 @@ type ChatTransferredMessage = {
 };
 
 type QueueUpdateMessage = {
-  type: "QueueUpdate";
+  type: typeof SALESFORCE_MESSAGE_TYPES.QueueUpdate;
   timestamp: number;
   message: {
     estimatedWaitTime: number;
@@ -78,7 +79,7 @@ type QueueUpdateMessage = {
 };
 
 type AgentTypingMessage = {
-  type: "AgentTyping";
+  type: typeof SALESFORCE_MESSAGE_TYPES.AgentTyping;
   timestamp: number;
   message: {
     name: string;
@@ -87,7 +88,7 @@ type AgentTypingMessage = {
 };
 
 type AgentNotTypingMessage = {
-  type: "AgentNotTyping";
+  type: typeof SALESFORCE_MESSAGE_TYPES.AgentNotTyping;
   timestamp: number;
   message: {
     name: string;

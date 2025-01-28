@@ -47,7 +47,7 @@ describe("useChat", () => {
     });
 
     (global.fetch as any).mockResolvedValue(
-      new NextResponse(mockStream, {
+      new Response(mockStream, {
         headers: {
           "X-Maven-Auth-Token": "mock-token",
         },

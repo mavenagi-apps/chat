@@ -1,4 +1,12 @@
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import {
+  vi,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  type Mock,
+} from "vitest";
 import { GET, POST } from "@/app/api/salesforce/messages/route";
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -42,17 +50,32 @@ vi.mock("@/app/api/salesforce/utils", async () => {
 
 describe("Salesforce Messages API", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     global.fetch = vi.fn();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   describe("GET /api/salesforce/messages", () => {
-    const createGetRequest = (headers: Record<string, string> = {}) => ({
-      signal: { aborted: false },
-      headers: {
-        get: vi.fn((key: string) => headers[key]),
-      },
-    });
+    const createGetRequest = (
+      headers: Record<string, string> = {},
+      abortAfterCalls = 1,
+    ) => {
+      let callCount = 0;
+      return {
+        signal: {
+          get aborted() {
+            callCount++;
+            return callCount > abortAfterCalls;
+          },
+        },
+        headers: {
+          get: vi.fn((key: string) => headers[key]),
+        },
+      } as unknown as NextRequest;
+    };
 
     it("should stream messages successfully", async () => {
       const messages = [
@@ -62,31 +85,102 @@ describe("Salesforce Messages API", () => {
         },
       ];
 
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ messages, sequence: 1, offset: 0 }),
-      } as unknown as Response);
+      const mockFetch = global.fetch as Mock;
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ messages, sequence: 1, offset: 0 }),
+        } as Response)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ messages: [], sequence: 2, offset: 1 }),
+        } as Response);
 
-      const response = await GET(createGetRequest() as unknown as NextRequest);
+      // Allow 2 fetch calls before aborting
+      const response = await GET(createGetRequest({}, 2));
       const reader = response.body?.getReader();
       const { value } = (await reader?.read()) || {};
       const text = new TextDecoder().decode(value);
 
       expect(response.status).toBe(200);
       expect(text).toContain("Hello");
+      expect(mockFetch).toHaveBeenCalledTimes(2);
     });
 
     it("should handle empty message responses", async () => {
-      vi.mocked(global.fetch).mockResolvedValueOnce({
+      const mockFetch = global.fetch as Mock;
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
         status: 204,
+        json: () => Promise.resolve({ messages: [], sequence: 1, offset: 0 }),
       } as Response);
 
-      const response = await GET(createGetRequest() as unknown as NextRequest);
+      // Abort after first call
+      const response = await GET(createGetRequest({}, 1));
       const reader = response.body?.getReader();
       const { done } = (await reader?.read()) || {};
 
       expect(response.status).toBe(200);
       expect(done).toBe(true);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    describe("Error Handling", () => {
+      let mockController: { enqueue: Mock; close: Mock; error: Mock };
+      let mockReader: { read: Mock };
+
+      beforeEach(() => {
+        mockController = {
+          enqueue: vi.fn(),
+          close: vi.fn(),
+          error: vi.fn(),
+        };
+
+        mockReader = {
+          read: vi.fn().mockResolvedValue({ done: true }),
+        };
+
+        vi.stubGlobal("console", { ...console, error: vi.fn() });
+
+        vi.stubGlobal(
+          "ReadableStream",
+          vi.fn().mockImplementation(({ start }) => {
+            start(mockController);
+            return {
+              getReader: () => mockReader,
+            };
+          }),
+        );
+      });
+
+      it("handles 403 errors gracefully during stream", async () => {
+        const mockFetch = global.fetch as Mock;
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 403,
+        });
+
+        const response = await GET(createGetRequest({}, 0));
+
+        expect(response.headers.get("Content-Type")).toBe("text/event-stream");
+        expect(mockController.close).toHaveBeenCalled();
+        expect(console.error).not.toHaveBeenCalled();
+      });
+
+      it("throws an error if 403 does not coincide with an aborted stream", async () => {
+        const mockFetch = global.fetch as Mock;
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 403,
+        });
+
+        // Use request that doesn't abort immediately
+        const response = await GET(createGetRequest({}, 2));
+
+        expect(response.headers.get("Content-Type")).toBe("text/event-stream");
+        expect(mockController.close).toHaveBeenCalled();
+        expect(console.error).toHaveBeenCalled();
+      });
     });
   });
 
@@ -96,15 +190,23 @@ describe("Salesforce Messages API", () => {
     });
 
     it("should send message successfully", async () => {
+      vi.mocked(sendChatMessage).mockResolvedValueOnce(
+        new Response("Chat message sent", { status: 200 }),
+      );
+
       const response = await POST(
         createPostRequest() as unknown as NextRequest,
       );
 
+      expect(response).toBeInstanceOf(Response);
       expect(response.status).toBe(200);
       expect(await response.json()).toBe("Chat message sent");
     });
 
     it("should handle send message failure", async () => {
+      const originalConsole = globalThis.console;
+      vi.stubGlobal("console", { ...console, error: vi.fn() });
+
       vi.mocked(sendChatMessage).mockRejectedValueOnce(
         new Error("Failed to send"),
       );
@@ -113,16 +215,23 @@ describe("Salesforce Messages API", () => {
         createPostRequest() as unknown as NextRequest,
       );
 
+      expect(response).toBeInstanceOf(Response);
       expect(response.status).toBe(500);
       expect(await response.json()).toBe("Failed to send chat message");
+      expect(console.error).toHaveBeenCalledOnce();
+
+      vi.stubGlobal("console", originalConsole);
     });
 
     it("should validate configuration", async () => {
-      vi.mocked(validateSalesforceConfig).mockReturnValueOnce(
-        new NextResponse(JSON.stringify({ error: "Invalid configuration" }), {
-          status: 400,
-        }),
+      const mockResponse = NextResponse.json(
+        {
+          success: false,
+          error: "Invalid handoff configuration type. Expected 'salesforce'.",
+        },
+        { status: 400 },
       );
+      vi.mocked(validateSalesforceConfig).mockReturnValueOnce(mockResponse);
 
       const response = await POST(
         createPostRequest() as unknown as NextRequest,
@@ -130,7 +239,8 @@ describe("Salesforce Messages API", () => {
 
       expect(response.status).toBe(400);
       expect(await response.json()).toEqual({
-        error: "Invalid configuration",
+        success: false,
+        error: "Invalid handoff configuration type. Expected 'salesforce'.",
       });
     });
   });

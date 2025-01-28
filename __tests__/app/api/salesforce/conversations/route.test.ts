@@ -1,4 +1,12 @@
-import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import {
+  vi,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  type Mock,
+} from "vitest";
 import jwt from "jsonwebtoken";
 import { POST } from "@/app/api/salesforce/conversations/route";
 import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
@@ -69,6 +77,7 @@ describe("POST /api/salesforce/conversations", () => {
   const createMockRequest = ({
     messages = [TEST_DATA.DEFAULT_MESSAGE],
     unsignedUserData = TEST_USER,
+    headers = {} as Record<string, string>,
   } = {}) => ({
     json: vi.fn().mockResolvedValue({
       messages,
@@ -77,6 +86,9 @@ describe("POST /api/salesforce/conversations", () => {
       screenResolution: TEST_USER.screenResolution,
       language: TEST_USER.language,
     }),
+    headers: {
+      get: vi.fn().mockImplementation((key) => headers[key]),
+    },
   });
 
   // Mock fetch responses
@@ -164,6 +176,9 @@ describe("POST /api/salesforce/conversations", () => {
           messages: [TEST_DATA.DEFAULT_MESSAGE],
           unsignedUserData: null,
         }),
+        headers: {
+          get: vi.fn(),
+        },
       } as unknown as NextRequest);
 
       expect(response.status).toBe(400);
@@ -188,6 +203,33 @@ describe("POST /api/salesforce/conversations", () => {
       expect(await response.json()).toEqual({
         error: "Internal Server Error",
       });
+    });
+
+    it("includes originalReferrer in session init when present", async () => {
+      const mockReferrer = "https://example.com/page";
+      const request = createMockRequest({
+        headers: { referer: mockReferrer },
+      }) as unknown as NextRequest;
+
+      await POST(request);
+
+      const initCall = (global.fetch as Mock).mock.calls.find((call) =>
+        call[0].includes("/ChasitorInit"),
+      );
+      const requestBody = JSON.parse(initCall?.[1]?.body);
+      expect(requestBody.visitorInfo?.originalReferrer).toBe(mockReferrer);
+    });
+
+    it("handles missing referrer header gracefully", async () => {
+      const request = createMockRequest();
+
+      await POST(request as unknown as NextRequest);
+
+      const initCall = (global.fetch as Mock).mock.calls.find((call) =>
+        call[0].includes("/ChasitorInit"),
+      );
+      const requestBody = JSON.parse(initCall?.[1]?.body);
+      expect(requestBody.visitorInfo?.originalReferrer).toBe("unknown");
     });
   });
 

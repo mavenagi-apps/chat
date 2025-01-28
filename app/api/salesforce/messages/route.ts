@@ -12,6 +12,7 @@ import {
   validateSalesforceConfig,
   validateAuthHeaders,
   fetchChatMessages,
+  ChatMessagesError,
 } from "@/app/api/salesforce/utils";
 import { withSettingsAndAuthentication } from "../../server/utils";
 
@@ -69,8 +70,12 @@ async function handleMessageStreaming(
             );
           }
         }
-      } catch (error) {
-        console.log("Failed to get chat messages:", error);
+      } catch (error: any) {
+        if (error instanceof ChatMessagesError && req.signal.aborted) {
+          console.log("Expected error: conversation deleted during long poll");
+        } else {
+          console.error("Failed to get chat messages:", error);
+        }
       } finally {
         controller.close();
       }
@@ -80,7 +85,7 @@ async function handleMessageStreaming(
     },
   });
 
-  return new NextResponse(stream, {
+  return new Response(stream, {
     headers: { "Content-Type": "text/event-stream" },
   });
 }
@@ -155,10 +160,12 @@ export async function POST(req: NextRequest) {
           sessionKey as string,
           url as string,
         );
-        return Response.json("Chat message sent");
+        return NextResponse.json("Chat message sent");
       } catch (error) {
-        console.log("Failed to send chat message:", error);
-        return Response.json("Failed to send chat message", { status: 500 });
+        console.error("Failed to send chat message:", error);
+        return NextResponse.json("Failed to send chat message", {
+          status: 500,
+        });
       }
     },
   );

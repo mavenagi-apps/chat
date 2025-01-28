@@ -24,6 +24,7 @@ import { Attachment, type ConversationMessageResponse } from "mavenagi/api";
 import { useTranslations } from "next-intl";
 import type { Front } from "@/types/front";
 import { CombinedMessage } from "@/types";
+import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
 
 interface MessageProps {
   message: CombinedMessage;
@@ -210,11 +211,11 @@ export function ChatMessage({
         return renderHandoffMessage(message as ZendeskWebhookMessage);
       case "front-agent":
         return renderFrontAgentMessage(message as Front.WebhookMessage);
-      case "ChatEstablished":
-      case "ChatEnded":
-      case "ChatConnecting":
-      case "ChatTransferred":
-      case "QueueUpdate":
+      case SALESFORCE_MESSAGE_TYPES.ChatEstablished:
+      case SALESFORCE_MESSAGE_TYPES.ChatEnded:
+      case SALESFORCE_MESSAGE_TYPES.ChatConnecting:
+      case SALESFORCE_MESSAGE_TYPES.ChatTransferred:
+      case SALESFORCE_MESSAGE_TYPES.QueueUpdate:
         return renderHandoffEventMessage(
           message as IncomingHandoffConnectionEvent,
         );

@@ -70,26 +70,6 @@ export function useHandoff({
     return generateHeaders(organizationId, agentId, state.handoffAuthToken);
   }, [state.handoffAuthToken, organizationId, agentId]);
 
-  const handleHandoffChatEvent = useCallback(
-    (event: IncomingHandoffEvent) => {
-      if (!strategyRef.current) return;
-
-      const { agentName: newAgentName, formattedEvent } =
-        strategyRef.current.handleChatEvent(event);
-
-      if (formattedEvent) {
-        if (newAgentName) {
-          setState((prev) => ({ ...prev, agentName: newAgentName }));
-        }
-        setState((prev) => ({
-          ...prev,
-          handoffChatEvents: [...prev.handoffChatEvents, formattedEvent],
-        }));
-      }
-    },
-    [state, setState],
-  );
-
   const getOrCreateUserAndConversation = useCallback(
     async (email?: string) => {
       if (!strategyRef.current) {
@@ -167,6 +147,33 @@ export function useHandoff({
     });
   }, [setState, generatedHeaders, resetAbortController]);
 
+  const handleHandoffChatEvent = useCallback(
+    async (event: IncomingHandoffEvent) => {
+      if (!strategyRef.current) return;
+
+      const {
+        agentName: newAgentName,
+        formattedEvent,
+        shouldEndHandoff,
+      } = strategyRef.current.handleChatEvent(event);
+
+      if (formattedEvent) {
+        if (newAgentName) {
+          setState((prev) => ({ ...prev, agentName: newAgentName }));
+        }
+        setState((prev) => ({
+          ...prev,
+          handoffChatEvents: [...prev.handoffChatEvents, formattedEvent],
+        }));
+      }
+
+      if (shouldEndHandoff) {
+        await handleEndHandoff();
+      }
+    },
+    [state, setState, handleEndHandoff],
+  );
+
   const getMessages = useCallback(async () => {
     if (!state.handoffAuthToken || !strategyRef.current) {
       return;
@@ -203,7 +210,7 @@ export function useHandoff({
         abortController.current,
       )) {
         if (abortController.current.signal.aborted) break;
-        handleHandoffChatEvent(event);
+        await handleHandoffChatEvent(event);
       }
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
