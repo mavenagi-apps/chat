@@ -56,7 +56,7 @@ function createRetryRateLimiter(minTime: number) {
         error.response.headers.get("retry-after")!,
         10,
       );
-      return retryAfterSeconds;
+      return retryAfterSeconds * 1000;
     }
     return defaultRetryAfter;
   });
