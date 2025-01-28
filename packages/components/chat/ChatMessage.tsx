@@ -212,6 +212,7 @@ export function ChatMessage({
       case "front-agent":
         return renderFrontAgentMessage(message as Front.WebhookMessage);
       case SALESFORCE_MESSAGE_TYPES.ChatRequestFail:
+      case SALESFORCE_MESSAGE_TYPES.ChatEstablished:
       case SALESFORCE_MESSAGE_TYPES.ChatEnded:
       case SALESFORCE_MESSAGE_TYPES.ChatConnecting:
       case SALESFORCE_MESSAGE_TYPES.ChatTransferred:
