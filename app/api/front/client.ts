@@ -40,18 +40,23 @@ function createRetryRateLimiter(minTime: number) {
     });
     const { retryCount } = info;
     const backoffs = [0.2, 0.4, 0.8, 1, 2];
+    if (backoffs.length <= retryCount) {
+      // stop retrying after 5 attempts
+      return;
+    }
+    const defaultRetryAfter = backoffs[retryCount] * 1000;
     if (
       error instanceof JsonFetchError &&
-      Object.values(RetryableStatusCodes).includes(error.response.status)
+      Object.values(RetryableStatusCodes).includes(error.response.status) &&
+      error.response.headers.get("retry-after")?.length
     ) {
       const retryAfterSeconds = parseInt(
-        error.response.headers.get("retry-after") ??
-          String(backoffs[retryCount]),
+        error.response.headers.get("retry-after")!,
         10,
       );
-      return retryAfterSeconds * 1000;
+      return retryAfterSeconds;
     }
-    return;
+    return defaultRetryAfter;
   });
   return limiter;
 }
