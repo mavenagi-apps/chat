@@ -208,7 +208,7 @@ export async function POST(req: NextRequest) {
         );
         return Response.json("Chat message sent");
       } catch (error) {
-        console.log("Failed to send chat message:", error);
+        console.error("Failed to send chat message:", error);
         return Response.json("Failed to send chat message", { status: 500 });
       }
     },

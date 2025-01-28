@@ -43,16 +43,27 @@ vi.mock("@/app/api/salesforce/utils", async () => {
 describe("Salesforce Messages API", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    global.fetch = vi.fn();
+    global.fetch = vi.fn() as unknown as typeof global.fetch;
   });
 
   describe("GET /api/salesforce/messages", () => {
-    const createGetRequest = (headers: Record<string, string> = {}) => ({
-      signal: { aborted: false },
-      headers: {
-        get: vi.fn((key: string) => headers[key]),
-      },
-    });
+    const createGetRequest = (
+      headers: Record<string, string> = {},
+      abortAfterCalls = 1,
+    ) => {
+      let callCount = 0;
+      return {
+        signal: {
+          get aborted() {
+            callCount++;
+            return callCount > abortAfterCalls;
+          },
+        },
+        headers: {
+          get: vi.fn((key: string) => headers[key]),
+        },
+      } as unknown as NextRequest;
+    };
 
     it("should stream messages successfully", async () => {
       const messages = [
@@ -62,31 +73,44 @@ describe("Salesforce Messages API", () => {
         },
       ];
 
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ messages, sequence: 1, offset: 0 }),
-      } as unknown as Response);
+      const mockFetch = global.fetch as Mock;
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ messages, sequence: 1, offset: 0 }),
+        } as Response)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ messages: [], sequence: 2, offset: 1 }),
+        } as Response);
 
-      const response = await GET(createGetRequest() as unknown as NextRequest);
+      // Allow 2 fetch calls before aborting
+      const response = await GET(createGetRequest({}, 2));
       const reader = response.body?.getReader();
       const { value } = (await reader?.read()) || {};
       const text = new TextDecoder().decode(value);
 
       expect(response.status).toBe(200);
       expect(text).toContain("Hello");
+      expect(mockFetch).toHaveBeenCalledTimes(2);
     });
 
     it("should handle empty message responses", async () => {
-      vi.mocked(global.fetch).mockResolvedValueOnce({
+      const mockFetch = global.fetch as Mock;
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
         status: 204,
+        json: () => Promise.resolve({ messages: [], sequence: 1, offset: 0 }),
       } as Response);
 
-      const response = await GET(createGetRequest() as unknown as NextRequest);
+      // Abort after first call
+      const response = await GET(createGetRequest({}, 1));
       const reader = response.body?.getReader();
       const { done } = (await reader?.read()) || {};
 
       expect(response.status).toBe(200);
       expect(done).toBe(true);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
     describe("Error Handling", () => {
@@ -157,6 +181,9 @@ describe("Salesforce Messages API", () => {
     });
 
     it("should handle send message failure", async () => {
+      // mock console.error once
+      const originalConsoleError = global.console.error;
+      global.console.error = vi.fn();
       vi.mocked(sendChatMessage).mockRejectedValueOnce(
         new Error("Failed to send"),
       );
@@ -167,6 +194,9 @@ describe("Salesforce Messages API", () => {
 
       expect(response.status).toBe(500);
       expect(await response.json()).toBe("Failed to send chat message");
+      expect(global.console.error).toHaveBeenCalledOnce();
+      // reset console.error
+      global.console.error = originalConsoleError;
     });
 
     it("should validate configuration", async () => {
