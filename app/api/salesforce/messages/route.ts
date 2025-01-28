@@ -1,66 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server";
 import {
-  type ChatMessageResponse,
   type SalesforceChatMessage,
   SALESFORCE_CHAT_SUBJECT_HEADER_KEY,
 } from "@/types/salesforce";
 
 import {
   SALESFORCE_ALLOWED_MESSAGE_TYPES,
-  SALESFORCE_API_BASE_HEADERS,
   SALESFORCE_CHAT_PROMPT_MESSAGE_NAMES,
   SALESFORCE_CHAT_PROMPT_MESSAGE_TEXTS,
   sendChatMessage,
   validateSalesforceConfig,
   validateAuthHeaders,
+  fetchChatMessages,
+  ChatMessagesError,
 } from "@/app/api/salesforce/utils";
 import { withSettingsAndAuthentication } from "../../server/utils";
-
-class ChatMessagesError extends Error {
-  constructor(
-    message: string,
-    public statusCode: number,
-  ) {
-    super(message);
-    this.name = "ChatMessagesError";
-  }
-}
-
-async function fetchChatMessages(
-  url: string,
-  ack: number,
-  affinityToken: string,
-  sessionKey: string,
-): Promise<ChatMessageResponse> {
-  const response = await fetch(`${url}/chat/rest/System/Messages?ack=${ack}`, {
-    method: "GET",
-    headers: {
-      ...SALESFORCE_API_BASE_HEADERS,
-      "X-LIVEAGENT-AFFINITY": affinityToken,
-      "X-LIVEAGENT-SESSION-KEY": sessionKey,
-    },
-  });
-
-  if (response.status === 204) {
-    return {
-      messages: [],
-      sequence: ack,
-      offset: 0,
-    };
-  }
-
-  if (!response.ok) {
-    throw new ChatMessagesError("Failed to get chat messages", response.status);
-  }
-
-  const data = await response.json();
-
-  if (process.env.ENABLE_API_LOGGING) {
-    console.log("GET MESSAGES RESPONSE", JSON.stringify(data, null, 2));
-  }
-
-  return data;
-}
 
 function filterMessages(messages: SalesforceChatMessage[]) {
   return messages.filter((message) =>

@@ -5,6 +5,7 @@ import type {
   EntityFieldMap,
   SalesforceChatUserData,
   PrechatDetail,
+  ChatMessageResponse,
   SalesforceMessageType,
 } from "@/types/salesforce";
 import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
@@ -237,3 +238,39 @@ export const generateSessionInitRequestBody = ({
     },
   };
 };
+
+export async function fetchChatMessages(
+  url: string,
+  ack: number,
+  affinityToken: string,
+  sessionKey: string,
+): Promise<ChatMessageResponse> {
+  const response = await fetch(`${url}/chat/rest/System/Messages?ack=${ack}`, {
+    method: "GET",
+    headers: {
+      ...SALESFORCE_API_BASE_HEADERS,
+      "X-LIVEAGENT-AFFINITY": affinityToken,
+      "X-LIVEAGENT-SESSION-KEY": sessionKey,
+    },
+  });
+
+  if (response.status === 204) {
+    return {
+      messages: [],
+      sequence: ack,
+      offset: 0,
+    };
+  }
+
+  if (!response.ok) {
+    throw new Error("Failed to get chat messages");
+  }
+
+  const data = await response.json();
+
+  if (process.env.ENABLE_API_LOGGING) {
+    console.log("GET MESSAGES RESPONSE", JSON.stringify(data, null, 2));
+  }
+
+  return data;
+}

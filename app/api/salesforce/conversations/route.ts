@@ -1,9 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import { sendChatMessage } from "@/app/api/salesforce/utils";
+import { fetchChatMessages, sendChatMessage } from "@/app/api/salesforce/utils";
 import { withAppSettings } from "@/app/api/server/utils";
 import type {
   ChatSessionResponse,
+  SalesforceChatMessage,
   SalesforceRequest,
 } from "@/types/salesforce";
 import {
@@ -13,6 +14,13 @@ import {
   SESSION_CREDENTIALS_REQUEST_HEADERS,
 } from "@/app/api/salesforce/utils";
 import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
+
+function containsChatRequestSuccess(messages: SalesforceChatMessage[]) {
+  return messages.some(
+    // TODO: Replace hardcoded message name
+    (message) => message.type === "ChatRequestSuccess",
+  );
+}
 
 // initializing salesforce chat session
 export async function POST(req: NextRequest) {
@@ -104,13 +112,23 @@ export async function POST(req: NextRequest) {
         throw new Error("Failed to initiate chat session");
       }
 
-      // Send messages
-      await sendChatMessage(
-        convertMessagesToTranscriptText(messages),
+      // Check for the presence of the "ChatRequestSuccess" message
+      const initialChatMessages = await fetchChatMessages(
+        chatHostUrl,
+        -1,
         chatSessionCredentials.affinityToken,
         chatSessionCredentials.key,
-        chatHostUrl,
       );
+
+      if (containsChatRequestSuccess(initialChatMessages.messages)) {
+        // Send messages
+        await sendChatMessage(
+          convertMessagesToTranscriptText(messages),
+          chatSessionCredentials.affinityToken,
+          chatSessionCredentials.key,
+          chatHostUrl,
+        );
+      }
 
       const token = jwt.sign(
         {
