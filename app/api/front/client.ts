@@ -27,17 +27,19 @@ function createRetryRateLimiter(minTime: number) {
     minTime: minTime,
   });
   limiter.on("failed", async (error, info) => {
-    console.error("FRONT:: API Request failed", {
-      attempt: info.retryCount,
-      message: error.message,
-      ...(error instanceof JsonFetchError
-        ? {
-            status: error.response.status,
-            statusText: error.response.statusText,
-            response: await error.response.text(),
-          }
-        : {}),
-    });
+    if (process.env.ENABLE_API_LOGGING) {
+      console.error("FRONT:: API Request failed", {
+        attempt: info.retryCount,
+        message: error.message,
+        ...(error instanceof JsonFetchError
+          ? {
+              status: error.response.status,
+              statusText: error.response.statusText,
+              response: await error.response.text(),
+            }
+          : {}),
+      });
+    }
     const { retryCount } = info;
     const backoffs = [0.2, 0.4, 0.8, 1, 2];
     if (backoffs.length <= retryCount) {
