@@ -48,6 +48,15 @@ export class FrontCoreClient {
   public shifts = async (params?: Front.PagedEndpointParams) => {
     return await this.fetchPagedResource<Front.Shift>("/shifts", params);
   };
+  public shiftsTeammates = async (
+    shiftId: string,
+    params?: Front.PagedEndpointParams,
+  ) => {
+    return await this.fetchPagedResource<Front.Teammate>(
+      `/shifts/${shiftId}/teammates`,
+      params,
+    );
+  };
 
   public async importMessage(inboxId: string, message: Front.ImportedMessage) {
     const url = new URL(`/inboxes/${inboxId}/imported_messages`, this.host);

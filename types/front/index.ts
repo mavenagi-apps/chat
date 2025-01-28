@@ -162,6 +162,25 @@ export namespace Front {
     updated_at: number;
   };
 
+  export type Teammate = PagedResource & {
+    _links: {
+      self: string;
+      related: {
+        inboxes: string;
+        conversations: string;
+      };
+    };
+    id: string;
+    email: string;
+    username: string;
+    first_name: string;
+    last_name: string;
+    is_admin: boolean;
+    is_available: boolean;
+    is_blocked: boolean;
+    type: string;
+  };
+
   export type Pagination = {
     limit: number;
     next: string | null;

@@ -116,20 +116,18 @@ async function searchPages<T extends Front.PagedResource>(
   return item;
 }
 
-async function searchPagesMany<T extends Front.PagedResource>(
+async function* loadAllItems<T extends Front.PagedResource>(
   loader: (params?: Front.PagedEndpointParams) => Promise<Front.List<T>>,
-  predicate: (resource: T) => boolean,
 ) {
   let next: string | null = "";
-  const results: T[] = [];
 
   while (next !== null) {
     const items = await loader({ next });
-    results.push(...items._results.filter(predicate));
     next = items._pagination.next;
+    for (const item of items._results) {
+      yield item;
+    }
   }
-
-  return results;
 }
 
 async function findChannel(
@@ -149,14 +147,21 @@ export async function findInbox(
   return searchPages(client.inboxes, (inbox) => inbox.name === inboxName);
 }
 
-export async function findShifts(
+export async function* findShifts(
   client: FrontCoreClient,
   shiftNames: string[],
-): Promise<Front.Shift[]> {
+) {
   const shiftNamesSet = new Set(shiftNames);
-  return searchPagesMany(client.shifts, (shift) =>
-    shiftNamesSet.has(shift.name),
-  );
+  for await (const shift of loadAllItems(client.shifts)) {
+    if (shiftNamesSet.has(shift.name)) {
+      shiftNamesSet.delete(shift.name);
+      yield shift;
+    }
+    if (!shiftNamesSet.size) {
+      // All shifts found, no need to continue
+      return;
+    }
+  }
 }
 
 export async function isAnyoneAvailable(
@@ -167,11 +172,21 @@ export async function isAnyoneAvailable(
   if (!shiftNames.length) {
     return true;
   }
-  const shifts = await findShifts(client, shiftNames);
-  if (!shifts.length) {
-    return false;
+  const now = new Date();
+  for await (const shift of findShifts(client, shiftNames)) {
+    if (!isShiftActive([shift], now)) {
+      continue;
+    }
+    // shift is active, check if anyone is available
+    for await (const tm of loadAllItems(
+      client.shiftsTeammates.bind(client, shift.id),
+    )) {
+      if (tm.is_available && !tm.is_blocked) {
+        return true;
+      }
+    }
   }
-  return isShiftActive(shifts, new Date());
+  return false;
 }
 
 export function isShiftActive(shifts: Front.Shift[], moment: Date) {
