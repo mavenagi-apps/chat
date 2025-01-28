@@ -131,7 +131,7 @@ async function handleMessageStreaming(
     },
   });
 
-  return new NextResponse(stream, {
+  return new Response(stream, {
     headers: { "Content-Type": "text/event-stream" },
   });
 }
