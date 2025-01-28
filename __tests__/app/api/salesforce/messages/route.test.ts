@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, beforeEach, type Mock } from "vitest";
 import { GET, POST } from "@/app/api/salesforce/messages/route";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import {
   sendChatMessage,
   validateSalesforceConfig,
@@ -115,6 +115,7 @@ describe("Salesforce Messages API", () => {
 
     describe("Error Handling", () => {
       let mockController: { enqueue: Mock; close: Mock; error: Mock };
+      let mockReader: { read: Mock };
 
       beforeEach(() => {
         mockController = {
@@ -123,47 +124,51 @@ describe("Salesforce Messages API", () => {
           error: vi.fn(),
         };
 
+        mockReader = {
+          read: vi.fn().mockResolvedValue({ done: true }),
+        };
+
         global.console.error = vi.fn();
 
-        // Mock ReadableStream to capture controller
+        // Mock ReadableStream to properly handle streaming
         global.ReadableStream = vi.fn().mockImplementation(({ start }) => {
+          // Start the stream controller immediately
           start(mockController);
-          return {};
+          return {
+            getReader: () => mockReader,
+          };
         });
       });
 
       it("handles 403 errors gracefully during stream", async () => {
-        // Mock fetch to fail with 403
         const mockFetch = global.fetch as Mock;
-        mockFetch.mockImplementation(() =>
-          Promise.resolve({
-            ok: false,
-            status: 403,
-          }),
-        );
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 403,
+        });
 
-        const mockRequest = createGetRequest({}, 0); // Abort immediately after first check
-        await GET(mockRequest);
+        // Use request that aborts immediately
+        const response = await GET(createGetRequest({}, 0));
 
-        expect(global.console.error).not.toHaveBeenCalled();
+        // Verify stream was created with correct headers
+        expect(response.headers.get("Content-Type")).toBe("text/event-stream");
         expect(mockController.close).toHaveBeenCalled();
+        expect(global.console.error).not.toHaveBeenCalled();
       });
 
       it("throws an error if 403 does not coincide with an aborted stream", async () => {
-        // Mock fetch to fail with 403
         const mockFetch = global.fetch as Mock;
-        mockFetch.mockImplementation(() =>
-          Promise.resolve({
-            ok: false,
-            status: 403,
-          }),
-        );
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 403,
+        });
 
-        const mockRequest = createGetRequest({}, 2); // Allow a couple of checks before aborting
-        await GET(mockRequest);
+        // Use request that doesn't abort immediately
+        const response = await GET(createGetRequest({}, 2));
 
-        expect(global.console.error).toHaveBeenCalled();
+        expect(response.headers.get("Content-Type")).toBe("text/event-stream");
         expect(mockController.close).toHaveBeenCalled();
+        expect(global.console.error).toHaveBeenCalled();
       });
     });
   });
@@ -174,18 +179,21 @@ describe("Salesforce Messages API", () => {
     });
 
     it("should send message successfully", async () => {
+      vi.mocked(sendChatMessage).mockResolvedValueOnce(undefined);
+
       const response = await POST(
         createPostRequest() as unknown as NextRequest,
       );
 
+      expect(response).toBeInstanceOf(Response);
       expect(response.status).toBe(200);
       expect(await response.json()).toBe("Chat message sent");
     });
 
     it("should handle send message failure", async () => {
-      // mock console.error once
       const originalConsoleError = global.console.error;
       global.console.error = vi.fn();
+
       vi.mocked(sendChatMessage).mockRejectedValueOnce(
         new Error("Failed to send"),
       );
@@ -194,19 +202,22 @@ describe("Salesforce Messages API", () => {
         createPostRequest() as unknown as NextRequest,
       );
 
+      expect(response).toBeInstanceOf(Response);
       expect(response.status).toBe(500);
       expect(await response.json()).toBe("Failed to send chat message");
       expect(global.console.error).toHaveBeenCalledOnce();
-      // reset console.error
+
       global.console.error = originalConsoleError;
     });
 
     it("should validate configuration", async () => {
-      vi.mocked(validateSalesforceConfig).mockReturnValueOnce(
-        new NextResponse(JSON.stringify({ error: "Invalid configuration" }), {
+      const mockResponse = new Response(
+        JSON.stringify({ error: "Invalid configuration" }),
+        {
           status: 400,
-        }),
+        },
       );
+      vi.mocked(validateSalesforceConfig).mockReturnValueOnce(mockResponse);
 
       const response = await POST(
         createPostRequest() as unknown as NextRequest,
