@@ -27,10 +27,21 @@ export const SALESFORCE_ALLOWED_MESSAGE_TYPES: SalesforceMessageType[] = [
   SALESFORCE_MESSAGE_TYPES.ChatMessage,
   SALESFORCE_MESSAGE_TYPES.ChatEnded,
 ];
+
 export const SALESFORCE_API_BASE_HEADERS = {
   "X-LIVEAGENT-API-VERSION": "34",
   "Access-Control-Allow-Origin": "*",
 };
+
+export class ChatMessagesError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number,
+  ) {
+    super(message);
+    this.name = "ChatMessagesError";
+  }
+}
 
 export function validateSalesforceConfig(handoffConfiguration: any) {
   if (handoffConfiguration?.type !== "salesforce") {
@@ -263,7 +274,7 @@ export async function fetchChatMessages(
   }
 
   if (!response.ok) {
-    throw new Error("Failed to get chat messages");
+    throw new ChatMessagesError("Failed to get chat messages", response.status);
   }
 
   const data = await response.json();
