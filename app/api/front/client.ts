@@ -1,15 +1,90 @@
 import { randomBytes } from "node:crypto";
 import { SignJWT } from "jose";
 import type { Front } from "@/types/front";
-import { jsonFetch } from "@/lib/jsonFetch";
+import { jsonFetch, JsonFetchError } from "@/lib/jsonFetch";
+import Bottleneck from "bottleneck";
+
+export enum RetryableStatusCodes {
+  TooManyRequests = 429,
+  InternalServerError = 500,
+  NotImplemented = 501,
+  BadGateway = 502,
+  ServiceUnavailable = 503,
+  GatewayTimeout = 504,
+}
 
 export const DEFAULT_API_HOST = "https://api2.frontapp.com";
 
+// https://dev.frontapp.com/docs/rate-limiting#standard-rate-limits
+export enum StandardRateLimits {
+  Starter = 1200,
+  Growth = 600,
+  Scale = 300,
+}
+
+function createRetryRateLimiter(minTime: number) {
+  const limiter = new Bottleneck({
+    minTime: minTime,
+  });
+  limiter.on("failed", async (error, info) => {
+    console.error("FRONT:: API Request failed", {
+      attempt: info.retryCount,
+      message: error.message,
+      ...(error instanceof JsonFetchError
+        ? {
+            status: error.response.status,
+            statusText: error.response.statusText,
+            response: await error.response.text(),
+          }
+        : {}),
+    });
+    const { retryCount } = info;
+    const backoffs = [0.2, 0.4, 0.8, 1, 2];
+    if (
+      error instanceof JsonFetchError &&
+      Object.values(RetryableStatusCodes).includes(error.response.status)
+    ) {
+      const retryAfterSeconds = parseInt(
+        error.response.headers.get("retry-after") ??
+          String(backoffs[retryCount]),
+        10,
+      );
+      return retryAfterSeconds * 1000;
+    }
+    return;
+  });
+  return limiter;
+}
+
 export class FrontCoreClient {
+  standardRateLimiter: Bottleneck;
+  burstRateLimiter: Bottleneck;
   constructor(
     private apiKey: string,
     private host: string = DEFAULT_API_HOST,
-  ) {}
+
+    private standardRateLimit: StandardRateLimits = StandardRateLimits.Starter,
+  ) {
+    this.standardRateLimiter = createRetryRateLimiter(this.standardRateLimit);
+    // 5 requests per second per conversation, https://dev.frontapp.com/docs/rate-limiting#additional-burst-rate-limiting
+    this.burstRateLimiter = createRetryRateLimiter(200);
+  }
+
+  private standardFetch = async <T = unknown>(
+    url: string | URL,
+    init?: RequestInit,
+  ) => {
+    return await this.standardRateLimiter.schedule(() =>
+      jsonFetch<T>(url, init),
+    );
+  };
+
+  private burstFetch = async <T = unknown>(
+    url: string | URL,
+    init?: RequestInit,
+  ) => {
+    return await this.burstRateLimiter.schedule(() => jsonFetch<T>(url, init));
+  };
 
   private async fetchPagedResource<T extends Front.PagedResource>(
     resource: string,
@@ -29,7 +104,7 @@ export class FrontCoreClient {
 
       url.search = queryParams.toString();
     }
-    return await jsonFetch<Front.List<T>>(url, {
+    return await this.standardFetch<Front.List<T>>(url, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
@@ -61,7 +136,7 @@ export class FrontCoreClient {
   public async importMessage(inboxId: string, message: Front.ImportedMessage) {
     const url = new URL(`/inboxes/${inboxId}/imported_messages`, this.host);
 
-    return await jsonFetch<Front.ImportMessageResponse>(url, {
+    return await this.burstFetch<Front.ImportMessageResponse>(url, {
       method: "POST",
       body: JSON.stringify(message),
       headers: {
