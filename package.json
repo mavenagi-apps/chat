@@ -13,6 +13,7 @@
   },
   "scripts": {
     "build": "turbo run build && next build",
+    "postbuild": "pnpm test",
     "dev": "turbo run build && next dev",
     "start": "next start",
     "lint": "next lint",
