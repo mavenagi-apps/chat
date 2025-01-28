@@ -130,22 +130,19 @@ describe("Salesforce Messages API", () => {
           start(mockController);
           return {};
         });
+      });
 
+      it("handles 403 errors gracefully during stream", async () => {
         // Mock fetch to fail with 403
-        global.fetch = vi.fn().mockImplementation(() =>
+        const mockFetch = global.fetch as Mock;
+        mockFetch.mockImplementation(() =>
           Promise.resolve({
             ok: false,
             status: 403,
           }),
         );
-      });
 
-      it("handles 403 errors gracefully during stream", async () => {
-        const mockRequest = new NextRequest("http://test.com");
-        Object.defineProperty(mockRequest, "signal", {
-          value: { aborted: true },
-        });
-
+        const mockRequest = createGetRequest({}, 0); // Abort immediately after first check
         await GET(mockRequest);
 
         expect(global.console.error).not.toHaveBeenCalled();
@@ -153,11 +150,16 @@ describe("Salesforce Messages API", () => {
       });
 
       it("throws an error if 403 does not coincide with an aborted stream", async () => {
-        const mockRequest = new NextRequest("http://test.com");
-        Object.defineProperty(mockRequest, "signal", {
-          value: { aborted: false },
-        });
+        // Mock fetch to fail with 403
+        const mockFetch = global.fetch as Mock;
+        mockFetch.mockImplementation(() =>
+          Promise.resolve({
+            ok: false,
+            status: 403,
+          }),
+        );
 
+        const mockRequest = createGetRequest({}, 2); // Allow a couple of checks before aborting
         await GET(mockRequest);
 
         expect(global.console.error).toHaveBeenCalled();
