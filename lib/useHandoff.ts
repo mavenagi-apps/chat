@@ -148,7 +148,7 @@ export function useHandoff({
   }, [setState, generatedHeaders, resetAbortController]);
 
   const handleHandoffChatEvent = useCallback(
-    (event: IncomingHandoffEvent) => {
+    async (event: IncomingHandoffEvent) => {
       if (!strategyRef.current) return;
 
       const {
@@ -168,7 +168,7 @@ export function useHandoff({
       }
 
       if (shouldEndHandoff) {
-        void handleEndHandoff();
+        await handleEndHandoff();
       }
     },
     [state, setState, handleEndHandoff],
@@ -210,7 +210,7 @@ export function useHandoff({
         abortController.current,
       )) {
         if (abortController.current.signal.aborted) break;
-        handleHandoffChatEvent(event);
+        await handleHandoffChatEvent(event);
       }
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
