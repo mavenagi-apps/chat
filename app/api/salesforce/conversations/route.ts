@@ -14,11 +14,11 @@ import {
   SESSION_CREDENTIALS_REQUEST_HEADERS,
 } from "@/app/api/salesforce/utils";
 import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
+import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
 
 function containsChatRequestSuccess(messages: SalesforceChatMessage[]) {
   return messages.some(
-    // TODO: Replace hardcoded message name
-    (message) => message.type === "ChatRequestSuccess",
+    (message) => message.type === SALESFORCE_MESSAGE_TYPES.ChatRequestSuccess,
   );
 }
 
