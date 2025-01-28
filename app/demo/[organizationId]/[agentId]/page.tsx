@@ -62,7 +62,6 @@ export default async function Page({
     signedUserData: signedUserData || undefined,
     unsignedUserData: mockUserData,
     customData: {
-      buttonId: "123",
       ...parsedCustomData,
     },
   };

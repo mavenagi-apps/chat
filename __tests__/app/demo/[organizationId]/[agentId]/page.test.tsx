@@ -90,7 +90,6 @@ describe("DemoPage", () => {
             "email":"[^"]+"
           },
           "customData":{
-            "buttonId":"[^"]+"
           }
         }\\);
       }\\);`.replace(/\s+/g, "");
@@ -121,8 +120,8 @@ describe("DemoPage", () => {
       const widgetScript = container.getElementsByTagName("script")[1];
       expect(widgetScript.innerHTML).toContain(
         `"customData":${JSON.stringify({
-          buttonId: "123",
-          ...customData,
+          testKey: "testValue",
+          numberKey: 123,
         })}`,
       );
     });
@@ -148,9 +147,7 @@ describe("DemoPage", () => {
       );
 
       const widgetScript = container.getElementsByTagName("script")[1];
-      expect(widgetScript.innerHTML).toContain(
-        `"customData":{"buttonId":"123"}`,
-      );
+      expect(widgetScript.innerHTML).toContain(`"customData":{}`);
     });
 
     test("should use default custom data when customData param is not provided", async () => {
@@ -162,9 +159,7 @@ describe("DemoPage", () => {
       );
 
       const widgetScript = container.getElementsByTagName("script")[1];
-      expect(widgetScript.innerHTML).toContain(
-        `"customData":{"buttonId":"123"}`,
-      );
+      expect(widgetScript.innerHTML).toContain(`"customData":{}`);
     });
   });
 
