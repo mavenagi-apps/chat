@@ -10,13 +10,34 @@ import type {
   UserChatMessage,
 } from "@/types";
 import type { SalesforceChatMessage } from "@/types/salesforce";
-import { SALESFORCE_CHAT_SUBJECT_HEADER_KEY } from "@/types/salesforce";
+import {
+  SALESFORCE_CHAT_SUBJECT_HEADER_KEY,
+  SALESFORCE_MESSAGE_TYPES,
+  SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION,
+} from "@/types/salesforce";
 
 export class SalesforceStrategy implements HandoffStrategy<Message> {
   readonly messagesEndpoint = "/api/salesforce/messages";
   readonly conversationsEndpoint = "/api/salesforce/conversations";
   readonly subjectHeaderKey = SALESFORCE_CHAT_SUBJECT_HEADER_KEY;
-  readonly connectedToAgentMessageType = "ChatConnecting";
+  readonly connectedToAgentMessageType =
+    SALESFORCE_MESSAGE_TYPES.ChatConnecting;
+
+  private shouldEndHandoff(event: SalesforceChatMessage): boolean {
+    return SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION.includes(
+      event.type as any,
+    );
+  }
+
+  private getAgentName(event: SalesforceChatMessage): string | null {
+    if (
+      event.type === SALESFORCE_MESSAGE_TYPES.ChatTransferred &&
+      event.message?.name
+    ) {
+      return event.message.name;
+    }
+    return null;
+  }
 
   formatMessages(messages: Message[], _mavenConversationId: string): Message[] {
     return messages.filter((message) =>
@@ -24,19 +45,25 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
     );
   }
 
-  handleChatEvent(event: SalesforceChatMessage): {
-    agentName: string | null;
-    formattedEvent: SalesforceChatMessage;
-  } {
-    let agentName = null;
+  handleChatEvent(event: SalesforceChatMessage):
+    | {
+        shouldEndHandoff: true;
+        agentName?: never;
+        formattedEvent?: never;
+      }
+    | {
+        agentName: string | null;
+        formattedEvent: SalesforceChatMessage;
+      } {
+    const agentName = this.getAgentName(event);
+    const shouldEndHandoff = this.shouldEndHandoff(event);
 
-    if (event.type === "ChatTransferred" && event.message?.name) {
-      agentName = event.message.name;
+    if (shouldEndHandoff) {
+      return { shouldEndHandoff: true };
     }
 
     const formattedEvent = {
       ...event,
-      type: event.type,
       timestamp: new Date().getTime(),
     } as SalesforceChatMessage;
 

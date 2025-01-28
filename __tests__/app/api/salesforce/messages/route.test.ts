@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { vi, describe, it, expect, beforeEach, type Mock } from "vitest";
 import { GET, POST } from "@/app/api/salesforce/messages/route";
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -87,6 +87,58 @@ describe("Salesforce Messages API", () => {
 
       expect(response.status).toBe(200);
       expect(done).toBe(true);
+    });
+
+    describe("Error Handling", () => {
+      let mockController: { enqueue: Mock; close: Mock; error: Mock };
+
+      beforeEach(() => {
+        mockController = {
+          enqueue: vi.fn(),
+          close: vi.fn(),
+          error: vi.fn(),
+        };
+
+        global.console.error = vi.fn();
+
+        // Mock ReadableStream to capture controller
+        global.ReadableStream = vi.fn().mockImplementation(({ start }) => {
+          start(mockController);
+          return {};
+        });
+
+        // Mock fetch to fail with 403
+        global.fetch = vi.fn().mockImplementation(() =>
+          Promise.resolve({
+            ok: false,
+            status: 403,
+          }),
+        );
+      });
+
+      it("handles 403 errors gracefully during stream", async () => {
+        const mockRequest = new NextRequest("http://test.com");
+        Object.defineProperty(mockRequest, "signal", {
+          value: { aborted: true },
+        });
+
+        await GET(mockRequest);
+
+        expect(global.console.error).not.toHaveBeenCalled();
+        expect(mockController.close).toHaveBeenCalled();
+      });
+
+      it("throws an error if 403 does not coincide with an aborted stream", async () => {
+        const mockRequest = new NextRequest("http://test.com");
+        Object.defineProperty(mockRequest, "signal", {
+          value: { aborted: false },
+        });
+
+        await GET(mockRequest);
+
+        expect(global.console.error).toHaveBeenCalled();
+        expect(mockController.close).toHaveBeenCalled();
+      });
     });
   });
 

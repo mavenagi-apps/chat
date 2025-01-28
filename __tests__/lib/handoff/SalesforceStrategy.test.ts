@@ -6,6 +6,7 @@ import {
   createSalesforceEvent,
   BotResponse,
 } from "./test-helpers";
+import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
 
 describe("SalesforceStrategy", () => {
   let strategy: SalesforceStrategy;
@@ -63,26 +64,42 @@ describe("SalesforceStrategy", () => {
 
   describe("handleChatEvent", () => {
     it("handles ChatTransferred events correctly", () => {
-      const event = createSalesforceEvent("ChatTransferred", "John Agent");
+      const event = createSalesforceEvent(
+        SALESFORCE_MESSAGE_TYPES.ChatTransferred,
+        "John Agent",
+      );
 
       const { agentName, formattedEvent } = strategy.handleChatEvent(event);
       expect(agentName).toBe("John Agent");
       expect(formattedEvent).toEqual({
         ...event,
-        type: "ChatTransferred",
+        type: SALESFORCE_MESSAGE_TYPES.ChatTransferred,
         timestamp: expect.any(Number),
       });
     });
 
-    it("handles other events correctly", () => {
-      const event = createSalesforceEvent("ChatMessage");
+    it("returns shouldEndHandoff true for termination messages", () => {
+      const event = createSalesforceEvent(
+        SALESFORCE_MESSAGE_TYPES.ChatRequestFail,
+      );
+      const result = strategy.handleChatEvent(event);
 
-      const { agentName, formattedEvent } = strategy.handleChatEvent(event);
-      expect(agentName).toBeNull();
-      expect(formattedEvent).toEqual({
-        ...event,
-        type: "ChatMessage",
-        timestamp: expect.any(Number),
+      expect(result).toEqual({ shouldEndHandoff: true });
+    });
+
+    it("returns formatted event and agent name for non-termination messages", () => {
+      const event = createSalesforceEvent(
+        SALESFORCE_MESSAGE_TYPES.ChatMessage,
+        "John Agent",
+      );
+      const result = strategy.handleChatEvent(event);
+
+      expect(result).toEqual({
+        agentName: null,
+        formattedEvent: {
+          ...event,
+          timestamp: expect.any(Number),
+        },
       });
     });
   });

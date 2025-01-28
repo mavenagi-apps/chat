@@ -70,26 +70,6 @@ export function useHandoff({
     return generateHeaders(organizationId, agentId, state.handoffAuthToken);
   }, [state.handoffAuthToken, organizationId, agentId]);
 
-  const handleHandoffChatEvent = useCallback(
-    (event: IncomingHandoffEvent) => {
-      if (!strategyRef.current) return;
-
-      const { agentName: newAgentName, formattedEvent } =
-        strategyRef.current.handleChatEvent(event);
-
-      if (formattedEvent) {
-        if (newAgentName) {
-          setState((prev) => ({ ...prev, agentName: newAgentName }));
-        }
-        setState((prev) => ({
-          ...prev,
-          handoffChatEvents: [...prev.handoffChatEvents, formattedEvent],
-        }));
-      }
-    },
-    [state, setState],
-  );
-
   const getOrCreateUserAndConversation = useCallback(
     async (email?: string) => {
       if (!strategyRef.current) {
@@ -166,6 +146,33 @@ export function useHandoff({
       body: JSON.stringify({ signedUserData, unsignedUserData }),
     });
   }, [setState, generatedHeaders, resetAbortController]);
+
+  const handleHandoffChatEvent = useCallback(
+    (event: IncomingHandoffEvent) => {
+      if (!strategyRef.current) return;
+
+      const {
+        agentName: newAgentName,
+        formattedEvent,
+        shouldEndHandoff,
+      } = strategyRef.current.handleChatEvent(event);
+
+      if (formattedEvent) {
+        if (newAgentName) {
+          setState((prev) => ({ ...prev, agentName: newAgentName }));
+        }
+        setState((prev) => ({
+          ...prev,
+          handoffChatEvents: [...prev.handoffChatEvents, formattedEvent],
+        }));
+      }
+
+      if (shouldEndHandoff) {
+        void handleEndHandoff();
+      }
+    },
+    [state, setState, handleEndHandoff],
+  );
 
   const getMessages = useCallback(async () => {
     if (!state.handoffAuthToken || !strategyRef.current) {

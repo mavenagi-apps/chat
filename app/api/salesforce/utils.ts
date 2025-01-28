@@ -6,6 +6,7 @@ import type {
   SalesforceChatUserData,
   PrechatDetail,
 } from "@/types/salesforce";
+import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
 
 export const SALESFORCE_CHAT_PROMPT_MESSAGE_NAMES = [
   "Management Center",
@@ -16,16 +17,13 @@ export const SALESFORCE_CHAT_PROMPT_MESSAGE_TEXTS = [
 ];
 
 export const SALESFORCE_ALLOWED_MESSAGE_TYPES = [
-  // 'ChatRequestSuccess',
-  // 'ChatEstablished',
-  // 'TransferToButtonInitiated',
-  // 'ChatEstablished',
-  "ChatTransferred",
-  "QueueUpdate",
-  "AgentTyping",
-  "AgentNotTyping",
-  "ChatMessage",
-  "ChatEnded",
+  SALESFORCE_MESSAGE_TYPES.ChatRequestFail,
+  SALESFORCE_MESSAGE_TYPES.ChatTransferred,
+  SALESFORCE_MESSAGE_TYPES.QueueUpdate,
+  SALESFORCE_MESSAGE_TYPES.AgentTyping,
+  SALESFORCE_MESSAGE_TYPES.AgentNotTyping,
+  SALESFORCE_MESSAGE_TYPES.ChatMessage,
+  SALESFORCE_MESSAGE_TYPES.ChatEnded,
 ];
 export const SALESFORCE_API_BASE_HEADERS = {
   "X-LIVEAGENT-API-VERSION": "34",
@@ -152,15 +150,25 @@ const createEntityFieldMap = (
   doCreate: false,
 });
 
-export const generateSessionInitRequestBody = (
-  chatSessionCredentials: ChatSessionResponse,
-  userData: SalesforceChatUserData,
-  organizationId: string,
-  deploymentId: string,
-  buttonId: string,
-  eswLiveAgentDevName: string,
-  sessionKey: string,
-) => {
+export const generateSessionInitRequestBody = ({
+  chatSessionCredentials,
+  userData,
+  organizationId,
+  deploymentId,
+  buttonId,
+  eswLiveAgentDevName,
+  sessionKey,
+  originalReferrer = "unknown",
+}: {
+  chatSessionCredentials: ChatSessionResponse;
+  userData: SalesforceChatUserData;
+  organizationId: string;
+  deploymentId: string;
+  buttonId: string;
+  eswLiveAgentDevName: string;
+  sessionKey: string;
+  originalReferrer?: string;
+}) => {
   const visibleFields = [
     ["First Name", userData.firstName, "First_Name__c"],
     ["Last Name", userData.lastName, "Last_Name__c"],
@@ -218,10 +226,10 @@ export const generateSessionInitRequestBody = (
     ],
     visitorInfo: {
       visitCount: 1,
-      originalReferrer: "https://www.tripadvisor.com/",
+      originalReferrer,
       pages: [
         {
-          location: "https://www.jscache.com/static/t4b/support_chat.html",
+          location: originalReferrer,
           time: Date.now(),
         },
       ],

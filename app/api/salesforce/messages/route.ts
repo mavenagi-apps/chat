@@ -16,6 +16,16 @@ import {
 } from "@/app/api/salesforce/utils";
 import { withSettingsAndAuthentication } from "../../server/utils";
 
+class ChatMessagesError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number,
+  ) {
+    super(message);
+    this.name = "ChatMessagesError";
+  }
+}
+
 async function fetchChatMessages(
   url: string,
   ack: number,
@@ -40,7 +50,7 @@ async function fetchChatMessages(
   }
 
   if (!response.ok) {
-    throw new Error("Failed to get chat messages");
+    throw new ChatMessagesError("Failed to get chat messages", response.status);
   }
 
   const data = await response.json();
@@ -54,7 +64,7 @@ async function fetchChatMessages(
 
 function filterMessages(messages: SalesforceChatMessage[]) {
   return messages.filter((message) =>
-    SALESFORCE_ALLOWED_MESSAGE_TYPES.includes(message.type),
+    SALESFORCE_ALLOWED_MESSAGE_TYPES.includes(message.type as any),
   );
 }
 
@@ -106,8 +116,12 @@ async function handleMessageStreaming(
             );
           }
         }
-      } catch (error) {
-        console.log("Failed to get chat messages:", error);
+      } catch (error: any) {
+        if (error instanceof ChatMessagesError && req.signal.aborted) {
+          console.log("Expected error: conversation deleted during long poll");
+        } else {
+          console.error("Failed to get chat messages:", error);
+        }
       } finally {
         controller.close();
       }

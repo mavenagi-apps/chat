@@ -1,22 +1,30 @@
 import { type Message } from "@/types";
 
-export const SALESFORCE_MESSAGE_TYPES = [
-  "AgentDisconnect",
-  "AgentNotTyping",
-  "AgentTyping",
-  "ChasitorSessionData",
-  "ChatEnded",
-  "ChatEstablished",
-  "ChatMessage",
-  "ChatRequestFail",
-  "ChatRequestSuccess",
-  "ChatTransferred",
-  "CustomEvent",
-  "NewVisitorBreadcrumb",
-  "QueueUpdate",
-] as const;
+export const SALESFORCE_MESSAGE_TYPES = {
+  AgentDisconnect: "AgentDisconnect",
+  AgentNotTyping: "AgentNotTyping",
+  AgentTyping: "AgentTyping",
+  ChasitorSessionData: "ChasitorSessionData",
+  ChatEnded: "ChatEnded",
+  ChatEstablished: "ChatEstablished",
+  ChatMessage: "ChatMessage",
+  ChatRequestFail: "ChatRequestFail",
+  ChatRequestSuccess: "ChatRequestSuccess",
+  ChatTransferred: "ChatTransferred",
+  CustomEvent: "CustomEvent",
+  NewVisitorBreadcrumb: "NewVisitorBreadcrumb",
+  QueueUpdate: "QueueUpdate",
+  ChatConnecting: "ChatConnecting",
+} as const;
 
-export type SalesforceMessageType = (typeof SALESFORCE_MESSAGE_TYPES)[number];
+export const SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION = [
+  SALESFORCE_MESSAGE_TYPES.ChatRequestFail,
+  SALESFORCE_MESSAGE_TYPES.ChatRequestSuccess,
+  SALESFORCE_MESSAGE_TYPES.ChatEnded,
+];
+
+export type SalesforceMessageType =
+  (typeof SALESFORCE_MESSAGE_TYPES)[keyof typeof SALESFORCE_MESSAGE_TYPES];
 
 export type SalesforceChatMessage = {
   type: SalesforceMessageType;

@@ -11,8 +11,9 @@ export const MESSAGE_TYPES_FOR_HANDOFF_CREATION = ["USER", "bot"];
 export interface HandoffStrategy<T = HandoffChatMessage> {
   formatMessages: (messages: Message[], mavenConversationId: string) => T[];
   handleChatEvent: (event: any) => {
-    agentName: string | null;
-    formattedEvent: any;
+    agentName?: string | null;
+    formattedEvent?: any;
+    shouldEndHandoff?: boolean;
   };
   showAgentTypingIndicator?: (
     messages: (

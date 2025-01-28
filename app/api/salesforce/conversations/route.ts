@@ -17,6 +17,7 @@ import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
 // initializing salesforce chat session
 export async function POST(req: NextRequest) {
   return withAppSettings(req, async (req, settings) => {
+    const originalReferrer = req.headers.get("referer");
     const { handoffConfiguration } = settings;
     if (handoffConfiguration?.type !== "salesforce") {
       return NextResponse.json(
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
       chatHostUrl,
       chatButtonId,
       deploymentId,
-      orgId,
+      orgId: organizationId,
       eswLiveAgentDevName,
     } = handoffConfiguration;
 
@@ -67,15 +68,17 @@ export async function POST(req: NextRequest) {
       const chatSessionCredentials: ChatSessionResponse =
         await chatSessionCredentialsResponse.json();
 
-      const requestBody = generateSessionInitRequestBody(
+      const requestBody = generateSessionInitRequestBody({
         chatSessionCredentials,
-        { ...userData, userAgent, screenResolution, language },
-        orgId,
+        userData: { ...userData, userAgent, screenResolution, language },
+        organizationId,
         deploymentId,
-        customData?.buttonId || chatButtonId,
-        customData?.eswLiveAgentDevName || eswLiveAgentDevName,
-        chatSessionCredentials.key,
-      );
+        buttonId: customData?.buttonId || chatButtonId,
+        eswLiveAgentDevName:
+          customData?.eswLiveAgentDevName || eswLiveAgentDevName,
+        sessionKey: chatSessionCredentials.key,
+        originalReferrer: originalReferrer || undefined,
+      });
 
       if (process.env.ENABLE_API_LOGGING) {
         console.log("REQUEST BODY", JSON.stringify(requestBody, null, 2));
@@ -119,7 +122,7 @@ export async function POST(req: NextRequest) {
         },
         handoffConfiguration.apiSecret,
         {
-          keyid: orgId,
+          keyid: organizationId,
         },
       );
 

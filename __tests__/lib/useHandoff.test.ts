@@ -1,9 +1,15 @@
 import { renderHook, act } from "@testing-library/react";
 import { useHandoff } from "@/lib/useHandoff";
+import { useSettings } from "@/app/providers/SettingsProvider";
 import { HandoffStatus } from "@/app/constants/handoff";
-import { describe, expect, test, vi, beforeEach } from "vitest";
+import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
 import type { Message, UserChatMessage, IncomingHandoffEvent } from "@/types";
 import { HandoffStrategyFactory } from "@/lib/handoff/HandoffStrategyFactory";
+import {
+  SALESFORCE_MESSAGE_TYPES,
+  SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION,
+} from "@/types/salesforce";
+import { streamResponse } from "@/lib/handoff/streamUtils";
 
 // Mock the required providers and hooks
 vi.mock("next/dist/client/components/navigation", () => ({
@@ -51,10 +57,15 @@ const createMockStrategy = () => ({
       },
     })),
   ),
-  handleChatEvent: vi.fn((event) => ({
-    agentName: "Test Agent",
-    formattedEvent: { ...event, type: "handoff-test" },
-  })),
+  handleChatEvent: vi.fn((event) => {
+    if (event.type === SALESFORCE_MESSAGE_TYPES.ChatRequestFail) {
+      return { shouldEndHandoff: true };
+    }
+    return {
+      agentName: "Test Agent",
+      formattedEvent: { ...event, type: "handoff-test" },
+    };
+  }),
   messagesEndpoint: "/api/test/messages",
   conversationsEndpoint: "/api/test/conversations",
   showAgentTypingIndicator: vi.fn(() => false),
@@ -68,7 +79,10 @@ vi.mock("@/lib/handoff/HandoffStrategyFactory", () => ({
   },
 }));
 
-const createSuccessfulResponse = (includeBody = false) =>
+const createSuccessfulResponse = (
+  includeBody = false,
+  messageType = "conversation:message",
+) =>
   Promise.resolve({
     ok: true,
     headers: {
@@ -84,7 +98,7 @@ const createSuccessfulResponse = (includeBody = false) =>
             done: true,
             value: new TextEncoder().encode(
               JSON.stringify({
-                message: { type: "conversation:message" },
+                message: { type: messageType },
               }),
             ),
           }),
@@ -224,7 +238,7 @@ describe("useHandoff", () => {
       expect(result.current.agentName).toBeNull();
       expect(result.current.handoffChatEvents).toContainEqual(
         expect.objectContaining({
-          type: "ChatEnded",
+          type: SALESFORCE_MESSAGE_TYPES.ChatEnded,
         }),
       );
     });
@@ -258,6 +272,47 @@ describe("useHandoff", () => {
       unmount();
 
       expect(clearTimeoutSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("handleHandoffChatEvent", () => {
+    beforeEach(() => {
+      mockFetch.mockImplementation(async (url) => {
+        if (url.includes("/api/test/conversations")) {
+          return createSuccessfulResponse();
+        }
+        if (url.includes("/api/test/messages")) {
+          return createSuccessfulResponse(true);
+        }
+        return Promise.resolve({ ok: true });
+      });
+    });
+
+    test("should end handoff on terminating chat events", async () => {
+      const { result } = renderHook(() => useHandoff(defaultProps));
+      vi.mocked(streamResponse).mockImplementationOnce(async function* () {
+        yield {
+          type: SALESFORCE_MESSAGE_TYPES.ChatRequestFail,
+          timestamp: Date.now(),
+          message: { reason: "Chat request failed" },
+        } as unknown as IncomingHandoffEvent;
+      });
+
+      await act(async () => {
+        await result.current.initializeHandoff({ email: "test@example.com" });
+      });
+
+      expect(result.current.handoffStatus).toBe(HandoffStatus.NOT_INITIALIZED);
+    });
+
+    test("should not end handoff on non-terminating chat events", async () => {
+      const { result } = renderHook(() => useHandoff(defaultProps));
+
+      await act(async () => {
+        await result.current.initializeHandoff({ email: "test@example.com" });
+      });
+
+      expect(result.current.handoffStatus).toBe(HandoffStatus.INITIALIZED);
     });
   });
 });
