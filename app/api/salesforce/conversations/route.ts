@@ -17,7 +17,7 @@ import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
 // initializing salesforce chat session
 export async function POST(req: NextRequest) {
   return withAppSettings(req, async (req, settings) => {
-    const originalReferrer = req.headers.get("referer");
+    const originalReferrer = req.headers.get("referer") || "unknown";
     const { handoffConfiguration } = settings;
     if (handoffConfiguration?.type !== "salesforce") {
       return NextResponse.json(

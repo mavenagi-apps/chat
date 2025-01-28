@@ -25,7 +25,7 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
 
   private shouldEndHandoff(event: SalesforceChatMessage): boolean {
     return SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION.includes(
-      event.type as any,
+      event.type,
     );
   }
 

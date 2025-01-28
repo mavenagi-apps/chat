@@ -17,10 +17,11 @@ export const SALESFORCE_MESSAGE_TYPES = {
   ChatConnecting: "ChatConnecting",
 } as const;
 
-export const SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION = [
-  SALESFORCE_MESSAGE_TYPES.ChatRequestFail,
-  SALESFORCE_MESSAGE_TYPES.ChatEnded,
-];
+export const SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION: SalesforceMessageType[] =
+  [
+    SALESFORCE_MESSAGE_TYPES.ChatRequestFail,
+    SALESFORCE_MESSAGE_TYPES.ChatEnded,
+  ];
 
 export type SalesforceMessageType =
   (typeof SALESFORCE_MESSAGE_TYPES)[keyof typeof SALESFORCE_MESSAGE_TYPES];

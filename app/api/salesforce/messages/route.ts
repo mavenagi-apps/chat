@@ -64,7 +64,7 @@ async function fetchChatMessages(
 
 function filterMessages(messages: SalesforceChatMessage[]) {
   return messages.filter((message) =>
-    SALESFORCE_ALLOWED_MESSAGE_TYPES.includes(message.type as any),
+    SALESFORCE_ALLOWED_MESSAGE_TYPES.includes(message.type),
   );
 }
 

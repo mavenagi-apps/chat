@@ -5,6 +5,7 @@ import type {
   EntityFieldMap,
   SalesforceChatUserData,
   PrechatDetail,
+  SalesforceMessageType,
 } from "@/types/salesforce";
 import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
 
@@ -16,7 +17,7 @@ export const SALESFORCE_CHAT_PROMPT_MESSAGE_TEXTS = [
   "Please enter the subject",
 ];
 
-export const SALESFORCE_ALLOWED_MESSAGE_TYPES = [
+export const SALESFORCE_ALLOWED_MESSAGE_TYPES: SalesforceMessageType[] = [
   SALESFORCE_MESSAGE_TYPES.ChatRequestFail,
   SALESFORCE_MESSAGE_TYPES.ChatTransferred,
   SALESFORCE_MESSAGE_TYPES.QueueUpdate,
