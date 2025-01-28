@@ -1,6 +1,14 @@
-import { vi, describe, it, expect, beforeEach, type Mock } from "vitest";
+import {
+  vi,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  type Mock,
+} from "vitest";
 import { GET, POST } from "@/app/api/salesforce/messages/route";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import {
   sendChatMessage,
   validateSalesforceConfig,
@@ -42,8 +50,12 @@ vi.mock("@/app/api/salesforce/utils", async () => {
 
 describe("Salesforce Messages API", () => {
   beforeEach(() => {
+    global.fetch = vi.fn();
     vi.clearAllMocks();
-    global.fetch = vi.fn() as unknown as typeof global.fetch;
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   describe("GET /api/salesforce/messages", () => {
@@ -128,16 +140,17 @@ describe("Salesforce Messages API", () => {
           read: vi.fn().mockResolvedValue({ done: true }),
         };
 
-        global.console.error = vi.fn();
+        vi.stubGlobal("console", { ...console, error: vi.fn() });
 
-        // Mock ReadableStream to properly handle streaming
-        global.ReadableStream = vi.fn().mockImplementation(({ start }) => {
-          // Start the stream controller immediately
-          start(mockController);
-          return {
-            getReader: () => mockReader,
-          };
-        });
+        vi.stubGlobal(
+          "ReadableStream",
+          vi.fn().mockImplementation(({ start }) => {
+            start(mockController);
+            return {
+              getReader: () => mockReader,
+            };
+          }),
+        );
       });
 
       it("handles 403 errors gracefully during stream", async () => {
@@ -147,13 +160,12 @@ describe("Salesforce Messages API", () => {
           status: 403,
         });
 
-        // Use request that aborts immediately
         const response = await GET(createGetRequest({}, 0));
 
-        // Verify stream was created with correct headers
+        expect(response).toBeInstanceOf(Response);
         expect(response.headers.get("Content-Type")).toBe("text/event-stream");
         expect(mockController.close).toHaveBeenCalled();
-        expect(global.console.error).not.toHaveBeenCalled();
+        expect(console.error).not.toHaveBeenCalled();
       });
 
       it("throws an error if 403 does not coincide with an aborted stream", async () => {
@@ -168,7 +180,7 @@ describe("Salesforce Messages API", () => {
 
         expect(response.headers.get("Content-Type")).toBe("text/event-stream");
         expect(mockController.close).toHaveBeenCalled();
-        expect(global.console.error).toHaveBeenCalled();
+        expect(console.error).toHaveBeenCalled();
       });
     });
   });
@@ -179,7 +191,9 @@ describe("Salesforce Messages API", () => {
     });
 
     it("should send message successfully", async () => {
-      vi.mocked(sendChatMessage).mockResolvedValueOnce(undefined);
+      vi.mocked(sendChatMessage).mockResolvedValueOnce(
+        new Response("Chat message sent", { status: 200 }),
+      );
 
       const response = await POST(
         createPostRequest() as unknown as NextRequest,
@@ -191,8 +205,8 @@ describe("Salesforce Messages API", () => {
     });
 
     it("should handle send message failure", async () => {
-      const originalConsoleError = global.console.error;
-      global.console.error = vi.fn();
+      const originalConsole = globalThis.console;
+      vi.stubGlobal("console", { ...console, error: vi.fn() });
 
       vi.mocked(sendChatMessage).mockRejectedValueOnce(
         new Error("Failed to send"),
@@ -205,17 +219,18 @@ describe("Salesforce Messages API", () => {
       expect(response).toBeInstanceOf(Response);
       expect(response.status).toBe(500);
       expect(await response.json()).toBe("Failed to send chat message");
-      expect(global.console.error).toHaveBeenCalledOnce();
+      expect(console.error).toHaveBeenCalledOnce();
 
-      global.console.error = originalConsoleError;
+      vi.stubGlobal("console", originalConsole);
     });
 
     it("should validate configuration", async () => {
-      const mockResponse = new Response(
-        JSON.stringify({ error: "Invalid configuration" }),
+      const mockResponse = NextResponse.json(
         {
-          status: 400,
+          success: false,
+          error: "Invalid handoff configuration type. Expected 'salesforce'.",
         },
+        { status: 400 },
       );
       vi.mocked(validateSalesforceConfig).mockReturnValueOnce(mockResponse);
 
@@ -225,7 +240,8 @@ describe("Salesforce Messages API", () => {
 
       expect(response.status).toBe(400);
       expect(await response.json()).toEqual({
-        error: "Invalid configuration",
+        success: false,
+        error: "Invalid handoff configuration type. Expected 'salesforce'.",
       });
     });
   });

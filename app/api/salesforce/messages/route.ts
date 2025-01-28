@@ -206,10 +206,12 @@ export async function POST(req: NextRequest) {
           sessionKey as string,
           url as string,
         );
-        return Response.json("Chat message sent");
+        return NextResponse.json("Chat message sent");
       } catch (error) {
         console.error("Failed to send chat message:", error);
-        return Response.json("Failed to send chat message", { status: 500 });
+        return NextResponse.json("Failed to send chat message", {
+          status: 500,
+        });
       }
     },
   );
