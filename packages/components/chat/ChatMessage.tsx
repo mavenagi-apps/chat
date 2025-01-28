@@ -211,7 +211,6 @@ export function ChatMessage({
         return renderHandoffMessage(message as ZendeskWebhookMessage);
       case "front-agent":
         return renderFrontAgentMessage(message as Front.WebhookMessage);
-      case SALESFORCE_MESSAGE_TYPES.ChatRequestFail:
       case SALESFORCE_MESSAGE_TYPES.ChatEstablished:
       case SALESFORCE_MESSAGE_TYPES.ChatEnded:
       case SALESFORCE_MESSAGE_TYPES.ChatConnecting:
