@@ -4,7 +4,7 @@ import { POST } from "@/app/api/salesforce/conversations/route";
 import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
 import { NextRequest } from "next/server";
 import { withAppSettings } from "@/app/api/server/utils";
-import { sendChatMessage } from "@/app/api/salesforce/utils";
+import { sendChatMessage, fetchChatMessages } from "@/app/api/salesforce/utils";
 
 // Mock external dependencies
 vi.mock("jsonwebtoken", () => ({
@@ -38,6 +38,11 @@ vi.mock("@/app/api/salesforce/utils", async () => {
   return {
     ...(actual as object),
     sendChatMessage: vi.fn(),
+    fetchChatMessages: vi.fn().mockResolvedValue({
+      messages: [],
+      sequence: 0,
+      offset: 0,
+    }),
   };
 });
 
@@ -187,13 +192,45 @@ describe("POST /api/salesforce/conversations", () => {
   });
 
   describe("Message Handling", () => {
-    it("should send initial messages after session creation", async () => {
+    describe("when fetchChatMessages returns a ChatRequestSuccess message", () => {
+      beforeEach(() => {
+        vi.mocked(fetchChatMessages).mockResolvedValueOnce({
+          messages: [
+            {
+              type: "ChatRequestSuccess",
+              message: {
+                text: "Test message",
+                name: "ChatRequestSuccess",
+                schedule: { responseDelayMilliseconds: 0 },
+                agentId: "test-agent-id",
+              },
+            },
+          ],
+          sequence: 0,
+          offset: 0,
+        });
+      });
+
+      afterEach(() => {
+        vi.mocked(fetchChatMessages).mockReset();
+      });
+
+      it("should send initial messages after session creation", async () => {
+        await POST(createMockRequest() as unknown as NextRequest);
+
+        expect(sendChatMessage).toHaveBeenCalled();
+        expect(vi.mocked(sendChatMessage).mock.calls[0][0]).toContain(
+          "MAVEN TRANSCRIPT HISTORY",
+        );
+      });
+    });
+  });
+
+  describe("when fetchChatMessages does not return a ChatRequestSuccess message", () => {
+    it("should not send initial messages after session creation", async () => {
       await POST(createMockRequest() as unknown as NextRequest);
 
-      expect(sendChatMessage).toHaveBeenCalled();
-      expect(vi.mocked(sendChatMessage).mock.calls[0][0]).toContain(
-        "MAVEN TRANSCRIPT HISTORY",
-      );
+      expect(sendChatMessage).not.toHaveBeenCalled();
     });
   });
 });
