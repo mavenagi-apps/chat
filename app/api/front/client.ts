@@ -5,21 +5,21 @@ import { jsonFetch, JsonFetchError } from "@/lib/jsonFetch";
 import Bottleneck from "bottleneck";
 
 export enum RetryableStatusCodes {
-  TooManyRequests = 429,
-  InternalServerError = 500,
-  NotImplemented = 501,
-  BadGateway = 502,
-  ServiceUnavailable = 503,
-  GatewayTimeout = 504,
+  TOO_MANY_REQUESTS = 429,
+  INTERNAL_SERVER_ERROR = 500,
+  NOT_IMPLEMENTED = 501,
+  BAD_GATEWAY = 502,
+  SERVICE_UNAVAILABLE = 503,
+  GATEWAY_TIMEOUT = 504,
 }
 
 export const DEFAULT_API_HOST = "https://api2.frontapp.com";
 
 // https://dev.frontapp.com/docs/rate-limiting#standard-rate-limits
 export enum StandardRateLimits {
-  Starter = 1200,
-  Growth = 600,
-  Scale = 300,
+  STARTER = 1200,
+  GROWTH = 600,
+  SCALE = 300,
 }
 
 function createRetryRateLimiter(minTime: number) {
@@ -70,7 +70,7 @@ export class FrontCoreClient {
     private apiKey: string,
     private host: string = DEFAULT_API_HOST,
 
-    private standardRateLimit: StandardRateLimits = StandardRateLimits.Starter,
+    private standardRateLimit: StandardRateLimits = StandardRateLimits.STARTER,
   ) {
     this.standardRateLimiter = createRetryRateLimiter(this.standardRateLimit);
     // 5 requests per second per conversation, https://dev.frontapp.com/docs/rate-limiting#additional-burst-rate-limiting
