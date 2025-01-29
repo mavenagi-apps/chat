@@ -64,7 +64,12 @@ async function createOrUpdateUser(
     const data: Record<string, MavenAGI.UserData> = {};
     Object.entries(rest).forEach(([key, value]) => {
       data[key] = {
-        value: (value as any).toString?.() || value,
+        value:
+          value === null
+            ? null
+            : typeof value === "object"
+              ? JSON.stringify(value, null, 4)
+              : (value as any).toString?.() || value,
         visibility: MavenAGI.VisibilityType.Visible,
       };
     });
