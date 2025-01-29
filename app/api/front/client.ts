@@ -158,12 +158,18 @@ export class FrontCoreClient {
   async contactById(id: string) {
     return await this.standardFetch<Front.Contact>(`/contacts/${id}`, {
       method: "GET",
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+      },
     });
   }
   async contactUpdateById(id: string, update: Front.ContactUpdate) {
     return await this.standardFetch<void>(`/contacts/${id}`, {
       method: "PATCH",
       body: JSON.stringify(update),
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+      },
     });
   }
 }
