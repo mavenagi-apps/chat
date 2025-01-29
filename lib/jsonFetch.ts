@@ -9,9 +9,10 @@ export class JsonFetchError extends Error {
 
 export async function jsonFetch<T = any>(
   url: string | URL,
-  { method = "GET", body, headers, ...rest }: RequestInit,
+  init?: RequestInit,
 ) {
-  const init: RequestInit = {
+  const { method = "GET", body, headers, ...rest } = init ?? {};
+  const requestInit: RequestInit = {
     method,
     headers: {
       ...(headers instanceof Headers
@@ -24,9 +25,9 @@ export async function jsonFetch<T = any>(
     ...rest,
   };
   if (body) {
-    init.body = body;
+    requestInit.body = body;
   }
-  const response = await fetch(url, init);
+  const response = await fetch(url, requestInit);
   if (!response.ok) {
     // throw an error and provide the response so the caller handle
     throw new JsonFetchError(
