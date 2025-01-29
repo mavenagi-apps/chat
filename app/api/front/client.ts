@@ -5,6 +5,7 @@ import { jsonFetch, JsonFetchError } from "@/lib/jsonFetch";
 import Bottleneck from "bottleneck";
 
 export enum RetryableStatusCodes {
+  UNAUTHORIZED = 401,
   TOO_MANY_REQUESTS = 429,
   INTERNAL_SERVER_ERROR = 500,
   NOT_IMPLEMENTED = 501,
