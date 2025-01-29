@@ -2,6 +2,7 @@
 import "highlight.js/styles/atom-one-dark.css";
 import React from "react";
 import RMReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import rehypeHighlight from "rehype-highlight";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
@@ -24,7 +25,10 @@ export function ReactMarkdown({
   return (
     <RMReactMarkdown
       remarkPlugins={[remarkGfm, remarkBreaks]}
-      rehypePlugins={[[rehypeHighlight, { detect: true }]]}
+      rehypePlugins={[
+        [rehypeRaw, { allowDangerousHtml: true }],
+        [rehypeHighlight, { detect: true }],
+      ]}
       unwrapDisallowed
       components={{
         ul: ({ node: _node, ...props }) => (
