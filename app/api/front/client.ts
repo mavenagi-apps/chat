@@ -79,18 +79,20 @@ export class FrontCoreClient {
   }
 
   private standardFetch = async <T = unknown>(
-    url: string | URL,
+    resource: string | URL,
     init?: RequestInit,
   ) => {
+    let url: string | URL = new URL(resource, this.host);
     return await this.standardRateLimiter.schedule(() =>
       jsonFetch<T>(url, init),
     );
   };
 
   private burstFetch = async <T = unknown>(
-    url: string | URL,
+    resource: string | URL,
     init?: RequestInit,
   ) => {
+    let url: string | URL = new URL(resource, this.host);
     return await this.burstRateLimiter.schedule(() => jsonFetch<T>(url, init));
   };
 
@@ -150,6 +152,18 @@ export class FrontCoreClient {
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
       },
+    });
+  }
+
+  async contactById(id: string) {
+    return await this.standardFetch<Front.Contact>(`/contacts/${id}`, {
+      method: "GET",
+    });
+  }
+  async contactUpdateById(id: string, update: Front.ContactUpdate) {
+    return await this.standardFetch<void>(`/contacts/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(update),
     });
   }
 }
