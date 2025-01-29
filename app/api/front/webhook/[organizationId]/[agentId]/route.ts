@@ -1,3 +1,4 @@
+import Turndown from "turndown";
 import { type NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getRedisPublishClient } from "@/app/api/server/lib/redis";
@@ -75,6 +76,9 @@ export const POST = async (
   }
 
   // TODO: handle auto-replies
+
+  // convert html to markdown
+  body.payload.body = new Turndown().turndown(body.payload.body);
 
   // publish the message to the correct channel
   const redisClient = await getRedisPublishClient();
