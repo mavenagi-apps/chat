@@ -5,6 +5,7 @@ import { jsonFetch, JsonFetchError } from "@/lib/jsonFetch";
 import Bottleneck from "bottleneck";
 
 export enum RetryableStatusCodes {
+  UNAUTHORIZED = 401,
   TOO_MANY_REQUESTS = 429,
   INTERNAL_SERVER_ERROR = 500,
   NOT_IMPLEMENTED = 501,
@@ -157,12 +158,31 @@ export class FrontApplicationClient {
   private tokenDuration: number = 30; // seconds
   private token?: string;
   private tokenTimeout?: NodeJS.Timeout;
+  burstRateLimiter: Bottleneck;
   constructor(
     private appId: string,
     private appSecret: string,
     private channelId: string,
     private host: string = DEFAULT_API_HOST,
-  ) {}
+  ) {
+    // 5 requests per second per conversation, https://dev.frontapp.com/docs/rate-limiting#additional-burst-rate-limiting
+    this.burstRateLimiter = createRetryRateLimiter(200);
+  }
+
+  private burstFetch = async <T = unknown>(
+    url: string | URL,
+    init?: RequestInit,
+  ) => {
+    return await this.burstRateLimiter.schedule(async () =>
+      jsonFetch<T>(url, {
+        ...init,
+        headers: {
+          ...init?.headers,
+          Authorization: `Bearer ${await this.getAuthToken()}`,
+        },
+      }),
+    );
+  };
 
   private async getAuthToken() {
     if (this.token) return this.token;
@@ -184,31 +204,23 @@ export class FrontApplicationClient {
   }
 
   public async sendIncomingMessages(msg: Front.AppChannelInboundMessage) {
-    const token = await this.getAuthToken();
     const url = new URL(
       `/channels/${this.channelId}/inbound_messages`,
       this.host,
     );
-    return await jsonFetch<Front.AppChannelSyncResponse>(url, {
+    return await this.burstFetch<Front.AppChannelSyncResponse>(url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify(msg),
     });
   }
 
   public async sendOutgoingMessages(msg: Front.AppChannelOutboundMessage) {
-    const token = await this.getAuthToken();
     const url = new URL(
       `/channels/${this.channelId}/outbound_messages`,
       this.host,
     );
-    return await jsonFetch<Front.AppChannelSyncResponse>(url, {
+    return await this.burstFetch<Front.AppChannelSyncResponse>(url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify(msg),
     });
   }
