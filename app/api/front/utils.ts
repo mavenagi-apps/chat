@@ -4,13 +4,10 @@ import type { HandoffChatMessage, VerifiedUserData } from "@/types";
 import {
   FrontApplicationClient,
   FrontCoreClient,
-  RetryableStatusCodes,
 } from "@/app/api/front/client";
 import Keyv from "keyv";
 import { Cacheable, KeyvCacheableMemory } from "cacheable";
 import { getRedisCache } from "@/app/api/server/lib/redis";
-import { JsonFetchError } from "@/lib/jsonFetch";
-import Bottleneck from "bottleneck";
 import { DateTime } from "luxon";
 
 let channelCache: Cacheable | undefined;
