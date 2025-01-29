@@ -241,6 +241,9 @@ describe("POST /api/create", () => {
             otherValue: "otherValue",
             firstName: "John",
             lastName: "Doe",
+            objectField: { key: "value" },
+            arrayField: ["one", "two"],
+            nullField: null,
           }),
           mockUnsignedData,
         );
@@ -264,6 +267,18 @@ describe("POST /api/create", () => {
             },
             lastName: {
               value: "Doe",
+              visibility: MavenAGI.VisibilityType.Visible,
+            },
+            objectField: {
+              value: JSON.stringify({ key: "value" }, null, 4),
+              visibility: MavenAGI.VisibilityType.Visible,
+            },
+            arrayField: {
+              value: JSON.stringify(["one", "two"], null, 4),
+              visibility: MavenAGI.VisibilityType.Visible,
+            },
+            nullField: {
+              value: null,
               visibility: MavenAGI.VisibilityType.Visible,
             },
           },
