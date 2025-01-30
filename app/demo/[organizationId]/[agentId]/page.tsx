@@ -5,6 +5,7 @@ import { generateSignedUserData } from "./actions";
 import { notFound } from "next/navigation";
 import backgroundImg from "@/assets/background/bg.jpg";
 
+const now = new Date();
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 // Move faker data generation outside the component
 const mockUserData = {
@@ -12,9 +13,7 @@ const mockUserData = {
   lastName: faker.person.lastName(),
   id: faker.string.uuid(),
   email: faker.internet.email(),
-  todaysDate: new Intl.DateTimeFormat(undefined, { timeZone }).format(
-    new Date(),
-  ),
+  todaysDate: new Intl.DateTimeFormat(undefined, { timeZone }).format(now),
 };
 
 console.log("mockUserData", mockUserData);
