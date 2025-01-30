@@ -1,3 +1,5 @@
+"use client";
+
 import { headers } from "next/headers";
 import { faker } from "@faker-js/faker";
 import { getPublicAppSettings } from "@/app/actions";
@@ -11,7 +13,7 @@ const mockUserData = {
   lastName: faker.person.lastName(),
   id: faker.string.uuid(),
   email: faker.internet.email(),
-  todaysDate: Date(),
+  todaysDate: new Date().toLocaleString(),
 };
 
 export default async function Page({
