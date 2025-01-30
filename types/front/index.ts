@@ -223,4 +223,54 @@ export namespace Front {
     created_at: number;
     conversation_id?: string;
   };
+
+  export type Contact = {
+    _links: {
+      self: string;
+      related: {
+        notes?: string;
+        conversations?: string;
+        owner?: string;
+      };
+    };
+    id: string;
+    name: string;
+    description: string;
+    avatar_url: string;
+    is_spammer: boolean;
+    links: string[];
+    groups: ContactGroup[];
+    handles: Handle[];
+    custom_fields: Record<string, unknown>;
+    is_private: boolean;
+  };
+
+  export type ContactUpdate = {
+    name?: string;
+    description?: string;
+    // NOTE: not supported
+    // avatar?: string;
+    is_spammer?: boolean;
+    links?: string[];
+    group_names?: string[];
+    custom_fields?: Record<string, unknown>;
+  };
+
+  export type ContactGroup = {
+    _links: {
+      self: string;
+      related: {
+        contacts: string;
+        owner: string;
+      };
+    };
+    id: string;
+    name: string;
+    is_private: boolean;
+  };
+
+  export type Handle = {
+    handle: string;
+    source: string;
+  };
 }
