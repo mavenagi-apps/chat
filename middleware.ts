@@ -10,8 +10,6 @@ const PATHNAMES = [
   "/:organizationId/:agentId/:path*",
 ] as const;
 
-const ENABLE_CSP_LOGGING = process.env.ENABLE_CSP_LOGGING === "true";
-
 // Types
 interface PathParams {
   organizationId?: string;
@@ -106,6 +104,7 @@ export async function middleware(request: NextRequest) {
     try {
       const appSettings = await getAppSettings(organizationId, agentId);
       const security = processSecuritySettings(appSettings, request);
+      const ENABLE_CSP_LOGGING = process.env.ENABLE_CSP_LOGGING === "true";
       const ORGANIZATIONS_WITH_CSP_DISABLED =
         process.env.ORGANIZATIONS_WITH_CSP_DISABLED?.split(",") || [];
       const shouldApplyCsp =
