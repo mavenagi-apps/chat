@@ -82,7 +82,7 @@ export class FrontCoreClient {
     resource: string | URL,
     init?: RequestInit,
   ) => {
-    let url: string | URL = new URL(resource, this.host);
+    const url: string | URL = new URL(resource, this.host);
     return await this.standardRateLimiter.schedule(() =>
       jsonFetch<T>(url, init),
     );
@@ -92,7 +92,7 @@ export class FrontCoreClient {
     resource: string | URL,
     init?: RequestInit,
   ) => {
-    let url: string | URL = new URL(resource, this.host);
+    const url: string | URL = new URL(resource, this.host);
     return await this.burstRateLimiter.schedule(() => jsonFetch<T>(url, init));
   };
 
