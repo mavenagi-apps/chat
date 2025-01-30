@@ -7,8 +7,7 @@ export class JsonFetchError extends Error {
   }
 }
 
-// type NoOutput = undefined;
-export async function jsonFetch<T = any | never>(
+export async function jsonFetch<T = any>(
   url: string | URL,
   init?: RequestInit,
 ): Promise<T | undefined> {
