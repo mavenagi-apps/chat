@@ -87,7 +87,8 @@ describe("DemoPage", () => {
             "firstName":"[^"]+",
             "lastName":"[^"]+",
             "id":"[^"]+",
-            "email":"[^"]+"
+            "email":"[^"]+",
+            "todaysDate":"[^"]+"
           },
           "customData":{
           }
