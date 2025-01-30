@@ -7,10 +7,11 @@ export class JsonFetchError extends Error {
   }
 }
 
-export async function jsonFetch<T = any>(
+// type NoOutput = undefined;
+export async function jsonFetch<T = any | never>(
   url: string | URL,
   init?: RequestInit,
-) {
+): Promise<T | undefined> {
   const { method = "GET", body, headers, ...rest } = init ?? {};
   const requestInit: RequestInit = {
     method,
@@ -31,9 +32,16 @@ export async function jsonFetch<T = any>(
   if (!response.ok) {
     // throw an error and provide the response so the caller handle
     throw new JsonFetchError(
-      `Failed to fetch ${method} ${new URL(url).pathname}`,
+      `Failed to fetch ${method}(${response.status}) ${new URL(url).pathname} ${await response.text()}`,
       response,
     );
   }
-  return (await response.json()) as T;
+
+  if (
+    response.headers.get("content-type")?.includes("application/json") &&
+    Number.parseInt(response.headers.get("content-length") ?? "0") > 0
+  ) {
+    return (await response.json()) as T;
+  }
+  return undefined;
 }

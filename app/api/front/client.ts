@@ -114,12 +114,17 @@ export class FrontCoreClient {
 
       url.search = queryParams.toString();
     }
-    return await this.standardFetch<Front.List<T>>(url, {
+    const output = await this.standardFetch<Front.List<T>>(url, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
       },
     });
+    if (output) {
+      return output;
+    }
+    // NOTE: this should never happen, it'll turn to an exception, but just here to appease TypeScript
+    throw new Error(`Failed to fetch paged resource: ${resource}`);
   }
 
   public channels = async (params?: Front.PagedEndpointParams) => {
@@ -156,15 +161,23 @@ export class FrontCoreClient {
   }
 
   async contactById(id: string) {
-    return await this.standardFetch<Front.Contact>(`/contacts/${id}`, {
+    const contact = await this.standardFetch<Front.Contact>(`/contacts/${id}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
       },
     });
+    if (contact) {
+      return contact;
+    }
+    // NOTE: this should never happen, it'll turn to an exception w/ 404, but just here to appease TypeScript
+    throw new Error(`Contact not found: ${id}`);
   }
-  async contactUpdateById(id: string, update: Front.ContactUpdate) {
-    return await this.standardFetch<void>(`/contacts/${id}`, {
+  async contactUpdateById(
+    id: string,
+    update: Front.ContactUpdate,
+  ): Promise<void> {
+    await this.standardFetch(`/contacts/${id}`, {
       method: "PATCH",
       body: JSON.stringify(update),
       headers: {
