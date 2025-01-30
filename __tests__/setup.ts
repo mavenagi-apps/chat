@@ -10,6 +10,8 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
   disconnect: vi.fn(),
 }));
 
+vi.mock("next/navigation");
+
 beforeAll(() => {
   vi.mock("next/router", () => require("next-router-mock"));
 });
@@ -29,19 +31,6 @@ vi.mock("next/image", () => ({
 vi.mock("next-intl", () => ({
   useLocale: () => "en",
   useTranslations: () => (key: string) => key,
-}));
-
-// Mock next/navigation (including useParams)
-vi.mock("next/navigation", () => ({
-  useParams: () => ({
-    organizationId: "test-org",
-    agentId: "test-id",
-  }),
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    prefetch: vi.fn(),
-  }),
 }));
 
 vi.mock("@/lib/analytics/use-analytics", () => ({
