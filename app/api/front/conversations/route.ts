@@ -15,7 +15,6 @@ import type { VerifiedUserData } from "@/types";
 import { nanoid } from "nanoid";
 import type { FrontCoreClient } from "../client";
 import type { Front } from "@/types/front";
-import { randomUUID } from "node:crypto";
 
 async function updateFrontUser(
   frontClient: FrontCoreClient,
@@ -73,10 +72,8 @@ export async function POST(req: NextRequest) {
       userInfo: verifiedUserInfo,
     });
 
-    verifiedUserInfo.customData ??= { data: randomUUID() };
-
     // creating messages in front will automatically create the user in front, now update with custom data
-    // don't await, we don't need to wait for this to complete
+    // don't await to get the response back faster
     void updateFrontUser(
       frontCoreClient,
       { handle: verifiedUserInfo.email, source: "custom" },
