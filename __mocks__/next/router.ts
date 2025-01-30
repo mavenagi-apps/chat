@@ -5,3 +5,7 @@ export const useRouter = vi.fn(() => ({
   replace: vi.fn(),
   prefetch: vi.fn(),
 }));
+
+module.exports = {
+  useRouter,
+};

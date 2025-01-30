@@ -1,13 +1,16 @@
-import { NextResponse, URLPattern } from "next/server";
+import { NextResponse, URLPattern as NextURLPattern } from "next/server";
 import type { NextRequest } from "next/server";
 import { getAppSettings } from "@/app/api/server/utils";
 import { notFound } from "next/navigation";
+import { isNotFoundError } from "next/dist/client/components/not-found";
 
 // Constants
 const PATHNAMES = [
   "/demo/:organizationId/:agentId/:path*",
   "/:organizationId/:agentId/:path*",
 ] as const;
+
+const ENABLE_CSP_LOGGING = process.env.ENABLE_CSP_LOGGING === "true";
 
 // Types
 interface PathParams {
@@ -23,7 +26,7 @@ const extractPathParams = (url: string): PathParams => {
   const input = url.split("?")[0];
 
   for (const pathname of PATHNAMES) {
-    const pattern = new URLPattern({ pathname });
+    const pattern = new NextURLPattern({ pathname });
     const patternResult = pattern.exec(input);
     if (patternResult?.pathname?.groups) {
       return patternResult.pathname.groups;
@@ -102,31 +105,45 @@ export async function middleware(request: NextRequest) {
 
     try {
       const appSettings = await getAppSettings(organizationId, agentId);
-
       const security = processSecuritySettings(appSettings, request);
+      const ORGANIZATIONS_WITH_CSP_DISABLED =
+        process.env.ORGANIZATIONS_WITH_CSP_DISABLED?.split(",") || [];
+      const shouldApplyCsp =
+        !ORGANIZATIONS_WITH_CSP_DISABLED.includes(organizationId);
 
       if (security.headers) {
-        response.headers.set("Content-Security-Policy", security.headers);
-        if (process.env.ENABLE_CSP_LOGGING) {
-          console.log(request.url, security.headers);
-          console.log("blocked", security.blocked);
-          console.log("supportsCsp", supportsCsp(request));
-          console.log("referrer", request.headers.get("referer"));
-          console.log(
-            "isAllowedDomain",
-            isAllowedDomain(
+        if (shouldApplyCsp) {
+          response.headers.set("Content-Security-Policy", security.headers);
+        } else {
+          if (ENABLE_CSP_LOGGING) {
+            console.log("CSP disabled for organization", organizationId);
+          }
+        }
+
+        if (ENABLE_CSP_LOGGING) {
+          console.log({
+            url: request.url,
+            cspHeaders: security.headers,
+            blocked: security.blocked,
+            supportsCsp: supportsCsp(request),
+            referrer: request.headers.get("referer"),
+            secFetchDest: request.headers.get("sec-fetch-dest"),
+            secFetchMode: request.headers.get("sec-fetch-mode"),
+            isAllowedDomain: isAllowedDomain(
               request.headers.get("referer"),
               appSettings.embedAllowlist || [],
             ),
-          );
+          });
         }
 
         if (security.blocked) {
-          return notFound();
+          notFound();
         }
       }
     } catch (error) {
-      console.error(error);
+      if (isNotFoundError(error)) {
+        return NextResponse.json({ error: "Not Found" }, { status: 404 });
+      }
     }
   }
 
