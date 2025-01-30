@@ -1,11 +1,10 @@
-"use client";
-
 import { headers } from "next/headers";
 import { faker } from "@faker-js/faker";
 import { getPublicAppSettings } from "@/app/actions";
 import { generateSignedUserData } from "./actions";
 import { notFound } from "next/navigation";
 import backgroundImg from "@/assets/background/bg.jpg";
+import Widget from "./Widget";
 
 // Move faker data generation outside the component
 const mockUserData = {
@@ -13,7 +12,6 @@ const mockUserData = {
   lastName: faker.person.lastName(),
   id: faker.string.uuid(),
   email: faker.internet.email(),
-  todaysDate: new Date().toLocaleString(),
 };
 
 export default async function Page({
@@ -77,15 +75,7 @@ export default async function Page({
         height: "100vh",
       }}
     >
-      <script src="/js/widget.js" defer></script>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-    addEventListener("load", function () {
-      Maven.ChatWidget.load(${JSON.stringify(widgetLoadPayload)});
-    });`,
-        }}
-      ></script>
+      <Widget widgetLoadPayload={widgetLoadPayload} />
     </div>
   );
 }
