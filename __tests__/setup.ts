@@ -11,6 +11,7 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
 }));
 
 vi.mock("next/navigation");
+vi.mock("next/server");
 
 beforeAll(() => {
   vi.mock("next/router", () => require("next-router-mock"));

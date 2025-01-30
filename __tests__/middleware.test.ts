@@ -10,17 +10,6 @@ vi.mock("@/app/api/server/utils", () => ({
   }),
 }));
 
-vi.mock("next/server", async () => {
-  const actual = await vi.importActual("next/server");
-  const { URLPattern: PolyfillURLPattern } = await vi.importActual(
-    "urlpattern-polyfill",
-  );
-  return {
-    ...actual,
-    URLPattern: PolyfillURLPattern,
-  };
-});
-
 describe("Middleware", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
