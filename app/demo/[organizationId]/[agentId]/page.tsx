@@ -11,8 +11,10 @@ const mockUserData = {
   lastName: faker.person.lastName(),
   id: faker.string.uuid(),
   email: faker.internet.email(),
-  todaysDate: new Date().toLocaleString(),
+  todaysDate: Date(),
 };
+
+console.log("mockUserData", mockUserData);
 
 export default async function Page({
   params,
