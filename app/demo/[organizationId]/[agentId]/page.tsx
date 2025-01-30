@@ -5,22 +5,13 @@ import { generateSignedUserData } from "./actions";
 import { notFound } from "next/navigation";
 import backgroundImg from "@/assets/background/bg.jpg";
 
-const today = new Date();
-const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-const formattedToday = new Intl.DateTimeFormat(undefined, {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-  timeZone: currentTimeZone,
-}).format(today);
-
 // Move faker data generation outside the component
 const mockUserData = {
   firstName: faker.person.firstName(),
   lastName: faker.person.lastName(),
   id: faker.string.uuid(),
   email: faker.internet.email(),
-  todaysDate: formattedToday,
+  todaysDate: Date(),
 };
 
 export default async function Page({
