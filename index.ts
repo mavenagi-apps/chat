@@ -1,5 +1,9 @@
 import { getMavenAGIClient } from "./app";
 import { SALESFORCE_API_VERSION } from "./app/constants/handoff";
+
+const ESCALATE_ACTION_ID = "escalate-to-agent";
+const ESCALATE_ACTION_NAME = "Escalate to Live Agent";
+
 const defaultModule = {
   async postInstall({
     settings,
@@ -53,9 +57,9 @@ const defaultModule = {
     // Escalate action
     const result = await client.actions.createOrUpdate({
       actionId: {
-        referenceId: "escalate-to-agent",
+        referenceId: ESCALATE_ACTION_ID,
       },
-      name: "escalate-live-agent",
+      name: ESCALATE_ACTION_NAME,
       description,
       userInteractionRequired: true,
       userFormParameters: [
@@ -97,25 +101,10 @@ const defaultModule = {
     settings,
   }: {
     actionId: string;
-    parameters: Record<string, any>;
-    organizationId: string;
-    agentId: string;
-    conversationId: string;
-    memberId: string;
-    memberEmail: string;
-    memberFirstName: string;
-    memberLastName: string;
-    memberPhone: string;
-    memberCountry: string;
-    memberLanguage: string;
-    memberTimezone: string;
-    memberIpAddress: string;
-    memberDevice: string;
-    memberBrowser: string;
-    memberOperatingSystem: string;
     settings: AppSettings;
   }) {
-    if (actionId === "escalate-to-agent") {
+    console.log("executeAction", actionId, settings);
+    if (actionId === ESCALATE_ACTION_ID) {
       if (settings.handoffConfiguration) {
         try {
           const parsedHandoffConfiguration: HandoffConfiguration = JSON.parse(
