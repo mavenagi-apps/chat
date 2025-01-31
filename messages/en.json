@@ -42,7 +42,8 @@
       "chat_queue_position_next": "You are next in line in the queue. Your agent will be with you shortly.",
       "chat_queue_position_in_queue": "You are in the queue. Please wait for the next available agent.",
       "chat_queue_position_estimated_wait_time": "Your estimated wait time is {estimatedWaitTime} seconds.",
-      "chat_queue_position_estimated_wait_time_singular": "Your estimated wait time is {estimatedWaitTime} second."
+      "chat_queue_position_estimated_wait_time_singular": "Your estimated wait time is {estimatedWaitTime} second.",
+      "salesforce_chat_request_fail_unavailable": "We are sorry but there are no live agents available at this time."
     },
     "IdleMessage": {
       "idle_message": "We are here to help you. Please ask a question.",
