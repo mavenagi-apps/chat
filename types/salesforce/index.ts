@@ -39,10 +39,38 @@ export type SalesforceChatMessage = {
   timestamp?: number;
 };
 
+export type SalesforceChatRequestFail = SalesforceChatMessage & {
+  type: typeof SALESFORCE_MESSAGE_TYPES.ChatRequestFail;
+  message: {
+    reason: string;
+    attachedRecords: string[];
+  };
+  timestamp?: number;
+};
+
+export type SalesforceChatRequestFailUnavailable = SalesforceChatRequestFail & {
+  message: {
+    reason: "Unavailable";
+    attachedRecords: string[];
+  };
+};
+
 export const isSalesforceMessage = (
   message: any,
 ): message is SalesforceChatMessage => {
   return message.type in SALESFORCE_MESSAGE_TYPES;
+};
+
+const isChatRequestFail = (
+  message: SalesforceChatMessage,
+): message is SalesforceChatRequestFail => {
+  return message.type === SALESFORCE_MESSAGE_TYPES.ChatRequestFail;
+};
+
+export const isChatRequestFailUnavailable = (
+  message: SalesforceChatRequestFail,
+): message is SalesforceChatRequestFailUnavailable => {
+  return isChatRequestFail(message) && message.message.reason === "Unavailable";
 };
 
 export type ChatSessionResponse = {

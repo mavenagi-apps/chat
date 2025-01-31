@@ -7,6 +7,7 @@ import {
   BotResponse,
 } from "./test-helpers";
 import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
+import type { SalesforceChatRequestFail } from "@/types/salesforce";
 
 describe("SalesforceStrategy", () => {
   let strategy: SalesforceStrategy;
@@ -78,13 +79,49 @@ describe("SalesforceStrategy", () => {
       });
     });
 
-    it("returns shouldEndHandoff true for termination messages", () => {
-      const event = createSalesforceEvent(
-        SALESFORCE_MESSAGE_TYPES.ChatRequestFail,
-      );
+    it("returns shouldEndHandoff true for non-unavailable termination messages", () => {
+      const event: SalesforceChatRequestFail = {
+        type: SALESFORCE_MESSAGE_TYPES.ChatRequestFail,
+        message: {
+          text: "Chat request failed",
+          name: "System",
+          schedule: {
+            responseDelayMilliseconds: 0,
+          },
+          agentId: "system-1",
+          reason: "Other",
+          attachedRecords: [],
+        },
+      };
       const result = strategy.handleChatEvent(event);
 
       expect(result).toEqual({ shouldEndHandoff: true });
+    });
+
+    it("returns formatted event for unavailable termination messages", () => {
+      const event: SalesforceChatRequestFail = {
+        type: SALESFORCE_MESSAGE_TYPES.ChatRequestFail,
+        message: {
+          text: "Chat request failed",
+          name: "System",
+          schedule: {
+            responseDelayMilliseconds: 0,
+          },
+          agentId: "system-1",
+          reason: "Unavailable",
+          attachedRecords: [],
+        },
+      };
+      const result = strategy.handleChatEvent(event);
+
+      expect(result).toEqual({
+        agentName: null,
+        formattedEvent: {
+          ...event,
+          timestamp: expect.any(Number),
+        },
+        shouldEndHandoff: true,
+      });
     });
 
     it("returns formatted event and agent name for non-termination messages", () => {
@@ -100,6 +137,7 @@ describe("SalesforceStrategy", () => {
           ...event,
           timestamp: expect.any(Number),
         },
+        shouldEndHandoff: false,
       });
     });
   });

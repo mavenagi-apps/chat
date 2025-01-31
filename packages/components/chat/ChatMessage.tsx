@@ -106,6 +106,7 @@ function getHandoffEventMessageText(
   const messageMap = {
     ChatConnecting: () => t("connecting_to_agent"),
     ChatEstablished: () => t("connected_to_agent"),
+    ChatRequestFail: () => t("salesforce_chat_request_fail_unavailable"),
     ChatEnded: () => t("chat_has_ended"),
     ChatTransferred: (message: IncomingHandoffConnectionEvent) => {
       const agentName =
@@ -216,6 +217,7 @@ export function ChatMessage({
       case SALESFORCE_MESSAGE_TYPES.ChatConnecting:
       case SALESFORCE_MESSAGE_TYPES.ChatTransferred:
       case SALESFORCE_MESSAGE_TYPES.QueueUpdate:
+      case SALESFORCE_MESSAGE_TYPES.ChatRequestFail:
         return renderHandoffEventMessage(
           message as IncomingHandoffConnectionEvent,
         );
