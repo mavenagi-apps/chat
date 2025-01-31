@@ -65,4 +65,5 @@ export class ZendeskStrategy implements HandoffStrategy {
 export class ZendeskServerStrategy implements ServerHandoffStrategy {
   constructor(private configuration: ZendeskHandoffConfiguration) {}
   isLiveHandoffAvailable? = () => Promise.resolve(true);
+  fetchHandoffAvailability? = () => Promise.resolve(true);
 }

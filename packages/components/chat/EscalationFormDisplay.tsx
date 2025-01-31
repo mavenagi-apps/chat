@@ -23,11 +23,7 @@ async function checkHandoffAvailability(
   agentId: string,
 ) {
   const result = await isHandoffAvailable(organizationId, agentId);
-
-  if (result.success) {
-    return result.data ?? true;
-  }
-  return true;
+  return result ?? true;
 }
 
 function EscalationForm({ isAvailable }: { isAvailable: boolean }) {

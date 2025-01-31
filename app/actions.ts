@@ -5,7 +5,7 @@ import { type MavenAGIClient, type MavenAGI } from "mavenagi";
 import { type FeedbackType } from "mavenagi/api";
 import { nanoid } from "nanoid";
 import { getAppSettings } from "@/app/api/server/utils";
-import { SALESFORCE_API_VERSION } from "./constants/handoff";
+import { ServerHandoffStrategyFactory } from "@/lib/handoff/ServerHandoffStrategyFactory";
 
 interface CreateOrUpdateFeedbackProps {
   organizationId: string;
@@ -163,48 +163,18 @@ export async function isHandoffAvailable(
       agentId,
     );
 
-    if (
-      handoffConfiguration?.type !== "salesforce" ||
-      !handoffConfiguration.enableAvailabilityCheck
-    ) {
-      return { success: true, data: undefined };
-    }
-
-    const url =
-      handoffConfiguration.chatHostUrl +
-      "/chat/rest/Visitor/Availability?" +
-      new URLSearchParams({
-        org_id: handoffConfiguration.orgId,
-        deployment_id: handoffConfiguration.deploymentId,
-        "Availability.ids": handoffConfiguration.chatButtonId,
-      });
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "X-LIVEAGENT-API-VERSION": SALESFORCE_API_VERSION,
-      },
-    });
-
-    if (!response.ok) {
-      return { success: true, data: undefined };
-    }
-
-    const data = await response.json();
-    const availabilityMessage = data?.messages?.find(
-      (message: any) => message.type === "Availability",
-    );
-    const result = availabilityMessage?.message?.results?.find(
-      (result: any) => result.id === handoffConfiguration.chatButtonId,
+    const strategy = ServerHandoffStrategyFactory.createStrategy(
+      handoffConfiguration?.type,
+      handoffConfiguration as HandoffConfiguration,
     );
 
-    if (result && result.isAvailable !== true) {
-      return { success: true, data: false };
+    if (!strategy) {
+      return true;
     }
 
-    return { success: true, data: true };
+    return (await strategy.fetchHandoffAvailability?.()) ?? true;
   } catch (error) {
     console.error("Error checking handoff availability:", error);
-    return { success: true, data: undefined };
+    return true;
   }
 }
