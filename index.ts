@@ -1,5 +1,4 @@
 import { getMavenAGIClient } from "./app";
-import { SALESFORCE_API_VERSION } from "./app/constants/handoff";
 
 const ESCALATE_ACTION_ID = "escalate-to-agent";
 const ESCALATE_ACTION_NAME = "Escalate to Live Agent";
