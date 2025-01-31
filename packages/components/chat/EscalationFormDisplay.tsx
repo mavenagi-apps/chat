@@ -1,6 +1,6 @@
-import { useContext, Suspense } from "react";
+import { useContext } from "react";
 import { useTranslations } from "next-intl";
-import React, { useState, use, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useSettings } from "@/app/providers/SettingsProvider";
