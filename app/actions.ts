@@ -162,7 +162,7 @@ export async function isHandoffAvailable(
       organizationId,
       agentId,
     );
-    console.log({ handoffConfiguration });
+
     if (
       handoffConfiguration?.type !== "salesforce" ||
       !handoffConfiguration.enableAvailabilityCheck
