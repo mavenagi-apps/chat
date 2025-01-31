@@ -96,53 +96,8 @@ const defaultModule = {
     });
   },
 
-  async executeAction({
-    actionId,
-    settings,
-  }: {
-    actionId: string;
-    settings: AppSettings;
-  }) {
-    console.log("executeAction", actionId, settings);
+  async executeAction({ actionId }: { actionId: string }) {
     if (actionId === ESCALATE_ACTION_ID) {
-      if (settings.handoffConfiguration) {
-        try {
-          const parsedHandoffConfiguration: HandoffConfiguration = JSON.parse(
-            settings.handoffConfiguration,
-          );
-          if (parsedHandoffConfiguration.type === "salesforce") {
-            const salesforceHandoffConfiguration =
-              parsedHandoffConfiguration as SalesforceHandoffConfiguration;
-            if (salesforceHandoffConfiguration.enableAvailabilityCheck) {
-              const url =
-                salesforceHandoffConfiguration.chatHostUrl +
-                new URLSearchParams({
-                  org_id: salesforceHandoffConfiguration.orgId,
-                  deployment_id: salesforceHandoffConfiguration.deploymentId,
-                  "Availability.ids":
-                    salesforceHandoffConfiguration.chatButtonId,
-                });
-              const response = await fetch(
-                `${url}/chat/rest/Visitor/Availability`,
-                {
-                  method: "GET",
-                  headers: {
-                    "X-LIVEAGENT-API-VERSION": SALESFORCE_API_VERSION,
-                  },
-                },
-              );
-              if (response.ok) {
-                const data = await response.json();
-                console.log(data);
-              } else {
-                console.error("Failed to check availability", response);
-              }
-            }
-          }
-        } catch (e) {
-          console.error("Failed to parse ESCALATION_TOPICS", e);
-        }
-      }
       return "Escalating to agent...";
     }
 

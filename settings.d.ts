@@ -55,6 +55,8 @@ declare global {
       | {
           type: HandoffConfiguration["type"];
           surveyLink?: string;
+          enableAvailabilityCheck?: boolean;
+          availabilityFallbackMessage?: string;
         }
       | undefined;
   }

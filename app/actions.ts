@@ -4,6 +4,8 @@ import { getMavenAGIClient } from "@/app/index";
 import { type MavenAGIClient, type MavenAGI } from "mavenagi";
 import { type FeedbackType } from "mavenagi/api";
 import { nanoid } from "nanoid";
+import { getAppSettings } from "@/app/api/server/utils";
+import { SALESFORCE_API_VERSION } from "./constants/handoff";
 
 interface CreateOrUpdateFeedbackProps {
   organizationId: string;
@@ -76,6 +78,10 @@ const parseHandoffConfiguration = (
     return {
       type: parsedHandoffConfiguration.type,
       surveyLink: parsedHandoffConfiguration.surveyLink,
+      enableAvailabilityCheck:
+        parsedHandoffConfiguration.enableAvailabilityCheck,
+      availabilityFallbackMessage:
+        parsedHandoffConfiguration.availabilityFallbackMessage,
     };
   } catch (error) {
     console.error("Error parsing handoff configuration:", error);
@@ -144,5 +150,61 @@ export async function submitBailoutForm(_prevState: any, formData: FormData) {
   } catch (error) {
     console.error("Error submitting bailout form", error);
     return { success: false, error: "Unknown error" };
+  }
+}
+
+export async function isHandoffAvailable(
+  organizationId: string,
+  agentId: string,
+) {
+  try {
+    const { handoffConfiguration } = await getAppSettings(
+      organizationId,
+      agentId,
+    );
+    console.log({ handoffConfiguration });
+    if (
+      handoffConfiguration?.type !== "salesforce" ||
+      !handoffConfiguration.enableAvailabilityCheck
+    ) {
+      return { success: true, data: undefined };
+    }
+
+    const url =
+      handoffConfiguration.chatHostUrl +
+      "/chat/rest/Visitor/Availability?" +
+      new URLSearchParams({
+        org_id: handoffConfiguration.orgId,
+        deployment_id: handoffConfiguration.deploymentId,
+        "Availability.ids": handoffConfiguration.chatButtonId,
+      });
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "X-LIVEAGENT-API-VERSION": SALESFORCE_API_VERSION,
+      },
+    });
+
+    if (!response.ok) {
+      return { success: true, data: undefined };
+    }
+
+    const data = await response.json();
+    const availabilityMessage = data?.messages?.find(
+      (message: any) => message.type === "Availability",
+    );
+    const result = availabilityMessage?.message?.results?.find(
+      (result: any) => result.id === handoffConfiguration.chatButtonId,
+    );
+
+    if (result && result.isAvailable !== true) {
+      return { success: true, data: false };
+    }
+
+    return { success: true, data: true };
+  } catch (error) {
+    console.error("Error checking handoff availability:", error);
+    return { success: true, data: undefined };
   }
 }

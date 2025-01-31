@@ -31,7 +31,8 @@
       "connect_to_live_agent": "Connetti a un agente in diretta",
       "connection_to_live_agent_success_title": "Ora sei connesso a un agente in diretta",
       "connection_to_live_agent_success_description": "Per favore attendi che l'agente risponda.",
-      "email_placeholder": "Email"
+      "email_placeholder": "Email",
+      "agents_unavailable": "Nessun agente è attualmente disponibile. Per favore riprova più tardi."
     },
     "Handoff": {
       "connected_to_agent": "Connesso con l'agente",
