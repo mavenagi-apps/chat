@@ -1,5 +1,5 @@
 import { getMavenAGIClient } from "./app";
-
+import { SALESFORCE_API_VERSION } from "./app/constants/handoff";
 const defaultModule = {
   async postInstall({
     settings,
@@ -94,11 +94,66 @@ const defaultModule = {
 
   async executeAction({
     actionId,
+    settings,
   }: {
     actionId: string;
     parameters: Record<string, any>;
+    organizationId: string;
+    agentId: string;
+    conversationId: string;
+    memberId: string;
+    memberEmail: string;
+    memberFirstName: string;
+    memberLastName: string;
+    memberPhone: string;
+    memberCountry: string;
+    memberLanguage: string;
+    memberTimezone: string;
+    memberIpAddress: string;
+    memberDevice: string;
+    memberBrowser: string;
+    memberOperatingSystem: string;
+    settings: AppSettings;
   }) {
     if (actionId === "escalate-to-agent") {
+      if (settings.handoffConfiguration) {
+        try {
+          const parsedHandoffConfiguration: HandoffConfiguration = JSON.parse(
+            settings.handoffConfiguration,
+          );
+          if (parsedHandoffConfiguration.type === "salesforce") {
+            const salesforceHandoffConfiguration =
+              parsedHandoffConfiguration as SalesforceHandoffConfiguration;
+            if (salesforceHandoffConfiguration.enableAvailabilityCheck) {
+              const url =
+                salesforceHandoffConfiguration.chatHostUrl +
+                new URLSearchParams({
+                  org_id: salesforceHandoffConfiguration.orgId,
+                  deployment_id: salesforceHandoffConfiguration.deploymentId,
+                  "Availability.ids":
+                    salesforceHandoffConfiguration.chatButtonId,
+                });
+              const response = await fetch(
+                `${url}/chat/rest/Visitor/Availability`,
+                {
+                  method: "GET",
+                  headers: {
+                    "X-LIVEAGENT-API-VERSION": SALESFORCE_API_VERSION,
+                  },
+                },
+              );
+              if (response.ok) {
+                const data = await response.json();
+                console.log(data);
+              } else {
+                console.error("Failed to check availability", response);
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Failed to parse ESCALATION_TOPICS", e);
+        }
+      }
       return "Escalating to agent...";
     }
 
