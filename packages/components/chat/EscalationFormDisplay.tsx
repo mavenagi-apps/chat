@@ -23,7 +23,7 @@ async function checkHandoffAvailability(
   agentId: string,
 ) {
   const result = await isHandoffAvailable(organizationId, agentId);
-  console.log({ result });
+
   if (result.success) {
     return result.data ?? true;
   }
