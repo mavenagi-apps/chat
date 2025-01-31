@@ -136,6 +136,9 @@ describe("SalesforceServerStrategy", () => {
   });
 
   it("returns true on fetch error", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const strategy = new SalesforceServerStrategy({
       type: "salesforce",
       enableAvailabilityCheck: true,
@@ -149,6 +152,9 @@ describe("SalesforceServerStrategy", () => {
 
     const result = await strategy.fetchHandoffAvailability();
     expect(result).toBe(true);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("returns true on non-200 response", async () => {

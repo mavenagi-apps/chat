@@ -108,42 +108,47 @@ export class SalesforceServerStrategy implements ServerHandoffStrategy {
   };
 
   fetchHandoffAvailability = async () => {
-    if (!this.configuration.enableAvailabilityCheck) {
-      return true;
-    }
+    try {
+      if (!this.configuration.enableAvailabilityCheck) {
+        return true;
+      }
 
-    const url =
-      this.configuration.chatHostUrl +
-      "/chat/rest/Visitor/Availability?" +
-      new URLSearchParams({
-        org_id: this.configuration.orgId,
-        deployment_id: this.configuration.deploymentId,
-        "Availability.ids": this.configuration.chatButtonId,
+      const url =
+        this.configuration.chatHostUrl +
+        "/chat/rest/Visitor/Availability?" +
+        new URLSearchParams({
+          org_id: this.configuration.orgId,
+          deployment_id: this.configuration.deploymentId,
+          "Availability.ids": this.configuration.chatButtonId,
+        });
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "X-LIVEAGENT-API-VERSION": SALESFORCE_API_VERSION,
+        },
       });
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "X-LIVEAGENT-API-VERSION": SALESFORCE_API_VERSION,
-      },
-    });
+      if (!response.ok) {
+        return true;
+      }
 
-    if (!response.ok) {
+      const data = (await response.json()) as ChatAvailabilityResponse;
+      const availabilityMessage = data?.messages?.find(
+        (message: any) => message.type === "Availability",
+      );
+      const result = availabilityMessage?.message?.results?.find(
+        (result: any) => result.id === this.configuration.chatButtonId,
+      );
+
+      if (result) {
+        return !!result.isAvailable; // undefined and false are both false
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error fetching handoff availability:", error);
       return true;
     }
-
-    const data = (await response.json()) as ChatAvailabilityResponse;
-    const availabilityMessage = data?.messages?.find(
-      (message: any) => message.type === "Availability",
-    );
-    const result = availabilityMessage?.message?.results?.find(
-      (result: any) => result.id === this.configuration.chatButtonId,
-    );
-
-    if (result) {
-      return !!result.isAvailable; // undefined and false are both false
-    }
-
-    return true;
   };
 }
