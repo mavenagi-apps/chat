@@ -1,149 +1,113 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { isHandoffAvailable } from "@/app/actions";
 import { getAppSettings } from "@/app/api/server/utils";
+import { ServerHandoffStrategyFactory } from "@/lib/handoff/ServerHandoffStrategyFactory";
 
 vi.mock("@/app/api/server/utils", () => ({
   getAppSettings: vi.fn(),
 }));
 
-describe("isHandoffAvailable", () => {
-  const mockFetch = vi.fn();
-  global.fetch = mockFetch;
+vi.mock("@/lib/handoff/ServerHandoffStrategyFactory", () => ({
+  ServerHandoffStrategyFactory: {
+    createStrategy: vi.fn(),
+  },
+}));
 
+describe("isHandoffAvailable", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubGlobal("console", { ...console, error: vi.fn() });
   });
 
-  it("returns undefined when handoff configuration is not salesforce", async () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("returns true when no strategy is available", async () => {
     vi.mocked(getAppSettings).mockResolvedValue({
       handoffConfiguration: {
-        type: "zendesk",
+        type: "unknown",
       },
     } as any);
 
+    vi.mocked(ServerHandoffStrategyFactory.createStrategy).mockReturnValue(
+      null,
+    );
+
     const result = await isHandoffAvailable("org-id", "agent-id");
-    expect(result).toEqual({ success: true, data: undefined });
+    expect(result).toBe(true);
   });
 
-  it("returns undefined when availability check is disabled", async () => {
+  it("returns true when strategy has no availability check", async () => {
     vi.mocked(getAppSettings).mockResolvedValue({
       handoffConfiguration: {
         type: "salesforce",
-        enableAvailabilityCheck: false,
       },
     } as any);
 
-    const result = await isHandoffAvailable("org-id", "agent-id");
-    expect(result).toEqual({ success: true, data: undefined });
-  });
-
-  it("returns undefined on fetch error", async () => {
-    vi.mocked(getAppSettings).mockResolvedValue({
-      handoffConfiguration: {
-        type: "salesforce",
-        enableAvailabilityCheck: true,
-        chatHostUrl: "https://test.com",
-        orgId: "org-id",
-        deploymentId: "dep-id",
-        chatButtonId: "button-id",
-      },
-    } as any);
-
-    mockFetch.mockRejectedValue(new Error("Network error"));
-
-    const result = await isHandoffAvailable("org-id", "agent-id");
-    expect(result).toEqual({ success: true, data: undefined });
-  });
-
-  it("returns undefined on non-200 response", async () => {
-    vi.mocked(getAppSettings).mockResolvedValue({
-      handoffConfiguration: {
-        type: "salesforce",
-        enableAvailabilityCheck: true,
-        chatHostUrl: "https://test.com",
-        orgId: "org-id",
-        deploymentId: "dep-id",
-        chatButtonId: "button-id",
-      },
-    } as any);
-
-    mockFetch.mockResolvedValue({
-      ok: false,
+    vi.mocked(ServerHandoffStrategyFactory.createStrategy).mockReturnValue({
+      fetchHandoffAvailability: undefined,
     });
 
     const result = await isHandoffAvailable("org-id", "agent-id");
-    expect(result).toEqual({ success: true, data: undefined });
+    expect(result).toBe(true);
   });
 
-  it("returns false when agents are not available", async () => {
+  it("returns availability check result when available", async () => {
     vi.mocked(getAppSettings).mockResolvedValue({
       handoffConfiguration: {
         type: "salesforce",
-        enableAvailabilityCheck: true,
-        chatHostUrl: "https://test.com",
-        orgId: "org-id",
-        deploymentId: "dep-id",
-        chatButtonId: "button-id",
       },
     } as any);
 
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          messages: [
-            {
-              type: "Availability",
-              message: {
-                results: [
-                  {
-                    id: "button-id",
-                    isAvailable: false,
-                  },
-                ],
-              },
-            },
-          ],
-        }),
+    vi.mocked(ServerHandoffStrategyFactory.createStrategy).mockReturnValue({
+      fetchHandoffAvailability: vi.fn().mockResolvedValue(false),
     });
 
     const result = await isHandoffAvailable("org-id", "agent-id");
-    expect(result).toEqual({ success: true, data: false });
+    expect(result).toBe(false);
   });
 
-  it("returns true when agents are available", async () => {
+  it("returns true on error during availability check", async () => {
     vi.mocked(getAppSettings).mockResolvedValue({
       handoffConfiguration: {
         type: "salesforce",
-        enableAvailabilityCheck: true,
-        chatHostUrl: "https://test.com",
-        orgId: "org-id",
-        deploymentId: "dep-id",
-        chatButtonId: "button-id",
       },
     } as any);
 
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          messages: [
-            {
-              type: "Availability",
-              message: {
-                results: [
-                  {
-                    id: "button-id",
-                    isAvailable: true,
-                  },
-                ],
-              },
-            },
-          ],
-        }),
+    vi.mocked(ServerHandoffStrategyFactory.createStrategy).mockReturnValue({
+      fetchHandoffAvailability: vi
+        .fn()
+        .mockRejectedValue(new Error("Test error")),
     });
 
     const result = await isHandoffAvailable("org-id", "agent-id");
-    expect(result).toEqual({ success: true, data: true });
+    expect(result).toBe(true);
+    expect(console.error).toHaveBeenCalledWith(
+      "Error checking handoff availability:",
+      expect.any(Error),
+    );
+  });
+
+  it("passes configuration to strategy factory", async () => {
+    const config = {
+      type: "salesforce",
+      enableAvailabilityCheck: true,
+    };
+
+    vi.mocked(getAppSettings).mockResolvedValue({
+      handoffConfiguration: config,
+    } as any);
+
+    vi.mocked(ServerHandoffStrategyFactory.createStrategy).mockReturnValue({
+      fetchHandoffAvailability: vi.fn().mockResolvedValue(true),
+    });
+
+    await isHandoffAvailable("org-id", "agent-id");
+
+    expect(ServerHandoffStrategyFactory.createStrategy).toHaveBeenCalledWith(
+      config.type,
+      config,
+    );
   });
 });

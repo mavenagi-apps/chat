@@ -94,10 +94,7 @@ describe("EscalationFormDisplay", () => {
         availabilityFallbackMessage,
       },
     });
-    (isHandoffAvailable as any).mockResolvedValue({
-      success: true,
-      data: isAvailable,
-    });
+    (isHandoffAvailable as any).mockResolvedValue(isAvailable);
 
     return render(
       <ChatContext.Provider value={mockProviderValue}>
@@ -122,7 +119,7 @@ describe("EscalationFormDisplay", () => {
 
     // Resolve the availability check
     await act(async () => {
-      resolvePromise!({ success: true, data: true });
+      resolvePromise!(true);
     });
 
     // Form should now be visible
@@ -282,7 +279,7 @@ describe("EscalationFormDisplay", () => {
 
     // Resolving the promise should not affect the UI
     await act(async () => {
-      resolvePromise!({ success: true, data: true });
+      resolvePromise!(true);
     });
 
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
