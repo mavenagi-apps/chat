@@ -31,6 +31,7 @@ export interface HandoffStrategy<T = HandoffChatMessage> {
 
 export interface ServerHandoffStrategy {
   isLiveHandoffAvailable?: () => Promise<boolean>;
+  fetchHandoffAvailability?: () => Promise<boolean>;
 }
 
 export interface HandoffContext {

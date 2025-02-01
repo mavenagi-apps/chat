@@ -1,5 +1,8 @@
 import { getMavenAGIClient } from "./app";
 
+const ESCALATE_ACTION_ID = "escalate-to-agent";
+const ESCALATE_ACTION_NAME = "Escalate to Live Agent";
+
 const defaultModule = {
   async postInstall({
     settings,
@@ -53,9 +56,9 @@ const defaultModule = {
     // Escalate action
     const result = await client.actions.createOrUpdate({
       actionId: {
-        referenceId: "escalate-to-agent",
+        referenceId: ESCALATE_ACTION_ID,
       },
-      name: "escalate-live-agent",
+      name: ESCALATE_ACTION_NAME,
       description,
       userInteractionRequired: true,
       userFormParameters: [
@@ -92,13 +95,8 @@ const defaultModule = {
     });
   },
 
-  async executeAction({
-    actionId,
-  }: {
-    actionId: string;
-    parameters: Record<string, any>;
-  }) {
-    if (actionId === "escalate-to-agent") {
+  async executeAction({ actionId }: { actionId: string }) {
+    if (actionId === ESCALATE_ACTION_ID) {
       return "Escalating to agent...";
     }
 

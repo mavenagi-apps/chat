@@ -31,7 +31,8 @@
       "connect_to_live_agent": "Connect to live agent",
       "connection_to_live_agent_success_title": "You are now connecting to a live agent",
       "connection_to_live_agent_success_description": "Please wait for the agent to respond.",
-      "email_placeholder": "Email address"
+      "email_placeholder": "Email address",
+      "agents_unavailable": "No agents are currently available. Please try again later."
     },
     "Handoff": {
       "connected_to_agent": "Connected to agent",

@@ -1,8 +1,12 @@
 import { useContext } from "react";
 import { useTranslations } from "next-intl";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
+import { useParams } from "next/navigation";
+import { ReactMarkdown } from "@magi/components/ReactMarkdown";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { useSettings } from "@/app/providers/SettingsProvider";
+import { isHandoffAvailable } from "@/app/actions";
 
 import { ChatContext } from "./Chat";
 import {
@@ -13,14 +17,24 @@ import {
   Input,
   useForm,
 } from "@magi/ui";
+import Spinner from "@magi/components/Spinner";
 
-export default function EscalationFormDisplay() {
+async function checkHandoffAvailability(
+  organizationId: string,
+  agentId: string,
+) {
+  const result = await isHandoffAvailable(organizationId, agentId);
+  return result ?? true;
+}
+
+function EscalationForm({ isAvailable }: { isAvailable: boolean }) {
   const t = useTranslations("chat.EscalationFormDisplay");
   const [error, setError] = useState<string | null>(null);
   const { initializeHandoff } = useContext(ChatContext);
-
   const { isAuthenticated } = useAuth();
-
+  const { handoffConfiguration } = useSettings();
+  const { availabilityFallbackMessage = t("agents_unavailable") } =
+    handoffConfiguration ?? {};
   const { Form, ...methods } = useForm<{ email?: string }>({
     onSubmit: async (data) => {
       try {
@@ -34,6 +48,14 @@ export default function EscalationFormDisplay() {
       }
     },
   });
+
+  if (!isAvailable) {
+    return (
+      <Alert variant="warning" className="[&_a]:underline">
+        <ReactMarkdown>{availabilityFallbackMessage}</ReactMarkdown>
+      </Alert>
+    );
+  }
 
   if (methods.formState.isSubmitSuccessful) {
     return null;
@@ -70,4 +92,39 @@ export default function EscalationFormDisplay() {
       )}
     </div>
   );
+}
+
+export default function EscalationFormDisplay() {
+  const { handoffConfiguration } = useSettings();
+  const { organizationId, agentId } = useParams<{
+    organizationId: string;
+    agentId: string;
+  }>();
+  const [isAvailable, setIsAvailable] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      const shouldCheckAvailability =
+        handoffConfiguration?.enableAvailabilityCheck;
+      if (shouldCheckAvailability) {
+        const _isAvailable = await checkHandoffAvailability(
+          organizationId,
+          agentId,
+        );
+        setIsAvailable(_isAvailable);
+      } else {
+        setIsAvailable(true);
+      }
+      setIsLoading(false);
+    };
+
+    fetchAvailability();
+  }, []);
+
+  if (isLoading) {
+    return <Spinner />;
+  }
+
+  return <EscalationForm isAvailable={isAvailable} />;
 }

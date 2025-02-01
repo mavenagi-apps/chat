@@ -1,5 +1,8 @@
 import { type Message } from "@/types";
 
+// Constants
+export const SALESFORCE_CHAT_SUBJECT_HEADER_KEY = "MAVEN-CHAT-SUBJECT";
+
 export const SALESFORCE_MESSAGE_TYPES = {
   AgentDisconnect: "AgentDisconnect",
   AgentNotTyping: "AgentNotTyping",
@@ -23,6 +26,7 @@ export const SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION: SalesforceMessage
     SALESFORCE_MESSAGE_TYPES.ChatEnded,
   ];
 
+// Message Types
 export type SalesforceMessageType =
   (typeof SALESFORCE_MESSAGE_TYPES)[keyof typeof SALESFORCE_MESSAGE_TYPES];
 
@@ -55,24 +59,7 @@ export type SalesforceChatRequestFailUnavailable = SalesforceChatRequestFail & {
   };
 };
 
-export const isSalesforceMessage = (
-  message: any,
-): message is SalesforceChatMessage => {
-  return message.type in SALESFORCE_MESSAGE_TYPES;
-};
-
-const isChatRequestFail = (
-  message: SalesforceChatMessage,
-): message is SalesforceChatRequestFail => {
-  return message.type === SALESFORCE_MESSAGE_TYPES.ChatRequestFail;
-};
-
-export const isChatRequestFailUnavailable = (
-  message: SalesforceChatRequestFail,
-): message is SalesforceChatRequestFailUnavailable => {
-  return isChatRequestFail(message) && message.message.reason === "Unavailable";
-};
-
+// Response Types
 export type ChatSessionResponse = {
   key: string;
   id: string;
@@ -88,6 +75,22 @@ export type ChatVisitorSessionResponse = {
   error?: unknown;
 };
 
+export type ChatMessageResponse = {
+  messages: SalesforceChatMessage[];
+  sequence: number;
+  offset: number;
+};
+
+export type ChatAvailabilityResponse = {
+  messages: {
+    type: "Availability";
+    message: {
+      results: { id: string; isAvailable?: boolean }[];
+    };
+  }[];
+};
+
+// Request Types
 export interface InitiateChatSessionParams {
   data: {
     name: string;
@@ -131,12 +134,7 @@ export interface SendChatMessageParams {
   };
 }
 
-export type ChatMessageResponse = {
-  messages: SalesforceChatMessage[];
-  sequence: number;
-  offset: number;
-};
-
+// User Data Types
 export type SalesforceChatUserData = {
   email: string;
   firstName: string;
@@ -180,4 +178,21 @@ export type EntityFieldMap = {
   doCreate: boolean;
 };
 
-export const SALESFORCE_CHAT_SUBJECT_HEADER_KEY = "MAVEN-CHAT-SUBJECT";
+// Type Guards
+export const isSalesforceMessage = (
+  message: any,
+): message is SalesforceChatMessage => {
+  return message.type in SALESFORCE_MESSAGE_TYPES;
+};
+
+const isChatRequestFail = (
+  message: SalesforceChatMessage,
+): message is SalesforceChatRequestFail => {
+  return message.type === SALESFORCE_MESSAGE_TYPES.ChatRequestFail;
+};
+
+export const isChatRequestFailUnavailable = (
+  message: SalesforceChatRequestFail,
+): message is SalesforceChatRequestFailUnavailable => {
+  return isChatRequestFail(message) && message.message.reason === "Unavailable";
+};

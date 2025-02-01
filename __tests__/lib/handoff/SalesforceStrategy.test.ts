@@ -1,5 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { SalesforceStrategy } from "@/lib/handoff/SalesforceStrategy";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import {
+  SalesforceStrategy,
+  SalesforceServerStrategy,
+} from "@/lib/handoff/SalesforceStrategy";
 import {
   createUserMessage,
   createBotMessage,
@@ -149,5 +152,203 @@ describe("SalesforceStrategy", () => {
         "/api/salesforce/conversations",
       );
     });
+  });
+});
+
+describe("SalesforceServerStrategy", () => {
+  const mockFetch = vi.fn();
+  global.fetch = mockFetch;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns true when availability check is disabled", async () => {
+    const strategy = new SalesforceServerStrategy({
+      type: "salesforce",
+      enableAvailabilityCheck: false,
+    } as any);
+
+    const result = await strategy.fetchHandoffAvailability();
+    expect(result).toBe(true);
+  });
+
+  it("returns true on fetch error", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const strategy = new SalesforceServerStrategy({
+      type: "salesforce",
+      enableAvailabilityCheck: true,
+      chatHostUrl: "https://test.com",
+      orgId: "org-id",
+      deploymentId: "dep-id",
+      chatButtonId: "button-id",
+    } as any);
+
+    mockFetch.mockRejectedValue(new Error("Network error"));
+
+    const result = await strategy.fetchHandoffAvailability();
+    expect(result).toBe(true);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("returns true on non-200 response", async () => {
+    const strategy = new SalesforceServerStrategy({
+      type: "salesforce",
+      enableAvailabilityCheck: true,
+      chatHostUrl: "https://test.com",
+      orgId: "org-id",
+      deploymentId: "dep-id",
+      chatButtonId: "button-id",
+    } as any);
+
+    mockFetch.mockResolvedValue({
+      ok: false,
+    });
+
+    const result = await strategy.fetchHandoffAvailability();
+    expect(result).toBe(true);
+  });
+
+  it("returns false when agents are not available", async () => {
+    const strategy = new SalesforceServerStrategy({
+      type: "salesforce",
+      enableAvailabilityCheck: true,
+      chatHostUrl: "https://test.com",
+      orgId: "org-id",
+      deploymentId: "dep-id",
+      chatButtonId: "button-id",
+    } as any);
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          messages: [
+            {
+              type: "Availability",
+              message: {
+                results: [
+                  {
+                    id: "button-id",
+                    isAvailable: false,
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+    });
+
+    const result = await strategy.fetchHandoffAvailability();
+    expect(result).toBe(false);
+  });
+
+  it("returns true when agents are available", async () => {
+    const strategy = new SalesforceServerStrategy({
+      type: "salesforce",
+      enableAvailabilityCheck: true,
+      chatHostUrl: "https://test.com",
+      orgId: "org-id",
+      deploymentId: "dep-id",
+      chatButtonId: "button-id",
+    } as any);
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          messages: [
+            {
+              type: "Availability",
+              message: {
+                results: [
+                  {
+                    id: "button-id",
+                    isAvailable: true,
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+    });
+
+    const result = await strategy.fetchHandoffAvailability();
+    expect(result).toBe(true);
+  });
+
+  it("returns true when no matching button ID is found", async () => {
+    const strategy = new SalesforceServerStrategy({
+      type: "salesforce",
+      enableAvailabilityCheck: true,
+      chatHostUrl: "https://test.com",
+      orgId: "org-id",
+      deploymentId: "dep-id",
+      chatButtonId: "button-id",
+    } as any);
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          messages: [
+            {
+              type: "Availability",
+              message: {
+                results: [
+                  {
+                    id: "different-button-id",
+                    isAvailable: true,
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+    });
+
+    const result = await strategy.fetchHandoffAvailability();
+    expect(result).toBe(true);
+  });
+
+  it("verifies the correct URL and headers are used", async () => {
+    const config = {
+      type: "salesforce",
+      enableAvailabilityCheck: true,
+      chatHostUrl: "https://test.com",
+      orgId: "org-id",
+      deploymentId: "dep-id",
+      chatButtonId: "button-id",
+    } as any;
+
+    const strategy = new SalesforceServerStrategy(config);
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ messages: [] }),
+    });
+
+    await strategy.fetchHandoffAvailability();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining(
+        config.chatHostUrl + "/chat/rest/Visitor/Availability",
+      ),
+      expect.objectContaining({
+        method: "GET",
+        headers: {
+          "X-LIVEAGENT-API-VERSION": expect.any(String),
+        },
+      }),
+    );
+
+    const url = new URL(mockFetch.mock.calls[0][0]);
+    expect(url.searchParams.get("org_id")).toBe(config.orgId);
+    expect(url.searchParams.get("deployment_id")).toBe(config.deploymentId);
+    expect(url.searchParams.get("Availability.ids")).toBe(config.chatButtonId);
   });
 });

@@ -1,3 +1,4 @@
+import { SALESFORCE_API_VERSION } from "@/app/constants/handoff";
 import {
   type HandoffStrategy,
   MESSAGE_TYPES_FOR_HANDOFF_CREATION,
@@ -18,6 +19,7 @@ import {
   SALESFORCE_CHAT_SUBJECT_HEADER_KEY,
   SALESFORCE_MESSAGE_TYPES,
   SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION,
+  type ChatAvailabilityResponse,
 } from "@/types/salesforce";
 export class SalesforceStrategy implements HandoffStrategy<Message> {
   readonly messagesEndpoint = "/api/salesforce/messages";
@@ -104,5 +106,53 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
 
 export class SalesforceServerStrategy implements ServerHandoffStrategy {
   constructor(private configuration: SalesforceHandoffConfiguration) {}
-  isLiveHandoffAvailable? = () => Promise.resolve(true);
+
+  isLiveHandoffAvailable? = async () => {
+    return true;
+  };
+
+  fetchHandoffAvailability = async () => {
+    try {
+      if (!this.configuration.enableAvailabilityCheck) {
+        return true;
+      }
+
+      const url =
+        this.configuration.chatHostUrl +
+        "/chat/rest/Visitor/Availability?" +
+        new URLSearchParams({
+          org_id: this.configuration.orgId,
+          deployment_id: this.configuration.deploymentId,
+          "Availability.ids": this.configuration.chatButtonId,
+        });
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "X-LIVEAGENT-API-VERSION": SALESFORCE_API_VERSION,
+        },
+      });
+
+      if (!response.ok) {
+        return true;
+      }
+
+      const data = (await response.json()) as ChatAvailabilityResponse;
+      const availabilityMessage = data?.messages?.find(
+        (message: any) => message.type === "Availability",
+      );
+      const result = availabilityMessage?.message?.results?.find(
+        (result: any) => result.id === this.configuration.chatButtonId,
+      );
+
+      if (result) {
+        return !!result.isAvailable; // undefined and false are both false
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error fetching handoff availability:", error);
+      return true;
+    }
+  };
 }

@@ -4,6 +4,8 @@ import { getMavenAGIClient } from "@/app/index";
 import { type MavenAGIClient, type MavenAGI } from "mavenagi";
 import { type FeedbackType } from "mavenagi/api";
 import { nanoid } from "nanoid";
+import { getAppSettings } from "@/app/api/server/utils";
+import { ServerHandoffStrategyFactory } from "@/lib/handoff/ServerHandoffStrategyFactory";
 
 interface CreateOrUpdateFeedbackProps {
   organizationId: string;
@@ -76,6 +78,10 @@ const parseHandoffConfiguration = (
     return {
       type: parsedHandoffConfiguration.type,
       surveyLink: parsedHandoffConfiguration.surveyLink,
+      enableAvailabilityCheck:
+        parsedHandoffConfiguration.enableAvailabilityCheck,
+      availabilityFallbackMessage:
+        parsedHandoffConfiguration.availabilityFallbackMessage,
     };
   } catch (error) {
     console.error("Error parsing handoff configuration:", error);
@@ -144,5 +150,31 @@ export async function submitBailoutForm(_prevState: any, formData: FormData) {
   } catch (error) {
     console.error("Error submitting bailout form", error);
     return { success: false, error: "Unknown error" };
+  }
+}
+
+export async function isHandoffAvailable(
+  organizationId: string,
+  agentId: string,
+) {
+  try {
+    const { handoffConfiguration } = await getAppSettings(
+      organizationId,
+      agentId,
+    );
+
+    const strategy = ServerHandoffStrategyFactory.createStrategy(
+      handoffConfiguration?.type,
+      handoffConfiguration as HandoffConfiguration,
+    );
+
+    if (!strategy) {
+      return true;
+    }
+
+    return (await strategy.fetchHandoffAvailability?.()) ?? true;
+  } catch (error) {
+    console.error("Error checking handoff availability:", error);
+    return true;
   }
 }

@@ -9,11 +9,13 @@ import type {
   SalesforceMessageType,
 } from "@/types/salesforce";
 import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
+import { SALESFORCE_API_VERSION } from "@/app/constants/handoff";
 
 export const SALESFORCE_CHAT_PROMPT_MESSAGE_NAMES = [
   "Management Center",
   "Management Center with Maven",
 ];
+
 export const SALESFORCE_CHAT_PROMPT_MESSAGE_TEXTS = [
   "Please enter the subject",
 ];
@@ -29,7 +31,7 @@ export const SALESFORCE_ALLOWED_MESSAGE_TYPES: SalesforceMessageType[] = [
 ];
 
 export const SALESFORCE_API_BASE_HEADERS = {
-  "X-LIVEAGENT-API-VERSION": "34",
+  "X-LIVEAGENT-API-VERSION": SALESFORCE_API_VERSION,
   "Access-Control-Allow-Origin": "*",
 };
 
@@ -103,7 +105,7 @@ export async function sendChatMessage(
 }
 
 export const SESSION_CREDENTIALS_REQUEST_HEADERS = {
-  "X-LIVEAGENT-API-VERSION": "34",
+  "X-LIVEAGENT-API-VERSION": SALESFORCE_API_VERSION,
   "X-LIVEAGENT-AFFINITY": "",
   "Access-Control-Allow-Origin": "*",
 };

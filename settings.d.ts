@@ -41,6 +41,8 @@ declare global {
     allowAnonymousHandoff?: boolean;
     apiSecret: string;
     surveyLink?: string;
+    enableAvailabilityCheck?: boolean;
+    availabilityFallbackMessage?: string;
   };
 
   type HandoffConfiguration =
@@ -53,6 +55,8 @@ declare global {
       | {
           type: HandoffConfiguration["type"];
           surveyLink?: string;
+          enableAvailabilityCheck?: boolean;
+          availabilityFallbackMessage?: string;
         }
       | undefined;
   }
