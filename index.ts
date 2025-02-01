@@ -1,7 +1,7 @@
 import { getMavenAGIClient } from "./app";
 
 const ESCALATE_ACTION_ID = "escalate-to-agent";
-const ESCALATE_ACTION_NAME = "Escalate to Live Agent";
+const ESCALATE_ACTION_NAME = "escalate-live-agent";
 
 const defaultModule = {
   async postInstall({
