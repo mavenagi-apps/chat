@@ -10,14 +10,17 @@ import type {
   Message,
   UserChatMessage,
 } from "@/types";
-import type { SalesforceChatMessage } from "@/types/salesforce";
+import {
+  type SalesforceChatMessage,
+  type SalesforceChatRequestFail,
+  isChatRequestFailUnavailable,
+} from "@/types/salesforce";
 import {
   SALESFORCE_CHAT_SUBJECT_HEADER_KEY,
   SALESFORCE_MESSAGE_TYPES,
   SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION,
   type ChatAvailabilityResponse,
 } from "@/types/salesforce";
-
 export class SalesforceStrategy implements HandoffStrategy<Message> {
   readonly messagesEndpoint = "/api/salesforce/messages";
   readonly conversationsEndpoint = "/api/salesforce/conversations";
@@ -47,21 +50,22 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
     );
   }
 
-  handleChatEvent(event: SalesforceChatMessage):
-    | {
-        shouldEndHandoff: true;
-        agentName?: never;
-        formattedEvent?: never;
-      }
-    | {
-        agentName: string | null;
-        formattedEvent: SalesforceChatMessage;
-      } {
+  handleChatEvent(event: SalesforceChatMessage): {
+    shouldEndHandoff: boolean;
+    agentName?: string | null;
+    formattedEvent?: SalesforceChatMessage;
+  } {
     const agentName = this.getAgentName(event);
     const shouldEndHandoff = this.shouldEndHandoff(event);
 
     if (shouldEndHandoff) {
-      return { shouldEndHandoff: true };
+      const isFailUnavailableEvent = isChatRequestFailUnavailable(
+        event as SalesforceChatRequestFail,
+      );
+
+      if (!isFailUnavailableEvent) {
+        return { shouldEndHandoff: true };
+      }
     }
 
     const formattedEvent = {
@@ -69,7 +73,7 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
       timestamp: new Date().getTime(),
     } as SalesforceChatMessage;
 
-    return { agentName, formattedEvent };
+    return { agentName, formattedEvent, shouldEndHandoff };
   }
 
   showAgentTypingIndicator(
