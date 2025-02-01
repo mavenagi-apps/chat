@@ -88,7 +88,7 @@ describe("ChatInput", () => {
       </ChatContext.Provider>,
     );
 
-    expect(screen.getByTestId("chat-attach-icon")).toBeNull();
+    expect(screen.queryByTestId("chat-attach-icon")).not.toBeInTheDocument();
   });
 
   it("submits question when form is submitted", async () => {
