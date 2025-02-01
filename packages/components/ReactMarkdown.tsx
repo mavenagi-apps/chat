@@ -18,6 +18,7 @@ export function ReactMarkdown({
   children,
   bulletsInside = false,
   linkTargetInNewTab = true,
+  underlineLinks = false,
 }: ReactMarkdownProps) {
   // Note: list-style-position: inside does not work well on chrome if the <li> might have <p> within them
   const listStylePosition = bulletsInside ? "inside" : "outside";

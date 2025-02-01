@@ -2,10 +2,11 @@ import { useContext } from "react";
 import { useTranslations } from "next-intl";
 import React, { useState, useEffect } from "react";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
+import { useParams } from "next/navigation";
+import { ReactMarkdown } from "@magi/components/ReactMarkdown";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { isHandoffAvailable } from "@/app/actions";
-import { useParams } from "next/navigation";
 
 import { ChatContext } from "./Chat";
 import {
@@ -49,7 +50,11 @@ function EscalationForm({ isAvailable }: { isAvailable: boolean }) {
   });
 
   if (!isAvailable) {
-    return <Alert variant="warning">{availabilityFallbackMessage}</Alert>;
+    return (
+      <Alert variant="warning" className="[&_a]:underline">
+        <ReactMarkdown>{availabilityFallbackMessage}</ReactMarkdown>
+      </Alert>
+    );
   }
 
   if (methods.formState.isSubmitSuccessful) {
