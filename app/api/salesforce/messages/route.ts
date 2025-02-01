@@ -16,6 +16,8 @@ import {
 } from "@/app/api/salesforce/utils";
 import { withSettingsAndAuthentication } from "../../server/utils";
 
+const KEEPALIVE_INTERVAL = 10000; // 10 seconds
+
 function filterMessages(messages: SalesforceChatMessage[]) {
   return messages.filter((message) =>
     SALESFORCE_ALLOWED_MESSAGE_TYPES.includes(message.type),
@@ -38,7 +40,23 @@ async function handleMessageStreaming(
   const stream = new ReadableStream({
     async start(controller) {
       let ack = -1;
+      let keepaliveInterval: NodeJS.Timeout | undefined;
+
+      const resetKeepalive = () => {
+        if (keepaliveInterval) {
+          clearInterval(keepaliveInterval);
+        }
+        keepaliveInterval = setInterval(() => {
+          if (!req.signal.aborted) {
+            controller.enqueue(new TextEncoder().encode(":\n\n")); // Send minimal keepalive message
+          }
+        }, KEEPALIVE_INTERVAL);
+      };
+
       try {
+        // Initial keepalive setup
+        resetKeepalive();
+
         while (!req.signal.aborted) {
           const { sequence, messages } = await fetchChatMessages(
             url,
@@ -68,6 +86,7 @@ async function handleMessageStreaming(
                 })}\n\n`,
               ),
             );
+            resetKeepalive(); // Reset keepalive after sending a message
           }
         }
       } catch (error: any) {
@@ -77,6 +96,7 @@ async function handleMessageStreaming(
           console.error("Failed to get chat messages:", error);
         }
       } finally {
+        clearInterval(keepaliveInterval);
         controller.close();
       }
     },
