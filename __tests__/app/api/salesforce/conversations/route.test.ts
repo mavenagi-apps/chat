@@ -114,12 +114,14 @@ describe("POST /api/salesforce/conversations", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubGlobal("console", { ...console, error: vi.fn() });
     mockFetchResponses();
     vi.mocked(jwt.sign).mockReturnValue(TEST_DATA.JWT_TOKEN);
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.unstubAllGlobals();
   });
 
   describe("Configuration Validation", () => {
@@ -203,6 +205,10 @@ describe("POST /api/salesforce/conversations", () => {
       expect(await response.json()).toEqual({
         error: "Internal Server Error",
       });
+      expect(console.error).toHaveBeenCalledWith(
+        "initiateChatSession failed:",
+        expect.any(Error),
+      );
     });
 
     it("includes originalReferrer in session init when present", async () => {

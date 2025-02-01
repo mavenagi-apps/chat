@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { POST } from "@/app/api/salesforce/conversations/passControl/route";
 import { NextRequest, NextResponse } from "next/server";
 import { validateSalesforceConfig } from "@/app/api/salesforce/utils";
@@ -41,6 +41,11 @@ describe("POST /api/salesforce/conversations/passControl", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     global.fetch = vi.fn();
+    vi.stubGlobal("console", { ...console, error: vi.fn() });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   const createMockRequest = () => ({
@@ -81,10 +86,15 @@ describe("POST /api/salesforce/conversations/passControl", () => {
       expect(await response.json()).toEqual({
         error: "Internal Server Error",
       });
+      expect(console.error).toHaveBeenCalledWith(
+        "endChatSession failed:",
+        expect.any(Error),
+      );
     });
 
     it("should handle network errors", async () => {
-      vi.mocked(global.fetch).mockRejectedValueOnce(new Error("Network error"));
+      const networkError = new Error("Network error");
+      vi.mocked(global.fetch).mockRejectedValueOnce(networkError);
 
       const response = await POST(
         createMockRequest() as unknown as NextRequest,
@@ -94,6 +104,10 @@ describe("POST /api/salesforce/conversations/passControl", () => {
       expect(await response.json()).toEqual({
         error: "Internal Server Error",
       });
+      expect(console.error).toHaveBeenCalledWith(
+        "endChatSession failed:",
+        networkError,
+      );
     });
   });
 

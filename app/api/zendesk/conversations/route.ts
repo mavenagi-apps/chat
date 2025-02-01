@@ -31,7 +31,7 @@ const getOrCreateZendeskUser = async (
       }
     } catch (error: any) {
       if ("status" in error && error.status === 404) {
-        console.log("User does not exist");
+        // Expected: user does not exist
       } else {
         console.error("Error getting user", error);
         throw error;
