@@ -82,6 +82,7 @@ const parseHandoffConfiguration = (
         parsedHandoffConfiguration.enableAvailabilityCheck,
       availabilityFallbackMessage:
         parsedHandoffConfiguration.availabilityFallbackMessage,
+      allowAnonymousHandoff: parsedHandoffConfiguration.allowAnonymousHandoff,
     };
   } catch (error) {
     console.error("Error parsing handoff configuration:", error);
