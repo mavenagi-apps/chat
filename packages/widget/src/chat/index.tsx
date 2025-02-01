@@ -20,6 +20,7 @@ type Props = {
   iframeUrl: string;
   bgColor: string;
   textColor: string;
+  buttonLabel: string;
   horizontalPosition: "left" | "right";
   verticalPosition: "top" | "bottom";
   signedUserData?: string | null;
@@ -54,6 +55,7 @@ const App = forwardRef<{ open: () => void; close: () => void }, Props>(
         <ChatButton
           bgColor={props.bgColor}
           textColor={props.textColor}
+          buttonLabel={props.buttonLabel}
           horizontalPosition={props.horizontalPosition}
           verticalPosition={props.verticalPosition}
           isOpen={isOpen}
@@ -83,8 +85,15 @@ export function close() {
 type LoadProps = Partial<Omit<Props, "iframeUrl">> & {
   envPrefix?: string;
   apiKey: string;
-} & // This union type ensures backwards compatibility during the migration from the
-  // "orgFriendlyId" and "agentFriendlyId" to "organizationId" and "agentId".
+  buttonLabel?: string;
+  unsignedUserData?: Record<string, any> | null;
+  signedUserData?: string | null;
+  customData?: Record<string, any> | null;
+  verticalPosition?: "top" | "bottom";
+  horizontalPosition?: "left" | "right";
+  bgColor?: string;
+  textColor?: string;
+} & // "orgFriendlyId" and "agentFriendlyId" to "organizationId" and "agentId". // This union type ensures backwards compatibility during the migration from the
   // It enforces that either:
   // 1. Both organizationId and agentId are provided (new spec) OR
   // 2. Both orgFriendlyId and agentFriendlyId are provided (legacy spec)
@@ -107,6 +116,7 @@ export async function load({
   envPrefix: _envPrefix,
   bgColor,
   textColor = "white",
+  buttonLabel = "Get Help",
   horizontalPosition = "right",
   verticalPosition = "bottom",
   organizationId,
@@ -127,6 +137,7 @@ export async function load({
       ref={appRef}
       bgColor={bgColor || "#6C2BD9"}
       textColor={textColor}
+      buttonLabel={buttonLabel}
       horizontalPosition={horizontalPosition}
       verticalPosition={verticalPosition}
       signedUserData={signedUserData}

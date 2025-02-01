@@ -4,6 +4,7 @@ import { CloseIcon } from "./icons/CloseIcon";
 interface ChatButtonProps {
   bgColor: string;
   textColor: string;
+  buttonLabel: string;
   horizontalPosition: "left" | "right";
   verticalPosition: "top" | "bottom";
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface ChatButtonProps {
 export function ChatButton({
   bgColor,
   textColor,
+  buttonLabel,
   horizontalPosition,
   verticalPosition,
   isOpen,
@@ -51,7 +53,7 @@ export function ChatButton({
         <div style={{ display: "flex", alignItems: "center" }}>
           <HelpIcon />
           <span style={{ marginLeft: "0.5rem", marginRight: "0.25rem" }}>
-            Get Help
+            {buttonLabel}
           </span>
         </div>
       ) : (

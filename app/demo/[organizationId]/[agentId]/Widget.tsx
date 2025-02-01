@@ -5,6 +5,7 @@ type WidgetLoadPayload = {
   organizationId: string;
   agentId: string;
   bgColor?: string;
+  buttonLabel?: string;
   signedUserData?: string;
   unsignedUserData?: Record<string, any>;
   customData?: Record<string, any>;
