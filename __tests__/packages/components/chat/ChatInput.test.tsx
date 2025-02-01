@@ -50,6 +50,7 @@ describe("ChatInput", () => {
     const input = screen.getByTestId("chat-input");
     const fileInput = screen.getByTestId("chat-file-input");
     const submitButton = screen.getByTestId("submit-question");
+    expect(screen.getByTestId("chat-attach-icon")).toBeDefined();
 
     const file = new File(["hello"], "hello.png", { type: "image/png" });
 
@@ -72,6 +73,22 @@ describe("ChatInput", () => {
       ]);
     });
     expect(fileInput.files[0]).toStrictEqual(file);
+  });
+
+  it("hide attachment when isHandoff is true", () => {
+    const contextWithHandoff = {
+      ...mockContextValue,
+      isHandoff: true,
+      agentName: "John Doe",
+    };
+
+    render(
+      <ChatContext.Provider value={contextWithHandoff}>
+        <ChatInput {...defaultProps} />
+      </ChatContext.Provider>,
+    );
+
+    expect(screen.getByTestId("chat-attach-icon")).toBeNull();
   });
 
   it("submits question when form is submitted", async () => {
