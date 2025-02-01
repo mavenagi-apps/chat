@@ -19,8 +19,9 @@ export default function Widget({
   const localizedDate = new Date().toLocaleString("en-US", {
     timeZoneName: "long",
   });
+  widgetLoadPayload.signedUserData = undefined;
   widgetLoadPayload.unsignedUserData = {
-    ...(widgetLoadPayload.unsignedUserData || {}),
+    // ...(widgetLoadPayload.unsignedUserData || {}),
     todaysDate: localizedDate,
   };
 

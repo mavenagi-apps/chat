@@ -4,7 +4,7 @@ import React, {
   type PropsWithChildren,
   useMemo,
 } from "react";
-
+import { useSettings } from "./SettingsProvider";
 type AuthContextType = {
   signedUserData: string | null;
   unsignedUserData: Record<string, any> | null;
@@ -21,7 +21,13 @@ export const AuthProvider = ({
   signedUserData: string | null;
   unsignedUserData: Record<string, any> | null;
 }>) => {
-  const isAuthenticated = useMemo(() => !!signedUserData, [signedUserData]);
+  const { handoffConfiguration } = useSettings();
+  const isAuthenticated = useMemo(() => {
+    if (handoffConfiguration?.allowAnonymousHandoff) {
+      return true;
+    }
+    return !!signedUserData;
+  }, [signedUserData, handoffConfiguration?.allowAnonymousHandoff]);
   const value = {
     signedUserData,
     unsignedUserData,

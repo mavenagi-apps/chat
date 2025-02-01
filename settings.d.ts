@@ -57,6 +57,7 @@ declare global {
           surveyLink?: string;
           enableAvailabilityCheck?: boolean;
           availabilityFallbackMessage?: string;
+          allowAnonymousHandoff?: boolean;
         }
       | undefined;
   }
