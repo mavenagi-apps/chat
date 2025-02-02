@@ -66,10 +66,6 @@ export async function POST(req: NextRequest) {
       );
 
       if (!chatSessionCredentialsResponse.ok) {
-        console.log(
-          "Failed to initiate chat session",
-          chatSessionCredentialsResponse,
-        );
         throw new Error("Failed to initiate chat session");
       }
 

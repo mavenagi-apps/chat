@@ -42,7 +42,6 @@ export async function POST(req: NextRequest) {
         );
 
         if (!chatSessionEndResponse.ok) {
-          console.log("Failed to end chat session", chatSessionEndResponse);
           throw new Error("Failed to end chat session");
         }
 
