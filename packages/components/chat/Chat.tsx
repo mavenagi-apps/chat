@@ -30,7 +30,11 @@ interface ChatContextProps {
   >;
 }
 
-interface ChatProps extends Omit<ChatContextProps, "followUpQuestions"> {
+interface ChatProps
+  extends Omit<
+    ChatContextProps,
+    "followUpQuestions" | "shouldDisableAttachments"
+  > {
   brandColor?: string;
   className?: string;
 }
