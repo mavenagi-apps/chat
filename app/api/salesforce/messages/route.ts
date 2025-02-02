@@ -58,15 +58,11 @@ async function handleMessageStreaming(
         if (keepaliveInterval) {
           clearInterval(keepaliveInterval);
         }
-        if (!req.signal.aborted) {
-          keepaliveInterval = setInterval(() => {
-            if (!req.signal.aborted) {
-              controller.enqueue(KEEPALIVE_MESSAGE);
-            } else {
-              clearInterval(keepaliveInterval);
-            }
-          }, KEEPALIVE_INTERVAL);
-        }
+        keepaliveInterval = setInterval(() => {
+          if (!req.signal.aborted) {
+            controller.enqueue(KEEPALIVE_MESSAGE);
+          }
+        }, KEEPALIVE_INTERVAL);
       };
 
       try {
