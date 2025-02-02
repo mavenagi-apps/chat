@@ -16,6 +16,20 @@ import {
 } from "@/app/api/salesforce/utils";
 import { withSettingsAndAuthentication } from "../../server/utils";
 
+const DEFAULT_KEEPALIVE_INTERVAL = 10000; // 10 seconds
+
+function getKeepaliveInterval() {
+  const interval = Number(
+    process.env.SALESFORCE_MESSAGE_STREAM_KEEPALIVE_INTERVAL,
+  );
+  return isNaN(interval) ? DEFAULT_KEEPALIVE_INTERVAL : interval;
+}
+
+const KEEPALIVE_INTERVAL = getKeepaliveInterval();
+const KEEPALIVE_MESSAGE = new TextEncoder().encode(
+  "event: keepalive\ndata: {}\n\n",
+);
+
 function filterMessages(messages: SalesforceChatMessage[]) {
   return messages.filter((message) =>
     SALESFORCE_ALLOWED_MESSAGE_TYPES.includes(message.type),
@@ -38,7 +52,23 @@ async function handleMessageStreaming(
   const stream = new ReadableStream({
     async start(controller) {
       let ack = -1;
+      let keepaliveInterval: NodeJS.Timeout | undefined;
+
+      const resetKeepalive = () => {
+        if (keepaliveInterval) {
+          clearInterval(keepaliveInterval);
+        }
+        keepaliveInterval = setInterval(() => {
+          if (!req.signal.aborted) {
+            controller.enqueue(KEEPALIVE_MESSAGE);
+          }
+        }, KEEPALIVE_INTERVAL);
+      };
+
       try {
+        // Initial keepalive setup
+        resetKeepalive();
+
         while (!req.signal.aborted) {
           const { sequence, messages } = await fetchChatMessages(
             url,
@@ -68,15 +98,21 @@ async function handleMessageStreaming(
                 })}\n\n`,
               ),
             );
+            resetKeepalive(); // Reset keepalive after sending a message
           }
         }
       } catch (error: any) {
         if (error instanceof ChatMessagesError && req.signal.aborted) {
           console.log("Expected error: conversation deleted during long poll");
         } else {
-          console.error("Failed to get chat messages:", error);
+          console.error(
+            "Failed to get chat messages:",
+            error?.message,
+            error?.stack,
+          );
         }
       } finally {
+        clearInterval(keepaliveInterval);
         controller.close();
       }
     },
@@ -161,8 +197,12 @@ export async function POST(req: NextRequest) {
           url as string,
         );
         return NextResponse.json("Chat message sent");
-      } catch (error) {
-        console.error("Failed to send chat message:", error);
+      } catch (error: any) {
+        console.error(
+          "Failed to send chat messages:",
+          error?.message,
+          error?.stack,
+        );
         return NextResponse.json("Failed to send chat message", {
           status: 500,
         });
