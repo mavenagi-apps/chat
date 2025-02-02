@@ -58,11 +58,15 @@ async function handleMessageStreaming(
         if (keepaliveInterval) {
           clearInterval(keepaliveInterval);
         }
-        keepaliveInterval = setInterval(() => {
-          if (!req.signal.aborted) {
-            controller.enqueue(KEEPALIVE_MESSAGE);
-          }
-        }, KEEPALIVE_INTERVAL);
+        if (!req.signal.aborted) {
+          keepaliveInterval = setInterval(() => {
+            if (!req.signal.aborted) {
+              controller.enqueue(KEEPALIVE_MESSAGE);
+            } else {
+              clearInterval(keepaliveInterval);
+            }
+          }, KEEPALIVE_INTERVAL);
+        }
       };
 
       try {
@@ -199,7 +203,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json("Chat message sent");
       } catch (error: any) {
         console.error(
-          "Failed to get chat messages:",
+          "Failed to send chat messages:",
           error?.message,
           error?.stack,
         );

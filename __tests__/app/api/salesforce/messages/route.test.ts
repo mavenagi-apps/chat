@@ -456,6 +456,52 @@ describe("Salesforce Messages API", () => {
           json: () => Promise.resolve({ messages: [], sequence: 1, offset: 0 }),
         });
       });
+
+      it("should cleanup keepalive interval and not send messages when aborted", async () => {
+        const mockFetch = global.fetch as Mock;
+        // Setup fetch to return a pending promise we can control
+        let fetchPromiseResolve: (value: any) => void = () => {};
+        let fetchPromise = new Promise((resolve) => {
+          fetchPromiseResolve = resolve;
+        });
+
+        mockFetch.mockImplementation(() => {
+          fetchPromise = new Promise((resolve) => {
+            fetchPromiseResolve = resolve;
+          });
+          return fetchPromise;
+        });
+
+        // Create request with abort controller
+        const abortController = new AbortController();
+        const request = createGetRequest({}, 10);
+        Object.defineProperty(request, "signal", {
+          value: abortController.signal,
+        });
+
+        // Start streaming but don't await completion
+        GET(request);
+
+        // Allow initial fetch to start
+        await vi.runOnlyPendingTimersAsync();
+        mockController.enqueue.mockClear();
+
+        // Abort the request
+        abortController.abort();
+
+        // Advance time past keepalive interval
+        await vi.advanceTimersByTimeAsync(10000);
+        await vi.runOnlyPendingTimersAsync();
+
+        // Verify no keepalive was sent after abort
+        expect(mockController.enqueue).not.toHaveBeenCalled();
+
+        // Cleanup
+        fetchPromiseResolve({
+          ok: true,
+          json: () => Promise.resolve({ messages: [], sequence: 1, offset: 0 }),
+        });
+      });
     });
   });
 
