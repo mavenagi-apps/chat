@@ -16,7 +16,19 @@ import {
 } from "@/app/api/salesforce/utils";
 import { withSettingsAndAuthentication } from "../../server/utils";
 
-const KEEPALIVE_INTERVAL = 10000; // 10 seconds
+const DEFAULT_KEEPALIVE_INTERVAL = 10000; // 10 seconds
+
+function getKeepaliveInterval() {
+  const interval = Number(
+    process.env.SALESFORCE_MESSAGE_STREAM_KEEPALIVE_INTERVAL,
+  );
+  return isNaN(interval) ? DEFAULT_KEEPALIVE_INTERVAL : interval;
+}
+
+const KEEPALIVE_INTERVAL = getKeepaliveInterval();
+const KEEPALIVE_MESSAGE = new TextEncoder().encode(
+  "event: keepalive\ndata: {}\n\n",
+);
 
 function filterMessages(messages: SalesforceChatMessage[]) {
   return messages.filter((message) =>
@@ -48,7 +60,7 @@ async function handleMessageStreaming(
         }
         keepaliveInterval = setInterval(() => {
           if (!req.signal.aborted) {
-            controller.enqueue(new TextEncoder().encode(":\n\n")); // Send minimal keepalive message
+            controller.enqueue(KEEPALIVE_MESSAGE);
           }
         }, KEEPALIVE_INTERVAL);
       };
@@ -93,7 +105,11 @@ async function handleMessageStreaming(
         if (error instanceof ChatMessagesError && req.signal.aborted) {
           console.log("Expected error: conversation deleted during long poll");
         } else {
-          console.error("Failed to get chat messages:", error);
+          console.error(
+            "Failed to get chat messages:",
+            error?.message,
+            error?.stack,
+          );
         }
       } finally {
         clearInterval(keepaliveInterval);
@@ -181,8 +197,12 @@ export async function POST(req: NextRequest) {
           url as string,
         );
         return NextResponse.json("Chat message sent");
-      } catch (error) {
-        console.error("Failed to send chat message:", error);
+      } catch (error: any) {
+        console.error(
+          "Failed to get chat messages:",
+          error?.message,
+          error?.stack,
+        );
         return NextResponse.json("Failed to send chat message", {
           status: 500,
         });

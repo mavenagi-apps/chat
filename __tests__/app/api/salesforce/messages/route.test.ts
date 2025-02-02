@@ -12,7 +12,10 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   sendChatMessage,
   validateSalesforceConfig,
+  validateAuthHeaders,
 } from "@/app/api/salesforce/utils";
+
+const KEEPALIVE_TEXT = "event: keepalive\ndata: {}\n\n";
 
 // Mock external dependencies
 vi.mock("@/app/api/server/utils", () => ({
@@ -52,6 +55,10 @@ describe("Salesforce Messages API", () => {
   beforeEach(() => {
     global.fetch = vi.fn();
     vi.clearAllMocks();
+    process.env = {
+      NODE_ENV: "test",
+    } as NodeJS.ProcessEnv;
+    vi.mocked(validateAuthHeaders).mockReturnValue(null);
   });
 
   afterEach(() => {
@@ -208,6 +215,8 @@ describe("Salesforce Messages API", () => {
         );
 
         vi.useFakeTimers();
+        // Ensure validateAuthHeaders returns null for all tests in this block
+        vi.mocked(validateAuthHeaders).mockReturnValue(null);
       });
 
       afterEach(() => {
@@ -242,7 +251,7 @@ describe("Salesforce Messages API", () => {
         await vi.advanceTimersByTimeAsync(10000);
         await vi.runOnlyPendingTimersAsync();
 
-        const expectedKeepalive = new TextEncoder().encode(":\n\n");
+        const expectedKeepalive = new TextEncoder().encode(KEEPALIVE_TEXT);
         expect(mockController.enqueue).toHaveBeenCalledWith(expectedKeepalive);
 
         // Resolve pending fetch to clean up
@@ -300,7 +309,7 @@ describe("Salesforce Messages API", () => {
         await vi.advanceTimersByTimeAsync(10000);
         await vi.runOnlyPendingTimersAsync();
 
-        const expectedKeepalive = new TextEncoder().encode(":\n\n");
+        const expectedKeepalive = new TextEncoder().encode(KEEPALIVE_TEXT);
         expect(mockController.enqueue).toHaveBeenCalledWith(expectedKeepalive);
 
         // Resolve pending fetch to clean up
@@ -329,6 +338,123 @@ describe("Salesforce Messages API", () => {
         await vi.advanceTimersByTimeAsync(15000);
         expect(mockController.enqueue).not.toHaveBeenCalled();
         expect(mockController.close).toHaveBeenCalled();
+      });
+
+      it("should use default interval when env variable is not set", async () => {
+        delete process.env.SALESFORCE_MESSAGE_STREAM_KEEPALIVE_INTERVAL;
+
+        const mockFetch = global.fetch as Mock;
+        // Setup fetch to return a pending promise we can control
+        let fetchPromiseResolve: (value: any) => void = () => {};
+        let fetchPromise = new Promise((resolve) => {
+          fetchPromiseResolve = resolve;
+        });
+
+        mockFetch.mockImplementation(() => {
+          // Each fetch call returns a new pending promise
+          fetchPromise = new Promise((resolve) => {
+            fetchPromiseResolve = resolve;
+          });
+          return fetchPromise;
+        });
+
+        // Start streaming but don't await completion
+        GET(createGetRequest({}, 10));
+
+        // Allow initial fetch to start
+        await vi.runOnlyPendingTimersAsync();
+        mockController.enqueue.mockClear();
+
+        // Advance time to trigger keepalive
+        await vi.advanceTimersByTimeAsync(10000);
+        await vi.runOnlyPendingTimersAsync();
+
+        const expectedKeepalive = new TextEncoder().encode(KEEPALIVE_TEXT);
+        expect(mockController.enqueue).toHaveBeenCalledWith(expectedKeepalive);
+
+        // Resolve pending fetch to clean up
+        fetchPromiseResolve({
+          ok: true,
+          json: () => Promise.resolve({ messages: [], sequence: 1, offset: 0 }),
+        });
+      });
+
+      it("should use configured interval from env variable", async () => {
+        process.env.SALESFORCE_MESSAGE_STREAM_KEEPALIVE_INTERVAL = "5000";
+
+        const mockFetch = global.fetch as Mock;
+        // Setup fetch to return a pending promise we can control
+        let fetchPromiseResolve: (value: any) => void = () => {};
+        let fetchPromise = new Promise((resolve) => {
+          fetchPromiseResolve = resolve;
+        });
+
+        mockFetch.mockImplementation(() => {
+          // Each fetch call returns a new pending promise
+          fetchPromise = new Promise((resolve) => {
+            fetchPromiseResolve = resolve;
+          });
+          return fetchPromise;
+        });
+
+        // Start streaming but don't await completion
+        GET(createGetRequest({}, 10));
+
+        // Allow initial fetch to start
+        await vi.runOnlyPendingTimersAsync();
+        mockController.enqueue.mockClear();
+
+        // Advance time to trigger keepalive
+        await vi.advanceTimersByTimeAsync(5000);
+        await vi.runOnlyPendingTimersAsync();
+
+        const expectedKeepalive = new TextEncoder().encode(KEEPALIVE_TEXT);
+        expect(mockController.enqueue).toHaveBeenCalledWith(expectedKeepalive);
+
+        // Resolve pending fetch to clean up
+        fetchPromiseResolve({
+          ok: true,
+          json: () => Promise.resolve({ messages: [], sequence: 1, offset: 0 }),
+        });
+      });
+
+      it("should use default interval when env variable is invalid", async () => {
+        process.env.SALESFORCE_MESSAGE_STREAM_KEEPALIVE_INTERVAL = "invalid";
+
+        const mockFetch = global.fetch as Mock;
+        // Setup fetch to return a pending promise we can control
+        let fetchPromiseResolve: (value: any) => void = () => {};
+        let fetchPromise = new Promise((resolve) => {
+          fetchPromiseResolve = resolve;
+        });
+
+        mockFetch.mockImplementation(() => {
+          // Each fetch call returns a new pending promise
+          fetchPromise = new Promise((resolve) => {
+            fetchPromiseResolve = resolve;
+          });
+          return fetchPromise;
+        });
+
+        // Start streaming but don't await completion
+        GET(createGetRequest({}, 10));
+
+        // Allow initial fetch to start
+        await vi.runOnlyPendingTimersAsync();
+        mockController.enqueue.mockClear();
+
+        // Advance time to trigger keepalive
+        await vi.advanceTimersByTimeAsync(10000);
+        await vi.runOnlyPendingTimersAsync();
+
+        const expectedKeepalive = new TextEncoder().encode(KEEPALIVE_TEXT);
+        expect(mockController.enqueue).toHaveBeenCalledWith(expectedKeepalive);
+
+        // Resolve pending fetch to clean up
+        fetchPromiseResolve({
+          ok: true,
+          json: () => Promise.resolve({ messages: [], sequence: 1, offset: 0 }),
+        });
       });
     });
   });
