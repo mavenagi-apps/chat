@@ -114,6 +114,7 @@ export async function getPublicAppSettings(
       enableDemoSite: settings.enableDemoSite,
       embedAllowlist: settings.embedAllowlist,
       welcomeMessage: settings.welcomeMessage,
+      disableAttachments: settings.disableAttachments,
       // Do not pass the full handoffConfiguration object to the client
       // because it contains sensitive information that should not be exposed
       handoffConfiguration: parsedHandoffConfiguration,

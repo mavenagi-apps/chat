@@ -17,10 +17,15 @@ describe("ChatInput", () => {
   };
 
   const mockContextValue = {
-    followUpQuestions: [],
-    ask: mockAsk,
-    isHandoff: false,
     agentName: "",
+    conversationId: "",
+    followUpQuestions: [],
+    isHandoff: false,
+    messages: [],
+    shouldDisableAttachments: false,
+    shouldSupressHandoffInputDisplay: false,
+    addMessage: vi.fn(),
+    ask: mockAsk,
     handleEndHandoff: vi.fn(),
     initializeHandoff: vi.fn(),
   };
@@ -48,7 +53,7 @@ describe("ChatInput", () => {
     );
 
     const input = screen.getByTestId("chat-input");
-    const fileInput = screen.getByTestId("chat-file-input");
+    const fileInput = screen.getByTestId("chat-file-input") as HTMLInputElement;
     const submitButton = screen.getByTestId("submit-question");
     expect(screen.getByTestId("chat-attach-icon")).toBeDefined();
 
@@ -72,23 +77,58 @@ describe("ChatInput", () => {
         },
       ]);
     });
-    expect(fileInput.files[0]).toStrictEqual(file);
+    expect(fileInput.files).not.toBeNull();
+    expect(fileInput.files![0]).toStrictEqual(file);
   });
 
-  it("hide attachment when isHandoff is true", () => {
-    const contextWithHandoff = {
+  it("hide attachment when shouldDisableAttachments is true", () => {
+    const contextWithDisabledAttachments = {
       ...mockContextValue,
-      isHandoff: true,
-      agentName: "John Doe",
+      shouldDisableAttachments: true,
     };
 
     render(
-      <ChatContext.Provider value={contextWithHandoff}>
+      <ChatContext.Provider value={contextWithDisabledAttachments}>
         <ChatInput {...defaultProps} />
       </ChatContext.Provider>,
     );
 
     expect(screen.queryByTestId("chat-attach-icon")).not.toBeInTheDocument();
+  });
+
+  it("shows attachment icon when shouldDisableAttachments is false", () => {
+    render(
+      <ChatContext.Provider value={mockContextValue}>
+        <ChatInput {...defaultProps} />
+      </ChatContext.Provider>,
+    );
+
+    expect(screen.getByTestId("chat-attach-icon")).toBeInTheDocument();
+  });
+
+  it("prevents file drop when shouldDisableAttachments is true", async () => {
+    const contextWithDisabledAttachments = {
+      ...mockContextValue,
+      shouldDisableAttachments: true,
+    };
+
+    render(
+      <ChatContext.Provider value={contextWithDisabledAttachments}>
+        <ChatInput {...defaultProps} />
+      </ChatContext.Provider>,
+    );
+
+    const input = screen.getByTestId("chat-input");
+    const file = new File(["hello"], "hello.png", { type: "image/png" });
+    const dataTransfer = {
+      files: [file],
+    };
+
+    fireEvent.drop(input, { dataTransfer });
+
+    await waitFor(() => {
+      expect(screen.queryByText("hello.png")).not.toBeInTheDocument();
+    });
   });
 
   it("submits question when form is submitted", async () => {

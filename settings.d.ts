@@ -11,6 +11,7 @@ declare global {
     embedAllowlist?: string[];
     enableDemoSite?: string;
     welcomeMessage?: string;
+    disableAttachments?: boolean;
   }
   type BaseHandoffConfiguration = {
     apiKey: string;
