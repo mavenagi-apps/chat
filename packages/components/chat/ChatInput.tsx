@@ -45,9 +45,10 @@ export const ChatInput = ({
   const t = useTranslations("chat.ChatInput");
   const {
     followUpQuestions,
-    ask,
     isHandoff,
+    disableAttachments,
     shouldSupressHandoffInputDisplay,
+    ask,
   } = React.useContext(ChatContext);
 
   const [seeMoreFollowupQuestions, setSeeMoreFollowupQuestions] =
@@ -98,17 +99,26 @@ export const ChatInput = ({
   const handleDragOver: React.DragEventHandler<HTMLDivElement> = (
     event: React.DragEvent,
   ) => {
+    if (disableAttachments) {
+      return;
+    }
     event.preventDefault();
     setIsDragging(true);
   };
 
   function handleDragLeave() {
+    if (disableAttachments) {
+      return;
+    }
     setIsDragging(false);
   }
 
   const handleDrop: React.DragEventHandler<HTMLDivElement> = (
     event: React.DragEvent,
   ) => {
+    if (disableAttachments) {
+      return;
+    }
     event.preventDefault();
     setIsDragging(false);
     const files: FileList = event.dataTransfer.files;
@@ -203,9 +213,14 @@ export const ChatInput = ({
                 displayText: methods.getValues("files")![0].name,
                 onRemove: () => methods.resetField("files"),
               })}
-            <label htmlFor="file-input" className="cursor-pointer">
-              <RiAttachmentLine className="size-5 text-gray-500 hover:text-gray-700 mr-2" />
-            </label>
+            {!disableAttachments && (
+              <label htmlFor="file-input" className="cursor-pointer">
+                <RiAttachmentLine
+                  data-testid="chat-attach-icon"
+                  className="size-5 text-gray-500 hover:text-gray-700 mr-2"
+                />
+              </label>
+            )}
             <button
               type="submit"
               aria-label={t("aria_submit_question")}

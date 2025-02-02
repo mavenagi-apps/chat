@@ -15,15 +15,16 @@ const mockUseSettings = vi.mocked(useSettings);
 
 describe("Chat", () => {
   const defaultProps = {
-    addMessage: vi.fn(),
     agentName: null,
-    ask: vi.fn(),
     conversationId: "123",
-    handleEndHandoff: vi.fn(),
-    initializeHandoff: vi.fn(),
     isHandoff: false,
     messages: [],
+    disableAttachments: false,
     shouldSupressHandoffInputDisplay: false,
+    addMessage: vi.fn(),
+    ask: vi.fn(),
+    handleEndHandoff: vi.fn(),
+    initializeHandoff: vi.fn(),
   };
 
   beforeEach(() => {
@@ -31,6 +32,7 @@ describe("Chat", () => {
     mockUseSettings.mockReturnValue({
       brandColor: "#000000",
       brandFontColor: "#FFFFFF",
+      disableAttachments: false,
     });
   });
 
@@ -157,5 +159,51 @@ describe("Chat", () => {
     expect(handleEndHandoff).toHaveBeenCalled();
     expect(screen.getByTestId("agent-name")).toHaveTextContent("Test Agent");
     expect(screen.getByTestId("is-handoff")).toHaveTextContent("true");
+  });
+
+  test("computes disableAttachments correctly", () => {
+    const TestConsumer = () => {
+      const context = React.useContext(ChatContext);
+      return (
+        <div data-testid="should-disable-attachments">
+          {context.disableAttachments.toString()}
+        </div>
+      );
+    };
+
+    // Test when both are false
+    const { rerender } = render(
+      <Chat {...defaultProps} isHandoff={false}>
+        <TestConsumer />
+      </Chat>,
+    );
+    expect(screen.getByTestId("should-disable-attachments")).toHaveTextContent(
+      "false",
+    );
+
+    // Test when isHandoff is true
+    rerender(
+      <Chat {...defaultProps} isHandoff={true}>
+        <TestConsumer />
+      </Chat>,
+    );
+    expect(screen.getByTestId("should-disable-attachments")).toHaveTextContent(
+      "true",
+    );
+
+    // Test when disableAttachments is true
+    mockUseSettings.mockReturnValue({
+      brandColor: "#000000",
+      brandFontColor: "#FFFFFF",
+      disableAttachments: true,
+    });
+    rerender(
+      <Chat {...defaultProps} isHandoff={false}>
+        <TestConsumer />
+      </Chat>,
+    );
+    expect(screen.getByTestId("should-disable-attachments")).toHaveTextContent(
+      "true",
+    );
   });
 });

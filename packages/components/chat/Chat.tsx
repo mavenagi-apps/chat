@@ -1,18 +1,21 @@
 import clsx from "clsx";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { isBotMessage, ChatMessage, CombinedMessage } from "@/types";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { Attachment } from "mavenagi/api";
-import type { Front } from "@/types/front";
 import { useIdleMessage } from "@/lib/useIdleMessage";
 
 interface ChatContextProps {
-  addMessage: (message: ChatMessage) => void;
   agentName: string | null;
-  ask: (question: string, attachments?: Attachment[]) => Promise<void>;
   conversationId: string;
   followUpQuestions: string[];
+  isHandoff: boolean;
+  messages: CombinedMessage[];
+  disableAttachments: boolean;
+  shouldSupressHandoffInputDisplay: boolean;
+  addMessage: (message: ChatMessage) => void;
+  ask: (question: string, attachments?: Attachment[]) => Promise<void>;
   handleEndHandoff: () => Promise<void>;
   initializeHandoff: (data: { email?: string }) => Promise<
     | void
@@ -25,44 +28,43 @@ interface ChatContextProps {
         error: string;
       }
   >;
-  isHandoff: boolean;
-  messages: CombinedMessage[];
-  shouldSupressHandoffInputDisplay: boolean;
 }
 
-interface ChatProps extends Omit<ChatContextProps, "followUpQuestions"> {
+interface ChatProps
+  extends Omit<ChatContextProps, "followUpQuestions" | "disableAttachments"> {
   brandColor?: string;
   className?: string;
 }
 
 export const ChatContext = React.createContext<ChatContextProps>({
-  addMessage: () => {},
   agentName: null,
-  ask: async () => {},
   conversationId: "",
   followUpQuestions: [],
-  handleEndHandoff: async () => {},
-  initializeHandoff: async () => {},
   isHandoff: false,
   messages: [],
+  disableAttachments: false,
   shouldSupressHandoffInputDisplay: false,
+  addMessage: () => {},
+  ask: async () => {},
+  handleEndHandoff: async () => {},
+  initializeHandoff: async () => {},
 });
 
 export default function Chat({
-  addMessage,
   agentName,
-  ask,
+  children,
   className,
   conversationId,
-  handleEndHandoff,
-  initializeHandoff,
   isHandoff,
   messages,
   shouldSupressHandoffInputDisplay,
-  children,
+  addMessage,
+  ask,
+  handleEndHandoff,
+  initializeHandoff,
 }: React.PropsWithChildren<ChatProps>) {
   const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
-  const { brandColor, brandFontColor } = useSettings();
+  const { brandColor, brandFontColor, disableAttachments } = useSettings();
   useIdleMessage({
     messages: messages as ChatMessage[],
     conversationId,
@@ -81,19 +83,25 @@ export default function Chat({
     setFollowUpQuestions([]);
   }, [messages]);
 
+  const disableAttachmentsOrIsHandoff = useMemo(
+    () => disableAttachments || isHandoff,
+    [disableAttachments, isHandoff],
+  );
+
   return (
     <ChatContext.Provider
       value={{
-        followUpQuestions,
-        ask,
-        initializeHandoff,
         agentName,
-        isHandoff,
-        handleEndHandoff,
-        shouldSupressHandoffInputDisplay,
-        messages,
-        addMessage,
         conversationId,
+        followUpQuestions,
+        isHandoff,
+        messages,
+        disableAttachments: disableAttachmentsOrIsHandoff,
+        shouldSupressHandoffInputDisplay,
+        addMessage,
+        ask,
+        handleEndHandoff,
+        initializeHandoff,
       }}
     >
       <div

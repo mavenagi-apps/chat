@@ -79,16 +79,16 @@ function ChatPage() {
       <ChatHeader logoUrl={logoUrl} />
       <Chat
         {...{
-          addMessage,
           agentName,
-          ask: handoffStatus === HandoffStatus.INITIALIZED ? askHandoff : ask,
           brandColor,
           conversationId,
-          handleEndHandoff,
-          initializeHandoff,
           isHandoff,
           messages: combinedMessages,
           shouldSupressHandoffInputDisplay,
+          addMessage,
+          ask: handoffStatus === HandoffStatus.INITIALIZED ? askHandoff : ask,
+          handleEndHandoff,
+          initializeHandoff,
         }}
       >
         <div className="flex flex-1 flex-col overflow-auto text-xs">
