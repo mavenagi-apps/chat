@@ -22,7 +22,7 @@ describe("ChatInput", () => {
     followUpQuestions: [],
     isHandoff: false,
     messages: [],
-    shouldDisableAttachments: false,
+    disableAttachments: false,
     shouldSupressHandoffInputDisplay: false,
     addMessage: vi.fn(),
     ask: mockAsk,
@@ -81,10 +81,10 @@ describe("ChatInput", () => {
     expect(fileInput.files![0]).toStrictEqual(file);
   });
 
-  it("hide attachment when shouldDisableAttachments is true", () => {
+  it("hide attachment when disableAttachments is true", () => {
     const contextWithDisabledAttachments = {
       ...mockContextValue,
-      shouldDisableAttachments: true,
+      disableAttachments: true,
     };
 
     render(
@@ -96,7 +96,7 @@ describe("ChatInput", () => {
     expect(screen.queryByTestId("chat-attach-icon")).not.toBeInTheDocument();
   });
 
-  it("shows attachment icon when shouldDisableAttachments is false", () => {
+  it("shows attachment icon when disableAttachments is false", () => {
     render(
       <ChatContext.Provider value={mockContextValue}>
         <ChatInput {...defaultProps} />
@@ -106,10 +106,10 @@ describe("ChatInput", () => {
     expect(screen.getByTestId("chat-attach-icon")).toBeInTheDocument();
   });
 
-  it("prevents file drop when shouldDisableAttachments is true", async () => {
+  it("prevents file drop when disableAttachments is true", async () => {
     const contextWithDisabledAttachments = {
       ...mockContextValue,
-      shouldDisableAttachments: true,
+      disableAttachments: true,
     };
 
     render(

@@ -12,7 +12,7 @@ interface ChatContextProps {
   followUpQuestions: string[];
   isHandoff: boolean;
   messages: CombinedMessage[];
-  shouldDisableAttachments: boolean;
+  disableAttachments: boolean;
   shouldSupressHandoffInputDisplay: boolean;
   addMessage: (message: ChatMessage) => void;
   ask: (question: string, attachments?: Attachment[]) => Promise<void>;
@@ -31,10 +31,7 @@ interface ChatContextProps {
 }
 
 interface ChatProps
-  extends Omit<
-    ChatContextProps,
-    "followUpQuestions" | "shouldDisableAttachments"
-  > {
+  extends Omit<ChatContextProps, "followUpQuestions" | "disableAttachments"> {
   brandColor?: string;
   className?: string;
 }
@@ -45,7 +42,7 @@ export const ChatContext = React.createContext<ChatContextProps>({
   followUpQuestions: [],
   isHandoff: false,
   messages: [],
-  shouldDisableAttachments: false,
+  disableAttachments: false,
   shouldSupressHandoffInputDisplay: false,
   addMessage: () => {},
   ask: async () => {},
@@ -86,7 +83,7 @@ export default function Chat({
     setFollowUpQuestions([]);
   }, [messages]);
 
-  const shouldDisableAttachments = useMemo(
+  const disableAttachmentsOrIsHandoff = useMemo(
     () => disableAttachments || isHandoff,
     [disableAttachments, isHandoff],
   );
@@ -99,7 +96,7 @@ export default function Chat({
         followUpQuestions,
         isHandoff,
         messages,
-        shouldDisableAttachments,
+        disableAttachments: disableAttachmentsOrIsHandoff,
         shouldSupressHandoffInputDisplay,
         addMessage,
         ask,

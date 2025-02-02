@@ -19,7 +19,7 @@ describe("Chat", () => {
     conversationId: "123",
     isHandoff: false,
     messages: [],
-    shouldDisableAttachments: false,
+    disableAttachments: false,
     shouldSupressHandoffInputDisplay: false,
     addMessage: vi.fn(),
     ask: vi.fn(),
@@ -161,12 +161,12 @@ describe("Chat", () => {
     expect(screen.getByTestId("is-handoff")).toHaveTextContent("true");
   });
 
-  test("computes shouldDisableAttachments correctly", () => {
+  test("computes disableAttachments correctly", () => {
     const TestConsumer = () => {
       const context = React.useContext(ChatContext);
       return (
         <div data-testid="should-disable-attachments">
-          {context.shouldDisableAttachments.toString()}
+          {context.disableAttachments.toString()}
         </div>
       );
     };

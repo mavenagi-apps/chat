@@ -46,7 +46,7 @@ export const ChatInput = ({
   const {
     followUpQuestions,
     isHandoff,
-    shouldDisableAttachments,
+    disableAttachments,
     shouldSupressHandoffInputDisplay,
     ask,
   } = React.useContext(ChatContext);
@@ -99,7 +99,7 @@ export const ChatInput = ({
   const handleDragOver: React.DragEventHandler<HTMLDivElement> = (
     event: React.DragEvent,
   ) => {
-    if (shouldDisableAttachments) {
+    if (disableAttachments) {
       return;
     }
     event.preventDefault();
@@ -107,7 +107,7 @@ export const ChatInput = ({
   };
 
   function handleDragLeave() {
-    if (shouldDisableAttachments) {
+    if (disableAttachments) {
       return;
     }
     setIsDragging(false);
@@ -116,7 +116,7 @@ export const ChatInput = ({
   const handleDrop: React.DragEventHandler<HTMLDivElement> = (
     event: React.DragEvent,
   ) => {
-    if (shouldDisableAttachments) {
+    if (disableAttachments) {
       return;
     }
     event.preventDefault();
@@ -213,7 +213,7 @@ export const ChatInput = ({
                 displayText: methods.getValues("files")![0].name,
                 onRemove: () => methods.resetField("files"),
               })}
-            {!shouldDisableAttachments && (
+            {!disableAttachments && (
               <label htmlFor="file-input" className="cursor-pointer">
                 <RiAttachmentLine
                   data-testid="chat-attach-icon"
