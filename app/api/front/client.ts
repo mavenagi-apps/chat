@@ -29,17 +29,27 @@ function createRetryRateLimiter(minTime: number) {
   });
   limiter.on("failed", async (error, info) => {
     if (process.env.ENABLE_API_LOGGING) {
-      console.error("FRONT:: API Request failed", {
+      const isJsonFetchError = error instanceof JsonFetchError;
+      const logData = {
         attempt: info.retryCount,
         message: error.message,
-        ...(error instanceof JsonFetchError
+        response: "",
+        ...(isJsonFetchError
           ? {
               status: error.response.status,
               statusText: error.response.statusText,
-              response: await error.response.text(),
             }
           : {}),
-      });
+      };
+      try {
+        logData.response = isJsonFetchError
+          ? await error.response.clone().text()
+          : "";
+      } catch {
+        // nothing to do
+      } finally {
+        console.error("FRONT:: API Request failed", logData);
+      }
     }
     const { retryCount } = info;
     const backoffs = [0.2, 0.4, 0.8, 1, 2];

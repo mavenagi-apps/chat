@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useActionState, useCallback } from "react";
-import { type AskStreamActionEvent } from "mavenagi/api";
+import type { ActionFormField, AskStreamActionEvent } from "mavenagi/api";
 import Form from "next/form";
 import { Button, Input } from "@magi/ui";
 import { submitBailoutForm } from "@/app/actions";
@@ -38,6 +38,13 @@ export default function BailoutFormDisplay({
     setIsSubmitting(true);
   };
 
+  const fieldType = (field: ActionFormField) => {
+    if (field.id.toLowerCase().includes("email")) {
+      return "email";
+    }
+    return "text";
+  };
+
   return (
     <div>
       {!state && (
@@ -59,7 +66,7 @@ export default function BailoutFormDisplay({
                   {field.required && <span className="text-red-500">*</span>}
                 </label>
                 <Input
-                  type="text"
+                  type={fieldType(field)}
                   id={field.id}
                   name={field.id}
                   defaultValue={field.suggestion}
