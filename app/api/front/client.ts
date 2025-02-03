@@ -45,7 +45,7 @@ function createRetryRateLimiter(minTime: number) {
         logData.response = isJsonFetchError
           ? await error.response.clone().text()
           : "";
-      } catch (error) {
+      } catch {
         // nothing to do
       } finally {
         console.error("FRONT:: API Request failed", logData);
