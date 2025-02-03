@@ -41,12 +41,14 @@ export class FrontStrategy implements HandoffStrategy {
   }
 
   handleChatEvent(event: Front.WebhookMessage) {
-    const agentName =
-      `${event.author.first_name} ${event.author.last_name}`.trim();
+    const isAutoReply = event.type === "message_autoreply";
+    const agentName = isAutoReply
+      ? undefined
+      : `${event.author.first_name} ${event.author.last_name}`.trim();
 
     const formattedEvent = {
       ...event,
-      type: "front-agent",
+      type: isAutoReply ? "front-agent" : "front-autoreply",
       timestamp: Math.trunc(event.created_at * 1000),
     };
 
