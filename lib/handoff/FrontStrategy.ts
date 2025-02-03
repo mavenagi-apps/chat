@@ -48,7 +48,7 @@ export class FrontStrategy implements HandoffStrategy {
 
     const formattedEvent = {
       ...event,
-      type: isAutoReply ? "front-agent" : "front-autoreply",
+      type: isAutoReply ? "front-autoreply" : "front-agent",
       timestamp: Math.trunc(event.created_at * 1000),
     };
 
