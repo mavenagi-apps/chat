@@ -51,6 +51,9 @@ function createRetryRateLimiter(minTime: number) {
         console.error("FRONT:: API Request failed", logData);
       }
     }
+    if (!Object.values(RetryableStatusCodes).includes(error.response.status)) {
+      return;
+    }
     const { retryCount } = info;
     const backoffs = [0.2, 0.4, 0.8, 1, 2];
     if (backoffs.length <= retryCount) {
@@ -60,7 +63,6 @@ function createRetryRateLimiter(minTime: number) {
     const defaultRetryAfter = backoffs[retryCount] * 1000;
     if (
       error instanceof JsonFetchError &&
-      Object.values(RetryableStatusCodes).includes(error.response.status) &&
       error.response.headers.get("retry-after")?.length
     ) {
       const retryAfterSeconds = parseInt(
