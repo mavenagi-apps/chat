@@ -126,6 +126,7 @@ export async function middleware(request: NextRequest) {
             blocked: security.blocked,
             supportsCsp: supportsCsp(request),
             referrer: request.headers.get("referer"),
+            origin: request.headers.get("origin"),
             secFetchDest: request.headers.get("sec-fetch-dest"),
             secFetchMode: request.headers.get("sec-fetch-mode"),
             isAllowedDomain: isAllowedDomain(
