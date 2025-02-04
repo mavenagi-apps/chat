@@ -10,6 +10,18 @@ import { Cacheable, KeyvCacheableMemory } from "cacheable";
 import { getRedisCache } from "@/app/api/server/lib/redis";
 import { DateTime } from "luxon";
 
+import remarkRehype from "remark-rehype";
+import rehypeStringify from "rehype-stringify";
+import remarkGfm from "remark-gfm";
+import remarkParse from "remark-parse";
+import { unified } from "unified";
+
+const mdParser = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkRehype)
+  .use(rehypeStringify);
+
 let channelCache: Cacheable | undefined;
 async function getChannelCache() {
   if (!channelCache) {
@@ -77,11 +89,13 @@ export function convertToFrontMessage(
   return null;
 }
 
-export function sendMessageToFront(
+export async function sendMessageToFront(
   client: FrontApplicationClient,
   message: Front.AppChannelInboundMessage | Front.AppChannelOutboundMessage,
 ) {
   if ((message as Front.AppChannelOutboundMessage).to) {
+    // markdown to html
+    message.body = String(await mdParser.process(message.body));
     return client.sendOutgoingMessages(
       message as Front.AppChannelOutboundMessage,
     );
