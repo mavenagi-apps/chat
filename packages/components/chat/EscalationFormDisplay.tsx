@@ -83,6 +83,7 @@ function EscalationForm({ isAvailable }: { isAvailable: boolean }) {
             <Form.SubmitButton
               variant="primary"
               className="w-full bg-[--brand-color]"
+              disabled={methods.formState.isSubmitting}
             >
               <IoChatbubbleEllipsesOutline />
               {t("connect_to_live_agent")}
