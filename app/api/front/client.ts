@@ -51,7 +51,9 @@ function createRetryRateLimiter(minTime: number) {
         console.error("FRONT:: API Request failed", logData);
       }
     }
-    if (!Object.values(RetryableStatusCodes).includes(error.response.status)) {
+    if (
+      !Object.values(RetryableStatusCodes).includes(error?.response?.status)
+    ) {
       return;
     }
     const { retryCount } = info;
