@@ -21,6 +21,11 @@ export default function BailoutFormDisplay({
       formData.append("organizationId", organizationId as string);
       formData.append("agentId", agentId as string);
       formData.append("conversationId", conversationId as string);
+
+      formData.forEach((value, key) => {
+        formData.set(key, typeof value === "string" ? value.trim() : value);
+      });
+
       return await submitBailoutForm(null, formData);
     },
     [organizationId, agentId, conversationId, action.id],
