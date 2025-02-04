@@ -88,8 +88,9 @@ function renderSalesforceMessage(message: SalesforceChatMessage) {
 }
 
 function renderFrontAgentMessage(message: Front.WebhookMessage) {
-  const author =
-    `${message.author.first_name} ${message.author.last_name}`.trim();
+  const author = message.author
+    ? `${message.author.first_name} ${message.author.last_name}`.trim()
+    : undefined;
   return (
     <ChatBubble direction="left-hug" author={author}>
       <ReactMarkdown linkTargetInNewTab={true}>
@@ -211,6 +212,7 @@ export function ChatMessage({
       case "handoff-zendesk":
         return renderHandoffMessage(message as ZendeskWebhookMessage);
       case "front-agent":
+      case "front-autoreply":
         return renderFrontAgentMessage(message as Front.WebhookMessage);
       case SALESFORCE_MESSAGE_TYPES.ChatEstablished:
       case SALESFORCE_MESSAGE_TYPES.ChatEnded:
