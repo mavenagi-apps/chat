@@ -134,4 +134,74 @@ describe("BailoutFormDisplay", () => {
       expect(screen.getByText(/submission failed/i)).toBeInTheDocument();
     });
   });
+
+  test("should call onSubmitSuccess with action form response on successful submission", async () => {
+    const onSubmitSuccess = vi.fn();
+    const mockActionFormResponse = createBotMessage([
+      { type: "text", text: "Success" },
+    ]) as ConversationMessageResponse.Bot;
+
+    vi.mocked(submitBailoutForm).mockResolvedValue({
+      success: true,
+      data: {},
+      actionFormResponse: mockActionFormResponse,
+    });
+
+    renderComponent({ onSubmitSuccess });
+
+    const form = screen.getByRole("form");
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(onSubmitSuccess).toHaveBeenCalledWith(mockActionFormResponse);
+      expect(onSubmitSuccess).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test("should not call onSubmitSuccess on failed submission", async () => {
+    const onSubmitSuccess = vi.fn();
+
+    vi.mocked(submitBailoutForm).mockResolvedValue({
+      success: false,
+      error: "Submission failed",
+    });
+
+    renderComponent({ onSubmitSuccess });
+
+    const form = screen.getByRole("form");
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(screen.getByText(/error/i)).toBeInTheDocument();
+    });
+
+    expect(onSubmitSuccess).not.toHaveBeenCalled();
+  });
+
+  test("should only call onSubmitSuccess once for multiple state updates", async () => {
+    const onSubmitSuccess = vi.fn();
+    const mockActionFormResponse = createBotMessage([
+      { type: "text", text: "Success" },
+    ]) as ConversationMessageResponse.Bot;
+
+    vi.mocked(submitBailoutForm).mockResolvedValue({
+      success: true,
+      data: {},
+      actionFormResponse: mockActionFormResponse,
+    });
+
+    renderComponent({ onSubmitSuccess });
+
+    const form = screen.getByRole("form");
+
+    // Submit form multiple times
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(onSubmitSuccess).toHaveBeenCalledWith(mockActionFormResponse);
+      expect(onSubmitSuccess).toHaveBeenCalledTimes(1);
+    });
+  });
 });
