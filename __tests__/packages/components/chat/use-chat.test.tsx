@@ -4,7 +4,7 @@ import { useChat } from "@/packages/components/chat/use-chat";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useParams } from "next/navigation";
 import { ChatMessage } from "@/types";
-import { NextResponse } from "next/server";
+import { ConversationMessageResponse } from "mavenagi/api";
 
 // Mock dependencies
 vi.mock("next/navigation", () => ({
@@ -273,5 +273,66 @@ describe("useChat", () => {
         }),
       }),
     );
+  });
+
+  it("should handle bailout form submission success", async () => {
+    const { result } = renderHook(() => useChat());
+
+    const actionFormResponse: ConversationMessageResponse.Bot = {
+      type: "bot",
+      botMessageType: "BOT_RESPONSE",
+      responses: [{ type: "text", text: "Form submitted successfully" }],
+      conversationMessageId: {
+        referenceId: "msg-123",
+        type: "CONVERSATION_MESSAGE",
+        appId: "app-123",
+        organizationId: "org-123",
+        agentId: "agent-123",
+      },
+      metadata: {
+        followupQuestions: [],
+        sources: [],
+      },
+    };
+
+    act(() => {
+      result.current.onBailoutFormSubmitSuccess(actionFormResponse);
+    });
+
+    expect(result.current.messages).toHaveLength(1);
+    expect(result.current.messages[0]).toEqual(
+      expect.objectContaining({
+        type: "bot",
+        responses: [{ type: "text", text: "Form submitted successfully" }],
+      }),
+    );
+  });
+
+  it("should add timestamp to messages when handling bailout form submission", async () => {
+    const { result } = renderHook(() => useChat());
+
+    const actionFormResponse: ConversationMessageResponse.Bot = {
+      type: "bot",
+      botMessageType: "BOT_RESPONSE",
+      responses: [{ type: "text", text: "Form submitted successfully" }],
+      conversationMessageId: {
+        referenceId: "msg-123",
+        type: "CONVERSATION_MESSAGE",
+        appId: "app-123",
+        organizationId: "org-123",
+        agentId: "agent-123",
+      },
+      metadata: {
+        followupQuestions: [],
+        sources: [],
+      },
+    };
+
+    act(() => {
+      result.current.onBailoutFormSubmitSuccess(actionFormResponse);
+    });
+
+    expect(result.current.messages[0]).toHaveProperty("timestamp");
+    expect(typeof result.current.messages[0].timestamp).toBe("number");
   });
 });

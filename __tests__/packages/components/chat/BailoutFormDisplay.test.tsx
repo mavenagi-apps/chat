@@ -1,24 +1,11 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  act,
-} from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, expect, test, beforeEach } from "vitest";
 import BailoutFormDisplay from "@/packages/components/chat/BailoutFormDisplay";
 import { type AskStreamActionEvent } from "mavenagi/api";
-import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { RouterProvider } from "@test-utils/test-utils";
 import { submitBailoutForm } from "@/app/actions";
-
-const mockAppRouter = {
-  push: vi.fn(),
-  replace: vi.fn(),
-  prefetch: vi.fn(),
-  back: vi.fn(),
-  forward: vi.fn(),
-  refresh: vi.fn(),
-};
+import { createBotMessage } from "@/__tests__/lib/handoff/test-utils";
+import type { ConversationMessageResponse } from "mavenagi/api";
 
 const mockAction: AskStreamActionEvent = {
   id: "test-action",
@@ -50,12 +37,13 @@ const renderComponent = (props = {}) => {
   const defaultProps = {
     action: mockAction,
     conversationId: "test-conversation",
+    onSubmitSuccess: vi.fn(),
   };
 
   return render(
-    <AppRouterContext.Provider value={mockAppRouter}>
+    <RouterProvider>
       <BailoutFormDisplay {...defaultProps} {...props} />
-    </AppRouterContext.Provider>,
+    </RouterProvider>,
   );
 };
 
@@ -90,7 +78,17 @@ describe("BailoutFormDisplay", () => {
     vi.mocked(submitBailoutForm).mockImplementation(
       () =>
         new Promise((resolve) =>
-          setTimeout(() => resolve({ success: true, data: {} }), 100),
+          setTimeout(
+            () =>
+              resolve({
+                success: true,
+                data: {},
+                actionFormResponse: createBotMessage([
+                  { type: "text", text: "Success" },
+                ]) as ConversationMessageResponse.Bot,
+              }),
+            100,
+          ),
         ),
     );
 

@@ -11,8 +11,11 @@ import type {
   CombinedMessage,
 } from "@/types";
 import type { Front } from "@/types/front";
-import type { ConversationMessageResponse } from "mavenagi/api";
-
+import type {
+  ConversationMessageResponse,
+  AskStreamActionEvent,
+} from "mavenagi/api";
+import { RouterProvider } from "@/__tests__/utils/test-utils";
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
@@ -20,6 +23,7 @@ vi.mock("next-intl", () => ({
 describe("ChatMessage", () => {
   const defaultProps = {
     mavenUserId: "test-user-id",
+    onBailoutFormSubmitSuccess: vi.fn(),
   };
 
   describe("User Messages", () => {
@@ -77,6 +81,45 @@ describe("ChatMessage", () => {
 
       render(<ChatMessage message={message} {...defaultProps} />);
       expect(screen.getByText("Bot response")).toBeInTheDocument();
+    });
+
+    it("renders bailout form when message is action type", () => {
+      const message: ConversationMessageResponse.Bot & {
+        action: AskStreamActionEvent;
+      } = {
+        type: "bot",
+        botMessageType: "BOT_RESPONSE",
+        responses: [{ type: "text", text: "Bot response" }],
+        conversationMessageId: {
+          referenceId: "msg-123",
+          type: "CONVERSATION_MESSAGE",
+          appId: "app-123",
+          organizationId: "org-123",
+          agentId: "agent-123",
+        },
+        metadata: {
+          followupQuestions: [],
+          sources: [],
+        },
+        action: {
+          id: "test-action",
+          formLabel: "test-form",
+          fields: [],
+          submitLabel: "test-submit",
+        },
+      };
+
+      render(
+        <RouterProvider>
+          <ChatMessage
+            message={message}
+            {...defaultProps}
+            conversationId="test-conv"
+          />
+        </RouterProvider>,
+      );
+      expect(screen.getByText("test-form")).toBeInTheDocument();
+      expect(screen.getByRole("form")).toBeInTheDocument();
     });
   });
 

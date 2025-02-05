@@ -25,6 +25,7 @@ import { useTranslations } from "next-intl";
 import type { Front } from "@/types/front";
 import { CombinedMessage } from "@/types";
 import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
+import { UseChatResponse } from "./use-chat";
 
 interface MessageProps {
   message: CombinedMessage;
@@ -32,6 +33,7 @@ interface MessageProps {
   conversationId?: string;
   initialUserChatMessage?: UserChatMessage | null;
   mavenUserId: string | null;
+  onBailoutFormSubmitSuccess: UseChatResponse["onBailoutFormSubmitSuccess"];
 }
 
 function MessageCharts({
@@ -168,6 +170,7 @@ export function ChatMessage({
   linkTargetInNewTab = true,
   conversationId,
   mavenUserId,
+  onBailoutFormSubmitSuccess,
 }: MessageProps) {
   if ("type" in message) {
     switch (message.type) {
@@ -230,6 +233,7 @@ export function ChatMessage({
             conversationId,
             linkTargetInNewTab,
             mavenUserId,
+            onBailoutFormSubmitSuccess,
           );
         }
         return null;
@@ -321,6 +325,7 @@ function renderBotMessage(
   conversationId: string | undefined,
   linkTargetInNewTab: boolean,
   mavenUserId: string | null,
+  onBailoutFormSubmitSuccess: UseChatResponse["onBailoutFormSubmitSuccess"],
 ) {
   if (!showBotAnswer({ message })) {
     return null;
@@ -334,6 +339,7 @@ function renderBotMessage(
         <BailoutFormDisplay
           action={message.action}
           conversationId={conversationId ?? ""}
+          onSubmitSuccess={onBailoutFormSubmitSuccess}
         />
       )}
       {showEscalationForm && <EscalationFormDisplay />}
