@@ -8,11 +8,7 @@
  * - Processes different types of responses (text, metadata, actions)
  *
  * Usage:
- * const { messages, addMessage, isLoading, isResponseAvailable } = useChat({
- *   organizationId: 'org-id',
- *   agentId: 'agent-id',
- *   signedUserData: 'signed-data'
- * });
+ * const { messages, addMessage, isLoading, isResponseAvailable } = useChat();
  */
 
 "use client";
@@ -44,13 +40,16 @@ import { useParams } from "next/navigation";
 import { useAuth } from "@/app/providers/AuthProvider";
 const API_ENDPOINT = "/api/create";
 
-type UseChatReturn = {
+export type UseChatResponse = {
   messages: Message[];
   addMessage: (message: ChatMessage) => void;
   isLoading: boolean;
   isResponseAvailable: boolean | undefined;
   conversationId: string;
   mavenUserId: string | null;
+  onBailoutFormSubmitSuccess: (
+    actionFormResponse: ConversationMessageResponse.Bot,
+  ) => void;
 };
 
 type UseChatParams = {
@@ -58,7 +57,7 @@ type UseChatParams = {
   agentId: string;
 };
 
-export function useChat(): UseChatReturn {
+export function useChat(): UseChatResponse {
   const { signedUserData } = useAuth();
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [conversationId, setConversationId] = React.useState<string>(nanoid());
@@ -324,6 +323,13 @@ export function useChat(): UseChatReturn {
     return lastMessage?.responses?.length > 0;
   }, []);
 
+  const onBailoutFormSubmitSuccess = useCallback(
+    (actionFormResponse: ConversationMessageResponse.Bot) => {
+      setMessages((prevMessages) => [...prevMessages, actionFormResponse]);
+    },
+    [setMessages],
+  );
+
   useEffect(() => {
     const timestamp = new Date().getTime();
     setMessages((prevMessages) =>
@@ -339,6 +345,7 @@ export function useChat(): UseChatReturn {
         void ask([...messages, message]);
       }
     },
+    onBailoutFormSubmitSuccess,
     isLoading: isLoading,
     mavenUserId: mavenUserId,
     isResponseAvailable: getResponseAvailable(),

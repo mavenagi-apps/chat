@@ -8,7 +8,7 @@ import {
   createBotMessage,
   createSalesforceEvent,
   BotResponse,
-} from "./test-helpers";
+} from "./test-utils";
 import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
 import type { SalesforceChatRequestFail } from "@/types/salesforce";
 

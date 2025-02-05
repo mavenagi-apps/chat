@@ -38,6 +38,7 @@ function ChatPage() {
     isResponseAvailable,
     mavenUserId,
     messages,
+    onBailoutFormSubmitSuccess,
   } = useChat();
 
   const ask = useAskQuestion({
@@ -110,6 +111,7 @@ function ChatPage() {
                 isResponseAvailable: isResponseAvailable || false,
                 mavenUserId,
                 messages: combinedMessages,
+                onBailoutFormSubmitSuccess,
               }}
             />
 

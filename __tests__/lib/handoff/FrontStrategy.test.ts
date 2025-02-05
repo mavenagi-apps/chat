@@ -4,7 +4,7 @@ import {
   createUserMessage,
   createBotMessage,
   createFrontEvent,
-} from "./test-helpers";
+} from "./test-utils";
 
 describe("FrontStrategy", () => {
   let strategy: FrontStrategy;

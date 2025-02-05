@@ -6,7 +6,7 @@ import {
   createBotMessage,
   createZendeskEvent,
   createFrontEvent,
-} from "./test-helpers";
+} from "./test-utils";
 
 describe("Handoff Strategies", () => {
   describe("ZendeskStrategy", () => {

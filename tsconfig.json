@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@magi/*": ["./packages/*"],
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@test-utils/*": ["./__tests__/utils/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

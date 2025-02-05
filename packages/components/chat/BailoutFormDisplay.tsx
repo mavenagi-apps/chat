@@ -1,19 +1,29 @@
 "use client";
 
-import { useState, useActionState, useCallback } from "react";
+import {
+  useState,
+  useActionState,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import type { ActionFormField, AskStreamActionEvent } from "mavenagi/api";
 import Form from "next/form";
 import { Button, Input } from "@magi/ui";
 import { submitBailoutForm } from "@/app/actions";
 import { useParams } from "next/navigation";
+import { type UseChatResponse } from "@/packages/components/chat/use-chat";
 
 export default function BailoutFormDisplay({
   action,
   conversationId,
+  onSubmitSuccess,
 }: {
   action: AskStreamActionEvent;
   conversationId: string;
+  onSubmitSuccess: UseChatResponse["onBailoutFormSubmitSuccess"];
 }) {
+  const onSubmitSuccessSent = useRef(false);
   const { organizationId, agentId } = useParams();
   const formActionCallback = useCallback(
     async (formData: FormData) => {
@@ -49,6 +59,13 @@ export default function BailoutFormDisplay({
     }
     return "text";
   };
+
+  useEffect(() => {
+    if (state?.actionFormResponse && !onSubmitSuccessSent.current) {
+      onSubmitSuccess(state.actionFormResponse);
+      onSubmitSuccessSent.current = true;
+    }
+  }, [state?.actionFormResponse, onSubmitSuccess]);
 
   return (
     <div>

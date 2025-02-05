@@ -2,7 +2,10 @@
 
 import { getMavenAGIClient } from "@/app/index";
 import { type MavenAGIClient, type MavenAGI } from "mavenagi";
-import { type FeedbackType } from "mavenagi/api";
+import {
+  type FeedbackType,
+  type ConversationMessageResponse,
+} from "mavenagi/api";
 import { nanoid } from "nanoid";
 import { getAppSettings } from "@/app/api/server/utils";
 import { ServerHandoffStrategyFactory } from "@/lib/handoff/ServerHandoffStrategyFactory";
@@ -16,6 +19,20 @@ interface CreateOrUpdateFeedbackProps {
   feedbackType?: FeedbackType;
   feedbackText?: string;
   userId?: string;
+}
+
+function getActionFormResponse(
+  actionFormResponse: MavenAGI.ConversationResponse,
+  actionFormId: string,
+): ConversationMessageResponse.Bot | undefined {
+  const actionFormResponseMessage = actionFormResponse.messages.find(
+    (message) =>
+      message.type === "bot" &&
+      message.conversationMessageId.referenceId ===
+        `${actionFormId}-actionResponse-1-bot`,
+  );
+
+  return actionFormResponseMessage as ConversationMessageResponse.Bot;
 }
 
 export async function createOrUpdateFeedback({
@@ -144,11 +161,21 @@ export async function submitBailoutForm(_prevState: any, formData: FormData) {
       parameters,
     };
 
-    await client.conversation.submitActionForm(
+    const conversationResponse = await client.conversation.submitActionForm(
       conversationId as string,
       request,
     );
-    return { success: true, data: Object.fromEntries(formData) };
+
+    const actionFormResponse = getActionFormResponse(
+      conversationResponse,
+      actionFormId as string,
+    );
+
+    return {
+      success: true,
+      data: Object.fromEntries(formData),
+      actionFormResponse,
+    };
   } catch (error) {
     console.error("Error submitting bailout form", error);
     return { success: false, error: "Unknown error" };
