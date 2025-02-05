@@ -4,7 +4,7 @@ import {
   createUserMessage,
   createBotMessage,
   createZendeskEvent,
-} from "./test-helpers";
+} from "./test-utils";
 
 describe("ZendeskStrategy", () => {
   let strategy: ZendeskStrategy;
