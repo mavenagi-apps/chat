@@ -26,7 +26,7 @@ import { TypingIndicator } from "@magi/components/chat/TypingIndicator";
 function ChatPage() {
   const analytics = useAnalytics();
   const { agentId }: { organizationId: string; agentId: string } = useParams();
-  const { brandColor, logoUrl } = useSettings();
+  const { brandColor, branding } = useSettings();
   const [messagesContainerRef, messagesEndRef] =
     useScrollToBottom<HTMLDivElement>();
 
@@ -76,7 +76,7 @@ function ChatPage() {
 
   return (
     <main className="flex h-screen flex-col bg-gray-50">
-      <ChatHeader logoUrl={logoUrl} />
+      <ChatHeader logo={branding?.logo} />
       <Chat
         {...{
           agentName,

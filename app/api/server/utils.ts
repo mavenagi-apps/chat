@@ -27,6 +27,10 @@ export async function getAppSettings(
 ): Promise<ParsedAppSettings> {
   const client = getMavenAGIClient(organizationId, agentId);
   const settings = (await client.appSettings.get()) as unknown as AppSettings;
+  console.log("settings2", JSON.stringify(settings, null, 2));
+
+  // @deprecated Use `branding.logo` instead.
+  // settings.branding.logo = settings.branding.logo || settings.logoUrl;
 
   if (settings?.handoffConfiguration) {
     try {

@@ -101,13 +101,18 @@ export async function getPublicAppSettings(
   const client = getMavenAGIClient(organizationId, agentId);
   try {
     const settings = (await client.appSettings.get()) as unknown as AppSettings;
+    console.log("settings1", JSON.stringify(settings, null, 2));
+    // @deprecated Use `logo` instead.
+    // settings.branding.logo = settings.branding.logo || settings.logoUrl;
     const parsedHandoffConfiguration = parseHandoffConfiguration(
       settings.handoffConfiguration,
     );
 
     return {
       amplitudeApiKey: settings.amplitudeApiKey,
-      logoUrl: settings.logoUrl,
+      // branding: {
+      //   logo: settings.branding.logo,
+      // },
       popularQuestions: settings.popularQuestions,
       brandColor: settings.brandColor,
       brandFontColor: settings.brandFontColor,

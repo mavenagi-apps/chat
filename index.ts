@@ -13,6 +13,9 @@ const defaultModule = {
     organizationId: string;
     agentId: string;
   }) {
+    // @deprecated Use `branding.logo` instead.
+    settings.branding.logo = settings.branding.logo || settings.logoUrl;
+
     if (!settings.handoffConfiguration) {
       return;
     }

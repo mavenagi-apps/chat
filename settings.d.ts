@@ -1,5 +1,11 @@
 declare global {
   interface AppSettings {
+    branding: {
+      logo: string;
+    };
+    /**
+     * @deprecated Use `branding.logo` instead.
+     */
     logoUrl: string;
     brandColor: string;
     brandFontColor?: string;
