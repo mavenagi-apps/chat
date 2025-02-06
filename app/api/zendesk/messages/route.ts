@@ -17,12 +17,14 @@ export async function POST(request: NextRequest) {
     async (req, settings, _orgId, _agentId, userId, conversationId) => {
       const { message } = await req.json();
 
-      if (settings.handoffConfiguration?.type !== "zendesk") {
+      if (settings.misc.handoffConfiguration?.type !== "zendesk") {
         throw new Error("Zendesk Handoff configuration not found");
       }
 
       const [SunshineConversationsClient, zendeskConversationsAppId] =
-        await getSunshineConversationsClient(settings.handoffConfiguration);
+        await getSunshineConversationsClient(
+          settings.misc.handoffConfiguration,
+        );
 
       await postMessagesToZendeskConversation(
         SunshineConversationsClient,
@@ -59,7 +61,7 @@ export async function GET(request: NextRequest) {
       conversationId,
     ) => {
       const encoder = new TextEncoder();
-      const { handoffConfiguration } = settings;
+      const { handoffConfiguration } = settings.misc;
       const { webhookId } =
         (handoffConfiguration as ZendeskHandoffConfiguration) || {};
       if (!webhookId) {

@@ -26,8 +26,8 @@ export function useIdleMessage({
   const timer = useRef<NodeJS.Timeout>();
   const analytics = useAnalytics();
   const { agentId } = useParams();
-  const { handoffConfiguration } = useSettings();
-  const surveyLink = handoffConfiguration?.surveyLink;
+  const { misc } = useSettings();
+  const surveyLink = misc.handoffConfiguration?.surveyLink;
 
   const callAnalytics = useCallback(() => {
     analytics.logEvent(MagiEvent.idleMessageDisplay, {

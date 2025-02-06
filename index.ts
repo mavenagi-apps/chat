@@ -13,7 +13,7 @@ const defaultModule = {
     organizationId: string;
     agentId: string;
   }) {
-    if (!settings.handoffConfiguration) {
+    if (!settings.misc.handoffConfiguration) {
       return;
     }
 
@@ -22,7 +22,7 @@ const defaultModule = {
 
     try {
       const parsedHandoffConfiguration = JSON.parse(
-        settings.handoffConfiguration,
+        settings.misc.handoffConfiguration,
       );
       if (Array.isArray(parsedHandoffConfiguration?.escalationTopics)) {
         parsedHandoffConfiguration.escalationTopics.map((topic: string) => {

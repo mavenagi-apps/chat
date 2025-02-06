@@ -22,7 +22,18 @@ vi.mock("@/app/api/server/utils", () => ({
   ),
   generateAuthToken: vi.fn(() => "mock-auth-token"),
   verifyAuthToken: vi.fn(),
-  withAppSettings: vi.fn((req, handler) => handler(req, {}, "org1", "agent1")),
+  withAppSettings: vi.fn((req, handler) =>
+    handler(
+      req,
+      {
+        branding: {},
+        security: {},
+        misc: {},
+      },
+      "org1",
+      "agent1",
+    ),
+  ),
 }));
 
 describe("POST /api/create", () => {

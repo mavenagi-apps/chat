@@ -26,7 +26,7 @@ export default async function Page({
   const envPrefix = (await headers()).get("x-magi-env-prefix") ?? "";
   const { organizationId, agentId } = await params;
   const settings = await getPublicAppSettings(organizationId, agentId);
-  const brandColor = settings?.brandColor;
+  const brandColor = settings?.branding.brandColor;
 
   if (!organizationId || !agentId) {
     notFound();

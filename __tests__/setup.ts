@@ -42,7 +42,11 @@ vi.mock("@/lib/analytics/use-analytics", () => ({
 
 vi.mock("@/app/providers/SettingsProvider", () => ({
   useSettings: () => ({
-    brandColor: "#000000",
-    logoUrl: "https://www.mavenagi-static.com/logos/mavenagi.png",
+    branding: {
+      brandColor: "#000000",
+      logoUrl: "https://www.mavenagi-static.com/logos/mavenagi.png",
+    },
+    security: {},
+    misc: {},
   }),
 }));

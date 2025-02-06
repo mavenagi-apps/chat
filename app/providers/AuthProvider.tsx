@@ -21,13 +21,13 @@ export const AuthProvider = ({
   signedUserData: string | null;
   unsignedUserData: Record<string, any> | null;
 }>) => {
-  const { handoffConfiguration } = useSettings();
+  const { misc } = useSettings();
   const isAuthenticated = useMemo(() => {
-    if (handoffConfiguration?.allowAnonymousHandoff) {
+    if (misc.handoffConfiguration?.allowAnonymousHandoff) {
       return true;
     }
     return !!signedUserData;
-  }, [signedUserData, handoffConfiguration?.allowAnonymousHandoff]);
+  }, [signedUserData, misc.handoffConfiguration?.allowAnonymousHandoff]);
   const value = {
     signedUserData,
     unsignedUserData,

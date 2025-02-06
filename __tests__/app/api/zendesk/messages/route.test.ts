@@ -25,10 +25,14 @@ vi.mock("@/app/api/server/utils", () => ({
   ),
   withAppSettings: vi.fn((req, handler) =>
     handler(req, {
-      handoffConfiguration: {
-        type: "zendesk",
-        apiKey: "test-key",
-        apiSecret: "test-secret",
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: {
+          type: "zendesk",
+          apiKey: "test-key",
+          apiSecret: "test-secret",
+        },
       },
     }),
   ),

@@ -28,7 +28,8 @@ export async function generateSignedUserData(
 
   const privateKey = await importPrivateKey(DEMO_SIGNING_PRIVATE_KEY);
 
-  const { encryptionSecret } = await getAppSettings(organizationId, agentId);
+  const { security } = await getAppSettings(organizationId, agentId);
+  const { encryptionSecret } = security;
 
   if (!encryptionSecret) {
     throw new Error("Encryption secret not found");

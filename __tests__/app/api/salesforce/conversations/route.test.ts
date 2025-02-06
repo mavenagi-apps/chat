@@ -25,14 +25,18 @@ vi.mock("@/app/api/server/utils", () => ({
     handler(
       req,
       {
-        handoffConfiguration: {
-          type: "salesforce",
-          chatHostUrl: "https://test.salesforce.com",
-          chatButtonId: "test-button-id",
-          deploymentId: "test-deployment-id",
-          orgId: "test-org-id",
-          eswLiveAgentDevName: "test-dev-name",
-          apiSecret: "test-secret",
+        branding: {},
+        security: {},
+        misc: {
+          handoffConfiguration: {
+            type: "salesforce",
+            chatHostUrl: "https://test.salesforce.com",
+            chatButtonId: "test-button-id",
+            deploymentId: "test-deployment-id",
+            orgId: "test-org-id",
+            eswLiveAgentDevName: "test-dev-name",
+            apiSecret: "test-secret",
+          },
         },
       },
       "test-org-id",
@@ -130,9 +134,13 @@ describe("POST /api/salesforce/conversations", () => {
         handler(
           req,
           {
-            handoffConfiguration: {
-              // @ts-expect-error - invalid type
-              type: "invalid",
+            branding: {},
+            security: {},
+            misc: {
+              handoffConfiguration: {
+                // @ts-expect-error - invalid type
+                type: "invalid",
+              },
             },
           },
           "test-org-id",

@@ -64,7 +64,7 @@ export default function Chat({
   initializeHandoff,
 }: React.PropsWithChildren<ChatProps>) {
   const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
-  const { brandColor, brandFontColor, disableAttachments } = useSettings();
+  const { branding, misc } = useSettings();
   useIdleMessage({
     messages: messages as ChatMessage[],
     conversationId,
@@ -84,8 +84,8 @@ export default function Chat({
   }, [messages]);
 
   const disableAttachmentsOrIsHandoff = useMemo(
-    () => disableAttachments || isHandoff,
-    [disableAttachments, isHandoff],
+    () => misc.disableAttachments || isHandoff,
+    [misc.disableAttachments, isHandoff],
   );
 
   return (
@@ -108,8 +108,8 @@ export default function Chat({
         className={clsx(className, "flex w-full flex-1 flex-col overflow-auto")}
         style={{
           // @ts-expect-error css variable
-          "--brand-color": brandColor,
-          "--brand-font-color": brandFontColor || "#FFFFFF",
+          "--brand-color": branding.brandColor,
+          "--brand-font-color": branding.brandFontColor || "#FFFFFF",
         }}
       >
         {children}

@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { isHandoffAvailable } from "@/app/actions";
+import { isHandoffAvailable, getPublicAppSettings } from "@/app/actions";
 import { getAppSettings } from "@/app/api/server/utils";
 import { ServerHandoffStrategyFactory } from "@/lib/handoff/ServerHandoffStrategyFactory";
+import { getMavenAGIClient } from "@/app";
+
+vi.mock("@/app", () => ({
+  getMavenAGIClient: vi.fn(),
+}));
 
 vi.mock("@/app/api/server/utils", () => ({
   getAppSettings: vi.fn(),
@@ -25,8 +30,12 @@ describe("isHandoffAvailable", () => {
 
   it("returns true when no strategy is available", async () => {
     vi.mocked(getAppSettings).mockResolvedValue({
-      handoffConfiguration: {
-        type: "unknown",
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: {
+          type: "unknown",
+        },
       },
     } as any);
 
@@ -40,8 +49,12 @@ describe("isHandoffAvailable", () => {
 
   it("returns true when strategy has no availability check", async () => {
     vi.mocked(getAppSettings).mockResolvedValue({
-      handoffConfiguration: {
-        type: "salesforce",
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: {
+          type: "salesforce",
+        },
       },
     } as any);
 
@@ -55,8 +68,12 @@ describe("isHandoffAvailable", () => {
 
   it("returns availability check result when available", async () => {
     vi.mocked(getAppSettings).mockResolvedValue({
-      handoffConfiguration: {
-        type: "salesforce",
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: {
+          type: "salesforce",
+        },
       },
     } as any);
 
@@ -70,8 +87,12 @@ describe("isHandoffAvailable", () => {
 
   it("returns true on error during availability check", async () => {
     vi.mocked(getAppSettings).mockResolvedValue({
-      handoffConfiguration: {
-        type: "salesforce",
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: {
+          type: "salesforce",
+        },
       },
     } as any);
 
@@ -96,7 +117,11 @@ describe("isHandoffAvailable", () => {
     };
 
     vi.mocked(getAppSettings).mockResolvedValue({
-      handoffConfiguration: config,
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: config,
+      },
     } as any);
 
     vi.mocked(ServerHandoffStrategyFactory.createStrategy).mockReturnValue({
@@ -108,6 +133,122 @@ describe("isHandoffAvailable", () => {
     expect(ServerHandoffStrategyFactory.createStrategy).toHaveBeenCalledWith(
       config.type,
       config,
+    );
+  });
+});
+
+describe("getPublicAppSettings", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubGlobal("console", { ...console, error: vi.fn() });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("returns null when organizationId is missing", async () => {
+    const result = await getPublicAppSettings("", "agent-id");
+    expect(result).toBeNull();
+  });
+
+  it("returns null when agentId is missing", async () => {
+    const result = await getPublicAppSettings("org-id", "");
+    expect(result).toBeNull();
+  });
+
+  it("transforms settings correctly", async () => {
+    const mockClient = {
+      appSettings: {
+        get: vi.fn().mockResolvedValue({
+          branding: {
+            logoUrl: "logo.png",
+            brandColor: "#000",
+          },
+          security: {
+            embedAllowList: ["domain.com"],
+          },
+          misc: {
+            amplitudeApiKey: "test-key",
+            disableAttachments: true,
+            handoffConfiguration: JSON.stringify({
+              type: "salesforce",
+              enableAvailabilityCheck: true,
+              surveyLink: "survey.com",
+              availabilityFallbackMessage: "message",
+              allowAnonymousHandoff: true,
+              apiSecret: "secret", // This should not be included in client settings
+            }),
+          },
+        }),
+      },
+    };
+
+    vi.mocked(getMavenAGIClient).mockReturnValue(mockClient as any);
+
+    const result = await getPublicAppSettings("org-id", "agent-id");
+
+    expect(result).toEqual({
+      branding: {
+        logoUrl: "logo.png",
+        brandColor: "#000",
+      },
+      security: {
+        embedAllowList: ["domain.com"],
+      },
+      misc: {
+        amplitudeApiKey: "test-key",
+        disableAttachments: true,
+        handoffConfiguration: {
+          type: "salesforce",
+          enableAvailabilityCheck: true,
+          surveyLink: "survey.com",
+          availabilityFallbackMessage: "message",
+          allowAnonymousHandoff: true,
+        },
+      },
+    });
+  });
+
+  it("handles invalid handoff configuration", async () => {
+    const mockClient = {
+      appSettings: {
+        get: vi.fn().mockResolvedValue({
+          branding: {},
+          security: {},
+          misc: {
+            handoffConfiguration: "invalid-json",
+          },
+        }),
+      },
+    };
+
+    vi.mocked(getMavenAGIClient).mockReturnValue(mockClient as any);
+
+    const result = await getPublicAppSettings("org-id", "agent-id");
+
+    expect(result?.misc.handoffConfiguration).toBeUndefined();
+    expect(console.error).toHaveBeenCalledWith(
+      "Error parsing handoff configuration:",
+      expect.any(Error),
+    );
+  });
+
+  it("returns null on error", async () => {
+    const mockClient = {
+      appSettings: {
+        get: vi.fn().mockRejectedValue(new Error("Failed to fetch")),
+      },
+    };
+
+    vi.mocked(getMavenAGIClient).mockReturnValue(mockClient as any);
+
+    const result = await getPublicAppSettings("org-id", "agent-id");
+
+    expect(result).toBeNull();
+    expect(console.error).toHaveBeenCalledWith(
+      "Error fetching app settings:",
+      expect.any(Error),
     );
   });
 });

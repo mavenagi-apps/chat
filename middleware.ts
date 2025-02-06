@@ -58,9 +58,9 @@ const processSecuritySettings = (
   appSettings: ParsedAppSettings,
   request: NextRequest,
 ): { headers?: string; blocked: boolean } => {
-  const allowlist = [...(appSettings.embedAllowlist || [])];
+  const allowlist = [...(appSettings.security.embedAllowList || [])];
   const enableDemoSite = ["true", "1"].includes(
-    appSettings.enableDemoSite || "",
+    appSettings.branding.enableDemoSite || "",
   );
   const referrer = request.headers.get("referer");
 
@@ -131,7 +131,7 @@ export async function middleware(request: NextRequest) {
             secFetchMode: request.headers.get("sec-fetch-mode"),
             isAllowedDomain: isAllowedDomain(
               request.headers.get("referer"),
-              appSettings.embedAllowlist || [],
+              appSettings.security.embedAllowList || [],
             ),
           });
         }

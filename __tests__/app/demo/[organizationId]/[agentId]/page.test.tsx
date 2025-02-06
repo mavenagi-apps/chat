@@ -41,7 +41,11 @@ describe("DemoPage", () => {
     vi.clearAllMocks();
     vi.mocked(headers).mockResolvedValue(mockHeaders);
     vi.mocked(getPublicAppSettings).mockResolvedValue({
-      brandColor: "#123456",
+      branding: {
+        brandColor: "#123456",
+      },
+      security: {},
+      misc: {},
     });
     vi.mocked(generateSignedUserData).mockResolvedValue("mock-signed-data");
   });
@@ -195,7 +199,11 @@ describe("DemoPage", () => {
 
   describe("when brand color is not set", () => {
     test("should use default background color", async () => {
-      vi.mocked(getPublicAppSettings).mockResolvedValue({});
+      vi.mocked(getPublicAppSettings).mockResolvedValue({
+        branding: {},
+        security: {},
+        misc: {},
+      } as any);
 
       const { container } = render(
         await DemoPage({

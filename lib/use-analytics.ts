@@ -4,7 +4,7 @@ import { useSettings } from "@/app/providers/SettingsProvider";
 import type { MagiProduct, MagiEvent } from "@/lib/analytics/events";
 
 export function useAnalytics() {
-  const { amplitudeApiKey } = useSettings();
+  const { misc } = useSettings();
   const [analyticsReady, setAnalyticsReady] = useState(false);
   const [logEventsQueue, setLogEventsQueue] = useState<
     { event: MagiEvent; properties: Record<string, any> }[]
@@ -43,11 +43,11 @@ export function useAnalytics() {
   });
 
   useEffect(() => {
-    if (amplitudeApiKey) {
-      setAnalytics(Analytics.getInstance(amplitudeApiKey));
+    if (misc.amplitudeApiKey) {
+      setAnalytics(Analytics.getInstance(misc.amplitudeApiKey as string));
       setAnalyticsReady(true);
     }
-  }, [amplitudeApiKey]);
+  }, [misc.amplitudeApiKey]);
 
   useEffect(() => {
     if (analyticsReady) {

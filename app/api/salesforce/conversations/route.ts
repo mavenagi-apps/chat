@@ -26,7 +26,7 @@ function containsChatRequestSuccess(messages: SalesforceChatMessage[]) {
 export async function POST(req: NextRequest) {
   return withAppSettings(req, async (req, settings) => {
     const originalReferrer = req.headers.get("referer") || "unknown";
-    const { handoffConfiguration } = settings;
+    const { handoffConfiguration } = settings.misc;
     if (handoffConfiguration?.type !== "salesforce") {
       return NextResponse.json(
         {

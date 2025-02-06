@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       _conversationId,
       authPayload,
     ) => {
-      const { handoffConfiguration } = settings;
+      const { handoffConfiguration } = settings.misc;
       const validationError = validateSalesforceConfig(handoffConfiguration);
       if (validationError) return validationError;
 

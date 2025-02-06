@@ -107,7 +107,7 @@ Claiming email address: ${email}`,
 export async function POST(req: NextRequest) {
   return withAppSettings(req, async (request, settings) => {
     const { messages, signedUserData, email } = await request.json();
-    const { handoffConfiguration } = settings;
+    const { handoffConfiguration } = settings.misc;
 
     if (handoffConfiguration?.type !== "zendesk") {
       return NextResponse.json(

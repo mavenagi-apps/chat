@@ -17,6 +17,7 @@ import {
   AGENT_HEADER,
   HANDOFF_AUTH_HEADER,
 } from "@/app/constants/authentication";
+import { adaptLegacySettings } from "@/lib/settings";
 
 const CONVERSATIONS_API_PRIVATE_KEY = process.env.CONVERSATIONS_API_PRIVATE_KEY;
 const CONVERSATIONS_API_PUBLIC_KEY = process.env.CONVERSATIONS_API_PUBLIC_KEY;
@@ -26,19 +27,23 @@ export async function getAppSettings(
   agentId: string,
 ): Promise<ParsedAppSettings> {
   const client = getMavenAGIClient(organizationId, agentId);
-  const settings = (await client.appSettings.get()) as unknown as AppSettings;
+  const legacySettings =
+    (await client.appSettings.get()) as unknown as InterimAppSettings;
+  const settings = adaptLegacySettings(legacySettings);
 
-  if (settings?.handoffConfiguration) {
+  if (settings.misc?.handoffConfiguration) {
     try {
-      settings.handoffConfiguration = JSON.parse(settings.handoffConfiguration);
+      settings.misc.handoffConfiguration = JSON.parse(
+        settings.misc.handoffConfiguration,
+      );
     } catch (error) {
       console.error("Failed to parse handoff configuration:", error);
-      settings.handoffConfiguration = undefined;
+      settings.misc.handoffConfiguration = undefined;
     }
   }
 
-  const handoffConfiguration =
-    settings?.handoffConfiguration as unknown as HandoffConfiguration;
+  const handoffConfiguration = settings.misc
+    ?.handoffConfiguration as unknown as HandoffConfiguration;
   if (handoffConfiguration?.type === "front") {
     handoffConfiguration.channelName ??= `${organizationId}-${agentId}`;
   }
@@ -85,20 +90,20 @@ export async function decryptAndVerifySignedUserData(
   settings: ParsedAppSettings,
 ): Promise<JWTPayload> {
   // 1. Get and validate settings
-  const { encryptionSecret, jwtPublicKey } = settings;
-  validateSettings(encryptionSecret, jwtPublicKey);
+  const { security } = settings;
+  validateSettings(security?.encryptionSecret, security?.jwtPublicKey);
 
   try {
     // 2. Decrypt the JWT
     const { jwt: decryptedJWT } = await decryptJWT(
       encryptedJWT,
-      encryptionSecret!,
+      security.encryptionSecret!,
     );
 
     // 3. Verify the JWT signature
     const verifiedPayload = await verifyJWTSignature(
       decryptedJWT as string,
-      jwtPublicKey!,
+      security.jwtPublicKey!,
     );
 
     const { iat: _iat, exp: _exp, ...verifiedUserData } = verifiedPayload;
@@ -192,7 +197,7 @@ export async function withApiAuthentication<T>(
     throw new Error("Missing API token");
   }
 
-  if (!settings?.handoffConfiguration?.apiSecret) {
+  if (!settings?.misc.handoffConfiguration?.apiSecret) {
     throw new Error("API secret not configured");
   }
 
@@ -201,7 +206,7 @@ export async function withApiAuthentication<T>(
   let authPayload: AuthJWTPayload;
   try {
     const encoder = new TextEncoder();
-    const secret = encoder.encode(settings.handoffConfiguration.apiSecret);
+    const secret = encoder.encode(settings.misc.handoffConfiguration.apiSecret);
     const { payload } = await jwtVerify(apiToken, secret);
     userId = payload.userId as string;
     conversationId = payload.conversationId as string;

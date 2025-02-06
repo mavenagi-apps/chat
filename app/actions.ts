@@ -8,6 +8,7 @@ import {
 } from "mavenagi/api";
 import { nanoid } from "nanoid";
 import { getAppSettings } from "@/app/api/server/utils";
+import { adaptLegacySettings } from "@/lib/settings";
 import { ServerHandoffStrategyFactory } from "@/lib/handoff/ServerHandoffStrategyFactory";
 
 interface CreateOrUpdateFeedbackProps {
@@ -77,8 +78,8 @@ export async function createOrUpdateFeedback({
 }
 
 const parseHandoffConfiguration = (
-  handoffConfiguration: AppSettings["handoffConfiguration"],
-): ClientSafeAppSettings["handoffConfiguration"] | undefined => {
+  handoffConfiguration: AppSettings["misc"]["handoffConfiguration"] | undefined,
+): ClientSafeAppSettings["misc"]["handoffConfiguration"] | undefined => {
   if (!handoffConfiguration) {
     return undefined;
   }
@@ -86,7 +87,7 @@ const parseHandoffConfiguration = (
   try {
     const parsedHandoffConfiguration = JSON.parse(
       handoffConfiguration,
-    ) as ClientSafeAppSettings["handoffConfiguration"];
+    ) as ClientSafeAppSettings["misc"]["handoffConfiguration"];
 
     if (!parsedHandoffConfiguration?.type) {
       return undefined;
@@ -117,24 +118,23 @@ export async function getPublicAppSettings(
 
   const client = getMavenAGIClient(organizationId, agentId);
   try {
-    const settings = (await client.appSettings.get()) as unknown as AppSettings;
+    const legacySettings =
+      (await client.appSettings.get()) as unknown as InterimAppSettings;
+    const settings = adaptLegacySettings(legacySettings);
     const parsedHandoffConfiguration = parseHandoffConfiguration(
-      settings.handoffConfiguration,
+      settings.misc?.handoffConfiguration,
     );
 
     return {
-      amplitudeApiKey: settings.amplitudeApiKey,
-      logoUrl: settings.logoUrl,
-      popularQuestions: settings.popularQuestions,
-      brandColor: settings.brandColor,
-      brandFontColor: settings.brandFontColor,
-      enableDemoSite: settings.enableDemoSite,
-      embedAllowlist: settings.embedAllowlist,
-      welcomeMessage: settings.welcomeMessage,
-      disableAttachments: settings.disableAttachments,
-      // Do not pass the full handoffConfiguration object to the client
-      // because it contains sensitive information that should not be exposed
-      handoffConfiguration: parsedHandoffConfiguration,
+      branding: settings.branding,
+      security: {
+        embedAllowList: settings.security?.embedAllowList,
+      },
+      misc: {
+        amplitudeApiKey: settings.misc?.amplitudeApiKey,
+        disableAttachments: settings.misc?.disableAttachments,
+        handoffConfiguration: parsedHandoffConfiguration,
+      },
     };
   } catch (error) {
     console.error("Error fetching app settings:", error);
@@ -187,14 +187,11 @@ export async function isHandoffAvailable(
   agentId: string,
 ) {
   try {
-    const { handoffConfiguration } = await getAppSettings(
-      organizationId,
-      agentId,
-    );
+    const settings = await getAppSettings(organizationId, agentId);
 
     const strategy = ServerHandoffStrategyFactory.createStrategy(
-      handoffConfiguration?.type,
-      handoffConfiguration as HandoffConfiguration,
+      settings.misc.handoffConfiguration?.type,
+      settings.misc.handoffConfiguration as HandoffConfiguration,
     );
 
     if (!strategy) {
