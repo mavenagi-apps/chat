@@ -236,7 +236,8 @@ export async function createApplicationChannelClient(
   config: FrontHandoffConfiguration,
 ) {
   const channelName = config.channelName;
-  // include appId in cache key to avoid conflicts between different front installations
+  // include agent in cache key to avoid conflicts between different front installations
+  // if the same channel name is used across customers
   const cacheKey = `front-channel-${organizationId}-${agentId}-${channelName}`;
   const channelCache = await getChannelCache();
   let channelId = await channelCache.get<string>(cacheKey);
