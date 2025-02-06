@@ -26,10 +26,14 @@ vi.mock("@/app/api/server/utils", () => ({
   ),
   withAppSettings: vi.fn((req, handler) =>
     handler(req, {
-      handoffConfiguration: {
-        type: "zendesk",
-        apiKey: "test-key",
-        apiSecret: "test-secret",
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: {
+          type: "zendesk",
+          apiKey: "test-key",
+          apiSecret: "test-secret",
+        },
       },
     }),
   ),
@@ -122,11 +126,15 @@ describe("POST /api/zendesk/conversations", () => {
         handler(
           req,
           {
-            handoffConfiguration: {
-              type: "zendesk",
-              apiSecret: "test-secret",
-              // Remove the apiKey from the handoff configuration
-            } as HandoffConfiguration,
+            branding: {},
+            security: {},
+            misc: {
+              handoffConfiguration: {
+                type: "zendesk",
+                apiSecret: "test-secret",
+                // Remove the apiKey from the handoff configuration
+              } as HandoffConfiguration,
+            },
           } as ParsedAppSettings,
           "test-org-id",
           "test-agent-id",

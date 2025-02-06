@@ -1,14 +1,10 @@
 import { renderHook, act } from "@testing-library/react";
 import { useHandoff } from "@/lib/useHandoff";
-import { useSettings } from "@/app/providers/SettingsProvider";
 import { HandoffStatus } from "@/app/constants/handoff";
 import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
 import type { Message, UserChatMessage, IncomingHandoffEvent } from "@/types";
 import { HandoffStrategyFactory } from "@/lib/handoff/HandoffStrategyFactory";
-import {
-  SALESFORCE_MESSAGE_TYPES,
-  SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION,
-} from "@/types/salesforce";
+import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
 import { streamResponse } from "@/lib/handoff/streamUtils";
 
 // Mock the required providers and hooks
@@ -21,8 +17,12 @@ vi.mock("next/dist/client/components/navigation", () => ({
 
 vi.mock("@/app/providers/SettingsProvider", () => ({
   useSettings: vi.fn(() => ({
-    handoffConfiguration: {
-      type: "zendesk",
+    branding: {},
+    security: {},
+    misc: {
+      handoffConfiguration: {
+        type: "zendesk",
+      },
     },
   })),
 }));

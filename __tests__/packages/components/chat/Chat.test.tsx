@@ -30,9 +30,14 @@ describe("Chat", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseSettings.mockReturnValue({
-      brandColor: "#000000",
-      brandFontColor: "#FFFFFF",
-      disableAttachments: false,
+      branding: {
+        brandColor: "#000000",
+        brandFontColor: "#FFFFFF",
+      },
+      misc: {
+        disableAttachments: false,
+      },
+      security: {},
     });
   });
 
@@ -193,9 +198,14 @@ describe("Chat", () => {
 
     // Test when disableAttachments is true
     mockUseSettings.mockReturnValue({
-      brandColor: "#000000",
-      brandFontColor: "#FFFFFF",
-      disableAttachments: true,
+      branding: {
+        brandColor: "#000000",
+        brandFontColor: "#FFFFFF",
+      },
+      misc: {
+        disableAttachments: true,
+      },
+      security: {},
     });
     rerender(
       <Chat {...defaultProps} isHandoff={false}>

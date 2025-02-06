@@ -25,8 +25,12 @@ describe("isHandoffAvailable", () => {
 
   it("returns true when no strategy is available", async () => {
     vi.mocked(getAppSettings).mockResolvedValue({
-      handoffConfiguration: {
-        type: "unknown",
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: {
+          type: "unknown",
+        },
       },
     } as any);
 
@@ -40,8 +44,12 @@ describe("isHandoffAvailable", () => {
 
   it("returns true when strategy has no availability check", async () => {
     vi.mocked(getAppSettings).mockResolvedValue({
-      handoffConfiguration: {
-        type: "salesforce",
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: {
+          type: "salesforce",
+        },
       },
     } as any);
 
@@ -55,8 +63,12 @@ describe("isHandoffAvailable", () => {
 
   it("returns availability check result when available", async () => {
     vi.mocked(getAppSettings).mockResolvedValue({
-      handoffConfiguration: {
-        type: "salesforce",
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: {
+          type: "salesforce",
+        },
       },
     } as any);
 
@@ -70,8 +82,12 @@ describe("isHandoffAvailable", () => {
 
   it("returns true on error during availability check", async () => {
     vi.mocked(getAppSettings).mockResolvedValue({
-      handoffConfiguration: {
-        type: "salesforce",
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: {
+          type: "salesforce",
+        },
       },
     } as any);
 
@@ -96,7 +112,11 @@ describe("isHandoffAvailable", () => {
     };
 
     vi.mocked(getAppSettings).mockResolvedValue({
-      handoffConfiguration: config,
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: config,
+      },
     } as any);
 
     vi.mocked(ServerHandoffStrategyFactory.createStrategy).mockReturnValue({

@@ -9,10 +9,14 @@ vi.mock("@/app/api/server/utils", () => ({
     handler(
       req,
       {
-        handoffConfiguration: {
-          type: "salesforce",
-          chatHostUrl: "https://test.salesforce.com",
-          apiSecret: "test-secret",
+        branding: {},
+        security: {},
+        misc: {
+          handoffConfiguration: {
+            type: "salesforce",
+            chatHostUrl: "https://test.salesforce.com",
+            apiSecret: "test-secret",
+          },
         },
       },
       "test-org-id",

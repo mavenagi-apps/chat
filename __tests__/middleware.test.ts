@@ -5,8 +5,13 @@ import { getAppSettings } from "@/app/api/server/utils";
 
 vi.mock("@/app/api/server/utils", () => ({
   getAppSettings: vi.fn().mockResolvedValue({
-    embedAllowlist: [],
-    enableDemoSite: "false",
+    security: {
+      embedAllowList: [],
+    },
+    branding: {
+      enableDemoSite: "false",
+    },
+    misc: {},
   }),
 }));
 
@@ -130,8 +135,13 @@ describe("Middleware", () => {
         describe(name, () => {
           beforeEach(() => {
             (getAppSettings as ReturnType<typeof vi.fn>).mockResolvedValue({
-              embedAllowlist: ["allowed-domain.com"],
-              enableDemoSite: "false",
+              security: {
+                embedAllowList: ["allowed-domain.com"],
+              },
+              branding: {
+                enableDemoSite: "false",
+              },
+              misc: {},
             });
             if (cspDisabled) {
               vi.stubEnv("ORGANIZATIONS_WITH_CSP_DISABLED", "org123,secondOrg");

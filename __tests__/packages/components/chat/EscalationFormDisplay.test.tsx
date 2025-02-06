@@ -27,9 +27,13 @@ vi.mock("@/app/providers/AuthProvider", () => ({
 
 vi.mock("@/app/providers/SettingsProvider", () => ({
   useSettings: vi.fn().mockReturnValue({
-    handoffConfiguration: {
-      enableAvailabilityCheck: false,
-      availabilityFallbackMessage: "agents_unavailable",
+    branding: {},
+    security: {},
+    misc: {
+      handoffConfiguration: {
+        enableAvailabilityCheck: false,
+        availabilityFallbackMessage: "agents_unavailable",
+      },
     },
   }),
 }));
@@ -55,6 +59,7 @@ const mockProviderValue = {
   conversationId: "test-conv-id",
   messages: [],
   shouldSupressHandoffInputDisplay: false,
+  disableAttachments: false,
 };
 
 describe("EscalationFormDisplay", () => {
@@ -65,9 +70,13 @@ describe("EscalationFormDisplay", () => {
       agentId: "agent-id",
     });
     (useSettings as any).mockReturnValue({
-      handoffConfiguration: {
-        enableAvailabilityCheck: false,
-        availabilityFallbackMessage: "agents_unavailable",
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: {
+          enableAvailabilityCheck: false,
+          availabilityFallbackMessage: "agents_unavailable",
+        },
       },
     });
   });
@@ -89,9 +98,13 @@ describe("EscalationFormDisplay", () => {
 
     (useAuth as any).mockReturnValue({ isAuthenticated });
     (useSettings as any).mockReturnValue({
-      handoffConfiguration: {
-        enableAvailabilityCheck,
-        availabilityFallbackMessage,
+      branding: {},
+      security: {},
+      misc: {
+        handoffConfiguration: {
+          enableAvailabilityCheck,
+          availabilityFallbackMessage,
+        },
       },
     });
     (isHandoffAvailable as any).mockResolvedValue(isAvailable);

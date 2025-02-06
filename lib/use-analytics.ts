@@ -43,8 +43,9 @@ export function useAnalytics() {
   });
 
   useEffect(() => {
+    const disableAmplitude = misc.disableAttachments;
     if (misc.amplitudeApiKey) {
-      setAnalytics(Analytics.getInstance(misc.amplitudeApiKey));
+      setAnalytics(Analytics.getInstance(misc.amplitudeApiKey as string));
       setAnalyticsReady(true);
     }
   }, [misc.amplitudeApiKey]);

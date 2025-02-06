@@ -92,11 +92,11 @@ declare global {
   interface ClientSafeAppSettings {
     branding: AppSettings["branding"];
     security: {
-      embedAllowList: AppSettings["security"]["embedAllowList"];
+      embedAllowList?: AppSettings["security"]["embedAllowList"];
     };
     misc: {
-      amplitudeApiKey: AppSettings["misc"]["amplitudeApiKey"];
-      disableAttachments: AppSettings["misc"]["disableAttachments"];
+      amplitudeApiKey?: AppSettings["misc"]["amplitudeApiKey"];
+      disableAttachments?: AppSettings["misc"]["disableAttachments"];
       handoffConfiguration?: ClientSafeHandoffConfig;
     };
   }
