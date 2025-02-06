@@ -6,7 +6,7 @@ import { getAppSettings } from "@/app/api/server/utils";
 vi.mock("@/app/api/server/utils", () => ({
   getAppSettings: vi.fn().mockResolvedValue({
     security: {
-      embedAllowList: [],
+      embedAllowlist: [],
     },
     branding: {
       enableDemoSite: "false",
@@ -136,7 +136,7 @@ describe("Middleware", () => {
           beforeEach(() => {
             (getAppSettings as ReturnType<typeof vi.fn>).mockResolvedValue({
               security: {
-                embedAllowList: ["allowed-domain.com"],
+                embedAllowlist: ["allowed-domain.com"],
               },
               branding: {
                 enableDemoSite: "false",

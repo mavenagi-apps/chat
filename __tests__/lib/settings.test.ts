@@ -34,7 +34,7 @@ describe("adaptLegacySettings", () => {
       },
       security: {
         jwtPublicKey: "legacy-jwt",
-        embedAllowList: ["legacy-domain"],
+        embedAllowlist: ["legacy-domain"],
         encryptionSecret: "legacy-secret",
       },
       misc: {
@@ -88,7 +88,7 @@ describe("adaptLegacySettings", () => {
       },
       security: {
         jwtPublicKey: undefined,
-        embedAllowList: undefined,
+        embedAllowlist: undefined,
         encryptionSecret: undefined,
       },
       misc: {
@@ -119,7 +119,7 @@ describe("adaptLegacySettings", () => {
       },
       security: {
         jwtPublicKey: undefined,
-        embedAllowList: undefined,
+        embedAllowlist: undefined,
         encryptionSecret: undefined,
       },
       misc: {

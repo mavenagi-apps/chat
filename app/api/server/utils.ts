@@ -29,6 +29,7 @@ export async function getAppSettings(
   const client = getMavenAGIClient(organizationId, agentId);
   const legacySettings =
     (await client.appSettings.get()) as unknown as InterimAppSettings;
+  console.log("legacySettings", legacySettings);
   const settings = adaptLegacySettings(legacySettings);
 
   if (settings.misc?.handoffConfiguration) {

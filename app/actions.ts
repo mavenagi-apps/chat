@@ -128,7 +128,7 @@ export async function getPublicAppSettings(
     return {
       branding: settings.branding,
       security: {
-        embedAllowList: settings.security?.embedAllowList,
+        embedAllowlist: settings.security?.embedAllowlist,
       },
       misc: {
         amplitudeApiKey: settings.misc?.amplitudeApiKey,

@@ -166,7 +166,7 @@ describe("getPublicAppSettings", () => {
             brandColor: "#000",
           },
           security: {
-            embedAllowList: ["domain.com"],
+            embedAllowlist: ["domain.com"],
           },
           misc: {
             amplitudeApiKey: "test-key",
@@ -194,7 +194,7 @@ describe("getPublicAppSettings", () => {
         brandColor: "#000",
       },
       security: {
-        embedAllowList: ["domain.com"],
+        embedAllowlist: ["domain.com"],
       },
       misc: {
         amplitudeApiKey: "test-key",
