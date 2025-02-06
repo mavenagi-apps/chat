@@ -160,4 +160,30 @@ describe("adaptLegacySettings", () => {
 
     expect(result.branding.popularQuestions).toBe("q3,q4");
   });
+
+  it("correctly adapts embedAllowlist from both legacy and new formats", () => {
+    const legacySettings = {
+      embedAllowlist: ["legacy.com"],
+      security: {
+        embedAllowlist: ["new.com"],
+      },
+      branding: {},
+      misc: {},
+    };
+
+    const result = adaptLegacySettings(legacySettings);
+
+    expect(result.security.embedAllowlist).toEqual(["new.com"]);
+
+    const legacyOnlySettings = {
+      embedAllowlist: ["legacy.com"],
+      security: {},
+      branding: {},
+      misc: {},
+    };
+
+    const legacyResult = adaptLegacySettings(legacyOnlySettings);
+
+    expect(legacyResult.security.embedAllowlist).toEqual(["legacy.com"]);
+  });
 });
