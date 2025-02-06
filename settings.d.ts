@@ -26,7 +26,7 @@ declare global {
     };
     security: {
       jwtPublicKey?: string;
-      embedAllowList?: string[];
+      embedAllowlist?: string[];
       encryptionSecret?: string;
     };
     misc: {
@@ -92,7 +92,7 @@ declare global {
   interface ClientSafeAppSettings {
     branding: AppSettings["branding"];
     security: {
-      embedAllowList?: AppSettings["security"]["embedAllowList"];
+      embedAllowlist?: AppSettings["security"]["embedAllowlist"];
     };
     misc: {
       amplitudeApiKey?: AppSettings["misc"]["amplitudeApiKey"];

@@ -24,8 +24,8 @@ export function adaptLegacySettings(settings: InterimAppSettings): AppSettings {
   // Set security properties
   adapted.security = {
     jwtPublicKey: settings.security?.jwtPublicKey ?? settings.jwtPublicKey,
-    embedAllowList:
-      settings.security?.embedAllowList ?? settings.embedAllowlist,
+    embedAllowlist:
+      settings.security?.embedAllowlist ?? settings.embedAllowlist,
     encryptionSecret:
       settings.security?.encryptionSecret ?? settings.encryptionSecret,
   };

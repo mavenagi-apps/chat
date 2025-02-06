@@ -58,7 +58,7 @@ const processSecuritySettings = (
   appSettings: ParsedAppSettings,
   request: NextRequest,
 ): { headers?: string; blocked: boolean } => {
-  const allowlist = [...(appSettings.security.embedAllowList || [])];
+  const allowlist = [...(appSettings.security.embedAllowlist || [])];
   const enableDemoSite = ["true", "1"].includes(
     appSettings.branding.enableDemoSite || "",
   );
@@ -103,6 +103,7 @@ export async function middleware(request: NextRequest) {
 
     try {
       const appSettings = await getAppSettings(organizationId, agentId);
+      console.log("appSettings", appSettings);
       const security = processSecuritySettings(appSettings, request);
       const ENABLE_CSP_LOGGING = process.env.ENABLE_CSP_LOGGING === "true";
       const ORGANIZATIONS_WITH_CSP_DISABLED =
@@ -131,7 +132,7 @@ export async function middleware(request: NextRequest) {
             secFetchMode: request.headers.get("sec-fetch-mode"),
             isAllowedDomain: isAllowedDomain(
               request.headers.get("referer"),
-              appSettings.security.embedAllowList || [],
+              appSettings.security.embedAllowlist || [],
             ),
           });
         }
