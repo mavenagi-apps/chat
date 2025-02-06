@@ -16,7 +16,7 @@ const KEEP_ALIVE_INTERVAL = 30000;
 export async function POST(request: NextRequest) {
   return withSettingsAndAuthentication(
     request,
-    async (req, settings, _orgId, _agentId, _userId, conversationId) => {
+    async (req, settings, orgId, agentId, _userId, conversationId) => {
       const { message, signedUserData } = (await req.json()) as {
         message: string;
         signedUserData: string;
@@ -36,8 +36,11 @@ export async function POST(request: NextRequest) {
 
       const { handoffConfiguration } = settings.misc;
 
-      const frontClient =
-        await createApplicationChannelClient(handoffConfiguration);
+      const frontClient = await createApplicationChannelClient(
+        orgId,
+        agentId,
+        handoffConfiguration,
+      );
 
       await postMavenMessagesToFront({
         conversationId,

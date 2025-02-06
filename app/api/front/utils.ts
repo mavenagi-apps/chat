@@ -231,12 +231,13 @@ export function isShiftActive(shifts: Front.Shift[], moment: Date) {
 }
 
 export async function createApplicationChannelClient(
+  organizationId: string,
+  agentId: string,
   config: FrontHandoffConfiguration,
 ) {
-  const appId = config.appId;
   const channelName = config.channelName;
   // include appId in cache key to avoid conflicts between different front installations
-  const cacheKey = `front-channel-${appId}-${channelName}`;
+  const cacheKey = `front-channel-${organizationId}-${agentId}-${channelName}`;
   const channelCache = await getChannelCache();
   let channelId = await channelCache.get<string>(cacheKey);
 

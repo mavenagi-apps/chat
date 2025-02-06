@@ -34,7 +34,7 @@ async function updateFrontUser(
 }
 
 export async function POST(req: NextRequest) {
-  return withAppSettings(req, async (request, settings, _orgId, _agentId) => {
+  return withAppSettings(req, async (request, settings, orgId, agentId) => {
     const { messages, signedUserData } = (await request.json()) as {
       messages: HandoffChatMessage[];
       signedUserData: string;
@@ -55,8 +55,11 @@ export async function POST(req: NextRequest) {
 
     const { appId, apiSecret } = handoffConfiguration;
     const frontCoreClient = createCoreClient(handoffConfiguration);
-    const frontClient =
-      await createApplicationChannelClient(handoffConfiguration);
+    const frontClient = await createApplicationChannelClient(
+      orgId,
+      agentId,
+      handoffConfiguration,
+    );
     const verifiedUserInfo = (await decryptAndVerifySignedUserData(
       signedUserData,
       settings,
