@@ -1,18 +1,43 @@
 declare global {
-  interface AppSettings {
-    logoUrl: string;
-    brandColor: string;
+  // Legacy AppSettings interface kept for reference during migration
+  interface LegacyAppSettings {
+    logoUrl?: string;
+    brandColor?: string;
     brandFontColor?: string;
-    amplitudeApiKey: string;
-    popularQuestions: string[] | string;
-    jwtPublicKey: string;
-    encryptionSecret: string;
+    amplitudeApiKey?: string;
+    popularQuestions?: string[] | string;
+    jwtPublicKey?: string;
+    encryptionSecret?: string;
     handoffConfiguration?: string;
     embedAllowlist?: string[];
     enableDemoSite?: string;
     welcomeMessage?: string;
     disableAttachments?: boolean;
   }
+
+  interface AppSettings {
+    branding: {
+      logoUrl?: string;
+      brandColor?: string;
+      brandFontColor?: string;
+      welcomeMessage?: string;
+      popularQuestions?: string[] | string;
+      enableDemoSite?: string;
+    };
+    security: {
+      jwtPublicKey?: string;
+      embedAllowList?: string[];
+      encryptionSecret?: string;
+    };
+    misc: {
+      handoffConfiguration?: string;
+      amplitudeApiKey?: string;
+      disableAttachments?: boolean;
+    };
+  }
+
+  interface InterimAppSettings extends LegacyAppSettings, AppSettings {}
+
   type BaseHandoffConfiguration = {
     apiKey: string;
     apiSecret: string;
@@ -51,20 +76,29 @@ declare global {
     | FrontHandoffConfiguration
     | SalesforceHandoffConfiguration;
 
-  interface ClientSafeAppSettings extends Partial<AppSettings> {
-    handoffConfiguration?:
-      | {
-          type: HandoffConfiguration["type"];
-          surveyLink?: string;
-          enableAvailabilityCheck?: boolean;
-          availabilityFallbackMessage?: string;
-          allowAnonymousHandoff?: boolean;
-        }
-      | undefined;
+  interface ParsedAppSettings extends Omit<AppSettings, "misc"> {
+    misc: AppSettings["misc"] & {
+      handoffConfiguration: HandoffConfiguration;
+    };
   }
 
-  interface ParsedAppSettings extends AppSettings {
-    handoffConfiguration?: HandoffConfiguration | undefined;
+  type ClientSafeHandoffConfig = Pick<
+    HandoffConfiguration,
+    "type" | "surveyLink" | "enableAvailabilityCheck" | "allowAnonymousHandoff"
+  > & {
+    availabilityFallbackMessage?: SalesforceHandoffConfiguration["availabilityFallbackMessage"];
+  };
+
+  interface ClientSafeAppSettings {
+    branding: AppSettings["branding"];
+    security: {
+      embedAllowList: AppSettings["security"]["embedAllowList"];
+    };
+    misc: {
+      amplitudeApiKey: AppSettings["misc"]["amplitudeApiKey"];
+      disableAttachments: AppSettings["misc"]["disableAttachments"];
+      handoffConfiguration?: ClientSafeHandoffConfig;
+    };
   }
 }
 

@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
         signedUserData: string;
       };
 
-      if (settings.handoffConfiguration?.type !== "front") {
+      if (settings.misc.handoffConfiguration?.type !== "front") {
         return NextResponse.json(
           { error: "Front Handoff configuration not found or invalid" },
           { status: 400 },
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         settings,
       )) as VerifiedUserData;
 
-      const { handoffConfiguration } = settings;
+      const { handoffConfiguration } = settings.misc;
 
       const frontClient =
         await createApplicationChannelClient(handoffConfiguration);

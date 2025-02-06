@@ -38,8 +38,8 @@ export function useHandoff({
   mavenConversationId,
 }: HandoffProps): HandoffHookReturn {
   // Configuration and refs
-  const { handoffConfiguration } = useSettings();
-  const handoffTypeRef = useRef(handoffConfiguration?.type ?? null);
+  const { misc } = useSettings();
+  const handoffTypeRef = useRef(misc.handoffConfiguration?.type ?? null);
   const strategyRef = useRef(
     HandoffStrategyFactory.createStrategy(handoffTypeRef.current),
   );

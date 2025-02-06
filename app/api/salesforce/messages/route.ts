@@ -138,7 +138,7 @@ export async function GET(req: NextRequest) {
       _conversationId,
       authPayload,
     ) => {
-      const { handoffConfiguration } = settings;
+      const { handoffConfiguration } = settings.misc;
       const validationError = validateSalesforceConfig(handoffConfiguration);
       if (validationError) return validationError;
 
@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
       _conversationId,
       authPayload,
     ) => {
-      const { handoffConfiguration } = settings;
+      const { handoffConfiguration } = settings.misc;
       const validationError = validateSalesforceConfig(handoffConfiguration);
       if (validationError) return validationError;
 

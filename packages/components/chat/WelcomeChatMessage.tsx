@@ -21,8 +21,8 @@ export function WelcomeMessage({
   const analytics = useAnalytics();
   const { ask } = useContext(ChatContext);
 
-  const { popularQuestions: popularQuestionsJSON, welcomeMessage } =
-    useSettings();
+  const { branding } = useSettings();
+  const { popularQuestions: popularQuestionsJSON, welcomeMessage } = branding;
 
   const welcomeMessageParsed = useMemo((): string | null => {
     if (!welcomeMessage) {

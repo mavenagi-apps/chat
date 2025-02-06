@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       messages: HandoffChatMessage[];
       signedUserData: string;
     };
-    const { handoffConfiguration } = settings;
+    const { handoffConfiguration } = settings.misc;
 
     if (
       handoffConfiguration?.type !== "front" ||

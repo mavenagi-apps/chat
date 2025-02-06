@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       userId,
       conversationId,
     ) => {
-      if (settings.handoffConfiguration?.type !== "zendesk") {
+      if (settings.misc.handoffConfiguration?.type !== "zendesk") {
         return NextResponse.json(
           { error: "Zendesk Handoff configuration not found" },
           { status: 400 },
@@ -24,7 +24,9 @@ export async function POST(request: NextRequest) {
       }
 
       const [SunshineConversationsClient, zendeskConversationsAppId] =
-        await getSunshineConversationsClient(settings.handoffConfiguration);
+        await getSunshineConversationsClient(
+          settings.misc.handoffConfiguration,
+        );
       await postMessagesToZendeskConversation(
         SunshineConversationsClient,
         conversationId,

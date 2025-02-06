@@ -46,7 +46,7 @@ export const POST = async (
   const { organizationId: orgId, agentId: agentId } = await params;
   // ignore messages with a bad agent configuration
   const agentAppSettings = await getAppSettings(orgId, agentId);
-  if (agentAppSettings?.handoffConfiguration?.type !== "front") {
+  if (agentAppSettings?.misc?.handoffConfiguration?.type !== "front") {
     return NextResponse.json(
       { type: "bad_request", message: "Unsupported agent" },
       { status: 400 },
@@ -54,7 +54,8 @@ export const POST = async (
   }
 
   // ignore messages without a valid signature or too old
-  const { apiSecret: frontAppSecret } = agentAppSettings.handoffConfiguration;
+  const { apiSecret: frontAppSecret } =
+    agentAppSettings.misc.handoffConfiguration;
   const headers = request.headers;
   const frontRequestSignature = headers.get("x-front-signature");
   const frontRequestTimestamp = parseInt(
@@ -104,7 +105,7 @@ export const DELETE = async (
   const body = await request.json();
   const { organizationId: orgId, agentId: agentId } = await params;
   const agentAppSettings = await getAppSettings(orgId, agentId);
-  if (agentAppSettings?.handoffConfiguration?.type !== "front") {
+  if (agentAppSettings?.misc?.handoffConfiguration?.type !== "front") {
     return NextResponse.json(
       { type: "bad_request", message: "Unsupported agent" },
       { status: 400 },
@@ -112,7 +113,8 @@ export const DELETE = async (
   }
 
   // ignore messages without a valid signature or too old
-  const { apiSecret: frontAppSecret } = agentAppSettings.handoffConfiguration;
+  const { apiSecret: frontAppSecret } =
+    agentAppSettings.misc.handoffConfiguration;
   const headers = request.headers;
   const frontRequestSignature = headers.get("x-front-signature");
   const frontRequestTimestamp = parseInt(

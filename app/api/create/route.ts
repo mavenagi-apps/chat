@@ -100,8 +100,8 @@ async function initializeConversation(
   unsignedUserData?: CreateOptions["unsignedUserData"],
 ) {
   const strategy = ServerHandoffStrategyFactory.createStrategy(
-    settings.handoffConfiguration?.type,
-    settings.handoffConfiguration as HandoffConfiguration,
+    settings.misc.handoffConfiguration?.type,
+    settings.misc.handoffConfiguration as HandoffConfiguration,
   );
   let isHandoffAvailable = false;
   try {

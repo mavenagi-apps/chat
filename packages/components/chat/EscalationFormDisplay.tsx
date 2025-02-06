@@ -32,9 +32,10 @@ function EscalationForm({ isAvailable }: { isAvailable: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const { initializeHandoff } = useContext(ChatContext);
   const { isAuthenticated } = useAuth();
-  const { handoffConfiguration } = useSettings();
-  const { availabilityFallbackMessage = t("agents_unavailable") } =
-    handoffConfiguration ?? {};
+  const { misc } = useSettings();
+  const availabilityFallbackMessage =
+    misc.handoffConfiguration?.availabilityFallbackMessage ??
+    t("agents_unavailable");
   const { Form, ...methods } = useForm<{ email?: string }>({
     onSubmit: async (data) => {
       try {
@@ -52,7 +53,7 @@ function EscalationForm({ isAvailable }: { isAvailable: boolean }) {
   if (!isAvailable) {
     return (
       <Alert variant="warning" className="[&_a]:underline">
-        <ReactMarkdown>{availabilityFallbackMessage}</ReactMarkdown>
+        <ReactMarkdown children={availabilityFallbackMessage as string} />
       </Alert>
     );
   }
@@ -96,7 +97,7 @@ function EscalationForm({ isAvailable }: { isAvailable: boolean }) {
 }
 
 export default function EscalationFormDisplay() {
-  const { handoffConfiguration } = useSettings();
+  const { misc } = useSettings();
   const { organizationId, agentId } = useParams<{
     organizationId: string;
     agentId: string;
@@ -107,7 +108,7 @@ export default function EscalationFormDisplay() {
   useEffect(() => {
     const fetchAvailability = async () => {
       const shouldCheckAvailability =
-        handoffConfiguration?.enableAvailabilityCheck;
+        misc.handoffConfiguration?.enableAvailabilityCheck;
       if (shouldCheckAvailability) {
         const _isAvailable = await checkHandoffAvailability(
           organizationId,
