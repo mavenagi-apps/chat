@@ -231,11 +231,16 @@ export function isShiftActive(shifts: Front.Shift[], moment: Date) {
 }
 
 export async function createApplicationChannelClient(
+  organizationId: string,
+  agentId: string,
   config: FrontHandoffConfiguration,
 ) {
   const channelName = config.channelName;
+  // include agent in cache key to avoid conflicts between different front installations
+  // if the same channel name is used across customers
+  const cacheKey = `front-channel-${organizationId}-${agentId}-${channelName}`;
   const channelCache = await getChannelCache();
-  let channelId = await channelCache.get<string>(channelName);
+  let channelId = await channelCache.get<string>(cacheKey);
 
   if (!channelId) {
     const coreClient = createCoreClient(config);
@@ -244,7 +249,7 @@ export async function createApplicationChannelClient(
       throw new Error(`Channel ${channelName} not found`);
     }
     channelId = channel.id;
-    await channelCache.set(channelName, channelId, "1h");
+    await channelCache.set(cacheKey, channelId, "1h");
   }
   return new FrontApplicationClient(
     config.appId,

@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
     async (
       _request,
       settings,
-      _organizationId,
-      _agentId,
+      organizationId,
+      agentId,
       _userId,
       conversationId,
     ) => {
@@ -37,8 +37,11 @@ export async function POST(request: NextRequest) {
 
       const { handoffConfiguration } = settings.misc;
 
-      const frontClient =
-        await createApplicationChannelClient(handoffConfiguration);
+      const frontClient = await createApplicationChannelClient(
+        organizationId,
+        agentId,
+        handoffConfiguration,
+      );
 
       await postMavenMessagesToFront({
         conversationId,
