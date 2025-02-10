@@ -4,9 +4,10 @@ import { getRedisPublishClient } from "@/app/api/server/lib/redis";
 import type { ZendeskMessagePayload } from "@/types/zendesk";
 
 const ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX = "conversation:";
-const ENABLE_API_LOGGING = process.env.ENABLE_API_LOGGING === "true";
+const BLOCKLIST_EVENTS = ["conversation:message:delivery:channel"];
 
 export const POST = async (request: NextRequest) => {
+  const ENABLE_API_LOGGING = process.env.ENABLE_API_LOGGING === "true";
   const rawBody = await request.text();
   const body = JSON.parse(rawBody);
   const {
@@ -19,6 +20,10 @@ export const POST = async (request: NextRequest) => {
 
   for (const event of body.events || []) {
     if (!event.type.startsWith(ZENDESK_CONVERSATION_EVENT_TYPE_PREFIX)) {
+      continue;
+    }
+
+    if (BLOCKLIST_EVENTS.includes(event.type)) {
       continue;
     }
 

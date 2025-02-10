@@ -1,18 +1,26 @@
-import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import {
+  vi,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  type Mock,
+} from "vitest";
 import { NextRequest } from "next/server";
 import { POST } from "@/app/api/zendesk/webhook/route";
-import { getRedisClient } from "@/app/api/server/lib/redis";
+import { getRedisPublishClient } from "@/app/api/server/lib/redis";
 
 vi.mock("@/app/api/server/lib/redis", () => ({
-  getRedisClient: vi.fn(),
+  getRedisPublishClient: vi.fn(),
 }));
 
 describe("POST /api/zendesk/webhook", () => {
   let mockRedisClient: {
-    publish: vi.Mock;
+    publish: Mock;
   };
   let mockRequest: {
-    text: vi.Mock;
+    text: Mock;
   } & Partial<NextRequest>;
 
   beforeEach(() => {
@@ -20,7 +28,7 @@ describe("POST /api/zendesk/webhook", () => {
     mockRedisClient = {
       publish: vi.fn().mockResolvedValue(true),
     };
-    vi.mocked(getRedisClient).mockResolvedValue(mockRedisClient as any);
+    vi.mocked(getRedisPublishClient).mockResolvedValue(mockRedisClient as any);
 
     // Setup mock request
     mockRequest = {
@@ -30,6 +38,7 @@ describe("POST /api/zendesk/webhook", () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
   });
 
   describe("when receiving valid webhook events", () => {
@@ -97,6 +106,34 @@ describe("POST /api/zendesk/webhook", () => {
     });
   });
 
+  describe("when receiving blocklisted events", () => {
+    const blocklistedPayload = {
+      webhook: { id: "webhook-123" },
+      events: [
+        {
+          type: "conversation:message:delivery:channel",
+          id: "event-123",
+          payload: {
+            conversation: {
+              id: "conv-123",
+            },
+          },
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      mockRequest.text.mockResolvedValue(JSON.stringify(blocklistedPayload));
+    });
+
+    it("should not publish blocklisted events to Redis", async () => {
+      const response = await POST(mockRequest as NextRequest);
+
+      expect(mockRedisClient.publish).not.toHaveBeenCalled();
+      expect(await response.json()).toEqual({ success: true });
+    });
+  });
+
   describe("when receiving invalid event data", () => {
     const testCases = [
       {
@@ -150,15 +187,13 @@ describe("POST /api/zendesk/webhook", () => {
   });
 
   describe("when ENABLE_API_LOGGING is true", () => {
-    const originalEnv = process.env.ENABLE_API_LOGGING;
-
     beforeEach(() => {
-      process.env.ENABLE_API_LOGGING = "true";
       vi.spyOn(console, "log").mockImplementation(() => {});
+      vi.stubEnv("ENABLE_API_LOGGING", "true");
     });
 
     afterEach(() => {
-      process.env.ENABLE_API_LOGGING = originalEnv;
+      vi.restoreAllMocks();
     });
 
     it("should log the raw body", async () => {
@@ -170,7 +205,54 @@ describe("POST /api/zendesk/webhook", () => {
 
       await POST(mockRequest as NextRequest);
 
+      // Verify both the initial env log and the raw body log
       expect(console.log).toHaveBeenCalledWith(JSON.stringify(payload));
+    });
+  });
+
+  describe("when ENABLE_API_LOGGING is false", () => {
+    beforeEach(() => {
+      vi.stubEnv("ENABLE_API_LOGGING", "false");
+      vi.spyOn(console, "log").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("should not log the raw body", async () => {
+      const payload = {
+        webhook: { id: "webhook-123" },
+        events: [],
+      };
+      mockRequest.text.mockResolvedValue(JSON.stringify(payload));
+
+      await POST(mockRequest as NextRequest);
+
+      expect(console.log).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("when ENABLE_API_LOGGING is not set", () => {
+    beforeEach(() => {
+      vi.stubEnv("ENABLE_API_LOGGING", undefined);
+      vi.spyOn(console, "log").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("should not log the raw body", async () => {
+      const payload = {
+        webhook: { id: "webhook-123" },
+        events: [],
+      };
+      mockRequest.text.mockResolvedValue(JSON.stringify(payload));
+
+      await POST(mockRequest as NextRequest);
+
+      expect(console.log).not.toHaveBeenCalled();
     });
   });
 });
