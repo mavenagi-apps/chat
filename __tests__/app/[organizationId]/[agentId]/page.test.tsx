@@ -11,7 +11,6 @@ import { HandoffStatus } from "@/app/constants/handoff";
 import { useChat } from "@magi/components/chat/use-chat";
 import { useHandoff } from "@/lib/useHandoff";
 import { useScrollToBottom } from "@/lib/useScrollToBottom";
-import { useIdleMessage } from "@/lib/useIdleMessage";
 
 let chatMessages = [] as Message[];
 let handoffMessages = [] as (
@@ -35,6 +34,8 @@ vi.mock("@/lib/useIframeMessaging", () => ({
   useIframeMessaging: () => ({
     loading: false,
     signedUserData: null,
+    unsignedUserData: null,
+    customData: null,
   }),
 }));
 
@@ -61,6 +62,7 @@ describe("ChatPage", () => {
       addMessage: vi.fn(),
       conversationId: "test-conversation-id",
       mavenUserId: "test-maven-user-id",
+      onBailoutFormSubmitSuccess: vi.fn(),
     });
 
     useHandoffMock.mockReturnValue({
