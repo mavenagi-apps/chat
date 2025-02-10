@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useEffect, useMemo } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Chat from "@magi/components/chat/Chat";
 import { ChatInput } from "@magi/components/chat/ChatInput";
 import { useChat } from "@magi/components/chat/use-chat";
@@ -138,8 +138,12 @@ function ChatPage() {
 }
 
 export default function ChatPageWrapper() {
+  const searchParams = useSearchParams();
+  const disableRedirectParam = searchParams.get("disableRedirect");
+  const disableRedirect =
+    disableRedirectParam !== null && disableRedirectParam !== "false";
   const { loading, signedUserData, unsignedUserData, customData } =
-    useIframeMessaging();
+    useIframeMessaging({ disableRedirect });
 
   if (loading) return null;
 

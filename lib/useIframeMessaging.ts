@@ -15,7 +15,8 @@ enum MAVEN_MESSAGE_TYPES {
 const demoUrl = (organizationId: string, agentId: string) =>
   `/demo/${organizationId}/${agentId}`;
 
-export function useIframeMessaging() {
+export function useIframeMessaging(options?: { disableRedirect?: boolean }) {
+  const { disableRedirect = false } = options || {};
   const [loading, setLoading] = useState(true);
   const [signedUserData, setSignedUserData] = useState<string | null>(null);
   const [unsignedUserData, setUnsignedUserData] = useState<Record<
@@ -60,7 +61,7 @@ export function useIframeMessaging() {
       }
     };
 
-    if (!isInIframe()) {
+    if (!disableRedirect && !isInIframe()) {
       window.location.href = demoUrl(organizationId, agentId);
       return;
     }
@@ -75,7 +76,7 @@ export function useIframeMessaging() {
     }
 
     return () => window.removeEventListener("message", handleMessage);
-  }, [organizationId, agentId, handleMessage]);
+  }, [organizationId, agentId, handleMessage, disableRedirect]);
 
   return {
     loading,
