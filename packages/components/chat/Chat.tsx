@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { isBotMessage, ChatMessage, CombinedMessage } from "@/types";
 import { useSettings } from "@/app/providers/SettingsProvider";
 import { Attachment } from "mavenagi/api";
-import { useIdleMessage } from "@/lib/useIdleMessage";
 
 interface ChatContextProps {
   agentName: string | null;
@@ -65,12 +64,7 @@ export default function Chat({
 }: React.PropsWithChildren<ChatProps>) {
   const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
   const { branding, misc } = useSettings();
-  useIdleMessage({
-    messages: messages as ChatMessage[],
-    conversationId,
-    agentName: agentName || "",
-    addMessage,
-  });
+
   useEffect(() => {
     if (messages.length > 0) {
       const lastMsg = messages[messages.length - 1];
