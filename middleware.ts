@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { getAppSettings } from "@/app/api/server/utils";
 import { notFound } from "next/navigation";
 import { isNotFoundError } from "next/dist/client/components/not-found";
-
+import { NEXT_LOCALE_HEADER } from "@/app/constants/internationalization";
 // Constants
 const PATHNAMES = [
   "/demo/:organizationId/:agentId/:path*",
@@ -83,6 +83,12 @@ const processSecuritySettings = (
  */
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
+
+  // Add locale to the response
+  const locale = request.nextUrl.searchParams.get("locale");
+  if (locale) {
+    response.headers.set(NEXT_LOCALE_HEADER, locale);
+  }
 
   if (
     !["iframe", "document"].includes(

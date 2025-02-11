@@ -21,6 +21,7 @@ type Props = {
   bgColor: string;
   textColor: string;
   buttonLabel: string;
+  locale?: string;
   horizontalPosition: "left" | "right";
   verticalPosition: "top" | "bottom";
   signedUserData?: string | null;
@@ -41,6 +42,7 @@ const App = forwardRef<{ open: () => void; close: () => void }, Props>(
       signedUserData: props.signedUserData,
       unsignedUserData: props.unsignedUserData || props.unverifiedUserData,
       customData: props.customData,
+      locale: props.locale,
       isWide,
       isOpen,
     });
@@ -93,8 +95,8 @@ type LoadProps = Partial<Omit<Props, "iframeUrl">> & {
   horizontalPosition?: "left" | "right";
   bgColor?: string;
   textColor?: string;
-} & // "orgFriendlyId" and "agentFriendlyId" to "organizationId" and "agentId". // This union type ensures backwards compatibility during the migration from the
-  // It enforces that either:
+  locale?: string;
+} & // It enforces that either: // "orgFriendlyId" and "agentFriendlyId" to "organizationId" and "agentId". // This union type ensures backwards compatibility during the migration from the
   // 1. Both organizationId and agentId are provided (new spec) OR
   // 2. Both orgFriendlyId and agentFriendlyId are provided (legacy spec)
   // This prevents mixing of old and new ID formats while supporting both patterns
@@ -119,6 +121,7 @@ export async function load({
   buttonLabel = "Get Help",
   horizontalPosition = "right",
   verticalPosition = "bottom",
+  locale,
   organizationId,
   orgFriendlyId,
   agentId,
@@ -138,6 +141,7 @@ export async function load({
       bgColor={bgColor || "#6C2BD9"}
       textColor={textColor}
       buttonLabel={buttonLabel}
+      locale={locale}
       horizontalPosition={horizontalPosition}
       verticalPosition={verticalPosition}
       signedUserData={signedUserData}

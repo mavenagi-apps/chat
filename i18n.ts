@@ -1,8 +1,10 @@
 import { headers } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
 import type { AbstractIntlMessages, IntlConfig } from "use-intl/core";
-
-const PERMITTED_LOCALES = ["en", "fr", "es", "it"];
+import {
+  NEXT_LOCALE_HEADER,
+  PERMITTED_LOCALES,
+} from "./app/constants/internationalization";
 
 // Helper function to get base locale
 function getBaseLocale(locale: string): string {
@@ -21,8 +23,11 @@ export default getRequestConfig(
       let locale = (await requestLocale) || "en";
       const headersList = await headers();
       const acceptLanguage = headersList.get("accept-language");
+      const localeFromUrl = headersList.get(NEXT_LOCALE_HEADER);
 
-      if (acceptLanguage) {
+      if (localeFromUrl) {
+        locale = localeFromUrl;
+      } else if (acceptLanguage) {
         // Get the first matching locale from accept-language header
         const matchedLocale = acceptLanguage
           .split(",")

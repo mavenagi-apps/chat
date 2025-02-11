@@ -41,6 +41,7 @@ export function useIframeCommunication({
   customData,
   isWide,
   isOpen,
+  locale,
 }: {
   organizationId: string;
   agentId: string;
@@ -49,6 +50,7 @@ export function useIframeCommunication({
   customData?: Record<string, any> | null;
   isWide: boolean;
   isOpen: boolean;
+  locale?: string;
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -65,6 +67,10 @@ export function useIframeCommunication({
       ? `${currentDomain || "localhost"}:${window.location.port}`
       : __IFRAME_DOMAIN__;
     let iframeUrl = `${iframeProtocol}://${iframeDomain}/${organizationId}/${agentId}`;
+
+    if (locale) {
+      iframeUrl += `?locale=${locale}`;
+    }
 
     return iframeUrl;
   }, [organizationId, agentId]);
