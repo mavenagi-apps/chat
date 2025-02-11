@@ -106,7 +106,7 @@ describe("useIframeMessaging", () => {
         renderHook(() => useIframeMessaging());
 
         if (expected) {
-          expect(window.location.href).toBe("/demo/test-org/test-agent");
+          expect(window.location.href).toBe("/preview/test-org/test-agent");
         } else {
           expect(window.location.href).not.toBe("");
         }

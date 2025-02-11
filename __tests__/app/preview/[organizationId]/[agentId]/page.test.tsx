@@ -1,9 +1,9 @@
 import { render } from "@testing-library/react";
-import DemoPage from "@/app/demo/[organizationId]/[agentId]/page";
+import PreviewPage from "@/app/preview/[organizationId]/[agentId]/page";
 import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
 import { headers } from "next/headers";
 import { getPublicAppSettings } from "@/app/actions";
-import { generateSignedUserData } from "@/app/demo/[organizationId]/[agentId]/actions";
+import { generateSignedUserData } from "@/app/preview/[organizationId]/[agentId]/actions";
 import { notFound } from "next/navigation";
 
 // Mock the dependencies
@@ -15,7 +15,7 @@ vi.mock("@/app/actions", () => ({
   getPublicAppSettings: vi.fn(),
 }));
 
-vi.mock("@/app/demo/[organizationId]/[agentId]/actions", () => ({
+vi.mock("@/app/preview/[organizationId]/[agentId]/actions", () => ({
   generateSignedUserData: vi.fn(),
 }));
 
@@ -28,7 +28,7 @@ vi.mock("@/assets/background/bg.jpg", () => ({
   default: { src: "/mock-bg-image.jpg" },
 }));
 
-describe("DemoPage", () => {
+describe("PreviewPage", () => {
   const mockParams = {
     organizationId: "test-org",
     agentId: "test-agent",
@@ -57,7 +57,7 @@ describe("DemoPage", () => {
   describe("when all parameters are valid", () => {
     test("should render the page with correct background and scripts", async () => {
       const { container } = render(
-        await DemoPage({
+        await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({
             anonymous: "anything",
@@ -113,7 +113,7 @@ describe("DemoPage", () => {
       };
 
       const { container } = render(
-        await DemoPage({
+        await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({
             anonymous: "anything",
@@ -137,7 +137,7 @@ describe("DemoPage", () => {
         .mockImplementation(() => {});
 
       const { container } = render(
-        await DemoPage({
+        await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({
             anonymous: "anything",
@@ -157,7 +157,7 @@ describe("DemoPage", () => {
 
     test("should use default custom data when customData param is not provided", async () => {
       const { container } = render(
-        await DemoPage({
+        await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({ anonymous: "anything" }),
         }),
@@ -175,7 +175,7 @@ describe("DemoPage", () => {
     } = { anonymous: "anything" };
 
     test("should call notFound when organizationId is missing", async () => {
-      await DemoPage({
+      await PreviewPage({
         params: Promise.resolve({
           ...mockParams,
           organizationId: "",
@@ -186,7 +186,7 @@ describe("DemoPage", () => {
     });
 
     test("should call notFound when agentId is missing", async () => {
-      await DemoPage({
+      await PreviewPage({
         params: Promise.resolve({
           ...mockParams,
           agentId: "",
@@ -206,7 +206,7 @@ describe("DemoPage", () => {
       } as any);
 
       const { container } = render(
-        await DemoPage({
+        await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({ anonymous: "anything" }),
         }),
@@ -222,7 +222,7 @@ describe("DemoPage", () => {
       vi.mocked(generateSignedUserData).mockResolvedValue("mock-signed-data");
 
       const { container } = render(
-        await DemoPage({
+        await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({
             anonymous: "anything",
@@ -239,7 +239,7 @@ describe("DemoPage", () => {
       vi.mocked(generateSignedUserData).mockResolvedValue("mock-signed-data");
 
       const { container } = render(
-        await DemoPage({
+        await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({ anonymous: "" }),
         }),
@@ -253,7 +253,7 @@ describe("DemoPage", () => {
       vi.mocked(generateSignedUserData).mockResolvedValue("mock-signed-data");
 
       const { container } = render(
-        await DemoPage({
+        await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({}),
         }),
@@ -275,7 +275,7 @@ describe("DemoPage", () => {
       vi.mocked(generateSignedUserData).mockRejectedValue(mockError);
 
       const { container } = render(
-        await DemoPage({
+        await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({}),
         }),
@@ -295,7 +295,7 @@ describe("DemoPage", () => {
       mockHeaders.delete("x-magi-env-prefix");
 
       const { container } = render(
-        await DemoPage({
+        await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({ anonymous: "anything" }),
         }),
@@ -309,7 +309,7 @@ describe("DemoPage", () => {
       mockHeaders.set("x-magi-env-prefix", "custom-prefix");
 
       const { container } = render(
-        await DemoPage({
+        await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({ anonymous: "anything" }),
         }),

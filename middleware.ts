@@ -6,7 +6,7 @@ import { isNotFoundError } from "next/dist/client/components/not-found";
 import { NEXT_LOCALE_HEADER } from "@/app/constants/internationalization";
 // Constants
 const PATHNAMES = [
-  "/demo/:organizationId/:agentId/:path*",
+  "/preview/:organizationId/:agentId/:path*",
   "/:organizationId/:agentId/:path*",
 ] as const;
 
@@ -59,12 +59,12 @@ const processSecuritySettings = (
   request: NextRequest,
 ): { headers?: string; blocked: boolean } => {
   const allowlist = [...(appSettings.security.embedAllowlist || [])];
-  const enableDemoSite = ["true", "1"].includes(
-    appSettings.branding.enableDemoSite || "",
+  const enablePreviewSite = ["true", "1"].includes(
+    appSettings.branding.enablePreviewSite || "",
   );
   const referrer = request.headers.get("referer");
 
-  if (enableDemoSite) {
+  if (enablePreviewSite) {
     allowlist.push("'self'");
   }
 

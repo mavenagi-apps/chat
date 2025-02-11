@@ -9,7 +9,7 @@ vi.mock("@/app/api/server/utils", () => ({
       embedAllowlist: [],
     },
     branding: {
-      enableDemoSite: "false",
+      enablePreviewSite: "false",
     },
     misc: {},
   }),
@@ -30,8 +30,8 @@ describe("Middleware", () => {
   };
 
   describe("Path parameter extraction", () => {
-    it("should extract organizationId and agentId from demo path", async () => {
-      const request = createMockRequest("/demo/org123/agent456", {
+    it("should extract organizationId and agentId from preview path", async () => {
+      const request = createMockRequest("/preview/org123/agent456", {
         "sec-fetch-dest": "iframe",
       });
       await middleware(request);
@@ -139,7 +139,7 @@ describe("Middleware", () => {
                 embedAllowlist: ["allowed-domain.com"],
               },
               branding: {
-                enableDemoSite: "false",
+                enablePreviewSite: "false",
               },
               misc: {},
             });
