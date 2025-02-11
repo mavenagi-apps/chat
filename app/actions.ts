@@ -132,7 +132,9 @@ export async function getPublicAppSettings(
       },
       misc: {
         amplitudeApiKey: settings.misc?.amplitudeApiKey,
-        disableAttachments: settings.misc?.disableAttachments,
+        disableAttachments:
+          ["true", "1"].includes(settings.misc?.disableAttachments || "") ??
+          false,
         handoffConfiguration: parsedHandoffConfiguration,
         enableIdleMessage:
           ["true", "1"].includes(settings.misc?.enableIdleMessage || "") ??

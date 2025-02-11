@@ -6,6 +6,16 @@ import { MagiEvent } from "@/lib/analytics/events";
 import { useParams } from "next/navigation";
 import { useSettings } from "@/app/providers/SettingsProvider";
 
+const IDLE_EVENTS = [
+  "mousemove",
+  "mousedown",
+  "keypress",
+  "DOMMouseScroll",
+  "mousewheel",
+  "touchmove",
+  "MSPointerMove",
+] as const;
+
 interface UseIdleMessageProps {
   idleTimeout?: number;
   messages: CombinedMessage[];
@@ -22,11 +32,6 @@ export function useIdleMessage({
   addMessage,
 }: UseIdleMessageProps) {
   const { misc } = useSettings();
-
-  if (!misc.enableIdleMessage) {
-    return;
-  }
-
   const t = useTranslations("chat.IdleMessage");
   const hasShownMessage = useRef(false);
   const hasConnectedToAgent = useRef(false);
@@ -76,18 +81,14 @@ export function useIdleMessage({
     }, idleTimeout);
   }, [idleTimeout, conversationId, t, callAnalytics, surveyLink, addMessage]);
 
-  const events = [
-    "mousemove",
-    "mousedown",
-    "keypress",
-    "DOMMouseScroll",
-    "mousewheel",
-    "touchmove",
-    "MSPointerMove",
-  ];
-
   useEffect(() => {
-    if (hasShownMessage.current || !userMessagesExist || !surveyLink) {
+    // Return early if feature is disabled or conditions aren't met
+    if (
+      !misc.enableIdleMessage ||
+      hasShownMessage.current ||
+      !userMessagesExist ||
+      !surveyLink
+    ) {
       return;
     }
 
@@ -95,17 +96,17 @@ export function useIdleMessage({
       if (timer.current) {
         clearTimeout(timer.current);
       }
-      events.forEach((event) => {
+      IDLE_EVENTS.forEach((event) => {
         window.removeEventListener(event, resetTimer);
       });
     };
 
-    events.forEach((event) => {
+    IDLE_EVENTS.forEach((event) => {
       window.addEventListener(event, resetTimer);
     });
 
     resetTimer();
 
     return cleanup;
-  }, [resetTimer, userMessagesExist, surveyLink]);
+  }, [resetTimer, userMessagesExist, surveyLink, misc.enableIdleMessage]);
 }

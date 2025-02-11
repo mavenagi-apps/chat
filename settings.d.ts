@@ -97,7 +97,7 @@ declare global {
     };
     misc: {
       amplitudeApiKey?: AppSettings["misc"]["amplitudeApiKey"];
-      disableAttachments?: AppSettings["misc"]["disableAttachments"];
+      disableAttachments?: boolean;
       handoffConfiguration?: ClientSafeHandoffConfig;
       enableIdleMessage?: boolean;
     };
