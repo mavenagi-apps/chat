@@ -9,6 +9,7 @@ export function adaptLegacySettings(settings: InterimAppSettings): AppSettings {
 
   // Set branding properties
   adapted.branding = {
+    ...(adapted.branding || {}),
     logoUrl: settings.branding?.logoUrl ?? settings.logoUrl,
     brandColor: settings.branding?.brandColor ?? settings.brandColor,
     brandFontColor:
@@ -23,6 +24,7 @@ export function adaptLegacySettings(settings: InterimAppSettings): AppSettings {
 
   // Set security properties
   adapted.security = {
+    ...(adapted.security || {}),
     jwtPublicKey: settings.security?.jwtPublicKey ?? settings.jwtPublicKey,
     embedAllowlist:
       settings.security?.embedAllowlist ?? settings.embedAllowlist,
@@ -31,6 +33,7 @@ export function adaptLegacySettings(settings: InterimAppSettings): AppSettings {
   };
 
   adapted.misc = {
+    ...(adapted.misc || {}),
     handoffConfiguration:
       settings.misc?.handoffConfiguration ?? settings.handoffConfiguration,
     amplitudeApiKey: settings.misc?.amplitudeApiKey ?? settings.amplitudeApiKey,

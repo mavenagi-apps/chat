@@ -1,0 +1,75 @@
+{
+  "chat": {
+    "ChatPage": {
+      "default_welcome_message": "Wie können wir Ihnen helfen? Sie können unten ein Gespräch beginnen oder mit beliebten Fragen starten:",
+      "default_error_message": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+      "related_links": "Verwandte Links",
+      "powered_by": "Bereitgestellt von",
+      "connecting_to_agent": "Wir verbinden Sie mit einem Live-Agenten...",
+      "agent_typing": "Der Agent tippt...",
+      "error_rendering_chart": "Fehler beim Rendern des Diagramms",
+      "chat_queue_position": "Sie sind an Position {position} in der Warteschlange. Sie werden in Kürze mit einem Agenten verbunden.",
+      "chat_queue_position_next": "Sie sind als Nächstes in der Warteschlange. Ihr Agent wird in Kürze bei Ihnen sein.",
+      "chat_queue_position_in_queue": "Sie sind in der Warteschlange. Bitte warten Sie auf den nächsten verfügbaren Agenten.",
+      "chat_queue_position_estimated_wait_time": "Ihre geschätzte Wartezeit beträgt {estimatedWaitTime} Sekunden.",
+      "chat_queue_position_estimated_wait_time_singular": "Ihre geschätzte Wartezeit beträgt {estimatedWaitTime} Sekunde."
+    },
+    "BailoutFormDisplay": {
+      "unable_to_answer": "Ich kann diese Frage nicht beantworten.",
+      "default_bailout_text": "Bitte versuchen Sie eine andere Frage oder kontaktieren Sie einen Support-Agenten für weitere Unterstützung.",
+      "integration_bailout_text": "Bitte klicken Sie auf die Schaltfläche unten, um sich mit einem Agenten zu verbinden, oder stellen Sie eine andere Frage.",
+      "name": "Name",
+      "email": "E-Mail",
+      "question": "Frage",
+      "ticket_created_title": "Support-Ticket erfolgreich erstellt",
+      "ticket_created_description": "Ein Agent wird sich innerhalb von 24-48 Stunden bei Ihnen melden",
+      "send": "Senden"
+    },
+    "EscalationFormDisplay": {
+      "connect_to_live_agent": "Mit einem Live-Agenten verbinden",
+      "connection_to_live_agent_success_title": "Sie werden jetzt mit einem Live-Agenten verbunden",
+      "connection_to_live_agent_success_description": "Bitte warten Sie, bis der Agent antwortet.",
+      "email_placeholder": "E-Mail-Adresse",
+      "agents_unavailable": "Derzeit sind keine Agenten verfügbar. Bitte versuchen Sie es später erneut."
+    },
+    "Handoff": {
+      "connected_to_agent": "Mit Agent verbunden",
+      "connecting_to_agent": "Wir verbinden Sie mit einem Live-Agenten...",
+      "chat_has_ended": "Chat wurde beendet",
+      "chat_transferred": "Agent {name} hat den Chat betreten",
+      "chat_queue_position": "Sie sind an Position {position} in der Warteschlange. Sie werden in Kürze mit einem Agenten verbunden.",
+      "chat_queue_position_next": "Sie sind als Nächstes in der Warteschlange. Ihr Agent wird in Kürze bei Ihnen sein.",
+      "chat_queue_position_in_queue": "Sie sind in der Warteschlange. Bitte warten Sie auf den nächsten verfügbaren Agenten.",
+      "chat_queue_position_estimated_wait_time": "Ihre geschätzte Wartezeit beträgt {estimatedWaitTime} Sekunden.",
+      "chat_queue_position_estimated_wait_time_singular": "Ihre geschätzte Wartezeit beträgt {estimatedWaitTime} Sekunde.",
+      "salesforce_chat_request_fail_unavailable": "Es tut uns leid, aber derzeit sind keine Live-Agenten verfügbar."
+    },
+    "IdleMessage": {
+      "idle_message": "Wir sind hier, um Ihnen zu helfen. Bitte stellen Sie eine Frage.",
+      "idle_message_with_survey": "Vielen Dank, dass Sie uns kontaktiert haben. Können Sie bitte diese [Umfrage]({url}{urlParams}) ausfüllen, um uns über Ihre Erfahrung zu berichten?"
+    },
+    "ChatInput": {
+      "see_more": "Mehr anzeigen",
+      "see_less": "Weniger anzeigen",
+      "question_placeholder": "Stellen Sie eine Frage...",
+      "speaking_with_agent": "Mit Agent sprechen",
+      "end_chat": "Chat beenden",
+      "aria_submit_question": "Frage absenden",
+      "aria_question_box": "Fragefeld"
+    },
+    "FeedbackForm": {
+      "submit_error": "Fehler beim Absenden des Feedbacks",
+      "submit_success": "Danke für Ihr Feedback!",
+      "thumbs_up": "Daumen hoch",
+      "thumbs_down": "Daumen runter",
+      "human_agent_requested": "Menschlicher Agent angefordert",
+      "copied_to_clipboard": "In die Zwischenablage kopiert",
+      "copy_to_clipboard": "In die Zwischenablage kopieren",
+      "speak_to_agent": "Mit Agent sprechen",
+      "feedback_reason": "Warum haben Sie dieses Feedback ausgewählt?",
+      "down_placeholder": "Lassen Sie uns wissen, wie die Antwort verbessert werden kann.",
+      "up_placeholder": "Was hat Ihnen an der Antwort gefallen?",
+      "submit": "Absenden"
+    }
+  }
+}

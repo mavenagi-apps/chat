@@ -12,7 +12,7 @@ declare global {
     embedAllowlist?: string[];
     enableDemoSite?: string;
     welcomeMessage?: string;
-    disableAttachments?: boolean;
+    disableAttachments?: string;
   }
 
   interface AppSettings {
@@ -32,7 +32,8 @@ declare global {
     misc: {
       handoffConfiguration?: string;
       amplitudeApiKey?: string;
-      disableAttachments?: boolean;
+      disableAttachments?: string;
+      enableIdleMessage?: string;
     };
   }
 
@@ -98,6 +99,7 @@ declare global {
       amplitudeApiKey?: AppSettings["misc"]["amplitudeApiKey"];
       disableAttachments?: AppSettings["misc"]["disableAttachments"];
       handoffConfiguration?: ClientSafeHandoffConfig;
+      enableIdleMessage?: boolean;
     };
   }
 }

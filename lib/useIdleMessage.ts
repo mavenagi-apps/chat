@@ -5,6 +5,7 @@ import { useAnalytics } from "@/lib/use-analytics";
 import { MagiEvent } from "@/lib/analytics/events";
 import { useParams } from "next/navigation";
 import { useSettings } from "@/app/providers/SettingsProvider";
+
 interface UseIdleMessageProps {
   idleTimeout?: number;
   messages: CombinedMessage[];
@@ -20,13 +21,18 @@ export function useIdleMessage({
   agentName,
   addMessage,
 }: UseIdleMessageProps) {
+  const { misc } = useSettings();
+
+  if (!misc.enableIdleMessage) {
+    return;
+  }
+
   const t = useTranslations("chat.IdleMessage");
   const hasShownMessage = useRef(false);
   const hasConnectedToAgent = useRef(false);
   const timer = useRef<NodeJS.Timeout>();
   const analytics = useAnalytics();
   const { agentId } = useParams();
-  const { misc } = useSettings();
   const surveyLink = misc.handoffConfiguration?.surveyLink;
 
   const callAnalytics = useCallback(() => {
@@ -57,9 +63,8 @@ export function useIdleMessage({
       if (!hasShownMessage.current) {
         const idleMessage: ChatMessage = {
           text: t("idle_message_with_survey", {
-            surveyLink,
-            conversationId,
-            additionalUrlParams: `&agentConnected=${hasConnectedToAgent.current ? "Yes" : "No"}`,
+            url: surveyLink,
+            urlParams: `?chatKey=${conversationId}&agentConnected=${hasConnectedToAgent.current ? "Yes" : "No"}`,
           }),
           type: "SIMULATED",
         };

@@ -134,6 +134,9 @@ export async function getPublicAppSettings(
         amplitudeApiKey: settings.misc?.amplitudeApiKey,
         disableAttachments: settings.misc?.disableAttachments,
         handoffConfiguration: parsedHandoffConfiguration,
+        enableIdleMessage:
+          ["true", "1"].includes(settings.misc?.enableIdleMessage || "") ??
+          false,
       },
     };
   } catch (error) {

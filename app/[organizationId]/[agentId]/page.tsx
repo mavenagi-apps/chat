@@ -3,25 +3,28 @@
 import * as React from "react";
 import { useEffect, useMemo } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import Chat from "@magi/components/chat/Chat";
-import { ChatInput } from "@magi/components/chat/ChatInput";
-import { useChat } from "@magi/components/chat/use-chat";
-import { MagiEvent } from "@/lib/analytics/events";
-import { useAnalytics } from "@/lib/use-analytics";
-import { useSettings } from "@/app/providers/SettingsProvider";
-import { useIframeMessaging } from "@/lib/useIframeMessaging";
+
 import { AuthProvider } from "@/app/providers/AuthProvider";
 import { CustomDataProvider } from "@/app/providers/CustomDataProvider";
-import { ChatHeader } from "@magi/components/chat/ChatHeader";
-import { WelcomeMessage } from "@magi/components/chat/WelcomeChatMessage";
-import { ChatMessages } from "@magi/components/chat/ChatMessages";
-import { useAskQuestion } from "@/lib/useAskQuestion";
-import { useScrollToBottom } from "@/lib/useScrollToBottom";
-import { useHandoff } from "@/lib/useHandoff";
+import { useSettings } from "@/app/providers/SettingsProvider";
 import { HandoffStatus } from "@/app/constants/handoff";
-import { PoweredByMaven } from "@magi/components/chat/PoweredByMaven";
+import { MagiEvent } from "@/lib/analytics/events";
+import { useAnalytics } from "@/lib/use-analytics";
+import { useAskQuestion } from "@/lib/useAskQuestion";
+import { useHandoff } from "@/lib/useHandoff";
+import { useIdleMessage } from "@/lib/useIdleMessage";
+import { useIframeMessaging } from "@/lib/useIframeMessaging";
+import { useScrollToBottom } from "@/lib/useScrollToBottom";
 import type { CombinedMessage } from "@/types";
+
+import Chat from "@magi/components/chat/Chat";
+import { ChatHeader } from "@magi/components/chat/ChatHeader";
+import { ChatInput } from "@magi/components/chat/ChatInput";
+import { ChatMessages } from "@magi/components/chat/ChatMessages";
+import { PoweredByMaven } from "@magi/components/chat/PoweredByMaven";
 import { TypingIndicator } from "@magi/components/chat/TypingIndicator";
+import { useChat } from "@magi/components/chat/use-chat";
+import { WelcomeMessage } from "@magi/components/chat/WelcomeChatMessage";
 
 function ChatPage() {
   const analytics = useAnalytics();
@@ -74,6 +77,13 @@ function ChatPage() {
   }, [messages, handoffChatEvents]);
 
   const isHandoff = handoffStatus === HandoffStatus.INITIALIZED;
+
+  useIdleMessage({
+    messages,
+    conversationId,
+    agentName: agentName || "",
+    addMessage,
+  });
 
   return (
     <main className="flex h-screen flex-col bg-gray-50">

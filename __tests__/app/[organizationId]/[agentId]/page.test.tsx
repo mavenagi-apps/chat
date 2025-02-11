@@ -11,6 +11,8 @@ import { HandoffStatus } from "@/app/constants/handoff";
 import { useChat } from "@magi/components/chat/use-chat";
 import { useHandoff } from "@/lib/useHandoff";
 import { useScrollToBottom } from "@/lib/useScrollToBottom";
+import { useSettings } from "@/app/providers/SettingsProvider";
+import { useIdleMessage } from "@/lib/useIdleMessage";
 
 let chatMessages = [] as Message[];
 let handoffMessages = [] as (
@@ -29,6 +31,10 @@ vi.mock("@/lib/useHandoff");
 const useHandoffMock = vi.mocked(useHandoff);
 
 vi.mock("@/lib/useIdleMessage");
+const useIdleMessageMock = vi.mocked(useIdleMessage);
+
+vi.mock("@/app/providers/SettingsProvider");
+const useSettingsMock = vi.mocked(useSettings);
 
 vi.mock("@/lib/useIframeMessaging", () => ({
   useIframeMessaging: () => ({
@@ -77,11 +83,37 @@ describe("ChatPage", () => {
       askHandoff: vi.fn(),
       handleEndHandoff: vi.fn(),
     });
+
+    useSettingsMock.mockReturnValue({
+      branding: {},
+      misc: {
+        enableIdleMessage: true,
+        handoffConfiguration: {
+          type: "salesforce",
+          enableAvailabilityCheck: true,
+          allowAnonymousHandoff: false,
+        },
+      },
+      security: {},
+    });
   });
 
   afterEach(() => {
     [chatMessages, handoffMessages] = [[], []];
     vi.restoreAllMocks();
+  });
+
+  describe("idle message setup", () => {
+    test("should always call useIdleMessage with correct props", () => {
+      render(<ChatPage />);
+
+      expect(useIdleMessageMock).toHaveBeenCalledWith({
+        messages: chatMessages,
+        conversationId: "test-conversation-id",
+        agentName: "Lenny",
+        addMessage: expect.any(Function),
+      });
+    });
   });
 
   describe("when there are no messages", () => {

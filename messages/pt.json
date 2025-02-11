@@ -1,0 +1,75 @@
+{
+  "chat": {
+    "ChatPage": {
+      "default_welcome_message": "Como podemos ajudar você? Você pode iniciar uma conversa abaixo ou começar com perguntas populares:",
+      "default_error_message": "Ocorreu um erro. Por favor, tente novamente.",
+      "related_links": "Links relacionados",
+      "powered_by": "Desenvolvido por",
+      "connecting_to_agent": "Conectando você a um agente ao vivo...",
+      "agent_typing": "O agente está digitando...",
+      "error_rendering_chart": "Erro ao renderizar gráfico",
+      "chat_queue_position": "Você está na posição {position} na fila. Você será conectado a um agente em breve.",
+      "chat_queue_position_next": "Você é o próximo na fila. Seu agente estará com você em breve.",
+      "chat_queue_position_in_queue": "Você está na fila. Por favor, aguarde o próximo agente disponível.",
+      "chat_queue_position_estimated_wait_time": "Seu tempo de espera estimado é de {estimatedWaitTime} segundos.",
+      "chat_queue_position_estimated_wait_time_singular": "Seu tempo de espera estimado é de {estimatedWaitTime} segundo."
+    },
+    "BailoutFormDisplay": {
+      "unable_to_answer": "Não consigo responder a esta pergunta.",
+      "default_bailout_text": "Por favor, tente outra pergunta ou entre em contato com um agente de suporte para mais assistência.",
+      "integration_bailout_text": "Por favor, clique no botão abaixo para se conectar a um agente ou faça outra pergunta.",
+      "name": "Nome",
+      "email": "Email",
+      "question": "Pergunta",
+      "ticket_created_title": "Ticket de suporte criado com sucesso",
+      "ticket_created_description": "Um agente entrará em contato com você dentro de 24-48 horas",
+      "send": "Enviar"
+    },
+    "EscalationFormDisplay": {
+      "connect_to_live_agent": "Conectar a um agente ao vivo",
+      "connection_to_live_agent_success_title": "Você está agora se conectando a um agente ao vivo",
+      "connection_to_live_agent_success_description": "Por favor, aguarde a resposta do agente.",
+      "email_placeholder": "Endereço de email",
+      "agents_unavailable": "Nenhum agente está disponível no momento. Por favor, tente novamente mais tarde."
+    },
+    "Handoff": {
+      "connected_to_agent": "Conectado ao agente",
+      "connecting_to_agent": "Conectando você a um agente ao vivo...",
+      "chat_has_ended": "O chat foi encerrado",
+      "chat_transferred": "O agente {name} entrou no chat",
+      "chat_queue_position": "Você está na posição {position} na fila. Você será conectado a um agente em breve.",
+      "chat_queue_position_next": "Você é o próximo na fila. Seu agente estará com você em breve.",
+      "chat_queue_position_in_queue": "Você está na fila. Por favor, aguarde o próximo agente disponível.",
+      "chat_queue_position_estimated_wait_time": "Seu tempo de espera estimado é de {estimatedWaitTime} segundos.",
+      "chat_queue_position_estimated_wait_time_singular": "Seu tempo de espera estimado é de {estimatedWaitTime} segundo.",
+      "salesforce_chat_request_fail_unavailable": "Lamentamos, mas não há agentes ao vivo disponíveis no momento."
+    },
+    "IdleMessage": {
+      "idle_message": "Estamos aqui para ajudar você. Por favor, faça uma pergunta.",
+      "idle_message_with_survey": "Obrigado por entrar em contato. Você pode preencher este [questionário]({url}{urlParams}) para nos contar sobre sua experiência?"
+    },
+    "ChatInput": {
+      "see_more": "Ver mais",
+      "see_less": "Ver menos",
+      "question_placeholder": "Faça uma pergunta...",
+      "speaking_with_agent": "Falando com o agente",
+      "end_chat": "Encerrar chat",
+      "aria_submit_question": "Enviar pergunta",
+      "aria_question_box": "Caixa de perguntas"
+    },
+    "FeedbackForm": {
+      "submit_error": "Erro ao enviar feedback",
+      "submit_success": "Obrigado pelo seu feedback!",
+      "thumbs_up": "Polegar para cima",
+      "thumbs_down": "Polegar para baixo",
+      "human_agent_requested": "Agente humano solicitado",
+      "copied_to_clipboard": "Copiado para a área de transferência",
+      "copy_to_clipboard": "Copiar para a área de transferência",
+      "speak_to_agent": "Falar com agente",
+      "feedback_reason": "Por que você selecionou este feedback?",
+      "down_placeholder": "Deixe-nos saber como a resposta pode ser melhorada.",
+      "up_placeholder": "O que você gostou na resposta?",
+      "submit": "Enviar"
+    }
+  }
+}
