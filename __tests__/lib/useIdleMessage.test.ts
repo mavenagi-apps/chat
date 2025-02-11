@@ -268,4 +268,147 @@ describe("useIdleMessage", () => {
 
     expect(removeEventListenerSpy).toHaveBeenCalled();
   });
+
+  it("should only add event listeners once", () => {
+    const addEventListenerSpy = vi.spyOn(window, "addEventListener");
+    const userMessage: ChatMessage = {
+      text: "Hello",
+      type: "USER",
+      timestamp: Date.now(),
+    };
+
+    const props = {
+      ...defaultProps,
+      messages: [userMessage] as CombinedMessage[],
+    };
+
+    renderHook(() => useIdleMessage(props));
+
+    // Should be called once for each event type
+    expect(addEventListenerSpy).toHaveBeenCalledTimes(7); // 7 events in IDLE_EVENTS
+
+    addEventListenerSpy.mockRestore();
+  });
+
+  it("should only set one timer at a time", () => {
+    const setTimeoutSpy = vi.spyOn(global, "setTimeout");
+    const userMessage: ChatMessage = {
+      text: "Hello",
+      type: "USER",
+      timestamp: Date.now(),
+    };
+
+    const props = {
+      ...defaultProps,
+      messages: [userMessage] as CombinedMessage[],
+    };
+
+    renderHook(() => useIdleMessage(props));
+
+    // Initial timer
+    expect(setTimeoutSpy).toHaveBeenCalledTimes(1);
+
+    // Simulate user activity
+    act(() => {
+      window.dispatchEvent(new Event("mousemove"));
+    });
+
+    // Should clear previous timer and set a new one
+    expect(setTimeoutSpy).toHaveBeenCalledTimes(2);
+
+    setTimeoutSpy.mockRestore();
+  });
+
+  it("should properly clean up previous timer before setting new one", () => {
+    const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
+    const userMessage: ChatMessage = {
+      text: "Hello",
+      type: "USER",
+      timestamp: Date.now(),
+    };
+
+    const props = {
+      ...defaultProps,
+      messages: [userMessage] as CombinedMessage[],
+    };
+
+    renderHook(() => useIdleMessage(props));
+
+    // Simulate multiple user activities
+    act(() => {
+      window.dispatchEvent(new Event("mousemove"));
+      window.dispatchEvent(new Event("mousemove"));
+      window.dispatchEvent(new Event("mousemove"));
+    });
+
+    // Should clear timeout for each reset
+    expect(clearTimeoutSpy).toHaveBeenCalledTimes(3);
+
+    clearTimeoutSpy.mockRestore();
+  });
+
+  it("should only call addMessage once ever, even across remounts", () => {
+    const userMessage: ChatMessage = {
+      text: "Hello",
+      type: "USER",
+      timestamp: Date.now(),
+    };
+
+    const props = {
+      ...defaultProps,
+      messages: [userMessage] as CombinedMessage[],
+    };
+
+    // First mount
+    const { rerender } = renderHook(() => useIdleMessage(props));
+
+    act(() => {
+      vi.advanceTimersByTime(30000);
+    });
+
+    expect(mockAddMessage).toHaveBeenCalledTimes(1);
+    mockAddMessage.mockClear();
+
+    // Rerender instead of unmount/remount to preserve refs
+    rerender();
+
+    act(() => {
+      vi.advanceTimersByTime(30000);
+    });
+
+    // Should not call addMessage again
+    expect(mockAddMessage).not.toHaveBeenCalled();
+  });
+
+  it("should only call addMessage once even with multiple user activities", () => {
+    const userMessage: ChatMessage = {
+      text: "Hello",
+      type: "USER",
+      timestamp: Date.now(),
+    };
+
+    const props = {
+      ...defaultProps,
+      messages: [userMessage] as CombinedMessage[],
+    };
+
+    renderHook(() => useIdleMessage(props));
+
+    // First timeout
+    act(() => {
+      vi.advanceTimersByTime(30000);
+    });
+    expect(mockAddMessage).toHaveBeenCalledTimes(1);
+
+    // Reset timer multiple times
+    for (let i = 0; i < 3; i++) {
+      act(() => {
+        window.dispatchEvent(new Event("mousemove"));
+        vi.advanceTimersByTime(30000);
+      });
+    }
+
+    // Should still only have been called once total
+    expect(mockAddMessage).toHaveBeenCalledTimes(1);
+  });
 });
