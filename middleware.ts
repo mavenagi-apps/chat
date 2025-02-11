@@ -60,12 +60,12 @@ const processSecuritySettings = (
   request: NextRequest,
 ): { headers?: string; blocked: boolean } => {
   const allowlist = [...(appSettings.security.embedAllowlist || [])];
-  const enableDemoSite = ["true", "1"].includes(
-    appSettings.branding.enableDemoSite || "",
+  const enablePreviewSite = ["true", "1"].includes(
+    appSettings.branding.enablePreviewSite || "",
   );
   const referrer = request.headers.get("referer");
 
-  if (enableDemoSite) {
+  if (enablePreviewSite) {
     allowlist.push("'self'");
   }
 

@@ -10,7 +10,7 @@ declare global {
     encryptionSecret?: string;
     handoffConfiguration?: string;
     embedAllowlist?: string[];
-    enableDemoSite?: string;
+    enablePreviewSite?: string;
     welcomeMessage?: string;
     disableAttachments?: string;
   }
@@ -22,7 +22,7 @@ declare global {
       brandFontColor?: string;
       welcomeMessage?: string;
       popularQuestions?: string[] | string;
-      enableDemoSite?: string;
+      enablePreviewSite?: string;
     };
     security: {
       jwtPublicKey?: string;

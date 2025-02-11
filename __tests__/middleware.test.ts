@@ -9,7 +9,7 @@ vi.mock("@/app/api/server/utils", () => ({
       embedAllowlist: [],
     },
     branding: {
-      enableDemoSite: "false",
+      enablePreviewSite: "false",
     },
     misc: {},
   }),
@@ -139,7 +139,7 @@ describe("Middleware", () => {
                 embedAllowlist: ["allowed-domain.com"],
               },
               branding: {
-                enableDemoSite: "false",
+                enablePreviewSite: "false",
               },
               misc: {},
             });

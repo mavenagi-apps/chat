@@ -3,10 +3,10 @@
 import { base64url, SignJWT, EncryptJWT, importPKCS8 } from "jose";
 import { getAppSettings } from "@/app/api/server/utils";
 
-// This envar and this entire action is only used for the demo page
+// This envar and this entire action is only used for the preview page
 // to demonstrate how the customer would sign and encrypt the user data
 // before sending it to Maven.
-const DEMO_SIGNING_PRIVATE_KEY = process.env.DEMO_SIGNING_PRIVATE_KEY;
+const PREVIEW_SIGNING_PRIVATE_KEY = process.env.PREVIEW_SIGNING_PRIVATE_KEY;
 
 async function importPrivateKey(privateKeyString: string) {
   try {
@@ -22,11 +22,11 @@ export async function generateSignedUserData(
   organizationId: string,
   agentId: string,
 ): Promise<string | null> {
-  if (!DEMO_SIGNING_PRIVATE_KEY) {
+  if (!PREVIEW_SIGNING_PRIVATE_KEY) {
     return null;
   }
 
-  const privateKey = await importPrivateKey(DEMO_SIGNING_PRIVATE_KEY);
+  const privateKey = await importPrivateKey(PREVIEW_SIGNING_PRIVATE_KEY);
 
   const { security } = await getAppSettings(organizationId, agentId);
   const { encryptionSecret } = security;

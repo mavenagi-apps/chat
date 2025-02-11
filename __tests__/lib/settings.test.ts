@@ -13,7 +13,7 @@ describe("adaptLegacySettings", () => {
       encryptionSecret: "legacy-secret",
       handoffConfiguration: "legacy-handoff",
       embedAllowlist: ["legacy-domain"],
-      enableDemoSite: "true",
+      enablePreviewSite: "true",
       welcomeMessage: "legacy-welcome",
       disableAttachments: true,
       branding: {},
@@ -30,7 +30,7 @@ describe("adaptLegacySettings", () => {
         brandFontColor: "#legacyFont",
         welcomeMessage: "legacy-welcome",
         popularQuestions: ["q1", "q2"],
-        enableDemoSite: "true",
+        enablePreviewSite: "true",
       },
       security: {
         jwtPublicKey: "legacy-jwt",
@@ -84,7 +84,7 @@ describe("adaptLegacySettings", () => {
         brandFontColor: undefined,
         welcomeMessage: undefined,
         popularQuestions: undefined,
-        enableDemoSite: undefined,
+        enablePreviewSite: undefined,
       },
       security: {
         jwtPublicKey: undefined,
@@ -115,7 +115,7 @@ describe("adaptLegacySettings", () => {
         brandFontColor: undefined,
         welcomeMessage: undefined,
         popularQuestions: undefined,
-        enableDemoSite: undefined,
+        enablePreviewSite: undefined,
       },
       security: {
         jwtPublicKey: undefined,
