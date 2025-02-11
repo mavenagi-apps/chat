@@ -13,7 +13,8 @@ declare global {
   }
 }
 
-window.Maven = window.Maven || {
+window.Maven = {
+  ...(window.Maven || {}),
   ChatWidget,
 };
 
