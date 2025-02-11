@@ -33,7 +33,7 @@ declare global {
       handoffConfiguration?: string;
       amplitudeApiKey?: string;
       disableAttachments?: string;
-      enableIdleMessage?: string;
+      idleMessageTimeout?: string;
     };
   }
 
@@ -99,7 +99,7 @@ declare global {
       amplitudeApiKey?: AppSettings["misc"]["amplitudeApiKey"];
       disableAttachments?: boolean;
       handoffConfiguration?: ClientSafeHandoffConfig;
-      enableIdleMessage?: boolean;
+      idleMessageTimeout?: number;
     };
   }
 }

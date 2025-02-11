@@ -30,7 +30,6 @@ describe("useIdleMessage", () => {
   const mockLogEvent = vi.fn();
   const mockTranslate = vi.fn();
   const defaultProps = {
-    idleTimeout: 1000,
     messages: [] as CombinedMessage[],
     conversationId: "test-conversation",
     agentName: "",
@@ -49,7 +48,7 @@ describe("useIdleMessage", () => {
         handoffConfiguration: {
           surveyLink: "https://test-survey.com",
         },
-        enableIdleMessage: true,
+        idleMessageTimeout: 30000,
       },
     });
 
@@ -64,13 +63,13 @@ describe("useIdleMessage", () => {
     vi.useRealTimers();
   });
 
-  it("should not show idle message if feature is disabled", () => {
+  it("should not show idle message if timeout is undefined", () => {
     (useSettings as any).mockReturnValue({
       misc: {
         handoffConfiguration: {
           surveyLink: "https://test-survey.com",
         },
-        enableIdleMessage: false,
+        idleMessageTimeout: undefined,
       },
     });
 
@@ -84,7 +83,7 @@ describe("useIdleMessage", () => {
     renderHook(() => useIdleMessage(props));
 
     act(() => {
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(60000); // Advance well beyond any reasonable timeout
     });
 
     expect(mockAddMessage).not.toHaveBeenCalled();
@@ -95,7 +94,7 @@ describe("useIdleMessage", () => {
     renderHook(() => useIdleMessage(defaultProps));
 
     act(() => {
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(60000);
     });
 
     expect(mockAddMessage).not.toHaveBeenCalled();
@@ -116,7 +115,7 @@ describe("useIdleMessage", () => {
     renderHook(() => useIdleMessage(props));
 
     act(() => {
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(30000); // Use the default timeout from settings
     });
 
     expect(mockAddMessage).toHaveBeenCalledTimes(1);
@@ -142,13 +141,13 @@ describe("useIdleMessage", () => {
     renderHook(() => useIdleMessage(props));
 
     act(() => {
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(30000);
     });
 
     expect(mockAddMessage).toHaveBeenCalledTimes(1);
 
     act(() => {
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(30000);
     });
 
     expect(mockAddMessage).toHaveBeenCalledTimes(1);
@@ -170,7 +169,7 @@ describe("useIdleMessage", () => {
 
     // Advance halfway through the timeout
     act(() => {
-      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(15000);
     });
 
     // Simulate user activity
@@ -180,14 +179,14 @@ describe("useIdleMessage", () => {
 
     // Advance past the original timeout
     act(() => {
-      vi.advanceTimersByTime(600);
+      vi.advanceTimersByTime(20000);
     });
 
     expect(mockAddMessage).not.toHaveBeenCalled();
 
     // Advance to the new timeout
     act(() => {
-      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(15000);
     });
 
     expect(mockAddMessage).toHaveBeenCalledTimes(1);
@@ -209,7 +208,7 @@ describe("useIdleMessage", () => {
     renderHook(() => useIdleMessage(props));
 
     act(() => {
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(30000);
     });
 
     expect(mockLogEvent).toHaveBeenCalledWith(MagiEvent.idleMessageDisplay, {
@@ -225,7 +224,7 @@ describe("useIdleMessage", () => {
         handoffConfiguration: {
           surveyLink: undefined,
         },
-        enableIdleMessage: true,
+        idleMessageTimeout: 30000,
       },
     });
 
@@ -243,7 +242,7 @@ describe("useIdleMessage", () => {
     renderHook(() => useIdleMessage(props));
 
     act(() => {
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(30000);
     });
 
     expect(mockAddMessage).not.toHaveBeenCalled();

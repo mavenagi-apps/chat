@@ -17,7 +17,6 @@ const IDLE_EVENTS = [
 ] as const;
 
 interface UseIdleMessageProps {
-  idleTimeout?: number;
   messages: CombinedMessage[];
   conversationId: string;
   agentName: string;
@@ -25,7 +24,6 @@ interface UseIdleMessageProps {
 }
 
 export function useIdleMessage({
-  idleTimeout = 30000,
   messages,
   conversationId,
   agentName,
@@ -78,13 +76,20 @@ export function useIdleMessage({
         hasShownMessage.current = true;
         callAnalytics();
       }
-    }, idleTimeout);
-  }, [idleTimeout, conversationId, t, callAnalytics, surveyLink, addMessage]);
+    }, misc.idleMessageTimeout);
+  }, [
+    misc.idleMessageTimeout,
+    conversationId,
+    t,
+    callAnalytics,
+    surveyLink,
+    addMessage,
+  ]);
 
   useEffect(() => {
     // Return early if feature is disabled or conditions aren't met
     if (
-      !misc.enableIdleMessage ||
+      !misc.idleMessageTimeout ||
       hasShownMessage.current ||
       !userMessagesExist ||
       !surveyLink
@@ -108,5 +113,5 @@ export function useIdleMessage({
     resetTimer();
 
     return cleanup;
-  }, [resetTimer, userMessagesExist, surveyLink, misc.enableIdleMessage]);
+  }, [resetTimer, userMessagesExist, surveyLink, misc.idleMessageTimeout]);
 }

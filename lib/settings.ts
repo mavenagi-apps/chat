@@ -1,3 +1,12 @@
+/**
+ * Parses a string value into a valid idle message timeout number.
+ * Returns undefined if the value is invalid or not a positive integer.
+ */
+export function parseIdleMessageTimeout(value?: string): number | undefined {
+  const timeout = parseInt(value || "", 10);
+  return !isNaN(timeout) && timeout > 0 ? timeout : undefined;
+}
+
 export function adaptLegacySettings(settings: InterimAppSettings): AppSettings {
   const { misc, branding, security } = settings;
 
