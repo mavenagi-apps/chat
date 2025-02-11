@@ -48,7 +48,7 @@ describe("useIdleMessage", () => {
         handoffConfiguration: {
           surveyLink: "https://test-survey.com",
         },
-        idleMessageTimeout: 30000,
+        idleMessageTimeout: 30, // 30 seconds
       },
     });
 
@@ -115,7 +115,7 @@ describe("useIdleMessage", () => {
     renderHook(() => useIdleMessage(props));
 
     act(() => {
-      vi.advanceTimersByTime(30000); // Use the default timeout from settings
+      vi.advanceTimersByTime(30000); // 30 seconds in milliseconds
     });
 
     expect(mockAddMessage).toHaveBeenCalledTimes(1);
@@ -141,13 +141,13 @@ describe("useIdleMessage", () => {
     renderHook(() => useIdleMessage(props));
 
     act(() => {
-      vi.advanceTimersByTime(30000);
+      vi.advanceTimersByTime(30000); // 30 seconds in milliseconds
     });
 
     expect(mockAddMessage).toHaveBeenCalledTimes(1);
 
     act(() => {
-      vi.advanceTimersByTime(30000);
+      vi.advanceTimersByTime(30000); // Another 30 seconds
     });
 
     expect(mockAddMessage).toHaveBeenCalledTimes(1);
@@ -169,7 +169,7 @@ describe("useIdleMessage", () => {
 
     // Advance halfway through the timeout
     act(() => {
-      vi.advanceTimersByTime(15000);
+      vi.advanceTimersByTime(15000); // 15 seconds
     });
 
     // Simulate user activity
@@ -179,14 +179,14 @@ describe("useIdleMessage", () => {
 
     // Advance past the original timeout
     act(() => {
-      vi.advanceTimersByTime(20000);
+      vi.advanceTimersByTime(20000); // 20 seconds
     });
 
     expect(mockAddMessage).not.toHaveBeenCalled();
 
     // Advance to the new timeout
     act(() => {
-      vi.advanceTimersByTime(15000);
+      vi.advanceTimersByTime(15000); // Final 15 seconds
     });
 
     expect(mockAddMessage).toHaveBeenCalledTimes(1);
@@ -208,7 +208,7 @@ describe("useIdleMessage", () => {
     renderHook(() => useIdleMessage(props));
 
     act(() => {
-      vi.advanceTimersByTime(30000);
+      vi.advanceTimersByTime(30000); // 30 seconds in milliseconds
     });
 
     expect(mockLogEvent).toHaveBeenCalledWith(MagiEvent.idleMessageDisplay, {
@@ -224,7 +224,7 @@ describe("useIdleMessage", () => {
         handoffConfiguration: {
           surveyLink: undefined,
         },
-        idleMessageTimeout: 30000,
+        idleMessageTimeout: 30, // 30 seconds
       },
     });
 
@@ -242,7 +242,7 @@ describe("useIdleMessage", () => {
     renderHook(() => useIdleMessage(props));
 
     act(() => {
-      vi.advanceTimersByTime(30000);
+      vi.advanceTimersByTime(30000); // 30 seconds in milliseconds
     });
 
     expect(mockAddMessage).not.toHaveBeenCalled();

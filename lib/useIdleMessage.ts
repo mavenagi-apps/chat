@@ -62,6 +62,14 @@ export function useIdleMessage({
       clearTimeout(timer.current);
     }
 
+    const timeoutInMs = misc.idleMessageTimeout
+      ? misc.idleMessageTimeout * 1000
+      : undefined;
+
+    if (!timeoutInMs) {
+      return;
+    }
+
     timer.current = setTimeout(() => {
       if (!hasShownMessage.current) {
         const idleMessage: ChatMessage = {
@@ -76,7 +84,7 @@ export function useIdleMessage({
         hasShownMessage.current = true;
         callAnalytics();
       }
-    }, misc.idleMessageTimeout);
+    }, timeoutInMs);
   }, [
     misc.idleMessageTimeout,
     conversationId,
