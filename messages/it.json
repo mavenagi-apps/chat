@@ -8,8 +8,6 @@
       "connecting_to_agent": "Connessione con un agente in diretta...",
       "agent_typing": "L'agente sta scrivendo...",
       "error_rendering_chart": "Errore nel renderizzare il grafico",
-      "idle_message": "Siamo qui per aiutarti. Per favore fai una domanda.",
-      "idle_message_with_survey": "Grazie per averci contattato. Puoi compilare questo [sondaggio]({url}{urlParams}) per raccontarci la tua esperienza?",
       "chat_queue_position": "Sei in posizione {position} nella coda. Sarai connesso a un agente a breve.",
       "chat_queue_position_next": "Sei il prossimo in coda. Il tuo agente sarà con te a breve.",
       "chat_queue_position_in_queue": "Sei in coda. Attendi il prossimo agente disponibile.",
@@ -48,7 +46,7 @@
     },
     "IdleMessage": {
       "idle_message": "Siamo qui per aiutarti. Per favore fai una domanda.",
-      "idle_message_with_survey": "Grazie per averci contattato. Puoi compilare questo [sondaggio]({surveyLink}?chatKey={conversationId}{additionalUrlParams}) per raccontarci la tua esperienza?"
+      "idle_message_with_survey": "Grazie per averci contattato. Puoi compilare questo [sondaggio]({url}{urlParams}) per raccontarci la tua esperienza?"
     },
     "ChatInput": {
       "see_more": "Vedi di più",

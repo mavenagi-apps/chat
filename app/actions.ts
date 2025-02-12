@@ -8,7 +8,7 @@ import {
 } from "mavenagi/api";
 import { nanoid } from "nanoid";
 import { getAppSettings } from "@/app/api/server/utils";
-import { adaptLegacySettings } from "@/lib/settings";
+import { adaptLegacySettings, parseIdleMessageTimeout } from "@/lib/settings";
 import { ServerHandoffStrategyFactory } from "@/lib/handoff/ServerHandoffStrategyFactory";
 
 interface CreateOrUpdateFeedbackProps {
@@ -132,8 +132,13 @@ export async function getPublicAppSettings(
       },
       misc: {
         amplitudeApiKey: settings.misc?.amplitudeApiKey,
-        disableAttachments: settings.misc?.disableAttachments,
+        disableAttachments:
+          ["true", "1"].includes(settings.misc?.disableAttachments || "") ??
+          false,
         handoffConfiguration: parsedHandoffConfiguration,
+        idleMessageTimeout: parseIdleMessageTimeout(
+          settings.misc?.idleMessageTimeout,
+        ),
       },
     };
   } catch (error) {

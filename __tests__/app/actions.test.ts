@@ -170,7 +170,8 @@ describe("getPublicAppSettings", () => {
           },
           misc: {
             amplitudeApiKey: "test-key",
-            disableAttachments: true,
+            disableAttachments: "true",
+            idleMessageTimeout: "30000",
             handoffConfiguration: JSON.stringify({
               type: "salesforce",
               enableAvailabilityCheck: true,
@@ -199,6 +200,7 @@ describe("getPublicAppSettings", () => {
       misc: {
         amplitudeApiKey: "test-key",
         disableAttachments: true,
+        idleMessageTimeout: 30000,
         handoffConfiguration: {
           type: "salesforce",
           enableAvailabilityCheck: true,
@@ -207,6 +209,64 @@ describe("getPublicAppSettings", () => {
           allowAnonymousHandoff: true,
         },
       },
+    });
+  });
+
+  describe("idleMessageTimeout parsing", () => {
+    it.each([
+      ["30000", 30000],
+      ["1000", 1000],
+      ["0", undefined],
+      ["-1000", undefined],
+      ["invalid", undefined],
+      ["", undefined],
+      [undefined, undefined],
+    ])("parses idleMessageTimeout %s as %s", async (input, expected) => {
+      const mockClient = {
+        appSettings: {
+          get: vi.fn().mockResolvedValue({
+            branding: {},
+            security: {},
+            misc: {
+              idleMessageTimeout: input,
+            },
+          }),
+        },
+      };
+
+      vi.mocked(getMavenAGIClient).mockReturnValue(mockClient as any);
+
+      const result = await getPublicAppSettings("org-id", "agent-id");
+      expect(result?.misc.idleMessageTimeout).toBe(expected);
+    });
+  });
+
+  describe("disableAttachments parsing", () => {
+    it.each([
+      ["true", true],
+      ["1", true],
+      ["false", false],
+      ["0", false],
+      ["", false],
+      [undefined, false],
+      ["anything-else", false],
+    ])("parses disableAttachments %s as %s", async (input, expected) => {
+      const mockClient = {
+        appSettings: {
+          get: vi.fn().mockResolvedValue({
+            branding: {},
+            security: {},
+            misc: {
+              disableAttachments: input,
+            },
+          }),
+        },
+      };
+
+      vi.mocked(getMavenAGIClient).mockReturnValue(mockClient as any);
+
+      const result = await getPublicAppSettings("org-id", "agent-id");
+      expect(result?.misc.disableAttachments).toBe(expected);
     });
   });
 
