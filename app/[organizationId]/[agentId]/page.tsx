@@ -79,9 +79,10 @@ function ChatPage() {
   const isHandoff = handoffStatus === HandoffStatus.INITIALIZED;
 
   useIdleMessage({
-    messages,
-    conversationId,
     agentName: agentName || "",
+    conversationId,
+    isHandoff,
+    messages,
     addMessage,
   });
 

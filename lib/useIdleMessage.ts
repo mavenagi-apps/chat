@@ -20,9 +20,10 @@ const IDLE_EVENTS = [
 ] as const;
 
 interface UseIdleMessageProps {
-  messages: CombinedMessage[];
-  conversationId: string;
   agentName: string;
+  conversationId: string;
+  isHandoff: boolean;
+  messages: CombinedMessage[];
   addMessage: (message: ChatMessage) => void;
 }
 
@@ -37,9 +38,10 @@ interface UseIdleMessageProps {
  * @param addMessage - Message injection callback
  */
 export function useIdleMessage({
-  messages,
-  conversationId,
   agentName,
+  conversationId,
+  isHandoff,
+  messages,
   addMessage,
 }: UseIdleMessageProps) {
   const { misc } = useSettings();
@@ -49,6 +51,7 @@ export function useIdleMessage({
   const hasDisplayedMessage = useRef(false);
   const eventListenersMap = useRef(new Map<string, () => void>());
   const isFirstRender = useRef(true);
+  const isHandoffRef = useRef(isHandoff);
   const [showMessage, setShowMessage] = useState(false);
   const analytics = useAnalytics();
   const { agentId } = useParams();
@@ -62,6 +65,10 @@ export function useIdleMessage({
     [messages],
   );
 
+  const hasValidConfiguration = useMemo(() => {
+    return !!misc.idleMessageTimeout && !!surveyLink;
+  }, [misc.idleMessageTimeout, surveyLink]);
+
   /**
    * Determines timer initialization eligibility based on:
    * - Timeout configuration
@@ -72,19 +79,22 @@ export function useIdleMessage({
   const shouldInitializeTimer = useMemo(() => {
     return (
       !showMessage &&
-      misc.idleMessageTimeout &&
+      hasValidConfiguration &&
       userMessagesExist &&
-      surveyLink &&
       !hasDisplayedMessage.current
     );
-  }, [showMessage, misc.idleMessageTimeout, userMessagesExist, surveyLink]);
+  }, [showMessage, hasValidConfiguration, userMessagesExist]);
 
   /**
    * Controls message display eligibility based on timer state and display history.
    */
   const shouldDisplayMessage = useMemo(() => {
     return showMessage && surveyLink && !hasDisplayedMessage.current;
-  }, [showMessage, surveyLink]);
+  }, [showMessage, surveyLink, isHandoff, hasValidConfiguration]);
+
+  const shouldDisplayMessageOnHandoffChange = useMemo(() => {
+    return !isHandoff && isHandoffRef.current && hasValidConfiguration;
+  }, [isHandoff, isHandoffRef.current, hasValidConfiguration]);
 
   /**
    * Manages timer lifecycle:
@@ -188,12 +198,30 @@ export function useIdleMessage({
    * 5. Updates display state
    */
   const displayMessage = useCallback(() => {
-    if (!shouldDisplayMessage) return;
+    if (!shouldDisplayMessage && !shouldDisplayMessageOnHandoffChange) return;
     addMessage(idleMessage);
     callAnalytics();
     cleanup();
     hasDisplayedMessage.current = true;
-  }, [idleMessage, addMessage, callAnalytics, cleanup, shouldDisplayMessage]);
+  }, [
+    idleMessage,
+    addMessage,
+    callAnalytics,
+    cleanup,
+    shouldDisplayMessage,
+    shouldDisplayMessageOnHandoffChange,
+  ]);
+
+  /**
+   * Handles handoff status changes.
+   * If the handoff status changes from true to false, display the message.
+   */
+  useEffect(() => {
+    if (isHandoffRef.current && !isHandoff) {
+      displayMessage();
+    }
+    isHandoffRef.current = isHandoff;
+  }, [isHandoff, displayMessage]);
 
   /**
    * Triggers message display sequence on timer completion.

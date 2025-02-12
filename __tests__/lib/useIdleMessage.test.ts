@@ -34,6 +34,7 @@ describe("useIdleMessage", () => {
     conversationId: "test-conversation",
     agentName: "",
     addMessage: mockAddMessage,
+    isHandoff: false,
   };
 
   beforeEach(() => {
@@ -510,5 +511,99 @@ describe("useIdleMessage", () => {
 
     // Should still only have been called once total
     expect(mockAddMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it("should display message when handoff status changes from true to false", () => {
+    const userMessage: ChatMessage = {
+      text: "Hello",
+      type: "USER",
+      timestamp: Date.now(),
+    };
+
+    const props = {
+      ...defaultProps,
+      messages: [userMessage] as CombinedMessage[],
+      isHandoff: true,
+    };
+
+    // Initial render with isHandoff true
+    const { rerender } = renderHook(
+      ({ isHandoff }) => useIdleMessage({ ...props, isHandoff }),
+      {
+        initialProps: { isHandoff: true },
+      },
+    );
+
+    // Change handoff status to false
+    rerender({ isHandoff: false });
+
+    expect(mockAddMessage).toHaveBeenCalledTimes(1);
+    expect(mockLogEvent).toHaveBeenCalledWith(MagiEvent.idleMessageDisplay, {
+      agentId: "test-agent",
+      conversationId: "test-conversation",
+      agentConnected: false,
+    });
+  });
+
+  it("should not display message if handoff status changes from false to true", () => {
+    const userMessage: ChatMessage = {
+      text: "Hello",
+      type: "USER",
+      timestamp: Date.now(),
+    };
+
+    const props = {
+      ...defaultProps,
+      messages: [userMessage] as CombinedMessage[],
+      isHandoff: false,
+    };
+
+    // Initial render with isHandoff true
+    const { rerender } = renderHook(
+      ({ isHandoff }) => useIdleMessage({ ...props, isHandoff }),
+      {
+        initialProps: { isHandoff: false },
+      },
+    );
+
+    rerender({ isHandoff: true });
+
+    expect(mockAddMessage).not.toHaveBeenCalled();
+  });
+
+  it("should not display message if handoff status changes from true to false and there is no valid configuration", () => {
+    const userMessage: ChatMessage = {
+      text: "Hello",
+      type: "USER",
+      timestamp: Date.now(),
+    };
+
+    (useSettings as any).mockReturnValue({
+      misc: {
+        handoffConfiguration: {
+          surveyLink: undefined,
+        },
+        idleMessageTimeout: 30, // 30 seconds
+      },
+    });
+
+    const props = {
+      ...defaultProps,
+      messages: [userMessage] as CombinedMessage[],
+      isHandoff: true,
+    };
+
+    // Initial render with isHandoff true
+    const { rerender } = renderHook(
+      ({ isHandoff }) => useIdleMessage({ ...props, isHandoff }),
+      {
+        initialProps: { isHandoff: true },
+      },
+    );
+
+    // Change handoff status to false
+    rerender({ isHandoff: false });
+
+    expect(mockAddMessage).not.toHaveBeenCalled();
   });
 });

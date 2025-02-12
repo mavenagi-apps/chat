@@ -99,7 +99,7 @@ describe("ChatPage Component", () => {
       useSettingsMock.mockReturnValue({
         branding: {},
         misc: {
-          enableIdleMessage: true,
+          idleMessageTimeout: 10,
           handoffConfiguration: {
             type: "salesforce",
             enableAvailabilityCheck: true,
@@ -124,6 +124,7 @@ describe("ChatPage Component", () => {
           conversationId: "test-conversation-id",
           agentName: "Lenny",
           addMessage: expect.any(Function),
+          isHandoff: true,
         });
       });
     });
