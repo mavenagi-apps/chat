@@ -90,11 +90,11 @@ export function useIdleMessage({
    */
   const shouldDisplayMessage = useMemo(() => {
     return showMessage && surveyLink && !hasDisplayedMessage.current;
-  }, [showMessage, surveyLink, isHandoff, hasValidConfiguration]);
+  }, [showMessage, surveyLink]);
 
   const shouldDisplayMessageOnHandoffChange = useMemo(() => {
     return !isHandoff && isHandoffRef.current && hasValidConfiguration;
-  }, [isHandoff, isHandoffRef.current, hasValidConfiguration]);
+  }, [isHandoff, hasValidConfiguration]);
 
   /**
    * Manages timer lifecycle:
