@@ -7,6 +7,7 @@ import { isNotFoundError } from "next/dist/client/components/not-found";
 // Constants
 const PATHNAMES = [
   "/demo/:organizationId/:agentId/:path*",
+  "/preview/:organizationId/:agentId/:path*",
   "/:organizationId/:agentId/:path*",
 ] as const;
 

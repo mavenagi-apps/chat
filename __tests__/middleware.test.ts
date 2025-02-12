@@ -31,7 +31,7 @@ describe("Middleware", () => {
 
   describe("Path parameter extraction", () => {
     it("should extract organizationId and agentId from demo path", async () => {
-      const request = createMockRequest("/demo/org123/agent456", {
+      const request = createMockRequest("/preview/org123/agent456", {
         "sec-fetch-dest": "iframe",
       });
       await middleware(request);

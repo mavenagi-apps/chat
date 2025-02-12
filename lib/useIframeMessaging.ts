@@ -13,7 +13,7 @@ enum MAVEN_MESSAGE_TYPES {
 }
 
 const demoUrl = (organizationId: string, agentId: string) =>
-  `/demo/${organizationId}/${agentId}`;
+  `/preview/${organizationId}/${agentId}`;
 
 export function useIframeMessaging(options?: { disableRedirect?: boolean }) {
   const { disableRedirect = false } = options || {};

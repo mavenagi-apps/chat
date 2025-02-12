@@ -22,6 +22,15 @@ const nextConfig = {
       fullUrl: true,
     },
   },
+  async redirects() {
+    return [
+      {
+        source: '/demo/:path*',
+        destination: '/preview/:path*',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 const nextConfigI18n = withNextIntl(nextConfig);
