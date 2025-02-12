@@ -33,7 +33,7 @@ describe("Widget", () => {
     expect(scripts[0]).toHaveAttribute("defer");
   });
 
-  it("includes today's date with timezone in unsigned user data", () => {
+  it("includes today's date with timezone when unsignedUserData exists", () => {
     const { container } = render(
       <Widget widgetLoadPayload={mockWidgetLoadPayload} />,
     );
@@ -60,6 +60,22 @@ describe("Widget", () => {
     expect(scriptContent).toContain('"name":"Test User"');
     // Check date was added
     expect(scriptContent).toContain("todaysDate");
+  });
+
+  it("does not add todaysDate when unsignedUserData is undefined", () => {
+    const payloadWithoutUnsignedData = {
+      ...mockWidgetLoadPayload,
+      unsignedUserData: undefined,
+    };
+
+    const { container } = render(
+      <Widget widgetLoadPayload={payloadWithoutUnsignedData} />,
+    );
+
+    const widgetScript = container.getElementsByTagName("script")[1];
+    const scriptContent = widgetScript.innerHTML;
+
+    expect(scriptContent).not.toContain("todaysDate");
   });
 
   it("generates correct widget load script with all payload data", () => {

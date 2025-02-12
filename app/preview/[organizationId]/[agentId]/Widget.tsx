@@ -16,13 +16,16 @@ export default function Widget({
 }: {
   widgetLoadPayload: WidgetLoadPayload;
 }) {
-  const localizedDate = new Date().toLocaleString("en-US", {
-    timeZoneName: "long",
-  });
-  widgetLoadPayload.unsignedUserData = {
-    ...(widgetLoadPayload.unsignedUserData || {}),
-    todaysDate: localizedDate,
-  };
+  if (widgetLoadPayload.unsignedUserData) {
+    const localizedDate = new Date().toLocaleString("en-US", {
+      timeZoneName: "long",
+    });
+
+    widgetLoadPayload.unsignedUserData = {
+      ...(widgetLoadPayload.unsignedUserData || {}),
+      todaysDate: localizedDate,
+    };
+  }
 
   return (
     <>
