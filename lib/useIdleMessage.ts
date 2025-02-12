@@ -7,8 +7,7 @@ import { useParams } from "next/navigation";
 import { useSettings } from "@/app/providers/SettingsProvider";
 
 /**
- * DOM events that reset the idle timer when triggered.
- * These events indicate user activity within the chat interface.
+ * DOM events that trigger timer reset, indicating user activity.
  */
 const IDLE_EVENTS = [
   "mousemove",
@@ -28,13 +27,14 @@ interface UseIdleMessageProps {
 }
 
 /**
- * Hook that manages the display of an idle message after a configurable period of user inactivity.
- * Handles user activity monitoring, timer management, and message display logic.
+ * Hook for managing idle message display based on user inactivity.
+ * Implements timer-based message injection with configurable timeout.
+ * Ensures single message display per session with cleanup on unmount.
  *
- * @param messages - Array of chat messages to determine if user has interacted
- * @param conversationId - Unique identifier for the current conversation
- * @param agentName - Name of the agent for connection status tracking
- * @param addMessage - Callback to add the idle message to the chat
+ * @param messages - Message history for user activity detection
+ * @param conversationId - Unique conversation identifier
+ * @param agentName - Agent identifier for connection state
+ * @param addMessage - Message injection callback
  */
 export function useIdleMessage({
   messages,
@@ -44,30 +44,109 @@ export function useIdleMessage({
 }: UseIdleMessageProps) {
   const { misc } = useSettings();
   const t = useTranslations("chat.IdleMessage");
-  const [showMessage, setShowMessage] = useState(false);
   const hasConnectedToAgent = useRef(false);
-  const timer = useRef<NodeJS.Timeout>();
+  const timerRef = useRef<NodeJS.Timeout>();
   const hasDisplayedMessage = useRef(false);
+  const eventListenersMap = useRef(new Map<string, () => void>());
+  const isFirstRender = useRef(true);
+  const [showMessage, setShowMessage] = useState(false);
   const analytics = useAnalytics();
   const { agentId } = useParams();
   const surveyLink = misc.handoffConfiguration?.surveyLink;
 
   /**
-   * Removes event listeners and clears the idle timer.
-   * Used during cleanup and when the idle message is displayed.
+   * Detects presence of user-initiated messages in conversation history.
+   */
+  const userMessagesExist = useMemo(
+    () => messages.some((message) => message.type === "USER"),
+    [messages],
+  );
+
+  /**
+   * Determines timer initialization eligibility based on:
+   * - Timeout configuration
+   * - User message presence
+   * - Survey link availability
+   * - Message display state
+   */
+  const shouldInitializeTimer = useMemo(() => {
+    return (
+      !showMessage &&
+      misc.idleMessageTimeout &&
+      userMessagesExist &&
+      surveyLink &&
+      !hasDisplayedMessage.current
+    );
+  }, [showMessage, misc.idleMessageTimeout, userMessagesExist, surveyLink]);
+
+  /**
+   * Controls message display eligibility based on timer state and display history.
+   */
+  const shouldDisplayMessage = useMemo(() => {
+    return showMessage && surveyLink && !hasDisplayedMessage.current;
+  }, [showMessage, surveyLink]);
+
+  /**
+   * Manages timer lifecycle:
+   * 1. Clears existing timer if present
+   * 2. Initializes new timer if conditions met
+   * 3. Sets display state on timer completion
+   */
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = undefined;
+    }
+
+    if (!shouldInitializeTimer) {
+      return;
+    }
+
+    const timeoutMs = misc.idleMessageTimeout
+      ? misc.idleMessageTimeout * 1000
+      : undefined;
+
+    if (!timeoutMs) {
+      return;
+    }
+
+    timerRef.current = setTimeout(() => {
+      setShowMessage(true);
+    }, timeoutMs);
+  }, [misc.idleMessageTimeout, shouldInitializeTimer]);
+
+  /**
+   * Performs cleanup operations:
+   * - Clears active timer
+   * - Removes registered event listeners
    */
   const cleanup = useCallback(() => {
-    if (timer.current) {
-      clearTimeout(timer.current);
-      timer.current = undefined;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = undefined;
     }
-    IDLE_EVENTS.forEach((event) => {
-      window.removeEventListener(event, resetTimer);
+
+    // Remove all event listeners using the saved references
+    eventListenersMap.current.forEach((listener, event) => {
+      window.removeEventListener(event, listener);
     });
+    eventListenersMap.current.clear();
   }, []);
 
   /**
-   * Logs idle message display event with relevant metadata.
+   * Resets timer on message array changes.
+   * Skips initial setup to prevent duplicate initialization.
+   */
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    resetTimer();
+  }, [messages, resetTimer]);
+
+  /**
+   * Records analytics event with metadata for idle message display.
    */
   const callAnalytics = useCallback(() => {
     analytics.logEvent(MagiEvent.idleMessageDisplay, {
@@ -78,15 +157,7 @@ export function useIdleMessage({
   }, [analytics, agentId, conversationId]);
 
   /**
-   * Determines if user has sent any messages in the conversation.
-   */
-  const userMessagesExist = useMemo(
-    () => messages.some((message) => message.type === "USER"),
-    [messages],
-  );
-
-  /**
-   * Tracks agent connection status for analytics and message content.
+   * Tracks agent connection state for analytics and message content.
    */
   useEffect(() => {
     if (agentName && !hasConnectedToAgent.current) {
@@ -95,7 +166,7 @@ export function useIdleMessage({
   }, [agentName]);
 
   /**
-   * Memoized idle message content with survey link and conversation metadata.
+   * Constructs idle message with dynamic survey link and metadata.
    */
   const idleMessage = useMemo(
     () => ({
@@ -109,79 +180,51 @@ export function useIdleMessage({
   );
 
   /**
-   * Handles the display of the idle message, including analytics and cleanup.
-   * Guarded by surveyLink availability check and ensures message is only displayed once.
+   * Executes message display sequence:
+   * 1. Validates display conditions
+   * 2. Injects message
+   * 3. Records analytics
+   * 4. Performs cleanup
+   * 5. Updates display state
    */
   const displayMessage = useCallback(() => {
-    if (!surveyLink || hasDisplayedMessage.current) return;
+    if (!shouldDisplayMessage) return;
     addMessage(idleMessage);
     callAnalytics();
     cleanup();
     hasDisplayedMessage.current = true;
-  }, [surveyLink, idleMessage, addMessage, callAnalytics, cleanup]);
+  }, [idleMessage, addMessage, callAnalytics, cleanup, shouldDisplayMessage]);
 
   /**
-   * Triggers the idle message display when showMessage state changes to true.
+   * Triggers message display sequence on timer completion.
    */
   useEffect(() => {
-    if (!showMessage) return;
+    if (!shouldDisplayMessage) return;
     displayMessage();
-  }, [showMessage, displayMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldDisplayMessage]);
 
   /**
-   * Manages the idle timer, clearing existing timeouts and setting new ones.
-   * Timer is only set if the message hasn't been shown and timeout is configured.
-   */
-  const resetTimer = useCallback(() => {
-    if (timer.current) {
-      clearTimeout(timer.current);
-      timer.current = undefined;
-    }
-
-    if (showMessage || hasDisplayedMessage.current) {
-      return;
-    }
-
-    const timeoutMs = misc.idleMessageTimeout
-      ? misc.idleMessageTimeout * 1000
-      : undefined;
-    if (!timeoutMs) {
-      return;
-    }
-
-    timer.current = setTimeout(() => {
-      setShowMessage(true);
-    }, timeoutMs);
-  }, [misc.idleMessageTimeout, showMessage]);
-
-  /**
-   * Sets up and manages event listeners for user activity tracking.
-   * Initializes the idle timer and handles cleanup on unmount or when conditions change.
+   * Initializes and maintains activity monitoring:
+   * 1. Sets up event listeners for user activity
+   * 2. Initializes idle timer
+   * 3. Handles cleanup on unmount or condition changes
    */
   useEffect(() => {
-    if (
-      !misc.idleMessageTimeout ||
-      showMessage ||
-      hasDisplayedMessage.current ||
-      !userMessagesExist ||
-      !surveyLink
-    ) {
-      return cleanup;
+    if (!shouldInitializeTimer) {
+      cleanup();
+      return;
     }
 
+    // Create new event listeners and save them in the map
     IDLE_EVENTS.forEach((event) => {
-      window.addEventListener(event, resetTimer);
+      const listener = () => resetTimer();
+      eventListenersMap.current.set(event, listener);
+      window.addEventListener(event, listener);
     });
 
     resetTimer();
 
     return cleanup;
-  }, [
-    resetTimer,
-    userMessagesExist,
-    surveyLink,
-    misc.idleMessageTimeout,
-    showMessage,
-    cleanup,
-  ]);
+  }, [resetTimer, cleanup, shouldInitializeTimer]);
 }
