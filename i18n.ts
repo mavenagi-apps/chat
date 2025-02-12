@@ -3,57 +3,183 @@ import { getRequestConfig } from "next-intl/server";
 import type { AbstractIntlMessages, IntlConfig } from "use-intl/core";
 import {
   NEXT_LOCALE_HEADER,
+  ACCEPT_LANGUAGE_HEADER,
   PERMITTED_LOCALES,
+  DEFAULT_LOCALE,
+  DEFAULT_QUALITY,
+  DEFAULT_QUALITY_VALUE,
+  ERROR_MESSAGES,
+  type PermittedLocale,
 } from "./app/constants/internationalization";
 
-// Helper function to get base locale
-function getBaseLocale(locale: string): string {
-  // Handle cases like 'en-US' -> 'en'
-  const baseLocale = locale.split("-")[0].toLowerCase();
-  return PERMITTED_LOCALES.includes(
-    baseLocale as (typeof PERMITTED_LOCALES)[number],
-  )
-    ? baseLocale
-    : "en";
+// Types
+interface LocaleQuality {
+  readonly locale: string;
+  readonly quality: number;
 }
 
-export default getRequestConfig(
-  async ({ requestLocale }): Promise<IntlConfig> => {
-    try {
-      let locale = (await requestLocale) || "en";
-      const headersList = await headers();
-      const acceptLanguage = headersList.get("accept-language");
-      const localeFromUrl = headersList.get(NEXT_LOCALE_HEADER);
+interface LocaleConfig {
+  readonly locale: PermittedLocale;
+  readonly messages: AbstractIntlMessages;
+}
 
-      if (localeFromUrl) {
-        locale = localeFromUrl;
-      } else if (acceptLanguage) {
-        // Get the first matching locale from accept-language header
-        const matchedLocale = acceptLanguage
-          .split(",")
-          .map((lang) => lang.split(";")[0].trim()) // Remove quality values
-          .find((lang) => PERMITTED_LOCALES.includes(getBaseLocale(lang)));
+interface RequestConfigParams {
+  readonly requestLocale: Promise<string | undefined>;
+}
 
-        if (matchedLocale) {
-          locale = getBaseLocale(matchedLocale);
-        }
+class LocaleError extends Error {
+  constructor(
+    message: string,
+    public readonly locale: string,
+  ) {
+    super(message);
+    this.name = "LocaleError";
+  }
+}
+
+/**
+ * Helper function to get base locale from a locale string
+ * Handles cases like 'en-US' -> 'en'
+ * @throws {LocaleError} If the locale is invalid
+ */
+function getBaseLocale(locale: string): PermittedLocale {
+  if (!locale) {
+    throw new LocaleError(ERROR_MESSAGES.INVALID_LOCALE, locale);
+  }
+
+  const baseLocale = locale.split("-")[0].toLowerCase();
+  if (PERMITTED_LOCALES.includes(baseLocale as PermittedLocale)) {
+    return baseLocale as PermittedLocale;
+  }
+
+  return DEFAULT_LOCALE;
+}
+
+/**
+ * Creates a default locale configuration
+ */
+async function createDefaultConfig(): Promise<LocaleConfig> {
+  return {
+    locale: DEFAULT_LOCALE,
+    messages: await loadDefaultMessages(),
+  };
+}
+
+/**
+ * Loads messages for a given locale
+ * Returns null if messages cannot be loaded
+ */
+async function loadMessages(
+  locale: PermittedLocale,
+): Promise<AbstractIntlMessages | null> {
+  try {
+    const messages = (await import(`./messages/${locale}.json`))
+      .default as AbstractIntlMessages;
+    return messages || null;
+  } catch (error) {
+    console.error(
+      `${ERROR_MESSAGES.FAILED_TO_LOAD_MESSAGES} ${locale}:`,
+      error instanceof Error ? error.message : error,
+    );
+    return null;
+  }
+}
+
+/**
+ * Loads the default English messages
+ * @throws {Error} If default messages cannot be loaded
+ */
+async function loadDefaultMessages(): Promise<AbstractIntlMessages> {
+  try {
+    return (await import(`./messages/${DEFAULT_LOCALE}.json`))
+      .default as AbstractIntlMessages;
+  } catch (error) {
+    console.error(
+      ERROR_MESSAGES.FAILED_TO_LOAD_DEFAULT,
+      error instanceof Error ? error.message : error,
+    );
+    throw new Error(ERROR_MESSAGES.FAILED_TO_LOAD_DEFAULT);
+  }
+}
+
+/**
+ * Parses accept-language header into sorted locale preferences
+ */
+function parseAcceptLanguage(acceptLanguage: string): LocaleQuality[] {
+  return acceptLanguage
+    .split(",")
+    .map((lang) => {
+      const [locale, quality = DEFAULT_QUALITY] = lang.split(";");
+      return {
+        locale: getBaseLocale(locale.trim()),
+        quality: parseFloat(quality.split("=")[1]) || DEFAULT_QUALITY_VALUE,
+      };
+    })
+    .sort((a, b) => b.quality - a.quality);
+}
+
+/**
+ * Attempts to load messages for each locale in order until one succeeds
+ */
+async function tryLocales(
+  locales: LocaleQuality[],
+): Promise<LocaleConfig | null> {
+  for (const { locale } of locales) {
+    if (PERMITTED_LOCALES.includes(locale as PermittedLocale)) {
+      const messages = await loadMessages(locale as PermittedLocale);
+      if (messages) {
+        return { locale: locale as PermittedLocale, messages };
       }
-
-      // Always ensure we use the base locale for file lookup
-      const baseLocale = getBaseLocale(locale);
-
-      return {
-        locale: baseLocale,
-        messages: (await import(`./messages/${baseLocale}.json`))
-          .default as AbstractIntlMessages,
-      };
-    } catch (error) {
-      console.error("Error loading locale messages:", error);
-      return {
-        locale: "en",
-        messages: (await import("./messages/en.json"))
-          .default as AbstractIntlMessages,
-      };
     }
-  },
-);
+  }
+  return null;
+}
+
+/**
+ * Handles the request configuration for internationalization
+ */
+export const getRequestConfigHandler = async ({
+  requestLocale,
+}: RequestConfigParams): Promise<IntlConfig> => {
+  try {
+    let locale = (await requestLocale) || DEFAULT_LOCALE;
+    const headersList = await headers();
+    const acceptLanguage = headersList.get(ACCEPT_LANGUAGE_HEADER);
+    const localeFromUrl = headersList.get(NEXT_LOCALE_HEADER);
+
+    // URL locale takes precedence
+    if (localeFromUrl) {
+      locale = localeFromUrl;
+    } else if (acceptLanguage) {
+      const locales = parseAcceptLanguage(acceptLanguage);
+      const config = await tryLocales(locales);
+      if (config) {
+        return config;
+      }
+    }
+
+    // Handle the requested locale
+    const baseLocale = getBaseLocale(locale);
+    if (!PERMITTED_LOCALES.includes(baseLocale)) {
+      return createDefaultConfig();
+    }
+
+    const messages = await loadMessages(baseLocale);
+    if (!messages) {
+      return createDefaultConfig();
+    }
+
+    return {
+      locale: baseLocale,
+      messages,
+    };
+  } catch (error) {
+    console.error(
+      "Error in getRequestConfigHandler:",
+      error instanceof Error ? error.message : error,
+    );
+    return createDefaultConfig();
+  }
+};
+
+export default getRequestConfig(getRequestConfigHandler);
