@@ -7,6 +7,7 @@ import { NEXT_LOCALE_HEADER } from "@/app/constants/internationalization";
 // Constants
 const PATHNAMES = [
   "/demo/:organizationId/:agentId/:path*",
+  "/preview/:organizationId/:agentId/:path*",
   "/:organizationId/:agentId/:path*",
 ] as const;
 
