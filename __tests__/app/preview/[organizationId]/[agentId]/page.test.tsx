@@ -28,10 +28,16 @@ vi.mock("@/assets/background/bg.jpg", () => ({
   default: { src: "/mock-bg-image.jpg" },
 }));
 
-describe("DemoPage", () => {
+describe("PreviewPage", () => {
   const mockParams = {
     organizationId: "test-org",
     agentId: "test-agent",
+  };
+
+  type SearchParams = {
+    authenticated?: string;
+    customContext?: string;
+    customData?: string;
   };
 
   const mockHeaders = new Headers();
@@ -60,13 +66,13 @@ describe("DemoPage", () => {
         await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({
-            anonymous: "anything",
+            authenticated: "true",
+            customContext: "true",
             customData: "{}",
-          }),
+          } as SearchParams),
         }),
       );
 
-      // Check if background image is set correctly
       const mainDiv = container.firstChild as HTMLElement;
       expect(mainDiv).toHaveStyle({
         backgroundImage: `url(/mock-bg-image.jpg)`,
@@ -74,39 +80,25 @@ describe("DemoPage", () => {
         height: "100vh",
       });
 
-      // Check if scripts are included
       const scripts = container.getElementsByTagName("script");
       expect(scripts).toHaveLength(2);
       expect(scripts[0]).toHaveAttribute("src", "/js/widget.js");
       expect(scripts[0]).toHaveAttribute("defer");
 
-      // Check if widget load script contains correct payload
-      const payloadRegex = `addEventListener\\("load", function \\(\\) {
-        Maven\\.ChatWidget\\.load\\({
-          "envPrefix":"[^"]+",
-          "organizationId":"[^"]+",
-          "agentId":"[^"]+",
-          "bgColor":"#[0-9a-fA-F]{6}",
-          "unsignedUserData":{
-            "firstName":"[^"]+",
-            "lastName":"[^"]+",
-            "id":"[^"]+",
-            "email":"[^"]+",
-            "todaysDate":"[^"]+"
-          },
-          "customData":{
-          }
-        }\\);
-      }\\);`.replace(/\s+/g, "");
+      const widgetScript = container.getElementsByTagName("script")[1];
+      const scriptContent = widgetScript.innerHTML;
 
-      expect(scripts[1].innerHTML.replace(/\s+/g, "")).toMatch(
-        new RegExp(payloadRegex),
-      );
+      expect(scriptContent).toContain('"envPrefix":"test-prefix"');
+      expect(scriptContent).toContain('"organizationId":"test-org"');
+      expect(scriptContent).toContain('"agentId":"test-agent"');
+      expect(scriptContent).toContain('"bgColor":"#123456"');
+      expect(scriptContent).toContain('"signedUserData":"mock-signed-data"');
+      expect(scriptContent).toContain('"customData":{}');
     });
   });
 
   describe("custom data handling", () => {
-    test("should parse and include valid custom data from search params", async () => {
+    test("should parse and include valid custom data", async () => {
       const customData = {
         testKey: "testValue",
         numberKey: 123,
@@ -116,9 +108,10 @@ describe("DemoPage", () => {
         await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({
-            anonymous: "anything",
+            authenticated: "true",
+            customContext: "true",
             customData: JSON.stringify(customData),
-          }),
+          } as SearchParams),
         }),
       );
 
@@ -140,9 +133,10 @@ describe("DemoPage", () => {
         await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({
-            anonymous: "anything",
+            authenticated: "true",
+            customContext: "true",
             customData: "invalid-json",
-          }),
+          } as SearchParams),
         }),
       );
 
@@ -159,7 +153,10 @@ describe("DemoPage", () => {
       const { container } = render(
         await PreviewPage({
           params: Promise.resolve(mockParams),
-          searchParams: Promise.resolve({ anonymous: "anything" }),
+          searchParams: Promise.resolve({
+            authenticated: "true",
+            customContext: "true",
+          } as SearchParams),
         }),
       );
 
@@ -169,10 +166,7 @@ describe("DemoPage", () => {
   });
 
   describe("when parameters are missing", () => {
-    const mockSearchParams: {
-      anonymous?: string;
-      customData?: string;
-    } = { anonymous: "anything" };
+    const mockSearchParams: SearchParams = { authenticated: "true" };
 
     test("should call notFound when organizationId is missing", async () => {
       await PreviewPage({
@@ -208,7 +202,10 @@ describe("DemoPage", () => {
       const { container } = render(
         await PreviewPage({
           params: Promise.resolve(mockParams),
-          searchParams: Promise.resolve({ anonymous: "anything" }),
+          searchParams: Promise.resolve({
+            authenticated: "true",
+            customContext: "true",
+          } as SearchParams),
         }),
       );
 
@@ -218,44 +215,17 @@ describe("DemoPage", () => {
   });
 
   describe("signed user data handling", () => {
-    test("should not include signed user data when anonymous param is present", async () => {
+    test("should include signed user data when authenticated is present", async () => {
       vi.mocked(generateSignedUserData).mockResolvedValue("mock-signed-data");
 
       const { container } = render(
         await PreviewPage({
           params: Promise.resolve(mockParams),
           searchParams: Promise.resolve({
-            anonymous: "anything",
+            authenticated: "true",
+            customContext: "true",
             customData: "{}",
-          }),
-        }),
-      );
-
-      const widgetScript = container.getElementsByTagName("script")[1];
-      expect(widgetScript.innerHTML).not.toContain(`"signedUserData"`);
-    });
-
-    test("should not include signed user data when anonymous param is empty string", async () => {
-      vi.mocked(generateSignedUserData).mockResolvedValue("mock-signed-data");
-
-      const { container } = render(
-        await PreviewPage({
-          params: Promise.resolve(mockParams),
-          searchParams: Promise.resolve({ anonymous: "" }),
-        }),
-      );
-
-      const widgetScript = container.getElementsByTagName("script")[1];
-      expect(widgetScript.innerHTML).not.toContain(`"signedUserData"`);
-    });
-
-    test("should include signed user data when anonymous param is missing", async () => {
-      vi.mocked(generateSignedUserData).mockResolvedValue("mock-signed-data");
-
-      const { container } = render(
-        await PreviewPage({
-          params: Promise.resolve(mockParams),
-          searchParams: Promise.resolve({}),
+          } as SearchParams),
         }),
       );
 
@@ -264,10 +234,40 @@ describe("DemoPage", () => {
         `"signedUserData":"mock-signed-data"`,
       );
     });
+
+    test("should not include signed user data when authenticated is not present", async () => {
+      vi.mocked(generateSignedUserData).mockResolvedValue("mock-signed-data");
+
+      const { container } = render(
+        await PreviewPage({
+          params: Promise.resolve(mockParams),
+          searchParams: Promise.resolve({
+            customContext: "true",
+          } as SearchParams),
+        }),
+      );
+
+      const widgetScript = container.getElementsByTagName("script")[1];
+      expect(widgetScript.innerHTML).not.toContain(`"signedUserData"`);
+    });
+
+    test("should not include signed user data when no params are present", async () => {
+      vi.mocked(generateSignedUserData).mockResolvedValue("mock-signed-data");
+
+      const { container } = render(
+        await PreviewPage({
+          params: Promise.resolve(mockParams),
+          searchParams: Promise.resolve({} as SearchParams),
+        }),
+      );
+
+      const widgetScript = container.getElementsByTagName("script")[1];
+      expect(widgetScript.innerHTML).not.toContain(`"signedUserData"`);
+    });
   });
 
-  describe("when signed user data generation fails", () => {
-    test("should handle the error gracefully and not include signed user data", async () => {
+  describe("error handling", () => {
+    test("should handle signed user data generation error gracefully", async () => {
       const consoleErrorSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
@@ -277,7 +277,10 @@ describe("DemoPage", () => {
       const { container } = render(
         await PreviewPage({
           params: Promise.resolve(mockParams),
-          searchParams: Promise.resolve({}),
+          searchParams: Promise.resolve({
+            authenticated: "true",
+            customContext: "true",
+          } as SearchParams),
         }),
       );
 
@@ -297,7 +300,10 @@ describe("DemoPage", () => {
       const { container } = render(
         await PreviewPage({
           params: Promise.resolve(mockParams),
-          searchParams: Promise.resolve({ anonymous: "anything" }),
+          searchParams: Promise.resolve({
+            authenticated: "true",
+            customContext: "true",
+          } as SearchParams),
         }),
       );
 
@@ -311,7 +317,10 @@ describe("DemoPage", () => {
       const { container } = render(
         await PreviewPage({
           params: Promise.resolve(mockParams),
-          searchParams: Promise.resolve({ anonymous: "anything" }),
+          searchParams: Promise.resolve({
+            authenticated: "true",
+            customContext: "true",
+          } as SearchParams),
         }),
       );
 

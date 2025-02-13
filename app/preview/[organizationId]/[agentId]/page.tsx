@@ -7,21 +7,26 @@ import backgroundImg from "@/assets/background/bg.jpg";
 import Widget from "./Widget";
 
 // Move faker data generation outside the component
-const mockUserData = {
+const generateMockUserData = () => ({
   firstName: faker.person.firstName(),
   lastName: faker.person.lastName(),
   id: faker.string.uuid(),
   email: faker.internet.email(),
-};
+});
 
 export default async function Page({
   params,
   searchParams,
 }: {
   params: Promise<{ organizationId: string; agentId: string }>;
-  searchParams: Promise<{ anonymous?: string; customData?: string }>;
+  searchParams: Promise<{
+    authenticated?: string;
+    customContext?: string;
+    customData?: string;
+  }>;
 }) {
-  const anonymous = "anonymous" in (await searchParams);
+  const authenticated = "authenticated" in (await searchParams);
+  const customContext = "customContext" in (await searchParams);
   const { customData: searchParamsCustomData = "{}" } = await searchParams;
   const envPrefix = (await headers()).get("x-magi-env-prefix") ?? "";
   const { organizationId, agentId } = await params;
@@ -33,9 +38,14 @@ export default async function Page({
   }
 
   let signedUserData = null;
+  let mockUserData = undefined;
 
-  // Only generate signed user data if anonymous param is not present
-  if (!anonymous) {
+  if (customContext || authenticated) {
+    mockUserData = generateMockUserData();
+  }
+
+  // Only generate signed user data if authenticated param is present
+  if (authenticated) {
     try {
       signedUserData = await generateSignedUserData(
         mockUserData,
@@ -61,7 +71,7 @@ export default async function Page({
     agentId,
     bgColor: brandColor || "#00202b",
     signedUserData: signedUserData || undefined,
-    unsignedUserData: mockUserData,
+    unsignedUserData: customContext ? mockUserData : undefined,
     customData: {
       ...parsedCustomData,
     },
