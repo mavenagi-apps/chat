@@ -276,6 +276,24 @@ describe("Salesforce Utils", () => {
       expect(body.language).toBeUndefined();
       expect(body.visitorInfo.originalReferrer).toBe("unknown");
     });
+
+    it("should filter out null values from prechatDetails", () => {
+      const body = generateSessionInitRequestBody({
+        ...baseParams,
+        userData: {
+          firstName: "John",
+          lastName: null as unknown as string,
+          email: "john@example.com",
+        },
+      });
+
+      expect(body.prechatDetails).not.toContainEqual(null);
+      expect(body.prechatDetails.some((detail) => detail === null)).toBe(false);
+      // Verify that null lastName didn't create a prechat detail
+      expect(
+        body.prechatDetails.find((detail) => detail?.label === "Last Name"),
+      ).toBeUndefined();
+    });
   });
 
   describe("fetchChatMessages", () => {

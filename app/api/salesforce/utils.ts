@@ -224,7 +224,7 @@ export const generateSessionInitRequestBody = ({
       }
       return null;
     }),
-  ];
+  ].filter((detail): detail is NonNullable<typeof detail> => detail !== null);
 
   const entityFieldsMaps = [
     createEntityFieldMap("FirstName", "First Name"),
