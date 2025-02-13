@@ -1,7 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { fetchChatMessages, sendChatMessage } from "@/app/api/salesforce/utils";
-import { withAppSettings } from "@/app/api/server/utils";
+import {
+  decryptAndVerifySignedUserData,
+  withAppSettings,
+} from "@/app/api/server/utils";
 import type {
   ChatSessionResponse,
   SalesforceChatMessage,
@@ -15,6 +18,7 @@ import {
 } from "@/app/api/salesforce/utils";
 import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
 import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
+import type { VerifiedUserData } from "@/types";
 
 function containsChatRequestSuccess(messages: SalesforceChatMessage[]) {
   return messages.some(
@@ -42,29 +46,32 @@ export async function POST(req: NextRequest) {
       deploymentId,
       orgId: organizationId,
       eswLiveAgentDevName,
+      allowAnonymousHandoff,
     } = handoffConfiguration;
 
     const {
-      unsignedUserData: userData,
-      messages,
-      userAgent,
-      screenResolution,
-      language,
       customData,
+      language,
+      messages,
+      screenResolution,
+      signedUserData,
+      unsignedUserData,
+      userAgent,
     } = (await req.json()) as SalesforceRequest;
-    if (process.env.ENABLE_API_LOGGING) {
-      console.log("Request payload:", {
-        userData,
-        messages,
-        userAgent,
-        screenResolution,
-        language,
-        customData,
-      });
-    }
-    if (!userData) {
+
+    if (!allowAnonymousHandoff && !unsignedUserData && !signedUserData) {
       return NextResponse.json({ error: "Missing user data" }, { status: 400 });
     }
+
+    let verifiedUserInfo: VerifiedUserData | undefined;
+    if (signedUserData) {
+      verifiedUserInfo = (await decryptAndVerifySignedUserData(
+        signedUserData,
+        settings,
+      )) as VerifiedUserData;
+    }
+
+    const userData = verifiedUserInfo || unsignedUserData;
 
     try {
       const chatSessionCredentialsResponse = await fetch(
@@ -83,15 +90,18 @@ export async function POST(req: NextRequest) {
         await chatSessionCredentialsResponse.json();
 
       const requestBody = generateSessionInitRequestBody({
-        chatSessionCredentials,
-        userData: { ...userData, userAgent, screenResolution, language },
-        organizationId,
-        deploymentId,
         buttonId: customData?.buttonId || chatButtonId,
+        chatSessionCredentials,
+        deploymentId,
         eswLiveAgentDevName:
           customData?.eswLiveAgentDevName || eswLiveAgentDevName,
-        sessionKey: chatSessionCredentials.key,
+        language,
+        organizationId,
         originalReferrer: originalReferrer || undefined,
+        screenResolution,
+        sessionKey: chatSessionCredentials.key,
+        userAgent,
+        userData,
       });
 
       if (process.env.ENABLE_API_LOGGING) {
