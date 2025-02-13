@@ -34,11 +34,28 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
     );
   }
 
+  /**
+   * Type guard to determine if a Salesforce event type can contain an agent name.
+   * Currently, only ChatMessage and ChatTransferred events can carry agent names.
+   * This helps TypeScript narrow down the event types for better type safety.
+   */
+  private isAgentNameBearingEvent(
+    type: string,
+  ): type is "ChatMessage" | "ChatTransferred" {
+    return (
+      type === SALESFORCE_MESSAGE_TYPES.ChatMessage ||
+      type === SALESFORCE_MESSAGE_TYPES.ChatTransferred
+    );
+  }
+
+  /**
+   * Extracts the agent name from a Salesforce chat event.
+   * Returns the agent's name if the event is of a type that can contain agent names
+   * (ChatMessage or ChatTransferred) and has a name in its message payload.
+   * Otherwise returns null.
+   */
   private getAgentName(event: SalesforceChatMessage): string | null {
-    if (
-      event.type === SALESFORCE_MESSAGE_TYPES.ChatTransferred &&
-      event.message?.name
-    ) {
+    if (this.isAgentNameBearingEvent(event.type) && event.message?.name) {
       return event.message.name;
     }
     return null;

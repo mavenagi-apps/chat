@@ -82,6 +82,31 @@ describe("SalesforceStrategy", () => {
       });
     });
 
+    it("handles ChatMessage events with agent name correctly", () => {
+      const event = createSalesforceEvent(
+        SALESFORCE_MESSAGE_TYPES.ChatMessage,
+        "Jane Agent",
+      );
+
+      const { agentName, formattedEvent } = strategy.handleChatEvent(event);
+      expect(agentName).toBe("Jane Agent");
+      expect(formattedEvent).toEqual({
+        ...event,
+        type: SALESFORCE_MESSAGE_TYPES.ChatMessage,
+        timestamp: expect.any(Number),
+      });
+    });
+
+    it("returns null agent name for non-agent events", () => {
+      const event = createSalesforceEvent(
+        SALESFORCE_MESSAGE_TYPES.ChatRequestSuccess,
+        "System",
+      );
+
+      const { agentName } = strategy.handleChatEvent(event);
+      expect(agentName).toBeNull();
+    });
+
     it("returns shouldEndHandoff true for non-unavailable termination messages", () => {
       const event: SalesforceChatRequestFail = {
         type: SALESFORCE_MESSAGE_TYPES.ChatRequestFail,
@@ -135,7 +160,7 @@ describe("SalesforceStrategy", () => {
       const result = strategy.handleChatEvent(event);
 
       expect(result).toEqual({
-        agentName: null,
+        agentName: "John Agent",
         formattedEvent: {
           ...event,
           timestamp: expect.any(Number),
