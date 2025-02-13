@@ -52,6 +52,16 @@ export async function POST(req: NextRequest) {
       language,
       customData,
     } = (await req.json()) as SalesforceRequest;
+    if (process.env.ENABLE_API_LOGGING) {
+      console.log("Request payload:", {
+        userData,
+        messages,
+        userAgent,
+        screenResolution,
+        language,
+        customData,
+      });
+    }
     if (!userData) {
       return NextResponse.json({ error: "Missing user data" }, { status: 400 });
     }
