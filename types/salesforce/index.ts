@@ -69,12 +69,6 @@ export type ChatSessionResponse = {
   error?: unknown;
 };
 
-export type ChatVisitorSessionResponse = {
-  status: string;
-  message?: string;
-  error?: unknown;
-};
-
 export type ChatMessageResponse = {
   messages: SalesforceChatMessage[];
   sequence: number;
@@ -90,75 +84,26 @@ export type ChatAvailabilityResponse = {
   }[];
 };
 
-// Request Types
-export interface InitiateChatSessionParams {
-  data: {
-    name: string;
-    email: string;
-    screenResolution: string;
-    userAgent: string;
-    subject: string;
-  };
-}
-
-export interface CreateChatVisitorSessionParams {
-  params: {
-    name: string;
-    email: string;
-    screenResolution: string;
-    userAgent: string;
-    subject: string;
-  };
-  session: {
-    affinityToken: string;
-    key: string;
-    id: string;
-  };
-}
-
-export interface GetChatMessagesParams {
-  ack: number;
-  session: {
-    affinityToken: string;
-    key: string;
-    id?: string;
-  };
-}
-
-export interface SendChatMessageParams {
-  message: string;
-  session: {
-    affinityToken: string;
-    key: string;
-    id?: string;
-  };
-}
-
 // User Data Types
 export type SalesforceChatUserData = {
   email: string;
   firstName: string;
   lastName: string;
-  locationId: string;
-  locationType: string;
-  question: string;
-  screenResolution: string;
-  subject: string;
-  userAgent: string;
-  userId: string;
-  language: string;
+  locationId?: string;
+  locationType?: string;
+  userId?: string;
 };
 
 export type SalesforceRequest = {
-  unsignedUserData?: SalesforceChatUserData;
-  signedUserData?: SalesforceChatUserData;
-  messages: Message[];
-  mavenConversationId: string;
-  email?: string;
-  userAgent: string;
-  screenResolution: string;
-  language: string;
   customData?: Record<string, any>;
+  email?: string;
+  language: string;
+  mavenConversationId: string;
+  messages: Message[];
+  screenResolution: string;
+  signedUserData?: string;
+  unsignedUserData?: SalesforceChatUserData;
+  userAgent: string;
 };
 
 export type PrechatDetail = {
@@ -179,12 +124,6 @@ export type EntityFieldMap = {
 };
 
 // Type Guards
-export const isSalesforceMessage = (
-  message: any,
-): message is SalesforceChatMessage => {
-  return message.type in SALESFORCE_MESSAGE_TYPES;
-};
-
 const isChatRequestFail = (
   message: SalesforceChatMessage,
 ): message is SalesforceChatRequestFail => {

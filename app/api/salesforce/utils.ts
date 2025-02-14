@@ -165,49 +165,98 @@ const createEntityFieldMap = (
   doCreate: false,
 });
 
+function isSalesforceChatUser(user: any): user is SalesforceChatUserData {
+  return "firstName" in user || "lastName" in user;
+}
+
 export const generateSessionInitRequestBody = ({
-  chatSessionCredentials,
-  userData,
-  organizationId,
-  deploymentId,
   buttonId,
+  chatSessionCredentials,
+  deploymentId,
   eswLiveAgentDevName,
-  sessionKey,
+  language,
+  organizationId,
   originalReferrer = "unknown",
+  screenResolution,
+  sessionKey,
+  userAgent,
+  userData,
 }: {
-  chatSessionCredentials: ChatSessionResponse;
-  userData: SalesforceChatUserData;
-  organizationId: string;
-  deploymentId: string;
   buttonId: string;
+  chatSessionCredentials: ChatSessionResponse;
+  deploymentId: string;
   eswLiveAgentDevName: string;
-  sessionKey: string;
+  language?: string;
+  organizationId: string;
   originalReferrer?: string;
+  screenResolution: string;
+  sessionKey: string;
+  userAgent: string;
+  userData: SalesforceChatUserData | { email: string } | undefined;
 }) => {
-  const visibleFields = [
-    ["First Name", userData.firstName, "First_Name__c"],
-    ["Last Name", userData.lastName, "Last_Name__c"],
-    ["Email", userData.email, "Email__c"],
-    ["Location Id", userData.locationId, "Location_Id__c"],
+  const visibleFields: [string, string | undefined, string][] = [
+    [
+      "First Name",
+      userData && isSalesforceChatUser(userData)
+        ? userData.firstName
+        : undefined,
+      "First_Name__c",
+    ],
+    [
+      "Last Name",
+      userData && isSalesforceChatUser(userData)
+        ? userData.lastName
+        : undefined,
+      "Last_Name__c",
+    ],
+    ["Email", userData?.email, "Email__c"],
+    [
+      "Location Id",
+      userData && isSalesforceChatUser(userData)
+        ? userData.locationId
+        : undefined,
+      "Location_Id__c",
+    ],
   ];
 
-  const hiddenFields: [string, string | boolean, string][] = [
+  const hiddenFields: [string, string | boolean | undefined, string][] = [
     ["Session Id", sessionKey, "Session_Id__c"],
-    ["User Id", userData.userId, "User_Id__c"],
-    ["Location Type", userData.locationType, "Location_Type__c"],
     ["Origin", "Chat", ""],
     ["eswLiveAgentDevName", eswLiveAgentDevName, ""],
     ["hasOnlyExtraPrechatInfo", false, ""],
+    [
+      "Location Type",
+      userData && isSalesforceChatUser(userData)
+        ? userData.locationType
+        : undefined,
+      "Location_Type__c",
+    ],
+    [
+      "User Id",
+      userData && isSalesforceChatUser(userData) ? userData.userId : undefined,
+      "User_Id__c",
+    ],
   ];
 
   const prechatDetails = [
-    ...visibleFields.map(([label, value, field]) =>
-      createPrechatDetail(label, value as string, true, field ? [field] : []),
-    ),
-    ...hiddenFields.map(([label, value, field]) =>
-      createPrechatDetail(label, value, false, field ? [field] : []),
-    ),
-  ];
+    ...visibleFields.map(([label, value, field]) => {
+      if (value) {
+        return createPrechatDetail(
+          label,
+          value as string,
+          true,
+          field ? [field] : [],
+        );
+      }
+      return null;
+    }),
+    ...hiddenFields.map(([label, value, field]) => {
+      if (value) {
+        return createPrechatDetail(label, value, false, field ? [field] : []);
+      }
+      return null;
+    }),
+  ].filter((detail): detail is NonNullable<typeof detail> => detail !== null);
 
   const entityFieldsMaps = [
     createEntityFieldMap("FirstName", "First Name"),
@@ -221,10 +270,13 @@ export const generateSessionInitRequestBody = ({
     buttonId,
     sessionId: chatSessionCredentials.id,
     trackingId: "",
-    userAgent: userData.userAgent,
-    language: userData.language,
-    screenResolution: userData.screenResolution,
-    visitorName: userData.firstName,
+    userAgent,
+    language,
+    screenResolution,
+    visitorName:
+      userData && isSalesforceChatUser(userData)
+        ? userData.firstName
+        : undefined,
     prechatDetails,
     buttonOverrides: [],
     receiveQueueUpdates: true,
