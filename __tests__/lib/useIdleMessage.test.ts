@@ -606,4 +606,59 @@ describe("useIdleMessage", () => {
 
     expect(mockAddMessage).not.toHaveBeenCalled();
   });
+
+  it("should update agentConnected URL parameter based on agent connection state when triggered by timer and handoff", () => {
+    const userMessage: ChatMessage = {
+      text: "Hello",
+      type: "USER",
+      timestamp: Date.now(),
+    };
+
+    const props = {
+      ...defaultProps,
+      messages: [userMessage] as CombinedMessage[],
+      agentName: "", // Start with no agent
+      isHandoff: false,
+    };
+
+    // Initial render with no agent and no handoff
+    const { rerender } = renderHook(
+      ({ agentName, isHandoff }) =>
+        useIdleMessage({ ...props, agentName, isHandoff }),
+      {
+        initialProps: { agentName: "", isHandoff: false },
+      },
+    );
+
+    // No message should be shown immediately
+    expect(mockTranslate).not.toHaveBeenCalled();
+
+    // Advance timer to trigger first idle message
+    act(() => {
+      vi.advanceTimersByTime(30000);
+    });
+
+    // First message should show agentConnected=No
+    expect(mockTranslate).toHaveBeenCalledWith("idle_message_with_survey", {
+      url: "https://test-survey.com",
+      urlParams: "?chatKey=test-conversation&agentConnected=No",
+    });
+
+    mockTranslate.mockClear();
+
+    // Simulate handoff starting and agent connecting
+    rerender({ agentName: "Agent Smith", isHandoff: true });
+
+    // No new message should be shown during handoff
+    expect(mockTranslate).not.toHaveBeenCalled();
+
+    // Simulate handoff ending
+    rerender({ agentName: "Agent Smith", isHandoff: false });
+
+    // Second message should show agentConnected=Yes because agent connected during handoff
+    expect(mockTranslate).toHaveBeenCalledWith("idle_message_with_survey", {
+      url: "https://test-survey.com",
+      urlParams: "?chatKey=test-conversation&agentConnected=Yes",
+    });
+  });
 });
