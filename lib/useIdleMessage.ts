@@ -178,7 +178,7 @@ export function useIdleMessage({
   /**
    * Constructs idle message with dynamic survey link and metadata.
    */
-  const idleMessage = useMemo(
+  const idleMessage = useCallback(
     () => ({
       text: t("idle_message_with_survey", {
         url: surveyLink,
@@ -186,7 +186,7 @@ export function useIdleMessage({
       }),
       type: "SIMULATED" as const,
     }),
-    [t, surveyLink, conversationId, hasConnectedToAgent],
+    [t, surveyLink, conversationId],
   );
 
   /**
@@ -199,7 +199,7 @@ export function useIdleMessage({
    */
   const displayMessage = useCallback(() => {
     if (!shouldDisplayMessage && !shouldDisplayMessageOnHandoffChange) return;
-    addMessage(idleMessage);
+    addMessage(idleMessage());
     callAnalytics();
     cleanup();
     hasDisplayedMessage.current = true;
