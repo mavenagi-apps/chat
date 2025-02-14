@@ -95,15 +95,15 @@ export type SalesforceChatUserData = {
 };
 
 export type SalesforceRequest = {
-  unsignedUserData?: SalesforceChatUserData;
-  signedUserData?: string;
-  messages: Message[];
-  mavenConversationId: string;
-  email?: string;
-  userAgent: string;
-  screenResolution: string;
-  language: string;
   customData?: Record<string, any>;
+  email?: string;
+  language: string;
+  mavenConversationId: string;
+  messages: Message[];
+  screenResolution: string;
+  signedUserData?: string;
+  unsignedUserData?: SalesforceChatUserData;
+  userAgent: string;
 };
 
 export type PrechatDetail = {

@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
 
     const {
       customData,
+      email,
       language,
       messages,
       screenResolution,
@@ -59,7 +60,12 @@ export async function POST(req: NextRequest) {
       userAgent,
     } = (await req.json()) as SalesforceRequest;
 
-    if (!allowAnonymousHandoff && !unsignedUserData && !signedUserData) {
+    if (
+      !allowAnonymousHandoff &&
+      !unsignedUserData &&
+      !signedUserData &&
+      !email
+    ) {
       return NextResponse.json({ error: "Missing user data" }, { status: 400 });
     }
 
@@ -71,7 +77,8 @@ export async function POST(req: NextRequest) {
       )) as VerifiedUserData;
     }
 
-    const userData = verifiedUserInfo || unsignedUserData;
+    const userData =
+      verifiedUserInfo || unsignedUserData || (email ? { email } : undefined);
 
     try {
       const chatSessionCredentialsResponse = await fetch(

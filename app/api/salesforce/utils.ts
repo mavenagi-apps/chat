@@ -188,7 +188,7 @@ export const generateSessionInitRequestBody = ({
   screenResolution: string;
   sessionKey: string;
   userAgent: string;
-  userData: SalesforceChatUserData | undefined;
+  userData: SalesforceChatUserData | { email: string } | undefined;
 }) => {
   const visibleFields: [string, string | undefined, string][] = [
     ["First Name", userData?.firstName, "First_Name__c"],

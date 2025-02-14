@@ -88,6 +88,7 @@ describe("POST /api/salesforce/conversations", () => {
     messages?: { content: string }[];
     unsignedUserData?: SalesforceChatUserData;
     signedUserData?: string;
+    email?: string;
     userAgent?: string;
     screenResolution?: string;
     language?: string;
@@ -103,6 +104,7 @@ describe("POST /api/salesforce/conversations", () => {
     messages = [TEST_DATA.DEFAULT_MESSAGE],
     unsignedUserData,
     signedUserData,
+    email,
     userAgent = "test-user-agent",
     screenResolution = "1920x1080",
     language = "en-US",
@@ -121,6 +123,7 @@ describe("POST /api/salesforce/conversations", () => {
           messages,
           unsignedUserData,
           signedUserData,
+          email,
           userAgent,
           screenResolution,
           language,
@@ -135,6 +138,7 @@ describe("POST /api/salesforce/conversations", () => {
           messages,
           unsignedUserData,
           signedUserData,
+          email,
           userAgent,
           screenResolution,
           language,
@@ -369,6 +373,27 @@ describe("POST /api/salesforce/conversations", () => {
       });
     });
 
+    it("should handle email-only authentication", async () => {
+      const testEmail = "test@example.com";
+      const response = await POST(
+        createMockRequest({
+          email: testEmail,
+          unsignedUserData: undefined,
+          signedUserData: undefined,
+        } as MockRequestParams) as unknown as NextRequest,
+      );
+
+      expect(response.status).toBe(200);
+      const fetchCalls = vi.mocked(global.fetch).mock.calls;
+      const initRequestBody = JSON.parse(fetchCalls[1][1]?.body as string);
+      expect(initRequestBody.prechatDetails).toContainEqual(
+        expect.objectContaining({
+          label: "Email",
+          value: testEmail,
+        }),
+      );
+    });
+
     it("should handle signed user data when provided", async () => {
       const verifiedUser = {
         ...TEST_USER,
@@ -392,7 +417,7 @@ describe("POST /api/salesforce/conversations", () => {
       );
     });
 
-    it("should prefer signed user data over unsigned data when both are provided", async () => {
+    it("should prefer signed user data over unsigned data and email when all are provided", async () => {
       const verifiedUser = {
         ...TEST_USER,
         userId: "verified-user-id",
@@ -405,6 +430,7 @@ describe("POST /api/salesforce/conversations", () => {
         createMockRequest({
           signedUserData: "encrypted-data",
           unsignedUserData: { ...TEST_USER, userId: "unsigned-user-id" },
+          email: "different@example.com",
         } as MockRequestParams) as unknown as NextRequest,
       );
 
@@ -418,6 +444,129 @@ describe("POST /api/salesforce/conversations", () => {
           value: "verified-user-id",
         }),
       );
+    });
+
+    it("should prefer unsigned user data over email when both are provided", async () => {
+      const response = await POST(
+        createMockRequest({
+          unsignedUserData: TEST_USER,
+          email: "different@example.com",
+        } as MockRequestParams) as unknown as NextRequest,
+      );
+
+      expect(response.status).toBe(200);
+      const fetchCalls = vi.mocked(global.fetch).mock.calls;
+      const initRequestBody = JSON.parse(fetchCalls[1][1]?.body as string);
+      expect(initRequestBody.prechatDetails).toContainEqual(
+        expect.objectContaining({
+          label: "Email",
+          value: TEST_USER.email,
+        }),
+      );
+    });
+
+    it("should handle custom button ID and eswLiveAgentDevName", async () => {
+      const response = await POST(
+        createMockRequest({
+          unsignedUserData: TEST_USER,
+          customData: {
+            buttonId: "custom-button-id",
+            eswLiveAgentDevName: "custom-dev-name",
+          },
+        } as MockRequestParams) as unknown as NextRequest,
+      );
+
+      expect(response.status).toBe(200);
+      const fetchCalls = vi.mocked(global.fetch).mock.calls;
+      const initCall = fetchCalls.find(
+        (call) =>
+          typeof call[0] === "string" && call[0].includes("/ChasitorInit"),
+      );
+      const requestBody = JSON.parse(initCall?.[1]?.body as string);
+
+      expect(requestBody.buttonId).toBe("custom-button-id");
+      expect(requestBody.prechatDetails).toContainEqual(
+        expect.objectContaining({
+          label: "eswLiveAgentDevName",
+          value: "custom-dev-name",
+        }),
+      );
+    });
+
+    it("should return 400 when no user data is provided and anonymous handoff is disabled", async () => {
+      // Mock the configuration with anonymous handoff disabled
+      vi.mocked(withAppSettings).mockImplementationOnce((req, handler) =>
+        handler(
+          req,
+          {
+            branding: {},
+            security: {},
+            misc: {
+              handoffConfiguration: {
+                type: "salesforce" as const,
+                chatHostUrl: "https://test.salesforce.com",
+                chatButtonId: "test-button-id",
+                deploymentId: "test-deployment-id",
+                orgId: "test-org-id",
+                eswLiveAgentDevName: "test-dev-name",
+                apiSecret: "test-secret",
+                allowAnonymousHandoff: false,
+              },
+            },
+          } as ParsedAppSettings,
+          "test-org-id",
+          "test-agent-id",
+        ),
+      );
+
+      const response = await POST(
+        createMockRequest({
+          unsignedUserData: undefined,
+          signedUserData: undefined,
+          email: undefined,
+        } as MockRequestParams) as unknown as NextRequest,
+      );
+
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({
+        error: "Missing user data",
+      });
+    });
+
+    it("should allow requests without user data when anonymous handoff is enabled", async () => {
+      // Mock the configuration with anonymous handoff enabled
+      vi.mocked(withAppSettings).mockImplementationOnce((req, handler) =>
+        handler(
+          req,
+          {
+            branding: {},
+            security: {},
+            misc: {
+              handoffConfiguration: {
+                type: "salesforce" as const,
+                chatHostUrl: "https://test.salesforce.com",
+                chatButtonId: "test-button-id",
+                deploymentId: "test-deployment-id",
+                orgId: "test-org-id",
+                eswLiveAgentDevName: "test-dev-name",
+                apiSecret: "test-secret",
+                allowAnonymousHandoff: true,
+              },
+            },
+          } as ParsedAppSettings,
+          "test-org-id",
+          "test-agent-id",
+        ),
+      );
+
+      const response = await POST(
+        createMockRequest({
+          unsignedUserData: undefined,
+          signedUserData: undefined,
+        } as MockRequestParams) as unknown as NextRequest,
+      );
+
+      expect(response.status).toBe(200);
     });
 
     it("should handle minimal user data without optional fields", async () => {
@@ -479,110 +628,6 @@ describe("POST /api/salesforce/conversations", () => {
           value: "test-user",
         }),
       );
-    });
-
-    it("should handle custom button ID and eswLiveAgentDevName", async () => {
-      const response = await POST(
-        createMockRequest({
-          unsignedUserData: TEST_USER,
-          customData: {
-            buttonId: "custom-button-id",
-            eswLiveAgentDevName: "custom-dev-name",
-          },
-        } as MockRequestParams) as unknown as NextRequest,
-      );
-
-      expect(response.status).toBe(200);
-      const fetchCalls = vi.mocked(global.fetch).mock.calls;
-      const initCall = fetchCalls.find(
-        (call) =>
-          typeof call[0] === "string" && call[0].includes("/ChasitorInit"),
-      );
-      const requestBody = JSON.parse(initCall?.[1]?.body as string);
-
-      expect(requestBody.buttonId).toBe("custom-button-id");
-      expect(requestBody.prechatDetails).toContainEqual(
-        expect.objectContaining({
-          label: "eswLiveAgentDevName",
-          value: "custom-dev-name",
-        }),
-      );
-    });
-
-    it("should return 400 when user data is missing and anonymous handoff is disabled", async () => {
-      // Mock the configuration with anonymous handoff disabled
-      vi.mocked(withAppSettings).mockImplementationOnce((req, handler) =>
-        handler(
-          req,
-          {
-            branding: {},
-            security: {},
-            misc: {
-              handoffConfiguration: {
-                type: "salesforce" as const,
-                chatHostUrl: "https://test.salesforce.com",
-                chatButtonId: "test-button-id",
-                deploymentId: "test-deployment-id",
-                orgId: "test-org-id",
-                eswLiveAgentDevName: "test-dev-name",
-                apiSecret: "test-secret",
-                allowAnonymousHandoff: false,
-              },
-            },
-          } as ParsedAppSettings,
-          "test-org-id",
-          "test-agent-id",
-        ),
-      );
-
-      const response = await POST(
-        createMockRequest({
-          unsignedUserData: undefined,
-          signedUserData: undefined,
-          messages: [],
-        } as MockRequestParams) as unknown as NextRequest,
-      );
-
-      expect(response.status).toBe(400);
-      expect(await response.json()).toEqual({
-        error: "Missing user data",
-      });
-    });
-
-    it("should allow requests without user data when anonymous handoff is enabled", async () => {
-      // Mock the configuration with anonymous handoff enabled
-      vi.mocked(withAppSettings).mockImplementationOnce((req, handler) =>
-        handler(
-          req,
-          {
-            branding: {},
-            security: {},
-            misc: {
-              handoffConfiguration: {
-                type: "salesforce" as const,
-                chatHostUrl: "https://test.salesforce.com",
-                chatButtonId: "test-button-id",
-                deploymentId: "test-deployment-id",
-                orgId: "test-org-id",
-                eswLiveAgentDevName: "test-dev-name",
-                apiSecret: "test-secret",
-                allowAnonymousHandoff: true,
-              },
-            },
-          } as ParsedAppSettings,
-          "test-org-id",
-          "test-agent-id",
-        ),
-      );
-
-      const response = await POST(
-        createMockRequest({
-          unsignedUserData: undefined,
-          signedUserData: undefined,
-        } as MockRequestParams) as unknown as NextRequest,
-      );
-
-      expect(response.status).toBe(200);
     });
   });
 
