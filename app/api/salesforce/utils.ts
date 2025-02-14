@@ -165,6 +165,10 @@ const createEntityFieldMap = (
   doCreate: false,
 });
 
+function isSalesforceChatUser(user: any): user is SalesforceChatUserData {
+  return "firstName" in user || "lastName" in user;
+}
+
 export const generateSessionInitRequestBody = ({
   buttonId,
   chatSessionCredentials,
@@ -191,10 +195,28 @@ export const generateSessionInitRequestBody = ({
   userData: SalesforceChatUserData | { email: string } | undefined;
 }) => {
   const visibleFields: [string, string | undefined, string][] = [
-    ["First Name", userData?.firstName, "First_Name__c"],
-    ["Last Name", userData?.lastName, "Last_Name__c"],
+    [
+      "First Name",
+      userData && isSalesforceChatUser(userData)
+        ? userData.firstName
+        : undefined,
+      "First_Name__c",
+    ],
+    [
+      "Last Name",
+      userData && isSalesforceChatUser(userData)
+        ? userData.lastName
+        : undefined,
+      "Last_Name__c",
+    ],
     ["Email", userData?.email, "Email__c"],
-    ["Location Id", userData?.locationId, "Location_Id__c"],
+    [
+      "Location Id",
+      userData && isSalesforceChatUser(userData)
+        ? userData.locationId
+        : undefined,
+      "Location_Id__c",
+    ],
   ];
 
   const hiddenFields: [string, string | boolean | undefined, string][] = [
@@ -202,8 +224,18 @@ export const generateSessionInitRequestBody = ({
     ["Origin", "Chat", ""],
     ["eswLiveAgentDevName", eswLiveAgentDevName, ""],
     ["hasOnlyExtraPrechatInfo", false, ""],
-    ["Location Type", userData?.locationType, "Location_Type__c"],
-    ["User Id", userData?.userId, "User_Id__c"],
+    [
+      "Location Type",
+      userData && isSalesforceChatUser(userData)
+        ? userData.locationType
+        : undefined,
+      "Location_Type__c",
+    ],
+    [
+      "User Id",
+      userData && isSalesforceChatUser(userData) ? userData.userId : undefined,
+      "User_Id__c",
+    ],
   ];
 
   const prechatDetails = [
@@ -241,7 +273,10 @@ export const generateSessionInitRequestBody = ({
     userAgent,
     language,
     screenResolution,
-    visitorName: userData?.firstName,
+    visitorName:
+      userData && isSalesforceChatUser(userData)
+        ? userData.firstName
+        : undefined,
     prechatDetails,
     buttonOverrides: [],
     receiveQueueUpdates: true,
