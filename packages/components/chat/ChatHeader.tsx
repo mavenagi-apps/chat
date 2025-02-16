@@ -11,7 +11,13 @@ export function ChatHeader({ logoUrl }: ChatHeaderProps) {
   return (
     <div role="banner" className="border-b border-gray-300 bg-white md:block">
       <div className="text-md flex p-5 font-medium text-gray-950">
-        <Image src={logoUrl || defaultLogo} alt="Logo" width={98} height={24} />
+        <Image
+          src={logoUrl || defaultLogo}
+          alt="Logo"
+          width={98}
+          height={24}
+          className="max-h-24"
+        />
       </div>
     </div>
   );
