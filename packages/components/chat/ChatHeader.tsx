@@ -16,7 +16,7 @@ export function ChatHeader({ logoUrl }: ChatHeaderProps) {
           alt="Logo"
           width={98}
           height={24}
-          className="max-h-24"
+          className="h-8 w-auto"
         />
       </div>
     </div>
