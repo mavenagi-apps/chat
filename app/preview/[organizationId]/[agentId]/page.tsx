@@ -60,7 +60,7 @@ export default async function Page({
   let parsedCustomData = {};
 
   try {
-    parsedCustomData = JSON.parse(searchParamsCustomData);
+    parsedCustomData = JSON.parse(decodeURIComponent(searchParamsCustomData));
   } catch (error) {
     console.error("Error parsing customData", error);
   }

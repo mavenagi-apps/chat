@@ -9,6 +9,7 @@ type WidgetLoadPayload = {
   signedUserData?: string;
   unsignedUserData?: Record<string, any>;
   customData?: Record<string, any>;
+  locale?: string;
 };
 
 export default function Widget({
@@ -26,6 +27,8 @@ export default function Widget({
       todaysDate: localizedDate,
     };
   }
+
+  widgetLoadPayload.locale = widgetLoadPayload.customData?.locale || undefined;
 
   return (
     <>
