@@ -6,6 +6,7 @@ import type { Message, UserChatMessage, IncomingHandoffEvent } from "@/types";
 import { HandoffStrategyFactory } from "@/lib/handoff/HandoffStrategyFactory";
 import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
 import { streamResponse } from "@/lib/handoff/streamUtils";
+import { useSettings } from "@/app/providers/SettingsProvider";
 
 // Mock the required providers and hooks
 vi.mock("next/dist/client/components/navigation", () => ({
@@ -136,10 +137,31 @@ describe("useHandoff", () => {
       expect(result.current.shouldSupressHandoffInputDisplay).toBe(false);
     });
 
-    test("should create strategy on mount", () => {
+    test("should create strategy with configuration on mount", () => {
+      const handoffConfig = {
+        type: "salesforce" as const,
+        orgId: "test-org",
+        chatHostUrl: "test-url",
+        chatButtonId: "test-button",
+        deploymentId: "test-deployment",
+        eswLiveAgentDevName: "test-name",
+        apiSecret: "test-secret",
+        handoffTerminatingMessageText: "goodbye",
+        enableAvailabilityCheck: true,
+      };
+
+      vi.mocked(useSettings).mockReturnValue({
+        branding: {},
+        security: {},
+        misc: {
+          handoffConfiguration: handoffConfig,
+        },
+      });
+
       renderHook(() => useHandoff(defaultProps));
       expect(HandoffStrategyFactory.createStrategy).toHaveBeenCalledWith(
-        "zendesk",
+        "salesforce",
+        handoffConfig,
       );
     });
   });

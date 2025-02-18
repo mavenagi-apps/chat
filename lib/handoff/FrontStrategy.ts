@@ -5,10 +5,13 @@ import {
 import type { Message, HandoffChatMessage } from "@/types";
 import type { Front } from "@/types/front";
 import { isChatUserMessage, isBotMessage } from "@/types";
+import type { FrontHandoffConfiguration } from "@/types/frontHandoffConfiguration";
 
 export class FrontStrategy implements HandoffStrategy {
   messagesEndpoint = "/api/front/messages";
   conversationsEndpoint = "/api/front/conversations";
+
+  constructor(private readonly configuration: FrontHandoffConfiguration) {}
 
   formatMessages(
     messages: Message[],

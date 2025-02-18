@@ -28,10 +28,19 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
   readonly connectedToAgentMessageType =
     SALESFORCE_MESSAGE_TYPES.ChatConnecting;
 
+  constructor(private readonly configuration: SalesforceHandoffConfiguration) {}
+
   private shouldEndHandoff(event: SalesforceChatMessage): boolean {
-    return SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION.includes(
-      event.type,
-    );
+    const shouldEndByType =
+      SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION.includes(event.type);
+
+    // Check if message text matches terminating text
+    const handoffConfig = this.configuration as SalesforceHandoffConfiguration;
+    const terminatingText = handoffConfig?.handoffTerminatingMessageText;
+    const shouldEndByText =
+      terminatingText && event.message?.text?.includes(terminatingText);
+
+    return shouldEndByType || !!shouldEndByText;
   }
 
   /**

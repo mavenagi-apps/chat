@@ -42,11 +42,12 @@ export function createBotMessage(responses: BotResponse[]): Message {
 export function createSalesforceEvent(
   type: SalesforceMessageType,
   agentName?: string,
+  messageText: string = "Hello",
 ): SalesforceChatMessage {
   return {
     type,
     message: {
-      text: "Hello",
+      text: messageText,
       name: agentName || "Unknown Agent",
       schedule: {
         responseDelayMilliseconds: 0,

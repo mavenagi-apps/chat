@@ -16,7 +16,15 @@ describe("SalesforceStrategy", () => {
   let strategy: SalesforceStrategy;
 
   beforeEach(() => {
-    strategy = new SalesforceStrategy();
+    strategy = new SalesforceStrategy({
+      type: "salesforce",
+      orgId: "test-org",
+      chatHostUrl: "test-url",
+      chatButtonId: "test-button",
+      deploymentId: "test-deployment",
+      eswLiveAgentDevName: "test-name",
+      apiSecret: "test-secret",
+    });
   });
 
   describe("formatMessages", () => {
@@ -167,6 +175,61 @@ describe("SalesforceStrategy", () => {
         },
         shouldEndHandoff: false,
       });
+    });
+
+    it("ends handoff when message contains terminating text", () => {
+      strategy = new SalesforceStrategy({
+        type: "salesforce",
+        orgId: "test-org",
+        chatHostUrl: "test-url",
+        chatButtonId: "test-button",
+        deploymentId: "test-deployment",
+        eswLiveAgentDevName: "test-name",
+        apiSecret: "test-secret",
+        handoffTerminatingMessageText: "goodbye",
+      });
+
+      const event = createSalesforceEvent(
+        SALESFORCE_MESSAGE_TYPES.ChatMessage,
+        "Agent",
+        "Thanks for chatting, goodbye!",
+      );
+
+      const result = strategy.handleChatEvent(event);
+      expect(result.shouldEndHandoff).toBe(true);
+    });
+
+    it("does not end handoff when terminating text is not present", () => {
+      strategy = new SalesforceStrategy({
+        type: "salesforce",
+        orgId: "test-org",
+        chatHostUrl: "test-url",
+        chatButtonId: "test-button",
+        deploymentId: "test-deployment",
+        eswLiveAgentDevName: "test-name",
+        apiSecret: "test-secret",
+        handoffTerminatingMessageText: "goodbye",
+      });
+
+      const event = createSalesforceEvent(
+        SALESFORCE_MESSAGE_TYPES.ChatMessage,
+        "Agent",
+        "How can I help you?",
+      );
+
+      const result = strategy.handleChatEvent(event);
+      expect(result.shouldEndHandoff).toBe(false);
+    });
+
+    it("does not end handoff when terminating text is not configured", () => {
+      const event = createSalesforceEvent(
+        SALESFORCE_MESSAGE_TYPES.ChatMessage,
+        "Agent",
+        "Thanks for chatting, goodbye!",
+      );
+
+      const result = strategy.handleChatEvent(event);
+      expect(result.shouldEndHandoff).toBe(false);
     });
   });
 

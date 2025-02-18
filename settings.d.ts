@@ -70,6 +70,7 @@ declare global {
     surveyLink?: string;
     enableAvailabilityCheck?: boolean;
     availabilityFallbackMessage?: string;
+    handoffTerminatingMessageText?: string;
   };
 
   type HandoffConfiguration =
@@ -85,7 +86,11 @@ declare global {
 
   type ClientSafeHandoffConfig = Pick<
     HandoffConfiguration,
-    "type" | "surveyLink" | "enableAvailabilityCheck" | "allowAnonymousHandoff"
+    | "type"
+    | "surveyLink"
+    | "enableAvailabilityCheck"
+    | "allowAnonymousHandoff"
+    | "handoffTerminatingMessageText"
   > & {
     availabilityFallbackMessage?: SalesforceHandoffConfiguration["availabilityFallbackMessage"];
   };
