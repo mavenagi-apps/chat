@@ -41,7 +41,10 @@ export function useHandoff({
   const { misc } = useSettings();
   const handoffTypeRef = useRef(misc.handoffConfiguration?.type ?? null);
   const strategyRef = useRef(
-    HandoffStrategyFactory.createStrategy(handoffTypeRef.current),
+    HandoffStrategyFactory.createStrategy(
+      handoffTypeRef.current,
+      misc.handoffConfiguration as HandoffConfiguration,
+    ),
   );
   const abortController = useRef(new AbortController());
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
@@ -58,6 +61,7 @@ export function useHandoff({
   useEffect(() => {
     strategyRef.current = HandoffStrategyFactory.createStrategy(
       handoffTypeRef.current,
+      misc.handoffConfiguration as HandoffConfiguration,
     );
   }, []);
 

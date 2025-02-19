@@ -178,6 +178,7 @@ describe("getPublicAppSettings", () => {
               surveyLink: "survey.com",
               availabilityFallbackMessage: "message",
               allowAnonymousHandoff: true,
+              handoffTerminatingMessageText: "goodbye",
               apiSecret: "secret", // This should not be included in client settings
             }),
           },
@@ -207,6 +208,7 @@ describe("getPublicAppSettings", () => {
           surveyLink: "survey.com",
           availabilityFallbackMessage: "message",
           allowAnonymousHandoff: true,
+          handoffTerminatingMessageText: "goodbye",
         },
       },
     });

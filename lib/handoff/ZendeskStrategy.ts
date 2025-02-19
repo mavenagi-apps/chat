@@ -14,6 +14,8 @@ export class ZendeskStrategy implements HandoffStrategy {
   messagesEndpoint = "/api/zendesk/messages";
   conversationsEndpoint = "/api/zendesk/conversations";
 
+  constructor(private readonly configuration: ZendeskHandoffConfiguration) {}
+
   formatMessages(
     messages: Message[],
     _mavenConversationId: string,
