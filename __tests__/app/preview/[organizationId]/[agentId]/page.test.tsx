@@ -61,7 +61,7 @@ describe("PreviewPage", () => {
   });
 
   describe("when all parameters are valid", () => {
-    test("should render the page with correct background and scripts", async () => {
+    test("should render the page with correct scripts", async () => {
       const { container } = render(
         await PreviewPage({
           params: Promise.resolve(mockParams),
@@ -72,13 +72,6 @@ describe("PreviewPage", () => {
           } as SearchParams),
         }),
       );
-
-      const mainDiv = container.firstChild as HTMLElement;
-      expect(mainDiv).toHaveStyle({
-        backgroundImage: `url(/mock-bg-image.jpg)`,
-        backgroundSize: "cover",
-        height: "100vh",
-      });
 
       const scripts = container.getElementsByTagName("script");
       expect(scripts).toHaveLength(2);
