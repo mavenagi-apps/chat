@@ -73,6 +73,12 @@ describe("PreviewPage", () => {
         }),
       );
 
+      const header = container.getElementsByTagName("header");
+      expect(header).toHaveLength(1);
+      expect(header[0]).toHaveTextContent("Preview");
+      const logo = container.getElementsByTagName("svg");
+      expect(logo).toHaveLength(1);
+
       const scripts = container.getElementsByTagName("script");
       expect(scripts).toHaveLength(2);
       expect(scripts[0]).toHaveAttribute("src", "/js/widget.js");
