@@ -1,0 +1,170 @@
+[
+  {
+    "key": "branding",
+    "type": "section",
+    "fields": [
+      {
+        "key": "logoUrl",
+        "type": "text",
+        "description": "URL of the logo to be displayed in the chat",
+        "displayName": "Logo URL"
+      },
+      {
+        "key": "brandColor",
+        "type": "color",
+        "description": "Hex color code for the brand color",
+        "displayName": "Brand Color"
+      },
+      {
+        "key": "brandFontColor",
+        "type": "color",
+        "description": "Hex color code for the brand font color",
+        "displayName": "Brand Font Color"
+      },
+      {
+        "key": "welcomeMessage",
+        "type": "multiline",
+        "description": "Optional: Text for the first chat prompt. Defaults to: \"How can we help you? You can start a conversation below or start with popular questions:\"\n\nAccepts markdown.\nAccepts JSON object keyed by locale for internationalization.",
+        "displayName": "Welcome Message"
+      },
+      {
+        "key": "popularQuestions",
+        "type": "array",
+        "description": "List of popular questions to prompt chat users",
+        "displayName": "Popular Questions"
+      },
+      {
+        "key": "enableDemoSite",
+        "type": "text",
+        "description": "Enable the demo site at /demo/[organizationId]/[agentId].   Set the value to 1 to enable, set to 0 to disable.",
+        "displayName": "Enable demo site"
+      }
+    ],
+    "description": "Configure the visual appearance and branding of your chat widget",
+    "displayName": "Branding"
+  },
+  {
+    "key": "security",
+    "type": "section",
+    "fields": [
+      {
+        "key": "jwtPublicKey",
+        "type": "multiline",
+        "description": "Optional: Public key for user data auth verification (ES256)",
+        "displayName": "JWT Public Key"
+      },
+      {
+        "key": "embedAllowlist",
+        "type": "array",
+        "description": "Optional: A list of domains the chat iframe can be embedded on",
+        "displayName": "Allowed domains"
+      },
+      {
+        "key": "encryptionSecret",
+        "type": "text",
+        "description": "Optional: Private 32-byte key for user data auth decryption ",
+        "displayName": "Encryption secret"
+      }
+    ],
+    "description": "Configure security settings and access controls",
+    "displayName": "Security"
+  },
+  {
+    "key": "misc",
+    "type": "section",
+    "fields": [
+      {
+        "key": "handoffConfiguration",
+        "type": "multiline",
+        "description": "Optional: Configuration for live agent handoff (JSON)",
+        "displayName": "Live agent handoff configuration"
+      },
+      {
+        "key": "amplitudeApiKey",
+        "type": "text",
+        "description": "Public API key for Amplitude instance",
+        "displayName": "Amplitude API Key"
+      },
+      {
+        "key": "disableAttachments",
+        "type": "text",
+        "description": "Optional: Disable the attachments feature",
+        "displayName": "Disable Attachments"
+      }
+    ],
+    "description": "Additional configuration options",
+    "displayName": "Miscellaneous"
+  },
+  {
+    "key": "logoUrl",
+    "type": "text",
+    "description": "URL of the logo to be displayed in the chat",
+    "displayName": "Logo URL"
+  },
+  {
+    "key": "brandColor",
+    "type": "color",
+    "description": "Hex color code for the brand color",
+    "displayName": "Brand Color"
+  },
+  {
+    "key": "jwtPublicKey",
+    "type": "multiline",
+    "description": "Optional: Public key for user data auth verification (ES256)",
+    "displayName": "JWT Public Key"
+  },
+  {
+    "key": "brandFontColor",
+    "type": "color",
+    "description": "Hex color code for the brand font color",
+    "displayName": "Brand Font Color"
+  },
+  {
+    "key": "embedAllowlist",
+    "type": "array",
+    "description": "Optional: A list of domains the chat iframe can be embedded on",
+    "displayName": "Allowed domains"
+  },
+  {
+    "key": "enableDemoSite",
+    "type": "text",
+    "description": "Enable the demo site at /demo/[organizationId]/[agentId].   Set the value to 1 to enable, set to 0 to disable.",
+    "displayName": "Enable demo site"
+  },
+  {
+    "key": "welcomeMessage",
+    "type": "multiline",
+    "description": "Optional: Text for the first chat prompt. Defaults to: \"How can we help you? You can start a conversation below or start with popular questions:\"\n\nAccepts markdown.\nAccepts JSON object keyed by locale for internationalization.",
+    "displayName": "Welcome Message"
+  },
+  {
+    "key": "amplitudeApiKey",
+    "type": "text",
+    "description": "Public API key for Amplitude instance",
+    "displayName": "Amplitude API Key"
+  },
+  {
+    "key": "encryptionSecret",
+    "type": "text",
+    "description": "Optional: Private 32-byte key for user data auth decryption ",
+    "displayName": "Encryption secret"
+  },
+  {
+    "key": "popularQuestions",
+    "type": "array",
+    "description": "List of popular questions to prompt chat users",
+    "displayName": "Popular Questions"
+  },
+  {
+    "key": "handoffConfiguration",
+    "type": "multiline",
+    "description": "Optional: Configuration for live agent handoff (JSON)",
+    "displayName": "Live agent handoff configuration"
+  },
+  {
+    "key": "disableAttachments",
+    "type": "text",
+    "description": "Optional: Disable the attachments feature",
+    "displayName": "Disable Attachments"
+  }
+]

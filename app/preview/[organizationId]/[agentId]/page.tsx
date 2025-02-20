@@ -3,8 +3,8 @@ import { faker } from "@faker-js/faker";
 import { getPublicAppSettings } from "@/app/actions";
 import { generateSignedUserData } from "./actions";
 import { notFound } from "next/navigation";
-import backgroundImg from "@/assets/background/bg.jpg";
 import Widget from "./Widget";
+import { PreviewHeader } from "@magi/components/preview-header";
 
 // Move faker data generation outside the component
 const generateMockUserData = () => ({
@@ -78,13 +78,8 @@ export default async function Page({
   };
 
   return (
-    <div
-      style={{
-        backgroundImage: `url(${backgroundImg.src})`,
-        backgroundSize: "cover",
-        height: "100vh",
-      }}
-    >
+    <div className="flex flex-col h-screen p-6">
+      <PreviewHeader badgeText="Chat Preview" />
       <Widget widgetLoadPayload={widgetLoadPayload} />
     </div>
   );
