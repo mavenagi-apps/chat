@@ -61,7 +61,7 @@ describe("PreviewPage", () => {
   });
 
   describe("when all parameters are valid", () => {
-    test("should render the page with correct scripts", async () => {
+    test("should render the page with correct scripts, header, and logo", async () => {
       const { container } = render(
         await PreviewPage({
           params: Promise.resolve(mockParams),
