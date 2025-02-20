@@ -27,8 +27,6 @@ export function adaptLegacySettings(settings: InterimAppSettings): AppSettings {
       settings.branding?.welcomeMessage ?? settings.welcomeMessage,
     popularQuestions:
       settings.branding?.popularQuestions ?? settings.popularQuestions,
-    enableDemoSite:
-      settings.branding?.enableDemoSite ?? settings.enableDemoSite,
   };
 
   // Set security properties
@@ -39,6 +37,8 @@ export function adaptLegacySettings(settings: InterimAppSettings): AppSettings {
       settings.security?.embedAllowlist ?? settings.embedAllowlist,
     encryptionSecret:
       settings.security?.encryptionSecret ?? settings.encryptionSecret,
+    enablePreviewSite:
+      settings.security?.enablePreviewSite ?? settings.enableDemoSite,
   };
 
   adapted.misc = {

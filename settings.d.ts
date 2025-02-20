@@ -22,12 +22,12 @@ declare global {
       brandFontColor?: string;
       welcomeMessage?: string;
       popularQuestions?: string[] | string;
-      enableDemoSite?: string;
     };
     security: {
       jwtPublicKey?: string;
       embedAllowlist?: string[];
       encryptionSecret?: string;
+      enablePreviewSite?: string;
     };
     misc: {
       handoffConfiguration?: string;

@@ -7,9 +7,7 @@ vi.mock("@/app/api/server/utils", () => ({
   getAppSettings: vi.fn().mockResolvedValue({
     security: {
       embedAllowlist: [],
-    },
-    branding: {
-      enableDemoSite: "false",
+      enablePreviewSite: "false",
     },
     misc: {},
   }),
@@ -30,7 +28,7 @@ describe("Middleware", () => {
   };
 
   describe("Path parameter extraction", () => {
-    it("should extract organizationId and agentId from demo path", async () => {
+    it("should extract organizationId and agentId from preview path", async () => {
       const request = createMockRequest("/preview/org123/agent456", {
         "sec-fetch-dest": "iframe",
       });
@@ -137,9 +135,7 @@ describe("Middleware", () => {
             (getAppSettings as ReturnType<typeof vi.fn>).mockResolvedValue({
               security: {
                 embedAllowlist: ["allowed-domain.com"],
-              },
-              branding: {
-                enableDemoSite: "false",
+                enablePreviewSite: "false",
               },
               misc: {},
             });
