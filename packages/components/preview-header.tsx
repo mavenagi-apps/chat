@@ -5,7 +5,7 @@ import { cn } from "@/packages/ui/src/lib/utils";
 import { LuCopy, LuCheck } from "react-icons/lu";
 import { Logo } from "./Logo";
 import { useCallback, useEffect, useState } from "react";
-
+import imgMaven from "@/assets/logo/mavenagi_logo_wide_on_light_purple.svg";
 interface PreviewHeaderProps {
   badgeText?: string;
 }
@@ -35,7 +35,7 @@ export function PreviewHeader({ badgeText = "Preview" }: PreviewHeaderProps) {
         <div className="h-full px-3 py-1.5 bg-[#f7f5f2] rounded-lg border border-[#efece8] backdrop-blur-[10px] flex items-center justify-between overflow-hidden">
           <div className="flex items-center gap-4 pl-1.5">
             <div data-svg-wrapper className="relative">
-              <Logo />
+              <Logo src={imgMaven} />
             </div>
             <div className="px-3 py-[9px] bg-[#f5ebe2] rounded-[18px] flex items-center">
               <div className="text-[#9b8c7c] text-xs font-bold font-['Control Upright'] leading-[10.80px]">

@@ -6,10 +6,12 @@ export function Logo({
   className = "h-8",
   width = 110,
   height = 32,
+  src = imgMaven,
 }: {
   className?: string;
   width?: number;
   height?: number;
+  src?: string;
 }) {
   return (
     <Image
@@ -17,7 +19,7 @@ export function Logo({
       className={className}
       width={width}
       height={height}
-      src={imgMaven}
+      src={src}
     />
   );
 }
