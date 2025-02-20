@@ -30,12 +30,12 @@ describe("adaptLegacySettings", () => {
         brandFontColor: "#legacyFont",
         welcomeMessage: "legacy-welcome",
         popularQuestions: ["q1", "q2"],
-        enableDemoSite: "true",
       },
       security: {
         jwtPublicKey: "legacy-jwt",
         embedAllowlist: ["legacy-domain"],
         encryptionSecret: "legacy-secret",
+        enablePreviewSite: "true",
       },
       misc: {
         handoffConfiguration: "legacy-handoff",
@@ -84,12 +84,12 @@ describe("adaptLegacySettings", () => {
         brandFontColor: undefined,
         welcomeMessage: undefined,
         popularQuestions: undefined,
-        enableDemoSite: undefined,
       },
       security: {
         jwtPublicKey: undefined,
         embedAllowlist: undefined,
         encryptionSecret: undefined,
+        enablePreviewSite: undefined,
       },
       misc: {
         handoffConfiguration: undefined,
@@ -115,12 +115,12 @@ describe("adaptLegacySettings", () => {
         brandFontColor: undefined,
         welcomeMessage: undefined,
         popularQuestions: undefined,
-        enableDemoSite: undefined,
       },
       security: {
         jwtPublicKey: undefined,
         embedAllowlist: undefined,
         encryptionSecret: undefined,
+        enablePreviewSite: undefined,
       },
       misc: {
         handoffConfiguration: undefined,
