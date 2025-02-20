@@ -2,7 +2,8 @@
 
 import { Button } from "@/packages/ui/src/button";
 import { cn } from "@/packages/ui/src/lib/utils";
-import { CheckIcon, LinkIcon } from "@heroicons/react/24/outline";
+import { LuCopy, LuCheck } from "react-icons/lu";
+
 import { useCallback, useEffect, useState } from "react";
 
 interface PreviewHeaderProps {
@@ -229,9 +230,9 @@ export function PreviewHeader({ badgeText = "Preview" }: PreviewHeaderProps) {
               </span>
             </div>
             {isCopied ? (
-              <CheckIcon className="h-4 w-4 text-green-600" />
+              <LuCheck className="h-4 w-4 text-green-600" />
             ) : (
-              <LinkIcon className="h-4 w-4 text-[#414956]" />
+              <LuCopy title="Copy link" />
             )}
           </Button>
         </div>
