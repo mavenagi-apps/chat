@@ -7,9 +7,13 @@ import { Logo } from "./Logo";
 import { useCallback, useEffect, useState } from "react";
 interface PreviewHeaderProps {
   badgeText?: string;
+  showLogo?: boolean;
 }
 
-export function PreviewHeader({ badgeText = "Preview" }: PreviewHeaderProps) {
+export function PreviewHeader({
+  badgeText = "Preview",
+  showLogo = true,
+}: PreviewHeaderProps) {
   const [isCopied, setIsCopied] = useState(false);
   const [currentUrl, setCurrentUrl] = useState("");
 
@@ -33,9 +37,11 @@ export function PreviewHeader({ badgeText = "Preview" }: PreviewHeaderProps) {
       <div className="h-12 mx-auto max-w-[1344px]">
         <div className="h-full px-3 py-1.5 bg-[#f7f5f2] rounded-lg border border-[#efece8] backdrop-blur-[10px] flex items-center justify-between overflow-hidden">
           <div className="flex items-center gap-4 pl-1.5">
-            <div data-svg-wrapper className="relative">
-              <Logo version="purple" />
-            </div>
+            {showLogo && (
+              <div data-svg-wrapper className="relative">
+                <Logo version="purple" />
+              </div>
+            )}
             <div className="px-3 py-[9px] bg-[#f5ebe2] rounded-[18px] flex items-center">
               <div className="text-[#9b8c7c] text-xs font-bold font-['Control Upright'] leading-[10.80px]">
                 {badgeText}

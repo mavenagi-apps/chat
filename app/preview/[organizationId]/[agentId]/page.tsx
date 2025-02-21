@@ -79,7 +79,7 @@ export default async function Page({
 
   return (
     <div className="flex flex-col h-screen p-6">
-      <PreviewHeader badgeText="Chat Preview" />
+      <PreviewHeader badgeText="Chat Preview" showLogo={false} />
       <Widget widgetLoadPayload={widgetLoadPayload} />
     </div>
   );
