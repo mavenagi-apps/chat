@@ -106,7 +106,7 @@ export async function sendChatMessage(
 
 export const SESSION_CREDENTIALS_REQUEST_HEADERS = {
   "X-LIVEAGENT-API-VERSION": SALESFORCE_API_VERSION,
-  "X-LIVEAGENT-AFFINITY": "",
+  "X-LIVEAGENT-AFFINITY": "null",
   "Access-Control-Allow-Origin": "*",
 };
 
