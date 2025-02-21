@@ -77,7 +77,7 @@ describe("PreviewPage", () => {
       expect(header).toHaveLength(1);
       expect(header[0]).toHaveTextContent("Preview");
       const logoSvg = container.querySelector('[data-testid="logo-svg"]');
-      expect(logoSvg).toBeNull();
+      expect(logoSvg).toHaveLength(1);
 
       const scripts = container.getElementsByTagName("script");
       expect(scripts).toHaveLength(2);
