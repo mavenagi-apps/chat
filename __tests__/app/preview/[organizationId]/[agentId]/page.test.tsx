@@ -61,7 +61,7 @@ describe("PreviewPage", () => {
   });
 
   describe("when all parameters are valid", () => {
-    test("should render the page with correct background and scripts", async () => {
+    test("should render the page with correct scripts, header, and logo", async () => {
       const { container } = render(
         await PreviewPage({
           params: Promise.resolve(mockParams),
@@ -73,12 +73,11 @@ describe("PreviewPage", () => {
         }),
       );
 
-      const mainDiv = container.firstChild as HTMLElement;
-      expect(mainDiv).toHaveStyle({
-        backgroundImage: `url(/mock-bg-image.jpg)`,
-        backgroundSize: "cover",
-        height: "100vh",
-      });
+      const header = container.getElementsByTagName("header");
+      expect(header).toHaveLength(1);
+      expect(header[0]).toHaveTextContent("Preview");
+      const logoSvg = container.querySelector('[data-testid="logo-svg"]');
+      expect(logoSvg).not.toBeNull();
 
       const scripts = container.getElementsByTagName("script");
       expect(scripts).toHaveLength(2);
