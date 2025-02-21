@@ -1,12 +1,16 @@
 import { defineConfig } from "vitest/config";
-import { createBaseConfig, EXPORT_NAME } from "./vite.config.base";
+import { resolve } from "path";
 
 export default defineConfig({
-  ...createBaseConfig("test"),
   test: {
     environment: "jsdom",
     globals: true,
     include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./src/test/setup.ts"],
   },
-});
+  resolve: {
+    alias: {
+      "@": resolve(__dirname, "./src"),
+    },
+  },
+} as const);
