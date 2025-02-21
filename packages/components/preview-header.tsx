@@ -39,7 +39,7 @@ export function PreviewHeader({
           <div className="flex items-center gap-4 pl-1.5">
             {showLogo && (
               <div data-svg-wrapper className="relative">
-                <Logo version="purple" />
+                <Logo />
               </div>
             )}
             <div className="px-3 py-[9px] bg-[#f5ebe2] rounded-[18px] flex items-center">
