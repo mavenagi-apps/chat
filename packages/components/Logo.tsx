@@ -22,6 +22,7 @@ export function Logo({
       width={width}
       height={height}
       src={version === "black" ? imgMaven : imgMavenPurple}
+      data-testid="logo-svg"
     />
   );
 }
