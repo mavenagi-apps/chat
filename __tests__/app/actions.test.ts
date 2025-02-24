@@ -162,7 +162,7 @@ describe("getPublicAppSettings", () => {
       appSettings: {
         get: vi.fn().mockResolvedValue({
           branding: {
-            logoUrl: "logo.png",
+            logo: "logo.png",
             brandColor: "#000",
           },
           security: {
@@ -192,7 +192,7 @@ describe("getPublicAppSettings", () => {
 
     expect(result).toEqual({
       branding: {
-        logoUrl: "logo.png",
+        logo: "logo.png",
         brandColor: "#000",
       },
       security: {

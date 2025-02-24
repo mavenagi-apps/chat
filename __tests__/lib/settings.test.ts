@@ -15,7 +15,7 @@ describe("adaptLegacySettings", () => {
       embedAllowlist: ["legacy-domain"],
       enableDemoSite: "true",
       welcomeMessage: "legacy-welcome",
-      disableAttachments: true,
+      disableAttachments: "true",
       branding: {},
       security: {},
       misc: {},
@@ -25,7 +25,7 @@ describe("adaptLegacySettings", () => {
 
     expect(result).toEqual({
       branding: {
-        logoUrl: "legacy-logo.png",
+        logo: "legacy-logo.png",
         brandColor: "#legacy",
         brandFontColor: "#legacyFont",
         welcomeMessage: "legacy-welcome",
@@ -40,7 +40,7 @@ describe("adaptLegacySettings", () => {
       misc: {
         handoffConfiguration: "legacy-handoff",
         amplitudeApiKey: "legacy-key",
-        disableAttachments: true,
+        disableAttachments: "true",
       },
     });
   });
@@ -49,7 +49,7 @@ describe("adaptLegacySettings", () => {
     const settings = {
       logoUrl: "legacy-logo.png",
       branding: {
-        logoUrl: "new-logo.png",
+        logo: "new-logo.png",
         brandColor: "#new",
       },
       security: {
@@ -62,7 +62,7 @@ describe("adaptLegacySettings", () => {
 
     const result = adaptLegacySettings(settings);
 
-    expect(result.branding.logoUrl).toBe("new-logo.png");
+    expect(result.branding.logo).toBe("new-logo.png");
     expect(result.security.jwtPublicKey).toBe("new-jwt");
     expect(result.misc.amplitudeApiKey).toBe("new-key");
   });
@@ -79,7 +79,7 @@ describe("adaptLegacySettings", () => {
 
     expect(result).toEqual({
       branding: {
-        logoUrl: "logo.png",
+        logo: "logo.png",
         brandColor: undefined,
         brandFontColor: undefined,
         welcomeMessage: undefined,
@@ -110,7 +110,7 @@ describe("adaptLegacySettings", () => {
 
     expect(result).toEqual({
       branding: {
-        logoUrl: undefined,
+        logo: undefined,
         brandColor: undefined,
         brandFontColor: undefined,
         welcomeMessage: undefined,
@@ -185,5 +185,54 @@ describe("adaptLegacySettings", () => {
     const legacyResult = adaptLegacySettings(legacyOnlySettings);
 
     expect(legacyResult.security.embedAllowlist).toEqual(["legacy.com"]);
+  });
+
+  it("handles logo field migration correctly", () => {
+    const testCases = [
+      {
+        input: {
+          logoUrl: "legacy.png",
+          branding: { logo: "new.png" },
+          security: {},
+          misc: {},
+        },
+        expected: "new.png",
+        description: "prefers branding.logo over legacy logoUrl",
+      },
+      {
+        input: {
+          logoUrl: "legacy.png",
+          branding: { logoUrl: "branding-legacy.png" },
+          security: {},
+          misc: {},
+        },
+        expected: "branding-legacy.png",
+        description: "prefers branding.logoUrl over legacy logoUrl",
+      },
+      {
+        input: {
+          logoUrl: "legacy.png",
+          branding: {},
+          security: {},
+          misc: {},
+        },
+        expected: "legacy.png",
+        description: "falls back to legacy logoUrl",
+      },
+      {
+        input: {
+          branding: { logo: "new.png", logoUrl: "old.png" },
+          security: {},
+          misc: {},
+        },
+        expected: "new.png",
+        description: "prefers logo over logoUrl in branding",
+      },
+    ];
+
+    testCases.forEach(({ input, expected, description }) => {
+      const result = adaptLegacySettings(input);
+      expect(result.branding.logo, description).toBe(expected);
+    });
   });
 });

@@ -1,23 +1,37 @@
 declare global {
   // Legacy AppSettings interface kept for reference during migration
   interface LegacyAppSettings {
+    /** @deprecated Use AppSettings.branding.logo instead */
     logoUrl?: string;
+    /** @deprecated Use AppSettings.branding.brandColor instead */
     brandColor?: string;
+    /** @deprecated Use AppSettings.branding.brandFontColor instead */
     brandFontColor?: string;
+    /** @deprecated Use AppSettings.misc.amplitudeApiKey instead */
     amplitudeApiKey?: string;
+    /** @deprecated Use AppSettings.branding.popularQuestions instead */
     popularQuestions?: string[] | string;
+    /** @deprecated Use AppSettings.security.jwtPublicKey instead */
     jwtPublicKey?: string;
+    /** @deprecated Use AppSettings.security.encryptionSecret instead */
     encryptionSecret?: string;
+    /** @deprecated Use AppSettings.misc.handoffConfiguration instead */
     handoffConfiguration?: string;
+    /** @deprecated Use AppSettings.security.embedAllowlist instead */
     embedAllowlist?: string[];
+    /** @deprecated Use AppSettings.security.enablePreviewSite instead */
     enableDemoSite?: string;
+    /** @deprecated Use AppSettings.branding.welcomeMessage instead */
     welcomeMessage?: string;
+    /** @deprecated Use AppSettings.misc.disableAttachments instead */
     disableAttachments?: string;
   }
 
   interface AppSettings {
     branding: {
+      /** @deprecated Use logo instead */
       logoUrl?: string;
+      logo?: string;
       brandColor?: string;
       brandFontColor?: string;
       welcomeMessage?: string;
