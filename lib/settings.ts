@@ -19,7 +19,9 @@ export function adaptLegacySettings(settings: InterimAppSettings): AppSettings {
   // Set branding properties
   adapted.branding = {
     ...(adapted.branding || {}),
-    logoUrl: settings.branding?.logoUrl ?? settings.logoUrl,
+    // TODO: Remove logoUrl once we have migrated all users to the new logo field
+    logo:
+      settings.branding?.logo ?? settings.branding?.logoUrl ?? settings.logoUrl,
     brandColor: settings.branding?.brandColor ?? settings.brandColor,
     brandFontColor:
       settings.branding?.brandFontColor ?? settings.brandFontColor,
