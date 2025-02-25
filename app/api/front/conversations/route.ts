@@ -15,6 +15,7 @@ import type { VerifiedUserData } from "@/types";
 import { nanoid } from "nanoid";
 import type { FrontCoreClient } from "../client";
 import type { Front } from "@/types/front";
+import { waitUntil } from "@vercel/functions";
 
 async function updateFrontUser(
   frontClient: FrontCoreClient,
@@ -77,15 +78,17 @@ export async function POST(req: NextRequest) {
 
     // creating messages in front will automatically create the user in front, now update with custom data
     // don't await to get the response back faster
-    void updateFrontUser(
-      frontCoreClient,
-      { handle: verifiedUserInfo.email, source: "custom" },
-      {
-        // NOTE: standardize on to picking up custom data in userInfo from `custom_fields` to match front's naming
-        //       but also support `customData` for backwards Scratchpay
-        custom_fields:
-          verifiedUserInfo?.custom_fields ?? verifiedUserInfo?.customData,
-      },
+    waitUntil(
+      updateFrontUser(
+        frontCoreClient,
+        { handle: verifiedUserInfo.email, source: "custom" },
+        {
+          // NOTE: standardize on to picking up custom data in userInfo from `custom_fields` to match front's naming
+          //       but also support `customData` for backwards Scratchpay
+          custom_fields:
+            verifiedUserInfo?.custom_fields ?? verifiedUserInfo?.customData,
+        },
+      ),
     );
 
     const token = jwt.sign(
