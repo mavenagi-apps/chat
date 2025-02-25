@@ -34,6 +34,7 @@ async function updateFrontUser(
   }
 }
 
+export const maxDuration = 60; // 1 minute
 export async function POST(req: NextRequest) {
   return withAppSettings(req, async (request, settings, orgId, agentId) => {
     const { messages, signedUserData } = (await request.json()) as {
