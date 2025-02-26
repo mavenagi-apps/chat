@@ -45,6 +45,8 @@ const App = forwardRef<{ open: () => void; close: () => void }, Props>(
       locale: props.locale,
       isWide,
       isOpen,
+      horizontalPosition: props.horizontalPosition,
+      verticalPosition: props.verticalPosition,
     });
 
     useImperativeHandle(ref, () => ({
@@ -96,8 +98,7 @@ type LoadProps = Partial<Omit<Props, "iframeUrl">> & {
   bgColor?: string;
   textColor?: string;
   locale?: string;
-} & // It enforces that either: // "orgFriendlyId" and "agentFriendlyId" to "organizationId" and "agentId". // This union type ensures backwards compatibility during the migration from the
-  // 1. Both organizationId and agentId are provided (new spec) OR
+} & // 1. Both organizationId and agentId are provided (new spec) OR // It enforces that either: // "orgFriendlyId" and "agentFriendlyId" to "organizationId" and "agentId". // This union type ensures backwards compatibility during the migration from the
   // 2. Both orgFriendlyId and agentFriendlyId are provided (legacy spec)
   // This prevents mixing of old and new ID formats while supporting both patterns
   (| {
