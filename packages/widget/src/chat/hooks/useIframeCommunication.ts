@@ -6,6 +6,44 @@ import {
   useState,
 } from "preact/hooks";
 
+// Position constants
+const POSITION = {
+  LEFT: "left",
+  RIGHT: "right",
+  TOP: "top",
+  BOTTOM: "bottom",
+  AUTO: "auto",
+  FIXED: "fixed",
+};
+
+// Spacing constants
+const SPACING = {
+  WIDE_MARGIN: "1rem",
+  ZERO: 0,
+  VERTICAL_MARGIN: "5rem",
+};
+
+// Style constants
+const STYLE = {
+  BACKGROUND_COLOR: "white",
+  WIDE_WIDTH: "480px",
+  FULL_WIDTH: "100vw",
+  WIDE_HEIGHT: "560px",
+  FULL_HEIGHT: "calc(100vh - 5rem)",
+  Z_INDEX: 1000,
+  BORDER: "solid rgb(209, 213, 219)",
+  OUTLINE: "none",
+  BOX_SHADOW: "rgba(0, 0, 0, 0.15) 0px 0px 20px 0px",
+  WIDE_BORDER_RADIUS: "12px",
+  ZERO_BORDER_RADIUS: 0,
+  TRANSITION:
+    "transform 0.2s cubic-bezier(0.03, 0.18, 0.32, 0.66) 0s, opacity 0.2s cubic-bezier(0.03, 0.18, 0.32, 0.66) 0s, box-shadow 0.2s cubic-bezier(0.03, 0.18, 0.32, 0.66) 0s",
+  VISIBLE_OPACITY: 1,
+  HIDDEN_OPACITY: 0,
+  VISIBLE_SCALE: "scale(1)",
+  HIDDEN_SCALE: "scale(0)",
+};
+
 enum MAVEN_MESSAGE_TYPES {
   USER_DATA = "USER_DATA",
   SIGNED_USER_DATA = "SIGNED_USER_DATA",
@@ -42,6 +80,8 @@ export function useIframeCommunication({
   isWide,
   isOpen,
   locale,
+  horizontalPosition,
+  verticalPosition,
 }: {
   organizationId: string;
   agentId: string;
@@ -51,6 +91,8 @@ export function useIframeCommunication({
   isWide: boolean;
   isOpen: boolean;
   locale?: string;
+  horizontalPosition: "left" | "right";
+  verticalPosition: "top" | "bottom";
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -76,25 +118,49 @@ export function useIframeCommunication({
   }, [organizationId, agentId]);
 
   const iframeStyle = useMemo(() => {
+    // Determine position based on horizontalPosition and verticalPosition
+    const positionStyles: React.CSSProperties = {};
+
+    // Set horizontal position (left or right)
+    if (horizontalPosition === POSITION.LEFT) {
+      positionStyles.left = isWide ? SPACING.WIDE_MARGIN : SPACING.ZERO;
+      positionStyles.right = POSITION.AUTO;
+      // Update transform origin for left positioning
+      positionStyles.transformOrigin = `${verticalPosition} ${POSITION.LEFT}`;
+    } else {
+      positionStyles.right = isWide ? SPACING.WIDE_MARGIN : SPACING.ZERO;
+      positionStyles.left = POSITION.AUTO;
+      // Update transform origin for right positioning
+      positionStyles.transformOrigin = `${verticalPosition} ${POSITION.RIGHT}`;
+    }
+
+    // Set vertical position (top or bottom)
+    if (verticalPosition === POSITION.TOP) {
+      positionStyles.top = SPACING.VERTICAL_MARGIN;
+      positionStyles.bottom = POSITION.AUTO;
+    } else {
+      positionStyles.bottom = SPACING.VERTICAL_MARGIN;
+      positionStyles.top = POSITION.AUTO;
+    }
+
     return {
-      backgroundColor: "white",
-      width: isWide ? "480px" : "100vw",
-      height: isWide ? "560px" : "calc(100vh - 5rem)",
-      position: "fixed",
-      zIndex: 1000,
-      bottom: "5rem",
-      right: isWide ? "1rem" : 0,
-      border: "solid rgb(209, 213, 219)",
-      outline: "none",
-      boxShadow: "rgba(0, 0, 0, 0.15) 0px 0px 20px 0px",
-      borderRadius: isWide ? "12px" : 0,
-      transition:
-        "transform 0.2s cubic-bezier(0.03, 0.18, 0.32, 0.66) 0s, opacity 0.2s cubic-bezier(0.03, 0.18, 0.32, 0.66) 0s, box-shadow 0.2s cubic-bezier(0.03, 0.18, 0.32, 0.66) 0s",
-      transformOrigin: "bottom right",
-      opacity: isOpen ? 1 : 0,
-      transform: isOpen ? "scale(1)" : "scale(0)",
+      backgroundColor: STYLE.BACKGROUND_COLOR,
+      width: isWide ? STYLE.WIDE_WIDTH : STYLE.FULL_WIDTH,
+      height: isWide ? STYLE.WIDE_HEIGHT : STYLE.FULL_HEIGHT,
+      position: POSITION.FIXED,
+      zIndex: STYLE.Z_INDEX,
+      border: STYLE.BORDER,
+      outline: STYLE.OUTLINE,
+      boxShadow: STYLE.BOX_SHADOW,
+      borderRadius: isWide
+        ? STYLE.WIDE_BORDER_RADIUS
+        : STYLE.ZERO_BORDER_RADIUS,
+      transition: STYLE.TRANSITION,
+      opacity: isOpen ? STYLE.VISIBLE_OPACITY : STYLE.HIDDEN_OPACITY,
+      transform: isOpen ? STYLE.VISIBLE_SCALE : STYLE.HIDDEN_SCALE,
+      ...positionStyles,
     } as React.CSSProperties;
-  }, [isWide, isOpen]);
+  }, [isWide, isOpen, horizontalPosition, verticalPosition]);
 
   const postMessageToIframe = useCallback(
     (
