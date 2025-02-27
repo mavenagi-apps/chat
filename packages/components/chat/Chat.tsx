@@ -103,7 +103,7 @@ export default function Chat({
         style={{
           // @ts-expect-error css variable
           "--brand-color": branding.brandColor,
-          "--brand-font-color": branding.brandFontColor || "#000000",
+          "--brand-font-color": branding.brandFontColor || "#FFFFFF",
         }}
       >
         {children}
