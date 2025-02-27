@@ -1,18 +1,17 @@
 import Image from "next/image";
 import { useState, useMemo } from "react";
 
+import imgMavenPurple from "@/assets/logo/mavenagi_logo_wide_on_light_purple.svg";
+
 interface ChatHeaderProps {
   logo?: string;
   fallbackLogo?: string;
 }
 
 export function ChatHeader({ logo, fallbackLogo }: ChatHeaderProps) {
-  const defaultLogo =
-    "https://app.mavenagi.com/_next/image?url=%2Fapi%2Fv1%2Ffiles%2Fage_CSMoGtyyQNJ0z8XzyMXK2Jbk%2Flogo%3F1730414949621&w=256&q=75";
-
   // Memoize the filtered logo sources array to prevent unnecessary recalculations
   const initialSources = useMemo(() => {
-    return [logo, fallbackLogo, defaultLogo].filter(
+    return [logo, fallbackLogo, imgMavenPurple].filter(
       (src): src is string => Boolean(src) && src !== "",
     );
   }, [logo, fallbackLogo]);

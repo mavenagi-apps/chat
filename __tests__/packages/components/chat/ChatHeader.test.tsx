@@ -1,10 +1,9 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ChatHeader } from "@/packages/components/chat/ChatHeader";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 
 describe("ChatHeader", () => {
-  const defaultLogo =
-    "https://app.mavenagi.com/_next/image?url=%2Fapi%2Fv1%2Ffiles%2Fage_CSMoGtyyQNJ0z8XzyMXK2Jbk%2Flogo%3F1730414949621&w=256&q=75";
+  const defaultLogo = "/assets/logo/mavenagi_logo_wide_on_light_purple.svg";
   const customLogoUrl = "https://example.com/custom-logo.png";
   const fallbackLogoUrl = "https://example.com/fallback-logo.png";
 
