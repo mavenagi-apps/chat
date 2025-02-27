@@ -88,7 +88,10 @@ function ChatPage() {
 
   return (
     <main className="flex h-screen flex-col bg-gray-50">
-      <ChatHeader logo={branding.logo} />
+      <ChatHeader
+        logo={branding.logo}
+        fallbackLogo={branding.fallbackLogoUrl}
+      />
       <Chat
         {...{
           agentName,

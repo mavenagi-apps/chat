@@ -26,6 +26,7 @@ describe("adaptLegacySettings", () => {
     expect(result).toEqual({
       branding: {
         logo: "legacy-logo.png",
+        fallbackLogoUrl: "legacy-logo.png",
         brandColor: "#legacy",
         brandFontColor: "#legacyFont",
         welcomeMessage: "legacy-welcome",
@@ -50,6 +51,7 @@ describe("adaptLegacySettings", () => {
       logoUrl: "legacy-logo.png",
       branding: {
         logo: "new-logo.png",
+        logoUrl: "branding-legacy-logo.png",
         brandColor: "#new",
       },
       security: {
@@ -63,6 +65,7 @@ describe("adaptLegacySettings", () => {
     const result = adaptLegacySettings(settings);
 
     expect(result.branding.logo).toBe("new-logo.png");
+    expect(result.branding.fallbackLogoUrl).toBe("branding-legacy-logo.png");
     expect(result.security.jwtPublicKey).toBe("new-jwt");
     expect(result.misc.amplitudeApiKey).toBe("new-key");
   });
@@ -80,6 +83,7 @@ describe("adaptLegacySettings", () => {
     expect(result).toEqual({
       branding: {
         logo: "logo.png",
+        fallbackLogoUrl: "logo.png",
         brandColor: undefined,
         brandFontColor: undefined,
         welcomeMessage: undefined,
@@ -111,6 +115,7 @@ describe("adaptLegacySettings", () => {
     expect(result).toEqual({
       branding: {
         logo: undefined,
+        fallbackLogoUrl: undefined,
         brandColor: undefined,
         brandFontColor: undefined,
         welcomeMessage: undefined,
@@ -197,6 +202,7 @@ describe("adaptLegacySettings", () => {
           misc: {},
         },
         expected: "new.png",
+        expectedFallback: "legacy.png",
         description: "prefers branding.logo over legacy logoUrl",
       },
       {
@@ -207,6 +213,7 @@ describe("adaptLegacySettings", () => {
           misc: {},
         },
         expected: "branding-legacy.png",
+        expectedFallback: "branding-legacy.png",
         description: "prefers branding.logoUrl over legacy logoUrl",
       },
       {
@@ -217,6 +224,7 @@ describe("adaptLegacySettings", () => {
           misc: {},
         },
         expected: "legacy.png",
+        expectedFallback: "legacy.png",
         description: "falls back to legacy logoUrl",
       },
       {
@@ -226,13 +234,53 @@ describe("adaptLegacySettings", () => {
           misc: {},
         },
         expected: "new.png",
+        expectedFallback: "old.png",
         description: "prefers logo over logoUrl in branding",
+      },
+    ];
+
+    testCases.forEach(({ input, expected, expectedFallback, description }) => {
+      const result = adaptLegacySettings(input);
+      expect(result.branding.logo, description).toBe(expected);
+      expect(result.branding.fallbackLogoUrl, `fallback: ${description}`).toBe(
+        expectedFallback,
+      );
+    });
+  });
+
+  it("sets fallbackLogoUrl correctly", () => {
+    const testCases = [
+      {
+        input: {
+          logoUrl: "legacy.png",
+          branding: {
+            logo: "primary.png",
+            logoUrl: "secondary.png",
+          },
+          security: {},
+          misc: {},
+        },
+        expected: "secondary.png",
+        description:
+          "uses branding.logoUrl as fallback when no explicit fallback",
+      },
+      {
+        input: {
+          logoUrl: "legacy.png",
+          branding: {
+            logo: "primary.png",
+          },
+          security: {},
+          misc: {},
+        },
+        expected: "legacy.png",
+        description: "uses legacy logoUrl when no other fallback options",
       },
     ];
 
     testCases.forEach(({ input, expected, description }) => {
       const result = adaptLegacySettings(input);
-      expect(result.branding.logo, description).toBe(expected);
+      expect(result.branding.fallbackLogoUrl, description).toBe(expected);
     });
   });
 });

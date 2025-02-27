@@ -31,6 +31,8 @@ declare global {
     branding: {
       /** @deprecated Use logo instead */
       logoUrl?: string;
+      /** @deprecated Use logo instead */
+      fallbackLogoUrl?: string;
       logo?: string;
       brandColor?: string;
       brandFontColor?: string;
