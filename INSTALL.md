@@ -39,7 +39,7 @@ NOTE: The ID values for the organization and agent are the plain-text versions.
 ```typescript
 interface WidgetConfig {
   bgColor?: string; // Widget background color
-  textColor?: string; // Widget text color (default: 'white')
+  textColor?: string; // Widget text color (default: 'black')
   horizontalPosition?: "left" | "right"; // Widget position (default: 'right')
   verticalPosition?: "top" | "bottom"; // Widget position (default: 'bottom')
   signedUserData: string;
