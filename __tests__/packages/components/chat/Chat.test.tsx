@@ -200,7 +200,7 @@ describe("Chat", () => {
     mockUseSettings.mockReturnValue({
       branding: {
         brandColor: "#000000",
-        brandFontColor: "#FFFFFF",
+        brandFontColor: "#000000",
       },
       misc: {
         disableAttachments: true,
