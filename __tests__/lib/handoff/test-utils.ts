@@ -1,11 +1,11 @@
-import type { Message } from "@/types";
+import type { Message } from "@/src/types";
 import type {
   SalesforceChatMessage,
   SalesforceMessageType,
-} from "@/types/salesforce";
+} from "@/src/types/salesforce";
 import { MavenAGI } from "mavenagi";
-import { Front } from "@/types/front";
-import type { ZendeskWebhookMessage } from "@/types/zendesk";
+import { Front } from "@/src/types/front";
+import type { ZendeskWebhookMessage } from "@/src/types/zendesk";
 export interface BotResponse {
   type: "text";
   text: string;

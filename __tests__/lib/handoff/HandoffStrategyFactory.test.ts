@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { HandoffStrategyFactory } from "@/lib/handoff/HandoffStrategyFactory";
-import { ZendeskStrategy } from "@/lib/handoff/ZendeskStrategy";
-import { FrontStrategy } from "@/lib/handoff/FrontStrategy";
-import { SalesforceStrategy } from "@/lib/handoff/SalesforceStrategy";
+import { HandoffStrategyFactory } from "@/src/lib/handoff/HandoffStrategyFactory";
+import { ZendeskStrategy } from "@/src/lib/handoff/ZendeskStrategy";
+import { FrontStrategy } from "@/src/lib/handoff/FrontStrategy";
+import { SalesforceStrategy } from "@/src/lib/handoff/SalesforceStrategy";
 
 describe("HandoffStrategyFactory", () => {
   const salesforceConfig = {

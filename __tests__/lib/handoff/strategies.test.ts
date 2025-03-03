@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { ZendeskStrategy } from "@/lib/handoff/ZendeskStrategy";
-import { FrontStrategy } from "@/lib/handoff/FrontStrategy";
+import { ZendeskStrategy } from "@/src/lib/handoff/ZendeskStrategy";
+import { FrontStrategy } from "@/src/lib/handoff/FrontStrategy";
 import {
   createUserMessage,
   createBotMessage,

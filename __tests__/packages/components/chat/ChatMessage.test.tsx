@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ChatMessage } from "@magi/components/chat/ChatMessage";
-import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
+import { SALESFORCE_MESSAGE_TYPES } from "@/src/types/salesforce";
 import type {
   UserChatMessage,
   SalesforceChatMessage,
@@ -9,8 +9,8 @@ import type {
   IncomingHandoffConnectionEvent,
   QueueUpdateMessage,
   CombinedMessage,
-} from "@/types";
-import type { Front } from "@/types/front";
+} from "@/src/types";
+import type { Front } from "@/src/types/front";
 import type {
   ConversationMessageResponse,
   AskStreamActionEvent,

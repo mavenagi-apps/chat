@@ -1,18 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { isHandoffAvailable, getPublicAppSettings } from "@/app/actions";
-import { getAppSettings } from "@/app/api/server/utils";
-import { ServerHandoffStrategyFactory } from "@/lib/handoff/ServerHandoffStrategyFactory";
-import { getMavenAGIClient } from "@/app";
+import { isHandoffAvailable, getPublicAppSettings } from "@/src/app/actions";
+import { getAppSettings } from "@/src/app/api/server/utils";
+import { ServerHandoffStrategyFactory } from "@/src/lib/handoff/ServerHandoffStrategyFactory";
+import { getMavenAGIClient } from "@/src/app";
 
-vi.mock("@/app", () => ({
+vi.mock("@/src/app", () => ({
   getMavenAGIClient: vi.fn(),
 }));
 
-vi.mock("@/app/api/server/utils", () => ({
+vi.mock("@/src/app/api/server/utils", () => ({
   getAppSettings: vi.fn(),
 }));
 
-vi.mock("@/lib/handoff/ServerHandoffStrategyFactory", () => ({
+vi.mock("@/src/lib/handoff/ServerHandoffStrategyFactory", () => ({
   ServerHandoffStrategyFactory: {
     createStrategy: vi.fn(),
   },

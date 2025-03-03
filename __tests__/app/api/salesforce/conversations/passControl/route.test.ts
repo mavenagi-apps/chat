@@ -1,10 +1,10 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
-import { POST } from "@/app/api/salesforce/conversations/passControl/route";
+import { POST } from "@/src/app/api/salesforce/conversations/passControl/route";
 import { NextRequest, NextResponse } from "next/server";
-import { validateSalesforceConfig } from "@/app/api/salesforce/utils";
+import { validateSalesforceConfig } from "@/src/app/api/salesforce/utils";
 
 // Mock external dependencies
-vi.mock("@/app/api/server/utils", () => ({
+vi.mock("@/src/app/api/server/utils", () => ({
   withSettingsAndAuthentication: vi.fn((req, handler) =>
     handler(
       req,
@@ -31,8 +31,8 @@ vi.mock("@/app/api/server/utils", () => ({
   ),
 }));
 
-vi.mock("@/app/api/salesforce/utils", async () => {
-  const actual = await vi.importActual("@/app/api/salesforce/utils");
+vi.mock("@/src/app/api/salesforce/utils", async () => {
+  const actual = await vi.importActual("@/src/app/api/salesforce/utils");
   return {
     ...(actual as object),
     validateSalesforceConfig: vi.fn(),

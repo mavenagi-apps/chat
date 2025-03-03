@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, expect, test, beforeEach } from "vitest";
-import BailoutFormDisplay from "@/packages/components/chat/BailoutFormDisplay";
+import BailoutFormDisplay from "@/src/packages/components/chat/BailoutFormDisplay";
 import { type AskStreamActionEvent } from "mavenagi/api";
 import { RouterProvider } from "@test-utils/test-utils";
-import { submitBailoutForm } from "@/app/actions";
+import { submitBailoutForm } from "@/src/app/actions";
 import { createBotMessage } from "@/__tests__/lib/handoff/test-utils";
 import type { ConversationMessageResponse } from "mavenagi/api";
 
@@ -29,7 +29,7 @@ const mockActionWithFields: AskStreamActionEvent = {
   submitLabel: "Submit Form",
 };
 
-vi.mock("@/app/actions", () => ({
+vi.mock("@/src/app/actions", () => ({
   submitBailoutForm: vi.fn().mockResolvedValue({ success: true }),
 }));
 

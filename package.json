@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "src/packages/*"
   ],
   "packageManager": "pnpm@9.7.0",
   "config": {

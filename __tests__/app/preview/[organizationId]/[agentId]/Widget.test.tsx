@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import Widget from "@/app/preview/[organizationId]/[agentId]/Widget";
+import Widget from "@/src/app/preview/[organizationId]/[agentId]/Widget";
 
 describe("Widget", () => {
   const mockWidgetLoadPayload = {

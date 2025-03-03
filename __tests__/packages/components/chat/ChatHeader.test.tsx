@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { ChatHeader } from "@/packages/components/chat/ChatHeader";
+import { ChatHeader } from "@/src/packages/components/chat/ChatHeader";
 import { describe, it, expect } from "vitest";
 
 describe("ChatHeader", () => {

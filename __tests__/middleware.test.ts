@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { NextRequest } from "next/server";
-import { middleware } from "@/middleware";
-import { getAppSettings } from "@/app/api/server/utils";
+import { middleware } from "@/src/middleware";
+import { getAppSettings } from "@/src/app/api/server/utils";
 
-vi.mock("@/app/api/server/utils", () => ({
+vi.mock("@/src/app/api/server/utils", () => ({
   getAppSettings: vi.fn().mockResolvedValue({
     security: {
       embedAllowlist: [],

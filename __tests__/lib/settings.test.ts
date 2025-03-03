@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { adaptLegacySettings } from "@/lib/settings";
+import { adaptLegacySettings } from "@/src/lib/settings";
 
 describe("adaptLegacySettings", () => {
   it("transforms legacy settings to new format", () => {

@@ -8,20 +8,20 @@ import type {
   Message,
   UserChatMessage,
   IncomingHandoffEvent,
-} from "@/types";
+} from "@/src/types";
 
 // Constants
-import { HandoffStatus } from "@/app/constants/handoff";
+import { HandoffStatus } from "@/src/app/constants/handoff";
 
 // Hooks
 import { useChat } from "@magi/components/chat/use-chat";
-import { useHandoff } from "@/lib/useHandoff";
-import { useScrollToBottom } from "@/lib/useScrollToBottom";
-import { useSettings } from "@/app/providers/SettingsProvider";
-import { useIdleMessage } from "@/lib/useIdleMessage";
+import { useHandoff } from "@/src/lib/useHandoff";
+import { useScrollToBottom } from "@/src/lib/useScrollToBottom";
+import { useSettings } from "@/src/app/providers/SettingsProvider";
+import { useIdleMessage } from "@/src/lib/useIdleMessage";
 
 // Components
-import ChatPage from "@/app/[organizationId]/[agentId]/page";
+import ChatPage from "@/src/app/[organizationId]/[agentId]/page";
 
 // Test setup
 let chatMessages = [] as Message[];
@@ -32,22 +32,22 @@ let handoffMessages = [] as (
 )[];
 
 // Mocks
-vi.mock("@/lib/useScrollToBottom");
+vi.mock("@/src/lib/useScrollToBottom");
 const useScrollToBottomMock = vi.mocked(useScrollToBottom);
 
 vi.mock("@magi/components/chat/use-chat");
 const useChatMock = vi.mocked(useChat);
 
-vi.mock("@/lib/useHandoff");
+vi.mock("@/src/lib/useHandoff");
 const useHandoffMock = vi.mocked(useHandoff);
 
-vi.mock("@/lib/useIdleMessage");
+vi.mock("@/src/lib/useIdleMessage");
 const useIdleMessageMock = vi.mocked(useIdleMessage);
 
-vi.mock("@/app/providers/SettingsProvider");
+vi.mock("@/src/app/providers/SettingsProvider");
 const useSettingsMock = vi.mocked(useSettings);
 
-vi.mock("@/lib/useIframeMessaging", () => ({
+vi.mock("@/src/lib/useIframeMessaging", () => ({
   useIframeMessaging: () => ({
     loading: false,
     signedUserData: null,
@@ -56,7 +56,7 @@ vi.mock("@/lib/useIframeMessaging", () => ({
   }),
 }));
 
-vi.mock("@/lib/useAskQuestion", () => ({
+vi.mock("@/src/lib/useAskQuestion", () => ({
   useAskQuestion: vi.fn().mockReturnValue({
     addMessage: vi.fn(),
     isLoading: false,

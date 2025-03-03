@@ -9,15 +9,15 @@ import {
   fetchChatMessages,
   ChatMessagesError,
   SALESFORCE_API_BASE_HEADERS,
-} from "@/app/api/salesforce/utils";
+} from "@/src/app/api/salesforce/utils";
 import type {
   ChatSessionResponse,
   SalesforceChatUserData,
-} from "@/types/salesforce";
-import type { Message } from "@/types";
+} from "@/src/types/salesforce";
+import type { Message } from "@/src/types";
 import { MavenAGI } from "mavenagi";
 import { BotConversationMessageType } from "mavenagi/api";
-import { SALESFORCE_API_VERSION } from "@/app/constants/handoff";
+import { SALESFORCE_API_VERSION } from "@/src/app/constants/handoff";
 
 const createBotMessage = (text: string, id = 1) => ({
   type: "bot" as const,

@@ -1,9 +1,9 @@
 import { render } from "@testing-library/react";
-import PreviewPage from "@/app/preview/[organizationId]/[agentId]/page";
+import PreviewPage from "@/src/app/preview/[organizationId]/[agentId]/page";
 import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
 import { headers } from "next/headers";
-import { getPublicAppSettings } from "@/app/actions";
-import { generateSignedUserData } from "@/app/preview/[organizationId]/[agentId]/actions";
+import { getPublicAppSettings } from "@/src/app/actions";
+import { generateSignedUserData } from "@/src/app/preview/[organizationId]/[agentId]/actions";
 import { notFound } from "next/navigation";
 
 // Mock the dependencies
@@ -11,11 +11,11 @@ vi.mock("next/headers", () => ({
   headers: vi.fn(),
 }));
 
-vi.mock("@/app/actions", () => ({
+vi.mock("@/src/app/actions", () => ({
   getPublicAppSettings: vi.fn(),
 }));
 
-vi.mock("@/app/preview/[organizationId]/[agentId]/actions", () => ({
+vi.mock("@/src/app/preview/[organizationId]/[agentId]/actions", () => ({
   generateSignedUserData: vi.fn(),
 }));
 
@@ -24,7 +24,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 // Mock the background image import
-vi.mock("@/assets/background/bg.jpg", () => ({
+vi.mock("@/src/assets/background/bg.jpg", () => ({
   default: { src: "/mock-bg-image.jpg" },
 }));
 

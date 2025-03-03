@@ -8,10 +8,10 @@ import {
   type Mock,
 } from "vitest";
 import { NextRequest } from "next/server";
-import { POST } from "@/app/api/zendesk/webhook/route";
-import { getRedisPublishClient } from "@/app/api/server/lib/redis";
+import { POST } from "@/src/app/api/zendesk/webhook/route";
+import { getRedisPublishClient } from "@/src/app/api/server/lib/redis";
 
-vi.mock("@/app/api/server/lib/redis", () => ({
+vi.mock("@/src/app/api/server/lib/redis", () => ({
   getRedisPublishClient: vi.fn(),
 }));
 

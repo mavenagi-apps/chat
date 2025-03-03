@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { useChat } from "@/packages/components/chat/use-chat";
-import { useAuth } from "@/app/providers/AuthProvider";
+import { useChat } from "@/src/packages/components/chat/use-chat";
+import { useAuth } from "@/src/app/providers/AuthProvider";
 import { useParams } from "next/navigation";
-import { ChatMessage } from "@/types";
+import { ChatMessage } from "@/src/types";
 import { ConversationMessageResponse } from "mavenagi/api";
 
 // Mock dependencies
@@ -11,7 +11,7 @@ vi.mock("next/navigation", () => ({
   useParams: vi.fn(),
 }));
 
-vi.mock("@/app/providers/AuthProvider", () => ({
+vi.mock("@/src/app/providers/AuthProvider", () => ({
   useAuth: vi.fn(),
 }));
 

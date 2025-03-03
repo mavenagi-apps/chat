@@ -15,7 +15,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@magi": resolve(__dirname, "./packages/"),
+      "@magi": resolve(__dirname, "./src/packages/"),
       "@": resolve(__dirname, "./"),
       "@test-utils": resolve(__dirname, "./__tests__/utils"),
     },

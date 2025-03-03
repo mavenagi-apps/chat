@@ -1,13 +1,13 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import jwt from "jsonwebtoken";
-import { POST } from "@/app/api/zendesk/conversations/route";
+import { POST } from "@/src/app/api/zendesk/conversations/route";
 import {
   getSunshineConversationsClient,
   postMessagesToZendeskConversation,
-} from "@/app/api/zendesk/utils";
-import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
+} from "@/src/app/api/zendesk/utils";
+import { HANDOFF_AUTH_HEADER } from "@/src/app/constants/authentication";
 import { NextRequest } from "next/server";
-import { withAppSettings } from "@/app/api/server/utils";
+import { withAppSettings } from "@/src/app/api/server/utils";
 // Mock all external dependencies
 vi.mock("nanoid", () => ({
   nanoid: () => "test-nanoid",
@@ -16,11 +16,11 @@ vi.mock("jsonwebtoken", () => ({
   default: { sign: vi.fn() },
   sign: vi.fn(),
 }));
-vi.mock("@/app/api/zendesk/utils", () => ({
+vi.mock("@/src/app/api/zendesk/utils", () => ({
   getSunshineConversationsClient: vi.fn(),
   postMessagesToZendeskConversation: vi.fn(),
 }));
-vi.mock("@/app/api/server/utils", () => ({
+vi.mock("@/src/app/api/server/utils", () => ({
   decryptAndVerifySignedUserData: vi.fn(async (userDataString) =>
     JSON.parse(userDataString),
   ),

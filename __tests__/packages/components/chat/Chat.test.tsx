@@ -2,12 +2,12 @@ import React from "react";
 import { render, screen, act } from "@testing-library/react";
 import { describe, expect, test, vi, beforeEach } from "vitest";
 import Chat, { ChatContext } from "@magi/components/chat/Chat";
-import { useSettings } from "@/app/providers/SettingsProvider";
+import { useSettings } from "@/src/app/providers/SettingsProvider";
 import { ConversationMessageResponse } from "mavenagi/api";
-import { UserChatMessage } from "@/types";
+import { UserChatMessage } from "@/src/types";
 
 // Mock the settings provider
-vi.mock("@/app/providers/SettingsProvider", () => ({
+vi.mock("@/src/app/providers/SettingsProvider", () => ({
   useSettings: vi.fn(),
 }));
 

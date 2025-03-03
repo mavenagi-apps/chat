@@ -10,13 +10,13 @@ import {
 } from "vitest";
 import { nanoid } from "nanoid";
 import { MavenAGI, MavenAGIError, MavenAGIClient } from "mavenagi";
-import { POST } from "@/app/api/create/route";
-import { getMavenAGIClient } from "@/app";
-import { verifyAuthToken } from "@/app/api/server/utils";
+import { POST } from "@/src/app/api/create/route";
+import { getMavenAGIClient } from "@/src/app";
+import { verifyAuthToken } from "@/src/app/api/server/utils";
 import { NextRequest } from "next/server";
 vi.mock("nanoid", () => ({ nanoid: vi.fn() }));
-vi.mock("@/app", () => ({ getMavenAGIClient: vi.fn() }));
-vi.mock("@/app/api/server/utils", () => ({
+vi.mock("@/src/app", () => ({ getMavenAGIClient: vi.fn() }));
+vi.mock("@/src/app/api/server/utils", () => ({
   decryptAndVerifySignedUserData: vi.fn(async (userDataString) =>
     JSON.parse(userDataString),
   ),
