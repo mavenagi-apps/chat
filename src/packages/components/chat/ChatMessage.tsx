@@ -19,13 +19,13 @@ import {
   type SalesforceChatMessage,
   type IncomingHandoffConnectionEvent,
   type QueueUpdateMessage,
+  type CombinedMessage,
 } from "@/src/types";
-import { Attachment, type ConversationMessageResponse } from "mavenagi/api";
+import type { Attachment, ConversationMessageResponse } from "mavenagi/api";
 import { useTranslations } from "next-intl";
 import type { Front } from "@/src/types/front";
-import { CombinedMessage } from "@/src/types";
 import { SALESFORCE_MESSAGE_TYPES } from "@/src/types/salesforce";
-import { UseChatResponse } from "./use-chat";
+import type { UseChatResponse } from "./use-chat";
 
 interface MessageProps {
   message: CombinedMessage;
@@ -104,8 +104,8 @@ function renderFrontAgentMessage(message: Front.WebhookMessage) {
 
 function getHandoffEventMessageText(
   message: IncomingHandoffConnectionEvent,
+  t: ReturnType<typeof useTranslations>,
 ): string | null {
-  const t = useTranslations("chat.Handoff");
   const messageMap = {
     ChatConnecting: () => t("connecting_to_agent"),
     ChatEstablished: () => t("connected_to_agent"),
@@ -144,8 +144,11 @@ function getHandoffEventMessageText(
   return messageText || null;
 }
 
-function renderHandoffEventMessage(message: IncomingHandoffConnectionEvent) {
-  const messageText = getHandoffEventMessageText(message);
+function renderHandoffEventMessage(
+  message: IncomingHandoffConnectionEvent,
+  t: ReturnType<typeof useTranslations>,
+) {
+  const messageText = getHandoffEventMessageText(message, t);
   if (!messageText) {
     return null;
   }
@@ -172,6 +175,7 @@ export function ChatMessage({
   mavenUserId,
   onBailoutFormSubmitSuccess,
 }: MessageProps) {
+  const t = useTranslations("chat.Handoff");
   if ("type" in message) {
     switch (message.type) {
       case "USER":
@@ -225,7 +229,9 @@ export function ChatMessage({
       case SALESFORCE_MESSAGE_TYPES.ChatRequestFail:
         return renderHandoffEventMessage(
           message as IncomingHandoffConnectionEvent,
+          t,
         );
+      case undefined:
       default:
         if (isBotMessage(message as Message)) {
           return renderBotMessage(
@@ -257,7 +263,11 @@ function UserMessage({
         {text}
       </ReactMarkdown>
       {attachmentUrls && (
-        <img className="max-w-80 max-h-80" src={attachmentUrls[0]} />
+        <img
+          alt="Attachment"
+          className="max-w-80 max-h-80"
+          src={attachmentUrls[0]}
+        />
       )}
     </div>
   );

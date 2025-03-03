@@ -32,6 +32,7 @@ export function WelcomeMessage({
     try {
       const parsed = JSON.parse(welcomeMessage);
       return parsed[locale] || parsed.en || "";
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       return welcomeMessage;
     }
@@ -56,7 +57,7 @@ export function WelcomeMessage({
         conversationId: conversationId || "",
         question,
       });
-      ask(question);
+      void ask(question);
     },
     [analytics, agentId, conversationId, ask],
   );

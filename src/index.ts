@@ -54,7 +54,7 @@ const defaultModule = {
     }
 
     // Escalate action
-    const result = await client.actions.createOrUpdate({
+    await client.actions.createOrUpdate({
       actionId: {
         referenceId: ESCALATE_ACTION_ID,
       },
@@ -63,7 +63,7 @@ const defaultModule = {
       userInteractionRequired: true,
       userFormParameters: [
         {
-          description: `The topic type of the conversation.`,
+          description: "The topic type of the conversation.",
           id: "topic",
           label: "Escalation Topic",
           required: true,

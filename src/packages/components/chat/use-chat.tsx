@@ -32,7 +32,7 @@ import {
 import {
   AGENT_HEADER,
   AUTHENTICATION_HEADER,
-  AuthJWTPayload,
+  type AuthJWTPayload,
   ORGANIZATION_HEADER,
 } from "@/src/app/constants/authentication";
 import { decodeJwt } from "jose";

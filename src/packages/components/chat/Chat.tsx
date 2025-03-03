@@ -1,9 +1,13 @@
 import clsx from "clsx";
 import React, { useEffect, useMemo, useState } from "react";
 
-import { isBotMessage, ChatMessage, CombinedMessage } from "@/src/types";
+import {
+  isBotMessage,
+  type ChatMessage,
+  type CombinedMessage,
+} from "@/src/types";
 import { useSettings } from "@/src/app/providers/SettingsProvider";
-import { Attachment } from "mavenagi/api";
+import type { Attachment } from "mavenagi/api";
 
 interface ChatContextProps {
   agentName: string | null;

@@ -1,4 +1,3 @@
-// eslint-disable-next-line node/no-extraneous-import
 import "highlight.js/styles/atom-one-dark.css";
 import React from "react";
 import RMReactMarkdown from "react-markdown";

@@ -32,7 +32,7 @@ export const Textarea = asControlledComponent(
       <HeadlessTextarea
         className={cn([
           // Basic layout
-          "relative block h-full w-full appearance-none rounded-lg px-[calc(theme(spacing.3)-1px)] py-[calc(theme(spacing[1.5])-1px)]",
+          "relative block size-full appearance-none rounded-lg px-[calc(theme(spacing.3)-1px)] py-[calc(theme(spacing[1.5])-1px)]",
 
           // Typography
           "text-sm/6 text-zinc-950 placeholder:text-zinc-500",

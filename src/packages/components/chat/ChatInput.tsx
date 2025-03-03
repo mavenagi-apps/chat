@@ -9,7 +9,7 @@ import { useForm } from "@magi/ui";
 
 import { ChatContext } from "./Chat";
 import Chip from "@magi/components/chat/Chip";
-import { Attachment } from "mavenagi/api";
+import type { Attachment } from "mavenagi/api";
 
 const HandoffChatBar = () => {
   const t = useTranslations("chat.ChatInput");

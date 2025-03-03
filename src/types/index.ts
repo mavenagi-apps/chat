@@ -1,13 +1,13 @@
-import {
-  type ConversationMessageResponse,
-  type AskStreamActionEvent,
-  type Attachment,
+import type {
+  ConversationMessageResponse,
+  AskStreamActionEvent,
+  Attachment,
 } from "mavenagi/api";
 
 import type { ZendeskWebhookMessage } from "@/src/types/zendesk";
 import type { Front } from "./front";
 import type { SalesforceChatMessage } from "./salesforce";
-import { SALESFORCE_MESSAGE_TYPES } from "./salesforce";
+import type { SALESFORCE_MESSAGE_TYPES } from "./salesforce";
 
 type IncomingHandoffEvent =
   | SalesforceChatMessage

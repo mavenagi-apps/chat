@@ -5,7 +5,7 @@ import { ErrorMessage } from "./fieldset";
 import { useFormFieldContext } from "./form";
 
 export function asControlledComponent<
-  P extends {},
+  P extends object,
   DefaultValueRequired = false,
 >(
   Component: React.ComponentType<P & { invalid?: boolean }>,

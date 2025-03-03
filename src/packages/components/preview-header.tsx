@@ -64,7 +64,7 @@ export function PreviewHeader({
               </span>
             </div>
             {isCopied ? (
-              <LuCheck className="h-4 w-4 text-green-600" />
+              <LuCheck className="size-4 text-green-600" />
             ) : (
               <LuCopy title="Copy link" />
             )}

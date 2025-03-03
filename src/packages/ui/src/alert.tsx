@@ -13,7 +13,7 @@ export const Alert = forwardRef<
       ref={ref}
       role="alert"
       className={cn(
-        "[&>[data-slot=icon]]:text-fg-primary relative flex w-full flex-col gap-1 rounded-lg border p-4 px-4 py-3 text-sm shadow-md ring-1 ring-zinc-950/10 [&>[data-slot=icon]]:absolute [&>[data-slot=icon]]:left-4 [&>[data-slot=icon]]:top-[1.1rem] [&>[data-slot=icon]]:size-4 [&>[data-slot=icon]]:translate-y-[-3px] [&>[data-slot=icon]~*]:pl-6",
+        "[&>[data-slot=icon]]:text-fg-primary relative flex w-full flex-col gap-1 rounded-lg border p-4 py-3 text-sm shadow-md ring-1 ring-zinc-950/10 [&>[data-slot=icon]]:absolute [&>[data-slot=icon]]:left-4 [&>[data-slot=icon]]:top-[1.1rem] [&>[data-slot=icon]]:size-4 [&>[data-slot=icon]]:translate-y-[-3px] [&>[data-slot=icon]~*]:pl-6",
         variant === "danger" &&
           "border-fg-danger/50 text-fg-danger dark:border-fg-danger [&>[data-slot=icon]]:text-fg-danger",
         variant === "success" &&

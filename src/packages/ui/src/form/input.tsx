@@ -13,6 +13,7 @@ export const Input = forwardRef<
     />
   );
 });
+Input.displayName = "Input";
 
 export const baseInputStyles = [
   // Basic layout

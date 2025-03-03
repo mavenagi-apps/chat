@@ -79,7 +79,7 @@ export const Button = React.forwardRef(function Button(
               ],
         ]
       : [
-          "flex-shrink-0 border-b border-l border-t px-3 py-1 text-sm/6 font-medium text-gray-500 first:rounded-l-md first:border-l last:rounded-r-md last:border-r",
+          "shrink-0 border-y border-l px-3 py-1 text-sm/6 font-medium text-gray-500 first:rounded-l-md first:border-l last:rounded-r-md last:border-r",
           "data-[active]:bg-violet-700 data-[hover]:bg-violet-600 data-[active]:text-white data-[hover]:text-white",
         ],
     className,

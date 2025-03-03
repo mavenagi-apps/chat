@@ -1,5 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Front {
-  export type PagedResource = {};
+  export type PagedResource = object;
 
   export type AppChannelSyncResponse = {
     status: string;

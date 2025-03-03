@@ -1,6 +1,5 @@
-import { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import React, { useState, useEffect } from "react";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { useParams } from "next/navigation";
 import { ReactMarkdown } from "@magi/components/ReactMarkdown";
@@ -53,7 +52,7 @@ function EscalationForm({ isAvailable }: { isAvailable: boolean }) {
   if (!isAvailable) {
     return (
       <Alert variant="warning" className="[&_a]:underline">
-        <ReactMarkdown children={availabilityFallbackMessage as string} />
+        <ReactMarkdown>{availabilityFallbackMessage as string}</ReactMarkdown>
       </Alert>
     );
   }
@@ -121,7 +120,7 @@ export default function EscalationFormDisplay() {
       setIsLoading(false);
     };
 
-    fetchAvailability();
+    void fetchAvailability();
   }, []);
 
   if (isLoading) {

@@ -84,6 +84,7 @@
     "eslint-config-next": "^15.0.2",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-i18next": "^6.1.0",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-tailwindcss": "^3.17.5",
     "husky": "^9.1.6",
     "jsdom": "^25.0.1",

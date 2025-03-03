@@ -3,6 +3,10 @@ import jwt from "jsonwebtoken";
 import {
   fetchChatMessages,
   sendChatMessage,
+  generateSessionInitRequestBody,
+  generateSessionInitRequestHeaders,
+  convertMessagesToTranscriptText,
+  SESSION_CREDENTIALS_REQUEST_HEADERS,
 } from "@/src/app/api/salesforce/utils";
 import {
   decryptAndVerifySignedUserData,
@@ -13,12 +17,6 @@ import type {
   SalesforceChatMessage,
   SalesforceRequest,
 } from "@/src/types/salesforce";
-import {
-  generateSessionInitRequestBody,
-  generateSessionInitRequestHeaders,
-  convertMessagesToTranscriptText,
-  SESSION_CREDENTIALS_REQUEST_HEADERS,
-} from "@/src/app/api/salesforce/utils";
 import { HANDOFF_AUTH_HEADER } from "@/src/app/constants/authentication";
 import { SALESFORCE_MESSAGE_TYPES } from "@/src/types/salesforce";
 import type { VerifiedUserData } from "@/src/types";

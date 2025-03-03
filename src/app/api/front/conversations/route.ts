@@ -4,14 +4,13 @@ import {
   withAppSettings,
 } from "@/src/app/api/server/utils";
 import { type NextRequest, NextResponse } from "next/server";
-import type { HandoffChatMessage } from "@/src/types";
+import type { HandoffChatMessage, VerifiedUserData } from "@/src/types";
 import { HANDOFF_AUTH_HEADER } from "@/src/app/constants/authentication";
 import {
   createApplicationChannelClient,
   createCoreClient,
   postMavenMessagesToFront,
 } from "../utils";
-import type { VerifiedUserData } from "@/src/types";
 import { nanoid } from "nanoid";
 import type { FrontCoreClient } from "../client";
 import type { Front } from "@/src/types/front";

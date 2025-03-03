@@ -2,7 +2,7 @@
 
 import React, { type HTMLAttributes } from "react";
 
-const ButtonGroupContext = React.createContext<{} | undefined>(undefined);
+const ButtonGroupContext = React.createContext<object | undefined>(undefined);
 export const useButtonGroupContext = () => React.useContext(ButtonGroupContext);
 
 type ButtonGroupProps = HTMLAttributes<HTMLDivElement>;
