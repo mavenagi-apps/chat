@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import HighchartsReact from "highcharts-react-official";
 import Highcharts from "highcharts";
 import { ReactMarkdown } from "@magi/components/ReactMarkdown";
@@ -257,16 +257,21 @@ function UserMessage({
   attachmentUrls?: string[];
   linkTargetInNewTab?: boolean;
 }) {
+  const hasAttachments = useMemo(
+    () => !!attachmentUrls?.length,
+    [attachmentUrls],
+  );
+
   return (
     <div className="text-xs">
       <ReactMarkdown linkTargetInNewTab={linkTargetInNewTab}>
         {text}
       </ReactMarkdown>
-      {attachmentUrls && (
+      {hasAttachments && (
         <img
           alt="Attachment"
           className="max-w-80 max-h-80"
-          src={attachmentUrls[0]}
+          src={attachmentUrls?.[0]}
         />
       )}
     </div>
