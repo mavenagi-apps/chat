@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import { NEXT_LOCALE_HEADER } from "@/app/constants/internationalization";
-import { getRequestConfigHandler } from "@/i18n";
+import { NEXT_LOCALE_HEADER } from "@/src/app/constants/internationalization";
+import { getRequestConfigHandler } from "@/src/i18n";
 
 // Mock next/headers
 const headerMap = new Map<string, string>();
@@ -12,21 +12,21 @@ vi.mock("next/headers", () => ({
 }));
 
 // Mock message files
-vi.mock("@/messages/en.json", () => ({
+vi.mock("@/src/messages/en.json", () => ({
   default: { test: "Test Message" },
 }));
 
-vi.mock("@/messages/es.json", () => ({
+vi.mock("@/src/messages/es.json", () => ({
   default: { test: "Mensaje de Prueba" },
 }));
 
 // Mock fr.json to simulate it not existing
-vi.mock("@/messages/fr.json", () => ({
+vi.mock("@/src/messages/fr.json", () => ({
   default: null,
 }));
 
 // Mock de.json to simulate it not existing
-vi.mock("@/messages/de.json", () => ({
+vi.mock("@/src/messages/de.json", () => ({
   default: null,
 }));
 

@@ -1,12 +1,16 @@
 import { renderHook, act } from "@testing-library/react";
-import { useHandoff } from "@/lib/useHandoff";
-import { HandoffStatus } from "@/app/constants/handoff";
+import { useHandoff } from "@/src/lib/useHandoff";
+import { HandoffStatus } from "@/src/app/constants/handoff";
 import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
-import type { Message, UserChatMessage, IncomingHandoffEvent } from "@/types";
-import { HandoffStrategyFactory } from "@/lib/handoff/HandoffStrategyFactory";
-import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
-import { streamResponse } from "@/lib/handoff/streamUtils";
-import { useSettings } from "@/app/providers/SettingsProvider";
+import type {
+  Message,
+  UserChatMessage,
+  IncomingHandoffEvent,
+} from "@/src/types";
+import { HandoffStrategyFactory } from "@/src/lib/handoff/HandoffStrategyFactory";
+import { SALESFORCE_MESSAGE_TYPES } from "@/src/types/salesforce";
+import { streamResponse } from "@/src/lib/handoff/streamUtils";
+import { useSettings } from "@/src/app/providers/SettingsProvider";
 
 // Mock the required providers and hooks
 vi.mock("next/dist/client/components/navigation", () => ({
@@ -16,7 +20,7 @@ vi.mock("next/dist/client/components/navigation", () => ({
   }),
 }));
 
-vi.mock("@/app/providers/SettingsProvider", () => ({
+vi.mock("@/src/app/providers/SettingsProvider", () => ({
   useSettings: vi.fn(() => ({
     branding: {},
     security: {},
@@ -28,21 +32,21 @@ vi.mock("@/app/providers/SettingsProvider", () => ({
   })),
 }));
 
-vi.mock("@/app/providers/AuthProvider", () => ({
+vi.mock("@/src/app/providers/AuthProvider", () => ({
   useAuth: () => ({
     signedUserData: "test-user",
     unsignedUserData: null,
   }),
 }));
 
-vi.mock("@/app/providers/CustomDataProvider", () => ({
+vi.mock("@/src/app/providers/CustomDataProvider", () => ({
   useCustomData: () => ({
     customData: {},
   }),
 }));
 
 // Mock stream response utility
-vi.mock("@/lib/handoff/streamUtils", () => ({
+vi.mock("@/src/lib/handoff/streamUtils", () => ({
   streamResponse: vi.fn(async function* () {
     yield { type: "test-event" };
   }),
@@ -74,7 +78,7 @@ const createMockStrategy = () => ({
 });
 
 // Mock the strategy factory
-vi.mock("@/lib/handoff/HandoffStrategyFactory", () => ({
+vi.mock("@/src/lib/handoff/HandoffStrategyFactory", () => ({
   HandoffStrategyFactory: {
     createStrategy: vi.fn(() => createMockStrategy()),
   },

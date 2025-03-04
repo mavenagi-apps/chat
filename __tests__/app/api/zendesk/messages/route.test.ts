@@ -2,12 +2,12 @@ import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
-import { POST } from "@/app/api/zendesk/conversations/route";
+import { POST } from "@/src/app/api/zendesk/conversations/route";
 import {
   getSunshineConversationsClient,
   postMessagesToZendeskConversation,
-} from "@/app/api/zendesk/utils";
-import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
+} from "@/src/app/api/zendesk/utils";
+import { HANDOFF_AUTH_HEADER } from "@/src/app/constants/authentication";
 import type SunshineConversationsClientModule from "sunshine-conversations-client";
 // Mock all external dependencies
 vi.mock("nanoid", () => ({ nanoid: vi.fn() }));
@@ -15,11 +15,11 @@ vi.mock("jsonwebtoken", () => ({
   default: { sign: vi.fn() },
   sign: vi.fn(),
 }));
-vi.mock("@/app/api/zendesk/utils", () => ({
+vi.mock("@/src/app/api/zendesk/utils", () => ({
   getSunshineConversationsClient: vi.fn(),
   postMessagesToZendeskConversation: vi.fn(),
 }));
-vi.mock("@/app/api/server/utils", () => ({
+vi.mock("@/src/app/api/server/utils", () => ({
   decryptAndVerifySignedUserData: vi.fn(async (userDataString) =>
     JSON.parse(userDataString),
   ),

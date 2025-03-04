@@ -1,12 +1,12 @@
 import { renderHook, act } from "@testing-library/react";
-import { useIdleMessage } from "@/lib/useIdleMessage";
+import { useIdleMessage } from "@/src/lib/useIdleMessage";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { useTranslations } from "next-intl";
-import { useAnalytics } from "@/lib/use-analytics";
+import { useAnalytics } from "@/src/lib/use-analytics";
 import { useParams } from "next/navigation";
-import { useSettings } from "@/app/providers/SettingsProvider";
-import { MagiEvent } from "@/lib/analytics/events";
-import type { ChatMessage, CombinedMessage } from "@/types";
+import { useSettings } from "@/src/app/providers/SettingsProvider";
+import { MagiEvent } from "@/src/lib/analytics/events";
+import type { ChatMessage, CombinedMessage } from "@/src/types";
 
 // Mock dependencies
 vi.mock("next-intl", () => ({
@@ -17,11 +17,11 @@ vi.mock("next/navigation", () => ({
   useParams: vi.fn(),
 }));
 
-vi.mock("@/lib/use-analytics", () => ({
+vi.mock("@/src/lib/use-analytics", () => ({
   useAnalytics: vi.fn(),
 }));
 
-vi.mock("@/app/providers/SettingsProvider", () => ({
+vi.mock("@/src/app/providers/SettingsProvider", () => ({
   useSettings: vi.fn(),
 }));
 

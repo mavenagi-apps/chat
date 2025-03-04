@@ -66,8 +66,8 @@ importers:
         specifier: ^3.5.0
         version: 3.5.0
       mavenagi:
-        specifier: 1.0.2
-        version: 1.0.2
+        specifier: 1.0.6
+        version: 1.0.6
       nanoid:
         specifier: ^5.0.7
         version: 5.0.8
@@ -186,6 +186,9 @@ importers:
       eslint-plugin-i18next:
         specifier: ^6.1.0
         version: 6.1.0
+      eslint-plugin-import:
+        specifier: ^2.31.0
+        version: 2.31.0(@typescript-eslint/parser@8.13.0(eslint@9.14.0(jiti@1.21.6))(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.3)(eslint@9.14.0(jiti@1.21.6))
       eslint-plugin-tailwindcss:
         specifier: ^3.17.5
         version: 3.17.5(tailwindcss@3.4.14)
@@ -229,7 +232,7 @@ importers:
         specifier: ^0.3.3
         version: 0.3.3(vitest@2.1.9(@types/node@20.17.6)(jsdom@25.0.1)(terser@5.36.0))
 
-  packages/widget:
+  src/packages/widget:
     dependencies:
       app-root-path:
         specifier: ^3.1.0
@@ -2658,8 +2661,8 @@ packages:
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
 
-  mavenagi@1.0.2:
-    resolution: {integrity: sha512-gsZlZuN3t51+n/wCdmTbXUkzkhmC5iRdNyG2tfcNW/TT7yb4Dz+HDS1PYxIpsmCCoxEND6aiweh9NYBq0ta7VA==}
+  mavenagi@1.0.6:
+    resolution: {integrity: sha512-V7vOv/FXOdoBt3MtBybqqiZsxzmuF8wYADuv1/TUm2xr91Qsw7jKN4MPjrALOyvTZvEQZphAroJbUT9Lq/1NBg==}
 
   mdast-util-find-and-replace@3.0.1:
     resolution: {integrity: sha512-SG21kZHGC3XRTSUhtofZkBzZTJNM5ecCi0SK2IMKmSXR8vO3peL+kb1O0z7Zl83jKtutG4k5Wv/W7V3/YHvzPA==}
@@ -4033,7 +4036,7 @@ snapshots:
       '@babel/traverse': 7.25.9
       '@babel/types': 7.26.0
       convert-source-map: 2.0.0
-      debug: 4.3.7
+      debug: 4.4.0
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -4044,7 +4047,7 @@ snapshots:
     dependencies:
       '@babel/parser': 7.26.2
       '@babel/types': 7.26.0
-      '@jridgewell/gen-mapping': 0.3.5
+      '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
       jsesc: 3.0.2
 
@@ -4147,7 +4150,7 @@ snapshots:
       '@babel/parser': 7.26.2
       '@babel/template': 7.25.9
       '@babel/types': 7.26.0
-      debug: 4.3.7
+      debug: 4.4.0
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -4453,7 +4456,6 @@ snapshots:
       '@jridgewell/set-array': 1.2.1
       '@jridgewell/sourcemap-codec': 1.5.0
       '@jridgewell/trace-mapping': 0.3.25
-    optional: true
 
   '@jridgewell/resolve-uri@3.1.2': {}
 
@@ -4546,7 +4548,7 @@ snapshots:
       '@prefresh/vite': 2.4.6(preact@10.23.2)(vite@5.4.14(@types/node@20.17.6)(terser@5.36.0))
       '@rollup/pluginutils': 4.2.1
       babel-plugin-transform-hook-names: 1.0.2(@babel/core@7.26.0)
-      debug: 4.3.7
+      debug: 4.4.0
       kolorist: 1.8.0
       magic-string: 0.30.5
       node-html-parser: 6.1.13
@@ -6532,7 +6534,7 @@ snapshots:
 
   markdown-table@3.0.4: {}
 
-  mavenagi@1.0.2:
+  mavenagi@1.0.6:
     dependencies:
       form-data: 4.0.1
       formdata-node: 6.0.3

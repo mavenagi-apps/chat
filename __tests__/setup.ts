@@ -34,13 +34,13 @@ vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock("@/lib/analytics/use-analytics", () => ({
+vi.mock("@/src/lib/analytics/use-analytics", () => ({
   useAnalytics: () => ({
     logEvent: vi.fn(),
   }),
 }));
 
-vi.mock("@/app/providers/SettingsProvider", () => ({
+vi.mock("@/src/app/providers/SettingsProvider", () => ({
   useSettings: () => ({
     branding: {
       brandColor: "#000000",

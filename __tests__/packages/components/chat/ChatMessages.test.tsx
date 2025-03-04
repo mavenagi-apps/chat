@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { ChatMessages } from "@magi/components/chat/ChatMessages";
 import { ChatContext } from "@magi/components/chat/Chat";
-import type { Message } from "@/types";
+import type { Message } from "@/src/types";
 import { RouterProvider } from "@/__tests__/utils/test-utils";
 
 describe("ChatMessages", () => {

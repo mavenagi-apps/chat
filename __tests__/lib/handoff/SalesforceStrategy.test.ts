@@ -2,15 +2,15 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   SalesforceStrategy,
   SalesforceServerStrategy,
-} from "@/lib/handoff/SalesforceStrategy";
+} from "@/src/lib/handoff/SalesforceStrategy";
 import {
   createUserMessage,
   createBotMessage,
   createSalesforceEvent,
   BotResponse,
 } from "./test-utils";
-import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
-import type { SalesforceChatRequestFail } from "@/types/salesforce";
+import { SALESFORCE_MESSAGE_TYPES } from "@/src/types/salesforce";
+import type { SalesforceChatRequestFail } from "@/src/types/salesforce";
 
 describe("SalesforceStrategy", () => {
   let strategy: SalesforceStrategy;

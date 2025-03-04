@@ -1,5 +1,5 @@
 import { render, renderHook } from "@testing-library/react";
-import { AuthProvider, useAuth } from "@/app/providers/AuthProvider";
+import { AuthProvider, useAuth } from "@/src/app/providers/AuthProvider";
 import { describe, expect, test, vi } from "vitest";
 
 describe("AuthProvider", () => {

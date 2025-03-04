@@ -8,16 +8,19 @@ import {
   type Mock,
 } from "vitest";
 import jwt from "jsonwebtoken";
-import { POST } from "@/app/api/salesforce/conversations/route";
-import { HANDOFF_AUTH_HEADER } from "@/app/constants/authentication";
+import { POST } from "@/src/app/api/salesforce/conversations/route";
+import { HANDOFF_AUTH_HEADER } from "@/src/app/constants/authentication";
 import { NextRequest } from "next/server";
 import {
   withAppSettings,
   decryptAndVerifySignedUserData,
-} from "@/app/api/server/utils";
-import { sendChatMessage, fetchChatMessages } from "@/app/api/salesforce/utils";
-import type { SalesforceChatUserData } from "@/types/salesforce";
-import { SALESFORCE_MESSAGE_TYPES } from "@/types/salesforce";
+} from "@/src/app/api/server/utils";
+import {
+  sendChatMessage,
+  fetchChatMessages,
+} from "@/src/app/api/salesforce/utils";
+import type { SalesforceChatUserData } from "@/src/types/salesforce";
+import { SALESFORCE_MESSAGE_TYPES } from "@/src/types/salesforce";
 
 // Test fixtures
 const TEST_DATA = {
@@ -52,7 +55,7 @@ vi.mock("jsonwebtoken", () => ({
   sign: vi.fn(),
 }));
 
-vi.mock("@/app/api/server/utils", () => ({
+vi.mock("@/src/app/api/server/utils", () => ({
   withAppSettings: vi.fn((req, handler) =>
     handler(
       req,
@@ -70,8 +73,8 @@ vi.mock("@/app/api/server/utils", () => ({
   decryptAndVerifySignedUserData: vi.fn(),
 }));
 
-vi.mock("@/app/api/salesforce/utils", async () => {
-  const actual = await vi.importActual("@/app/api/salesforce/utils");
+vi.mock("@/src/app/api/salesforce/utils", async () => {
+  const actual = await vi.importActual("@/src/app/api/salesforce/utils");
   return {
     ...(actual as object),
     sendChatMessage: vi.fn(),

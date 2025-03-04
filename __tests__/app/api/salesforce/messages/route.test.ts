@@ -7,18 +7,18 @@ import {
   afterEach,
   type Mock,
 } from "vitest";
-import { GET, POST } from "@/app/api/salesforce/messages/route";
+import { GET, POST } from "@/src/app/api/salesforce/messages/route";
 import { NextRequest, NextResponse } from "next/server";
 import {
   sendChatMessage,
   validateSalesforceConfig,
   validateAuthHeaders,
-} from "@/app/api/salesforce/utils";
+} from "@/src/app/api/salesforce/utils";
 
 const KEEPALIVE_TEXT = "event: keepalive\ndata: {}\n\n";
 
 // Mock external dependencies
-vi.mock("@/app/api/server/utils", () => ({
+vi.mock("@/src/app/api/server/utils", () => ({
   withSettingsAndAuthentication: vi.fn((req, handler) =>
     handler(
       req,
@@ -45,8 +45,8 @@ vi.mock("@/app/api/server/utils", () => ({
   ),
 }));
 
-vi.mock("@/app/api/salesforce/utils", async () => {
-  const actual = await vi.importActual("@/app/api/salesforce/utils");
+vi.mock("@/src/app/api/salesforce/utils", async () => {
+  const actual = await vi.importActual("@/src/app/api/salesforce/utils");
   return {
     ...(actual as object),
     validateSalesforceConfig: vi.fn(),

@@ -1,9 +1,9 @@
 import { expect, describe, test } from "vitest";
 
-import enJson from "@/messages/en.json";
-import frJson from "@/messages/fr.json";
-import itJson from "@/messages/it.json";
-import esJson from "@/messages/es.json";
+import enJson from "@/src/messages/en.json";
+import frJson from "@/src/messages/fr.json";
+import itJson from "@/src/messages/it.json";
+import esJson from "@/src/messages/es.json";
 
 describe("messages", () => {
   test("should have the correct keys", () => {

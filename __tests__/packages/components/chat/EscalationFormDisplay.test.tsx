@@ -6,12 +6,12 @@ import {
   act,
 } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import EscalationFormDisplay from "@/packages/components/chat/EscalationFormDisplay";
-import { ChatContext } from "@/packages/components/chat/Chat";
-import { useAuth } from "@/app/providers/AuthProvider";
-import { useSettings } from "@/app/providers/SettingsProvider";
+import EscalationFormDisplay from "@/src/packages/components/chat/EscalationFormDisplay";
+import { ChatContext } from "@/src/packages/components/chat/Chat";
+import { useAuth } from "@/src/app/providers/AuthProvider";
+import { useSettings } from "@/src/app/providers/SettingsProvider";
 import { useParams } from "next/navigation";
-import { isHandoffAvailable } from "@/app/actions";
+import { isHandoffAvailable } from "@/src/app/actions";
 
 // Mock the next-intl translations
 vi.mock("next-intl", () => ({
@@ -19,13 +19,13 @@ vi.mock("next-intl", () => ({
 }));
 
 // Mock the auth hook
-vi.mock("@/app/providers/AuthProvider", () => ({
+vi.mock("@/src/app/providers/AuthProvider", () => ({
   useAuth: vi.fn().mockReturnValue({
     isAuthenticated: false,
   }),
 }));
 
-vi.mock("@/app/providers/SettingsProvider", () => ({
+vi.mock("@/src/app/providers/SettingsProvider", () => ({
   useSettings: vi.fn().mockReturnValue({
     branding: {},
     security: {},
@@ -42,7 +42,7 @@ vi.mock("next/navigation", () => ({
   useParams: vi.fn(),
 }));
 
-vi.mock("@/app/actions", () => ({
+vi.mock("@/src/app/actions", () => ({
   isHandoffAvailable: vi.fn(),
 }));
 

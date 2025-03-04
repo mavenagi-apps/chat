@@ -19,7 +19,7 @@
       }
     ],
     "paths": {
-      "@magi/*": ["./packages/*"],
+      "@magi/*": ["./src/packages/*"],
       "@/*": ["./*"],
       "@test-utils/*": ["./__tests__/utils/*"]
     }

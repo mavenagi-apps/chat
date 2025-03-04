@@ -8,7 +8,7 @@ import {
   afterEach,
   type Mock,
 } from "vitest";
-import { useIframeMessaging } from "@/lib/useIframeMessaging";
+import { useIframeMessaging } from "@/src/lib/useIframeMessaging";
 
 // Mock search params value for testing
 let mockDisableRedirectValue: string | null = null;
