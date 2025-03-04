@@ -91,7 +91,7 @@ export default function BailoutFormDisplay({
                   type={fieldType(field)}
                   id={field.id}
                   name={field.id}
-                  defaultValue={field.suggestion}
+                  defaultValue={field.suggestion as string | undefined}
                   required={field.required}
                   aria-describedby={`${field.id}-description`}
                 />
