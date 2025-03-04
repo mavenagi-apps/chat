@@ -49,6 +49,7 @@ export function WelcomeMessage({
           try {
             const translationsObject = JSON.parse(question);
             return translationsObject[locale] || translationsObject.en || "";
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (error) {
             return question;
           }
@@ -58,7 +59,7 @@ export function WelcomeMessage({
     } catch (error) {
       return [];
     }
-  }, [popularQuestionsJSON]);
+  }, [popularQuestionsJSON, locale]);
 
   const handleQuestionClick = useCallback(
     (question: string) => {
