@@ -43,7 +43,17 @@ export function WelcomeMessage({
       if (typeof popularQuestionsJSON === "string") {
         return JSON.parse(popularQuestionsJSON || "[]");
       }
-      return popularQuestionsJSON || [];
+      return (popularQuestionsJSON || [])
+        .map((question: string) => {
+          // The question is either a string or a JSON string
+          try {
+            const translationsObject = JSON.parse(question);
+            return translationsObject[locale] || translationsObject.en || "";
+          } catch (error) {
+            return question;
+          }
+        })
+        .filter((question: string) => question !== "");
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       return [];
