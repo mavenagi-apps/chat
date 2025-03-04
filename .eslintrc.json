@@ -10,7 +10,7 @@
     "plugin:tailwindcss/recommended"
   ],
   "plugins": ["tailwindcss", "i18next"],
-  "ignorePatterns": ["app/mavenagi-cgi/"],
+  "ignorePatterns": ["src/app/mavenagi-cgi/"],
   "rules": {
     "quotes": ["error", "double"],
     "jsx-quotes": ["error", "prefer-double"],
