@@ -77,9 +77,9 @@ export class ZendeskServerStrategy implements ServerHandoffStrategy {
 
       const url =
         `https://${this.configuration.subdomain}.zendesk.com` +
-        `/api/v2/agent_availabilities` +
-        `?filter[channel_status]=messaging:online` +
-        `&select_channel=messaging`;
+        "/api/v2/agent_availabilities" +
+        "?filter[channel_status]=messaging:online" +
+        "&select_channel=messaging";
       const encodedApiKey = Buffer.from(
         `${this.configuration.availabilityCheckApiEmail}/token:${this.configuration.availabilityCheckApiToken}`,
       ).toString("base64");

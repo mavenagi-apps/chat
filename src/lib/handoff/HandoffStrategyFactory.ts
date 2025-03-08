@@ -8,19 +8,15 @@ export type HandoffType = "zendesk" | "front" | "salesforce" | null | undefined;
 export class HandoffStrategyFactory {
   static createStrategy(
     type: HandoffType,
-    configuration?: HandoffConfiguration,
+    configuration?: ClientSafeHandoffConfig,
   ): HandoffStrategy<Record<string, any>> | null {
     switch (type) {
       case "zendesk":
-        return new ZendeskStrategy(
-          configuration as ZendeskHandoffConfiguration,
-        );
+        return new ZendeskStrategy(configuration as ClientSafeHandoffConfig);
       case "front":
-        return new FrontStrategy(configuration as FrontHandoffConfiguration);
+        return new FrontStrategy(configuration as ClientSafeHandoffConfig);
       case "salesforce":
-        return new SalesforceStrategy(
-          configuration as SalesforceHandoffConfiguration,
-        );
+        return new SalesforceStrategy(configuration as ClientSafeHandoffConfig);
       case null:
       case undefined:
       default:
