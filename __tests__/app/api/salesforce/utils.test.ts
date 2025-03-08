@@ -46,23 +46,23 @@ describe("Salesforce Utils", () => {
       expect(validateSalesforceConfig(config)).toBeNull();
     });
 
-    it("should return error response for invalid configuration type", () => {
+    it("should return error response for invalid configuration type", async () => {
       const config = {
         type: "invalid",
         chatHostUrl: "https://test.salesforce.com",
       };
       const response = validateSalesforceConfig(config);
       expect(response?.status).toBe(400);
-      expect(response?.json()).resolves.toEqual({
+      await expect(response?.json()).resolves.toEqual({
         success: false,
         error: "Invalid handoff configuration type. Expected 'salesforce'.",
       });
     });
 
-    it("should return error response for undefined configuration", () => {
+    it("should return error response for undefined configuration", async () => {
       const response = validateSalesforceConfig(undefined);
       expect(response?.status).toBe(400);
-      expect(response?.json()).resolves.toEqual({
+      await expect(response?.json()).resolves.toEqual({
         success: false,
         error: "Invalid handoff configuration type. Expected 'salesforce'.",
       });
@@ -74,16 +74,16 @@ describe("Salesforce Utils", () => {
       expect(validateAuthHeaders("affinity-token", "session-key")).toBeNull();
     });
 
-    it("should return error response when affinity token is missing", () => {
+    it("should return error response when affinity token is missing", async () => {
       const response = validateAuthHeaders(undefined, "session-key");
       expect(response?.status).toBe(401);
-      expect(response?.json()).resolves.toBe("Missing auth headers");
+      await expect(response?.json()).resolves.toBe("Missing auth headers");
     });
 
-    it("should return error response when session key is missing", () => {
+    it("should return error response when session key is missing", async () => {
       const response = validateAuthHeaders("affinity-token", undefined);
       expect(response?.status).toBe(401);
-      expect(response?.json()).resolves.toBe("Missing auth headers");
+      await expect(response?.json()).resolves.toBe("Missing auth headers");
     });
   });
 

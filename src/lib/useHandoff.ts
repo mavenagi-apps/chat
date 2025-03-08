@@ -43,7 +43,7 @@ export function useHandoff({
   const strategyRef = useRef(
     HandoffStrategyFactory.createStrategy(
       handoffTypeRef.current,
-      misc.handoffConfiguration as HandoffConfiguration,
+      misc.handoffConfiguration as ClientSafeHandoffConfig,
     ),
   );
   const abortController = useRef(new AbortController());
@@ -61,7 +61,7 @@ export function useHandoff({
   useEffect(() => {
     strategyRef.current = HandoffStrategyFactory.createStrategy(
       handoffTypeRef.current,
-      misc.handoffConfiguration as HandoffConfiguration,
+      misc.handoffConfiguration,
     );
   }, []);
 
