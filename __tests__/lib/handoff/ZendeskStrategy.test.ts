@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  vi,
+  afterEach,
+  afterAll,
+} from "vitest";
 import {
   ZendeskStrategy,
   ZendeskServerStrategy,
@@ -8,6 +16,9 @@ import {
   createBotMessage,
   createZendeskEvent,
 } from "./test-utils";
+
+// Store the original fetch implementation
+const originalFetch = global.fetch;
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -211,4 +222,9 @@ describe("ZendeskServerStrategy", () => {
       expect(result).toBe(true);
     });
   });
+});
+
+// Restore the original fetch implementation after all tests
+afterAll(() => {
+  global.fetch = originalFetch;
 });
