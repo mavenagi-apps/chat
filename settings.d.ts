@@ -67,6 +67,9 @@ declare global {
     webhookId: string;
     webhookSecret: string;
     subdomain: string;
+    enableAvailabilityCheck?: boolean;
+    availabilityCheckApiEmail?: string;
+    availabilityCheckApiToken?: string;
   };
   type FrontHandoffConfiguration = BaseHandoffConfiguration & {
     type: "front";

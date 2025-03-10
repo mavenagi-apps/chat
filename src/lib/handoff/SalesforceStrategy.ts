@@ -28,7 +28,7 @@ export class SalesforceStrategy implements HandoffStrategy<Message> {
   readonly connectedToAgentMessageType =
     SALESFORCE_MESSAGE_TYPES.ChatConnecting;
 
-  constructor(private readonly configuration: SalesforceHandoffConfiguration) {}
+  constructor(private readonly configuration: ClientSafeHandoffConfig) {}
 
   private shouldEndHandoff(event: SalesforceChatMessage): boolean {
     const shouldEndByType =

@@ -10,7 +10,7 @@ export class FrontStrategy implements HandoffStrategy {
   messagesEndpoint = "/api/front/messages";
   conversationsEndpoint = "/api/front/conversations";
 
-  constructor(private readonly configuration: FrontHandoffConfiguration) {}
+  constructor(private readonly configuration: ClientSafeHandoffConfig) {}
 
   formatMessages(
     messages: Message[],
