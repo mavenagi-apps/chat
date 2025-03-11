@@ -82,6 +82,7 @@ export function useIframeCommunication({
   locale,
   horizontalPosition,
   verticalPosition,
+  showPoweredBy,
 }: {
   organizationId: string;
   agentId: string;
@@ -93,6 +94,7 @@ export function useIframeCommunication({
   locale?: string;
   horizontalPosition: "left" | "right";
   verticalPosition: "top" | "bottom";
+  showPoweredBy?: boolean;
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -110,11 +112,13 @@ export function useIframeCommunication({
       : __IFRAME_DOMAIN__;
     let iframeUrl = `${iframeProtocol}://${iframeDomain}/${organizationId}/${agentId}`;
 
-    if (locale) {
-      iframeUrl += `?locale=${locale}`;
-    }
+    const url = new URL(iframeUrl);
+    url.search = new URLSearchParams({
+      locale: locale ?? "en",
+      pb: showPoweredBy ? "true" : "false",
+    }).toString();
 
-    return iframeUrl;
+    return url.toString();
   }, [organizationId, agentId]);
 
   const iframeStyle = useMemo(() => {

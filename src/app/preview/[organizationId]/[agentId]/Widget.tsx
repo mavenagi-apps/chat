@@ -10,6 +10,7 @@ type WidgetLoadPayload = {
   unsignedUserData?: Record<string, any>;
   customData?: Record<string, any>;
   locale?: string;
+  showPoweredBy?: boolean;
 };
 
 export default function Widget({

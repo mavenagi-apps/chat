@@ -29,6 +29,8 @@ import { WelcomeMessage } from "@magi/components/chat/WelcomeChatMessage";
 function ChatPage() {
   const analytics = useAnalytics();
   const { agentId }: { organizationId: string; agentId: string } = useParams();
+  const searchParams = useSearchParams();
+  const showPoweredBy = searchParams.get("pb") === "true";
   const { branding } = useSettings();
   const [messagesContainerRef, messagesEndRef] =
     useScrollToBottom<HTMLDivElement>();
@@ -137,7 +139,9 @@ function ChatPage() {
           </div>
 
           <PoweredByMaven
-            shouldRender={combinedMessages.length === 0 && !isLoading}
+            shouldRender={
+              showPoweredBy && combinedMessages.length === 0 && !isLoading
+            }
           />
         </div>
 
