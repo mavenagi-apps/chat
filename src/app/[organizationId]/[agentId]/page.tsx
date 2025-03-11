@@ -30,7 +30,9 @@ function ChatPage() {
   const analytics = useAnalytics();
   const { agentId }: { organizationId: string; agentId: string } = useParams();
   const searchParams = useSearchParams();
-  const showPoweredBy = searchParams.get("pb") === "true";
+  const showPoweredBy = !searchParams.has("pb")
+    ? true
+    : searchParams.get("pb") === "true";
   const { branding } = useSettings();
   const [messagesContainerRef, messagesEndRef] =
     useScrollToBottom<HTMLDivElement>();
