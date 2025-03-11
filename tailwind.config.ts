@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: ["class"],
   content: [
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/packages/ui/**/*.{js,ts,jsx,tsx,mdx}",
@@ -19,16 +20,18 @@ const config: Config = {
       },
       colors: {
         primary: {
-          50: "#F6F5FF",
-          100: "#EDEBFE",
-          200: "#DCD7FE",
-          300: "#CABFFD",
-          400: "#AC94FA",
-          500: "#9061F9",
-          600: "#7E3AF2",
-          700: "#6C2BD9",
-          800: "#5521B5",
-          900: "#4A1D96",
+          "50": "#F6F5FF",
+          "100": "#EDEBFE",
+          "200": "#DCD7FE",
+          "300": "#CABFFD",
+          "400": "#AC94FA",
+          "500": "#9061F9",
+          "600": "#7E3AF2",
+          "700": "#6C2BD9",
+          "800": "#5521B5",
+          "900": "#4A1D96",
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
         },
         fg: {
           brand: "#6C2BD9",
@@ -56,9 +59,50 @@ const config: Config = {
           warning: "#FDF6B2",
           info: "#E1EFFE",
         },
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
     },
   },
-  plugins: [require("@tailwindcss/typography")],
+  plugins: [require("@tailwindcss/typography"), require("tailwindcss-animate")],
 };
 export default config;

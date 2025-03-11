@@ -49,6 +49,11 @@ describe("POST /api/zendesk/conversations", () => {
     JWT_TOKEN: "test-jwt-token",
     NANOID: "test-nanoid",
     DEFAULT_MESSAGE: { content: "Test message" },
+    CUSTOM_FIELD_VALUES: {
+      "1": "high",
+      "2": "Bug report",
+      "3": true,
+    },
   };
 
   const AUTHENTICATED_USER = {
@@ -62,24 +67,38 @@ describe("POST /api/zendesk/conversations", () => {
     messages = [TEST_DATA.DEFAULT_MESSAGE],
     signedUserData = null,
     email = TEST_DATA.EMAIL,
+    customFieldValues = undefined,
   }: {
     messages?: any[];
     signedUserData?: string | null;
     email?: string | null;
+    customFieldValues?: Record<string, string | boolean | number>;
   } = {}) => ({
     json: vi.fn().mockResolvedValue({
       messages,
       signedUserData,
       email: email || undefined,
+      customFieldValues,
     }),
   });
 
   let mockApiInstances: any;
+  let mockSwitchboardActionsApi: any;
+  let mockPassControlBody: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Move mockApiInstances initialization here
+    // Initialize mock instances
+    mockPassControlBody = {
+      setSwitchboardIntegration: vi.fn(),
+      setMetadata: vi.fn(),
+    };
+
+    mockSwitchboardActionsApi = {
+      passControl: vi.fn().mockResolvedValue({}),
+    };
+
     mockApiInstances = {
       users: {
         getUser: vi.fn().mockRejectedValue({ status: 404 }),
@@ -107,6 +126,8 @@ describe("POST /api/zendesk/conversations", () => {
       ConversationCreateBody: vi
         .fn()
         .mockReturnValue(mockApiInstances.conversationBody),
+      SwitchboardActionsApi: vi.fn().mockReturnValue(mockSwitchboardActionsApi),
+      PassControlBody: vi.fn().mockReturnValue(mockPassControlBody),
     };
 
     vi.mocked(getSunshineConversationsClient).mockResolvedValue([
@@ -266,6 +287,75 @@ describe("POST /api/zendesk/conversations", () => {
         TEST_DATA.APP_ID,
         [TEST_DATA.DEFAULT_MESSAGE],
       );
+    });
+
+    it("should pass customFieldValues to getOrCreateZendeskConversation", async () => {
+      await POST(
+        createMockRequest({
+          customFieldValues: TEST_DATA.CUSTOM_FIELD_VALUES,
+        }) as unknown as NextRequest,
+      );
+
+      // Verify passControl was called with transformed custom fields
+      expect(
+        mockPassControlBody.setSwitchboardIntegration,
+      ).toHaveBeenCalledWith("zd-agentWorkspace");
+
+      // Check that metadata was set with prefixed custom fields
+      expect(mockPassControlBody.setMetadata).toHaveBeenCalledWith({
+        "dataCapture.ticketField.1": "high",
+        "dataCapture.ticketField.2": "Bug report",
+        "dataCapture.ticketField.3": true,
+      });
+
+      // Verify passControl was called with the right parameters
+      expect(mockSwitchboardActionsApi.passControl).toHaveBeenCalledWith(
+        TEST_DATA.APP_ID,
+        TEST_DATA.CONVERSATION_ID,
+        mockPassControlBody,
+      );
+    });
+
+    it("should not call passControl when customFieldValues is not provided", async () => {
+      await POST(
+        createMockRequest({
+          customFieldValues: undefined,
+        }) as unknown as NextRequest,
+      );
+
+      // Verify passControl was not called
+      expect(mockSwitchboardActionsApi.passControl).not.toHaveBeenCalled();
+      expect(
+        mockPassControlBody.setSwitchboardIntegration,
+      ).not.toHaveBeenCalled();
+      expect(mockPassControlBody.setMetadata).not.toHaveBeenCalled();
+    });
+
+    it("should handle errors when passControl fails", async () => {
+      // Mock console.error to prevent test output noise
+      const originalConsoleError = console.error;
+      console.error = vi.fn();
+
+      // Setup passControl to throw an error
+      mockSwitchboardActionsApi.passControl.mockRejectedValueOnce(
+        new Error("API Error"),
+      );
+
+      // Request should still succeed even if passControl fails
+      const response = await POST(
+        createMockRequest({
+          customFieldValues: TEST_DATA.CUSTOM_FIELD_VALUES,
+        }) as unknown as NextRequest,
+      );
+
+      expect(response.status).toBe(200);
+      expect(console.error).toHaveBeenCalledWith(
+        "Error passing control to zendesk",
+        expect.any(Error),
+      );
+
+      // Restore console.error
+      console.error = originalConsoleError;
     });
   });
 });

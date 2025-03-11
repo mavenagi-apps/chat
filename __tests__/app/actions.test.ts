@@ -180,6 +180,27 @@ describe("getPublicAppSettings", () => {
               allowAnonymousHandoff: true,
               handoffTerminatingMessageText: "goodbye",
               apiSecret: "secret", // This should not be included in client settings
+              customFields: [
+                {
+                  id: 1,
+                  label: "Priority",
+                  description: "Issue priority",
+                  type: "TEXT",
+                  required: true,
+                  enumOptions: [
+                    { label: "High", value: "high" },
+                    { label: "Medium", value: "medium" },
+                    { label: "Low", value: "low" },
+                  ],
+                },
+                {
+                  id: 2,
+                  label: "Description",
+                  description: "Issue description",
+                  type: "TEXT",
+                  required: false,
+                },
+              ],
             }),
           },
         }),
@@ -209,9 +230,77 @@ describe("getPublicAppSettings", () => {
           availabilityFallbackMessage: "message",
           allowAnonymousHandoff: true,
           handoffTerminatingMessageText: "goodbye",
+          customFields: [
+            {
+              id: 1,
+              label: "Priority",
+              description: "Issue priority",
+              type: "TEXT",
+              required: true,
+              enumOptions: [
+                { label: "High", value: "high" },
+                { label: "Medium", value: "medium" },
+                { label: "Low", value: "low" },
+              ],
+            },
+            {
+              id: 2,
+              label: "Description",
+              description: "Issue description",
+              type: "TEXT",
+              required: false,
+            },
+          ],
         },
       },
     });
+  });
+
+  it("correctly parses customFields in handoff configuration", async () => {
+    const customFields = [
+      {
+        id: 1,
+        label: "Category",
+        description: "Issue category",
+        type: "DROPDOWN",
+        required: true,
+        enumOptions: [
+          { label: "Technical", value: "technical" },
+          { label: "Billing", value: "billing" },
+          { label: "General", value: "general" },
+        ],
+      },
+      {
+        id: 2,
+        label: "Agree to Terms",
+        description: "User agrees to terms",
+        type: "BOOLEAN",
+        required: true,
+      },
+    ];
+
+    const mockClient = {
+      appSettings: {
+        get: vi.fn().mockResolvedValue({
+          branding: {},
+          security: {},
+          misc: {
+            handoffConfiguration: JSON.stringify({
+              type: "zendesk",
+              customFields,
+            }),
+          },
+        }),
+      },
+    };
+
+    vi.mocked(getMavenAGIClient).mockReturnValue(mockClient as any);
+
+    const result = await getPublicAppSettings("org-id", "agent-id");
+
+    expect(result?.misc.handoffConfiguration?.customFields).toEqual(
+      customFields,
+    );
   });
 
   describe("idleMessageTimeout parsing", () => {

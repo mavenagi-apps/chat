@@ -27,6 +27,27 @@ vi.mock("@/src/app/providers/SettingsProvider", () => ({
     misc: {
       handoffConfiguration: {
         type: "zendesk",
+        customFields: [
+          {
+            id: 1,
+            label: "Priority",
+            description: "Issue priority",
+            type: "TEXT",
+            required: true,
+            enumOptions: [
+              { label: "High", value: "high" },
+              { label: "Medium", value: "medium" },
+              { label: "Low", value: "low" },
+            ],
+          },
+          {
+            id: 2,
+            label: "Description",
+            description: "Issue description",
+            type: "TEXT",
+            required: false,
+          },
+        ],
       },
     },
   })),
@@ -152,6 +173,19 @@ describe("useHandoff", () => {
         apiSecret: "test-secret",
         handoffTerminatingMessageText: "goodbye",
         enableAvailabilityCheck: true,
+        customFields: [
+          {
+            id: 1,
+            label: "Priority",
+            type: "TEXT",
+            required: true,
+            enumOptions: [
+              { label: "High", value: "high" },
+              { label: "Medium", value: "medium" },
+              { label: "Low", value: "low" },
+            ],
+          },
+        ],
       };
 
       vi.mocked(useSettings).mockReturnValue({
@@ -171,7 +205,7 @@ describe("useHandoff", () => {
   });
 
   describe("initializeHandoff", () => {
-    test("should handle successful initialization", async () => {
+    test("should handle successful initialization with email only", async () => {
       mockFetch.mockImplementation(async (url) => {
         if (url.includes("/api/test/conversations")) {
           return createSuccessfulResponse();
@@ -189,9 +223,125 @@ describe("useHandoff", () => {
         "/api/test/conversations",
         expect.objectContaining({
           method: "POST",
+          body: expect.stringContaining("test@example.com"),
+        }),
+      );
+
+      // Verify that the request body doesn't include customFieldValues
+      const requestBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(requestBody.email).toBe("test@example.com");
+      expect(requestBody.customFieldValues).toBeUndefined();
+    });
+
+    test("should handle successful initialization with customFieldValues", async () => {
+      mockFetch.mockImplementation(async (url) => {
+        if (url.includes("/api/test/conversations")) {
+          return createSuccessfulResponse();
+        }
+        return Promise.resolve({ ok: true });
+      });
+
+      const { result } = renderHook(() => useHandoff(defaultProps));
+
+      const customFieldValues = {
+        1: "high",
+        2: "This is a bug report",
+      };
+
+      await act(async () => {
+        await result.current.initializeHandoff({
+          email: "test@example.com",
+          customFieldValues,
+        });
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/test/conversations",
+        expect.objectContaining({
+          method: "POST",
           body: expect.any(String),
         }),
       );
+
+      // Verify that the request body includes customFieldValues
+      const requestBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(requestBody.email).toBe("test@example.com");
+      expect(requestBody.customFieldValues).toEqual(customFieldValues);
+    });
+
+    test("should handle initialization with only customFieldValues for authenticated users", async () => {
+      mockFetch.mockImplementation(async (url) => {
+        if (url.includes("/api/test/conversations")) {
+          return createSuccessfulResponse();
+        }
+        return Promise.resolve({ ok: true });
+      });
+
+      const { result } = renderHook(() => useHandoff(defaultProps));
+
+      const customFieldValues = {
+        1: "medium",
+        2: "Feature request",
+      };
+
+      await act(async () => {
+        await result.current.initializeHandoff({ customFieldValues });
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/test/conversations",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.any(String),
+        }),
+      );
+
+      // Verify that the request body includes customFieldValues but no email
+      const requestBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(requestBody.email).toBeUndefined();
+      expect(requestBody.customFieldValues).toEqual(customFieldValues);
+    });
+
+    test("should correctly pass both email and customFieldValues to the API", async () => {
+      mockFetch.mockImplementation(async (url) => {
+        if (url.includes("/api/test/conversations")) {
+          return createSuccessfulResponse();
+        }
+        return Promise.resolve({ ok: true });
+      });
+
+      const { result } = renderHook(() => useHandoff(defaultProps));
+
+      const params = {
+        email: "test@example.com",
+        customFieldValues: {
+          1: "high",
+          2: "This is a critical issue",
+          3: true,
+        },
+      };
+
+      await act(async () => {
+        await result.current.initializeHandoff(params);
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/test/conversations",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.any(String),
+        }),
+      );
+
+      // Verify that the request body includes both email and customFieldValues
+      const requestBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(requestBody.email).toBe(params.email);
+      expect(requestBody.customFieldValues).toEqual(params.customFieldValues);
+
+      // Verify that all fields in customFieldValues are included
+      Object.entries(params.customFieldValues).forEach(([key, value]) => {
+        expect(requestBody.customFieldValues[key]).toEqual(value);
+      });
     });
 
     test("should handle initialization failure", async () => {

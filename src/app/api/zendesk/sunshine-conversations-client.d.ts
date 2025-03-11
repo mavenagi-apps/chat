@@ -123,12 +123,18 @@ declare module "sunshine-conversations-client" {
     setUserId(userId: string): void;
   }
 
+  class PassControlBody {
+    constructor();
+    setSwitchboardIntegration(switchboardIntegration: string): void;
+    setMetadata(metadata: Record<string, string | boolean | number>): void;
+  }
+
   export class SwitchboardActionsApi {
     constructor();
     passControl(
       appId: string,
       conversationId: string,
-      acceptControlBody: any,
+      passControlBody: PassControlBody,
     ): Promise<any>;
   }
 }
