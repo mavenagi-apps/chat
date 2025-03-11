@@ -30,6 +30,7 @@ type Props = {
   customData?: Record<string, any> | null;
   organizationId: string;
   agentId: string;
+  showPoweredBy?: boolean;
 };
 
 const App = forwardRef<{ open: () => void; close: () => void }, Props>(
@@ -47,6 +48,7 @@ const App = forwardRef<{ open: () => void; close: () => void }, Props>(
       isOpen,
       horizontalPosition: props.horizontalPosition,
       verticalPosition: props.verticalPosition,
+      showPoweredBy: props.showPoweredBy,
     });
 
     useImperativeHandle(ref, () => ({
@@ -98,8 +100,8 @@ type LoadProps = Partial<Omit<Props, "iframeUrl">> & {
   bgColor?: string;
   textColor?: string;
   locale?: string;
-} & // 2. Both orgFriendlyId and agentFriendlyId are provided (legacy spec) // 1. Both organizationId and agentId are provided (new spec) OR // It enforces that either: // "orgFriendlyId" and "agentFriendlyId" to "organizationId" and "agentId". // This union type ensures backwards compatibility during the migration from the
-  // This prevents mixing of old and new ID formats while supporting both patterns
+  showPoweredBy?: boolean;
+} & // This prevents mixing of old and new ID formats while supporting both patterns // 2. Both orgFriendlyId and agentFriendlyId are provided (legacy spec) // 1. Both organizationId and agentId are provided (new spec) OR // It enforces that either: // "orgFriendlyId" and "agentFriendlyId" to "organizationId" and "agentId". // This union type ensures backwards compatibility during the migration from the
   (| {
         organizationId: string;
         agentId: string;
@@ -129,6 +131,7 @@ export async function load({
   signedUserData = null,
   unsignedUserData = null,
   customData = null,
+  showPoweredBy = true,
 }: LoadProps) {
   const placeholder = document.createElement("div");
   placeholder.id = "maven-chat-widget";
@@ -151,6 +154,7 @@ export async function load({
       // TODO: Remove this fallback once the legacy spec is deprecated
       organizationId={organizationId || orgFriendlyId || ""}
       agentId={agentId || agentFriendlyId || ""}
+      showPoweredBy={showPoweredBy}
     />,
     placeholder,
   );

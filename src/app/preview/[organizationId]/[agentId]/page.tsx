@@ -23,11 +23,13 @@ export default async function Page({
     authenticated?: string;
     customContext?: string;
     customData?: string;
+    showPoweredBy?: string;
   }>;
 }) {
   const authenticated = "authenticated" in (await searchParams);
   const customContext = "customContext" in (await searchParams);
-  const { customData: searchParamsCustomData = "{}" } = await searchParams;
+  const { customData: searchParamsCustomData = "{}", showPoweredBy = "true" } =
+    await searchParams;
   const envPrefix = (await headers()).get("x-magi-env-prefix") ?? "";
   const { organizationId, agentId } = await params;
   const settings = await getPublicAppSettings(organizationId, agentId);
@@ -75,6 +77,7 @@ export default async function Page({
     customData: {
       ...parsedCustomData,
     },
+    showPoweredBy: showPoweredBy === "true",
   };
 
   return (
