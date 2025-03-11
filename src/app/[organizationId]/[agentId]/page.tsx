@@ -30,9 +30,10 @@ function ChatPage() {
   const analytics = useAnalytics();
   const { agentId }: { organizationId: string; agentId: string } = useParams();
   const searchParams = useSearchParams();
-  const showPoweredBy = searchParams.has?.("pb")
+  const poweredByEnabled = searchParams.has?.("pb")
     ? searchParams.get?.("pb") === "true"
     : true;
+
   const { branding } = useSettings();
   const [messagesContainerRef, messagesEndRef] =
     useScrollToBottom<HTMLDivElement>();
@@ -81,6 +82,10 @@ function ChatPage() {
   }, [messages, handoffChatEvents]);
 
   const isHandoff = handoffStatus === HandoffStatus.INITIALIZED;
+
+  const showPoweredBy = useMemo(() => {
+    return poweredByEnabled && combinedMessages.length === 0 && !isLoading;
+  }, [poweredByEnabled, combinedMessages.length === 0, isLoading]);
 
   useIdleMessage({
     agentName: agentName || "",
@@ -140,11 +145,7 @@ function ChatPage() {
             />
           </div>
 
-          <PoweredByMaven
-            shouldRender={
-              showPoweredBy && combinedMessages.length === 0 && !isLoading
-            }
-          />
+          <PoweredByMaven shouldRender={showPoweredBy} />
         </div>
 
         <ChatInput
