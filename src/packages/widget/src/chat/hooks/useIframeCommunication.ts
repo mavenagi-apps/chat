@@ -110,7 +110,7 @@ export function useIframeCommunication({
     const iframeDomain = isLocalEnvironment
       ? `${currentDomain || "localhost"}:${window.location.port}`
       : __IFRAME_DOMAIN__;
-    let iframeUrl = `${iframeProtocol}://${iframeDomain}/${organizationId}/${agentId}`;
+    const iframeUrl = `${iframeProtocol}://${iframeDomain}/${organizationId}/${agentId}`;
 
     const url = new URL(iframeUrl);
     url.search = new URLSearchParams({
