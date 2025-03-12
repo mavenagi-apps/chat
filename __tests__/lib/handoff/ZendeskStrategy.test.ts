@@ -217,9 +217,27 @@ describe("ZendeskServerStrategy", () => {
   });
 
   describe("isLiveHandoffAvailable", () => {
-    it("returns a promise that resolves to true", async () => {
-      const result = await serverStrategy.isLiveHandoffAvailable?.();
-      expect(result).toBe(true);
+    it("delegates to fetchHandoffAvailability", async () => {
+      // Spy on fetchHandoffAvailability
+      const fetchAvailabilitySpy = vi.spyOn(
+        serverStrategy,
+        "fetchHandoffAvailability",
+      );
+
+      // Mock the return value
+      fetchAvailabilitySpy.mockResolvedValueOnce(false);
+
+      // Call isLiveHandoffAvailable
+      const result = await serverStrategy.isLiveHandoffAvailable();
+
+      // Verify fetchHandoffAvailability was called
+      expect(fetchAvailabilitySpy).toHaveBeenCalledTimes(1);
+
+      // Verify the result matches what fetchHandoffAvailability returned
+      expect(result).toBe(false);
+
+      // Restore the original implementation
+      fetchAvailabilitySpy.mockRestore();
     });
   });
 });
