@@ -1,3 +1,5 @@
+import type { CustomField } from "@magi/lib/handoff/types";
+
 declare global {
   // Legacy AppSettings interface kept for reference during migration
   interface LegacyAppSettings {
@@ -70,6 +72,7 @@ declare global {
     enableAvailabilityCheck?: boolean;
     availabilityCheckApiEmail?: string;
     availabilityCheckApiToken?: string;
+    customFields?: CustomField[];
   };
   type FrontHandoffConfiguration = BaseHandoffConfiguration & {
     type: "front";
@@ -110,9 +113,10 @@ declare global {
     | "enableAvailabilityCheck"
     | "allowAnonymousHandoff"
     | "handoffTerminatingMessageText"
-  > & {
-    availabilityFallbackMessage?: SalesforceHandoffConfiguration["availabilityFallbackMessage"];
-  };
+  > &
+    Pick<ZendeskHandoffConfiguration, "customFields"> & {
+      availabilityFallbackMessage?: SalesforceHandoffConfiguration["availabilityFallbackMessage"];
+    };
 
   interface ClientSafeAppSettings {
     branding: AppSettings["branding"];

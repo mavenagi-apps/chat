@@ -19,6 +19,7 @@ import type {
   HandoffState,
   HandoffHookReturn,
   Params,
+  InitializeHandoffParams,
 } from "./handoff/types";
 import { generateHeaders } from "./handoff/headerUtils";
 
@@ -75,7 +76,8 @@ export function useHandoff({
   }, [state.handoffAuthToken, organizationId, agentId]);
 
   const getOrCreateUserAndConversation = useCallback(
-    async (email?: string) => {
+    async (params: InitializeHandoffParams) => {
+      const { email, customFieldValues } = params;
       if (!strategyRef.current) {
         throw new Error("Handoff strategy is not set");
       }
@@ -94,6 +96,7 @@ export function useHandoff({
           language: navigator.language,
           customData,
           email,
+          customFieldValues,
         }),
         headers: generatedHeaders,
       });
@@ -240,7 +243,7 @@ export function useHandoff({
   ]);
 
   const initializeHandoff = useCallback(
-    async ({ email }: { email?: string }): Promise<void> => {
+    async (initializeHandoffParams: InitializeHandoffParams): Promise<void> => {
       if (!strategyRef.current) {
         console.error("Handoff strategy is not set");
         return;
@@ -252,7 +255,7 @@ export function useHandoff({
       }));
 
       try {
-        await getOrCreateUserAndConversation(email);
+        await getOrCreateUserAndConversation(initializeHandoffParams);
       } catch (error) {
         console.error("Error initializing handoff:", error);
         void handleEndHandoff();

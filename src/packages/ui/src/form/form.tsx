@@ -16,6 +16,7 @@ import {
   type UseFormProps,
   type UseFormReturn,
   useForm as useFormRHF,
+  Controller,
 } from "react-hook-form";
 import { type ZodTypeDef, type z } from "zod";
 
@@ -23,6 +24,7 @@ import { type ZodTypeDef, type z } from "zod";
 
 import { Button } from "../button";
 import { CheckboxField, Field, type FieldProps } from "./fieldset";
+import { Select, SelectTrigger, SelectValue, SelectContent } from "./select";
 
 const FormFieldContext = createContext<{ controlId: string } | undefined>(
   undefined,
@@ -30,6 +32,87 @@ const FormFieldContext = createContext<{ controlId: string } | undefined>(
 const FormFieldProvider = FormFieldContext.Provider;
 
 export const useFormFieldContext = () => useContext(FormFieldContext);
+
+// Form field components
+const FormField = <TFieldValues extends FieldValues>({
+  controlId,
+  ...props
+}: { controlId: FieldPath<TFieldValues> } & FieldProps) => {
+  return (
+    <FormFieldProvider value={{ controlId }}>
+      <Field {...props} />
+    </FormFieldProvider>
+  );
+};
+
+const FormCheckboxField = <TFieldValues extends FieldValues>({
+  controlId,
+  ...props
+}: { controlId: FieldPath<TFieldValues> } & FieldProps) => {
+  return (
+    <FormFieldProvider value={{ controlId }}>
+      <CheckboxField {...props} />
+    </FormFieldProvider>
+  );
+};
+
+// New FormSelectField component
+type FormSelectFieldProps<TFieldValues extends FieldValues> = {
+  controlId: FieldPath<TFieldValues>;
+  label?: string;
+  description?: string;
+  placeholder?: string;
+  required?: boolean;
+  className?: string;
+  children: React.ReactNode;
+};
+
+const FormSelectField = <TFieldValues extends FieldValues>({
+  controlId,
+  label,
+  description,
+  placeholder,
+  required,
+  className,
+  children,
+}: FormSelectFieldProps<TFieldValues>) => {
+  return (
+    <FormFieldProvider value={{ controlId }}>
+      <Controller
+        name={controlId}
+        rules={{ required }}
+        render={({ field, fieldState }) => (
+          <div className="flex flex-col gap-1">
+            {label && (
+              <label className="text-sm font-medium">
+                {label}
+                {required && <span className="text-red-500">*</span>}
+              </label>
+            )}
+            {description && (
+              <p className="text-xs text-gray-500">{description}</p>
+            )}
+            <Select
+              onValueChange={field.onChange}
+              value={field.value || ""}
+              defaultValue=""
+            >
+              <SelectTrigger className={className}>
+                <SelectValue placeholder={placeholder} />
+              </SelectTrigger>
+              <SelectContent className="bg-white dark:bg-gray-800">
+                {children}
+              </SelectContent>
+            </Select>
+            {fieldState.error && (
+              <p className="text-xs text-red-500">{fieldState.error.message}</p>
+            )}
+          </div>
+        )}
+      />
+    </FormFieldProvider>
+  );
+};
 
 export function useForm<
   Output extends FieldValues,
@@ -53,6 +136,7 @@ export function useForm<
     Form: typeof Form<Input, any, Output>;
     Field: typeof FormField<Input>;
     CheckboxField: typeof FormCheckboxField<Input>;
+    SelectField: typeof FormSelectField<Input>;
     SubmitButton: FC<ComponentProps<typeof Button>>;
   };
 };
@@ -73,6 +157,7 @@ export function useForm<TFieldValues extends FieldValues>({
     Form: typeof Form<TFieldValues, any, TFieldValues>;
     Field: typeof FormField<TFieldValues>;
     CheckboxField: typeof FormCheckboxField<TFieldValues>;
+    SelectField: typeof FormSelectField<TFieldValues>;
     SubmitButton: FC<ComponentProps<typeof Button>>;
   };
 };
@@ -121,6 +206,7 @@ export function useForm<
       Form,
       Field: FormField<TFieldValues>,
       CheckboxField: FormCheckboxField<TFieldValues>,
+      SelectField: FormSelectField<TFieldValues>,
       SubmitButton,
     },
     ...methods,
@@ -209,24 +295,4 @@ const Form = <
   );
 };
 
-const FormField = <TFieldValues extends FieldValues>({
-  controlId,
-  ...props
-}: { controlId: FieldPath<TFieldValues> } & FieldProps) => {
-  return (
-    <FormFieldProvider value={{ controlId }}>
-      <Field {...props} />
-    </FormFieldProvider>
-  );
-};
-
-const FormCheckboxField = <TFieldValues extends FieldValues>({
-  controlId,
-  ...props
-}: { controlId: FieldPath<TFieldValues> } & FieldProps) => {
-  return (
-    <FormFieldProvider value={{ controlId }}>
-      <CheckboxField {...props} />
-    </FormFieldProvider>
-  );
-};
+export { FormField, FormCheckboxField, FormSelectField };

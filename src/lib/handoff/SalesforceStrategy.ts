@@ -11,15 +11,13 @@ import type {
   UserChatMessage,
 } from "@/src/types";
 import {
+  isChatRequestFailUnavailable,
+  SALESFORCE_CHAT_SUBJECT_HEADER_KEY,
+  SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION,
+  SALESFORCE_MESSAGE_TYPES,
+  type ChatAvailabilityResponse,
   type SalesforceChatMessage,
   type SalesforceChatRequestFail,
-  isChatRequestFailUnavailable,
-} from "@/src/types/salesforce";
-import {
-  SALESFORCE_CHAT_SUBJECT_HEADER_KEY,
-  SALESFORCE_MESSAGE_TYPES,
-  SALESFORCE_MESSAGE_TYPES_FOR_HANDOFF_TERMINATION,
-  type ChatAvailabilityResponse,
 } from "@/src/types/salesforce";
 export class SalesforceStrategy implements HandoffStrategy<Message> {
   readonly messagesEndpoint = "/api/salesforce/messages";

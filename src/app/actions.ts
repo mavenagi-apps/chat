@@ -106,6 +106,7 @@ const parseHandoffConfiguration = (
       allowAnonymousHandoff: parsedHandoffConfiguration.allowAnonymousHandoff,
       handoffTerminatingMessageText:
         parsedHandoffConfiguration.handoffTerminatingMessageText,
+      customFields: parsedHandoffConfiguration.customFields,
     };
   } catch (error) {
     console.error("Error parsing handoff configuration:", error);

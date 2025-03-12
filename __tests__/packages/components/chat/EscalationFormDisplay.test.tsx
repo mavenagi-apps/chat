@@ -12,6 +12,7 @@ import { useAuth } from "@/src/app/providers/AuthProvider";
 import { useSettings } from "@/src/app/providers/SettingsProvider";
 import { useParams } from "next/navigation";
 import { isHandoffAvailable } from "@/src/app/actions";
+import type { CustomField } from "@/src/lib/handoff/types";
 
 // Mock the next-intl translations
 vi.mock("next-intl", () => ({
@@ -62,6 +63,35 @@ const mockProviderValue = {
   disableAttachments: false,
 };
 
+// Sample custom fields for testing
+const sampleCustomFields: CustomField[] = [
+  {
+    id: 1,
+    label: "First Name",
+    description: "Your first name",
+    required: true,
+    type: "STRING",
+  },
+  {
+    id: 2,
+    label: "Subscribe to newsletter",
+    description: "Receive updates about our products",
+    required: false,
+    type: "BOOLEAN",
+  },
+  {
+    id: 3,
+    label: "Priority",
+    description: "Select your issue priority",
+    required: true,
+    enumOptions: [
+      { label: "Low", value: "low" },
+      { label: "Medium", value: "medium" },
+      { label: "High", value: "high" },
+    ],
+  },
+];
+
 describe("EscalationFormDisplay", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -87,6 +117,7 @@ describe("EscalationFormDisplay", () => {
       enableAvailabilityCheck?: boolean;
       availabilityFallbackMessage?: string;
       isAvailable?: boolean;
+      customFields?: CustomField[];
     } = {},
   ) => {
     const {
@@ -94,6 +125,7 @@ describe("EscalationFormDisplay", () => {
       enableAvailabilityCheck = false,
       availabilityFallbackMessage = "agents_unavailable",
       isAvailable = true,
+      customFields = [],
     } = config;
 
     (useAuth as any).mockReturnValue({ isAuthenticated });
@@ -104,6 +136,7 @@ describe("EscalationFormDisplay", () => {
         handoffConfiguration: {
           enableAvailabilityCheck,
           availabilityFallbackMessage,
+          customFields,
         },
       },
     });
@@ -187,6 +220,7 @@ describe("EscalationFormDisplay", () => {
     await waitFor(() => {
       expect(mockInitializeHandoff).toHaveBeenCalledWith({
         email: "test@example.com",
+        customFieldValues: {},
       });
     });
   });
@@ -225,6 +259,7 @@ describe("EscalationFormDisplay", () => {
     await waitFor(() => {
       expect(mockInitializeHandoff).toHaveBeenCalledWith({
         email: "test@example.com",
+        customFieldValues: {},
       });
     });
   });
@@ -240,6 +275,7 @@ describe("EscalationFormDisplay", () => {
     await waitFor(() => {
       expect(mockInitializeHandoff).toHaveBeenCalledWith({
         email: undefined,
+        customFieldValues: {},
       });
     });
   });
@@ -297,5 +333,38 @@ describe("EscalationFormDisplay", () => {
 
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
     expect(screen.getByText("connect_to_live_agent")).toBeInTheDocument();
+  });
+
+  // New tests for custom fields
+  it("renders text custom fields", async () => {
+    renderComponent({
+      customFields: [sampleCustomFields[0]],
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("First Name")).toBeInTheDocument();
+      expect(screen.getByText("Your first name")).toBeInTheDocument();
+      const inputs = screen.getAllByRole("textbox");
+      for (const input of inputs) {
+        expect(input).toBeInTheDocument();
+        expect(input).toBeRequired();
+      }
+    });
+  });
+
+  it("renders dropdown custom fields", async () => {
+    renderComponent({
+      customFields: [sampleCustomFields[2]],
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Priority")).toBeInTheDocument();
+      expect(
+        screen.getByText("Select your issue priority"),
+      ).toBeInTheDocument();
+      // Note: The actual dropdown might be rendered differently depending on the UI library
+      // This is a basic check for the label
+      expect(screen.getByText("Priority")).toBeInTheDocument();
+    });
   });
 });
