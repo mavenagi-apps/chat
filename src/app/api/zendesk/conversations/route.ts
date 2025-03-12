@@ -4,9 +4,11 @@ import {
   getSunshineConversationsClient,
   postMessagesToZendeskConversation,
 } from "@/src/app/api/zendesk/utils";
-import { withAppSettings } from "@/src/app/api/server/utils";
 import { type NextRequest, NextResponse } from "next/server";
-import { decryptAndVerifySignedUserData } from "@/src/app/api/server/utils";
+import {
+  withAppSettings,
+  decryptAndVerifySignedUserData,
+} from "@/src/app/api/server/utils";
 
 import jwt from "jsonwebtoken";
 import { HANDOFF_AUTH_HEADER } from "@/src/app/constants/authentication";
@@ -14,6 +16,44 @@ import type { VerifiedUserData } from "@/src/types";
 import { nanoid } from "nanoid";
 
 const ANONYMOUS_USER_PREFIX = "maven-anonymous-user";
+
+const transformCustomFieldValues = (
+  customFieldValues: Record<string, string | boolean | number | undefined>,
+) => {
+  // Add prefix to custom field values
+  return Object.fromEntries(
+    Object.entries(customFieldValues).map(([key, value]) => [
+      `dataCapture.ticketField.${key}`,
+      value,
+    ]),
+  );
+};
+
+const passControlToZendesk = async (
+  SunshineConversationsClient: typeof SunshineConversationsClientModule,
+  conversationId: string,
+  appId: string,
+  customFieldValues: Record<string, string | boolean | number | undefined>,
+) => {
+  try {
+    const prefixedCustomFieldValues =
+      transformCustomFieldValues(customFieldValues);
+    const switchboardActionsApiInstance =
+      new SunshineConversationsClient.SwitchboardActionsApi();
+    const passControlBody = new SunshineConversationsClient.PassControlBody();
+    passControlBody.setSwitchboardIntegration("zd-agentWorkspace");
+    passControlBody.setMetadata(
+      prefixedCustomFieldValues as Record<string, string | number | boolean>,
+    );
+    await switchboardActionsApiInstance.passControl(
+      appId,
+      conversationId,
+      passControlBody,
+    );
+  } catch (error) {
+    console.error("Error passing control to zendesk", error);
+  }
+};
 
 const getOrCreateZendeskUser = async (
   SunshineConversationsClient: typeof SunshineConversationsClientModule,
@@ -106,7 +146,8 @@ Claiming email address: ${email}`,
 
 export async function POST(req: NextRequest) {
   return withAppSettings(req, async (request, settings) => {
-    const { messages, signedUserData, email } = await request.json();
+    const { messages, signedUserData, email, customFieldValues } =
+      await request.json();
     const { handoffConfiguration } = settings.misc;
 
     if (handoffConfiguration?.type !== "zendesk") {
@@ -180,6 +221,15 @@ export async function POST(req: NextRequest) {
       zendeskConversationsAppId,
       messages,
     );
+
+    if (customFieldValues) {
+      await passControlToZendesk(
+        SunshineConversationsClient,
+        conversationId,
+        zendeskConversationsAppId,
+        customFieldValues,
+      );
+    }
 
     const token = jwt.sign(
       { scope: "appUser", userId, conversationId, isAuthenticated },

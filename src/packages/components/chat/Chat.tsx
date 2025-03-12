@@ -8,7 +8,7 @@ import {
 } from "@/src/types";
 import { useSettings } from "@/src/app/providers/SettingsProvider";
 import type { Attachment } from "mavenagi/api";
-
+import type { InitializeHandoffParams } from "@/src/lib/handoff/types";
 interface ChatContextProps {
   agentName: string | null;
   conversationId: string;
@@ -20,17 +20,7 @@ interface ChatContextProps {
   addMessage: (message: ChatMessage) => void;
   ask: (question: string, attachments?: Attachment[]) => Promise<void>;
   handleEndHandoff: () => Promise<void>;
-  initializeHandoff: (data: { email?: string }) => Promise<
-    | void
-    | {
-        success: true;
-        data: { [k: string]: FormDataEntryValue };
-      }
-    | {
-        success: false;
-        error: string;
-      }
-  >;
+  initializeHandoff: (params: InitializeHandoffParams) => Promise<void>;
 }
 
 interface ChatProps

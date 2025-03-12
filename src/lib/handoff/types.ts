@@ -29,8 +29,13 @@ export type HandoffState = {
   handoffStatus: HandoffStatus;
 };
 
+export type InitializeHandoffParams = {
+  email?: string;
+  customFieldValues?: Record<string, string | boolean | number>;
+};
+
 export type HandoffHookReturn = {
-  initializeHandoff: (params: { email?: string }) => Promise<void>;
+  initializeHandoff: (params: InitializeHandoffParams) => Promise<void>;
   handoffStatus: HandoffStatus;
   handoffError: string | null;
   handoffChatEvents: HandoffState["handoffChatEvents"];
@@ -40,4 +45,23 @@ export type HandoffHookReturn = {
   isConnected: boolean;
   showTypingIndicator: boolean;
   shouldSupressHandoffInputDisplay: boolean;
+};
+
+// Define the custom field types
+type CustomFieldType = "STRING" | "BOOLEAN" | "NUMBER";
+
+// Define the enum option structure
+type EnumOption = {
+  label: string; // User-facing string in dropdown/radio
+  value: any; // Actual value to be stored (can be any type)
+};
+
+// Define the custom field structure
+export type CustomField = {
+  id: number; // Unique identifier for the field
+  label: string; // User-facing label for the field
+  description: string; // Longer description shown near the label
+  required: boolean; // Whether field is required
+  type?: CustomFieldType; // Parameter type (defaults to STRING)
+  enumOptions?: EnumOption[]; // Options for dropdown fields
 };
