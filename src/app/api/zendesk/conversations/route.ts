@@ -17,6 +17,44 @@ import { nanoid } from "nanoid";
 
 const ANONYMOUS_USER_PREFIX = "maven-anonymous-user";
 
+const transformCustomFieldValues = (
+  customFieldValues: Record<string, string | boolean | number | undefined>,
+) => {
+  // Add prefix to custom field values
+  return Object.fromEntries(
+    Object.entries(customFieldValues).map(([key, value]) => [
+      `dataCapture.ticketField.${key}`,
+      value,
+    ]),
+  );
+};
+
+const passControlToZendesk = async (
+  SunshineConversationsClient: typeof SunshineConversationsClientModule,
+  conversationId: string,
+  appId: string,
+  customFieldValues: Record<string, string | boolean | number | undefined>,
+) => {
+  try {
+    const prefixedCustomFieldValues =
+      transformCustomFieldValues(customFieldValues);
+    const switchboardActionsApiInstance =
+      new SunshineConversationsClient.SwitchboardActionsApi();
+    const passControlBody = new SunshineConversationsClient.PassControlBody();
+    passControlBody.setSwitchboardIntegration("zd-agentWorkspace");
+    passControlBody.setMetadata(
+      prefixedCustomFieldValues as Record<string, string | number | boolean>,
+    );
+    await switchboardActionsApiInstance.passControl(
+      appId,
+      conversationId,
+      passControlBody,
+    );
+  } catch (error) {
+    console.error("Error passing control to zendesk", error);
+  }
+};
+
 const getOrCreateZendeskUser = async (
   SunshineConversationsClient: typeof SunshineConversationsClientModule,
   verifiedUserData: VerifiedUserData | undefined,
@@ -64,7 +102,6 @@ const getOrCreateZendeskConversation = async (
   SunshineConversationsClient: typeof SunshineConversationsClientModule,
   userId: string,
   appId: string,
-  customFieldValues?: Record<string, string | boolean | number | undefined>,
 ) => {
   const apiInstance = new SunshineConversationsClient.ConversationsApi();
 
@@ -88,32 +125,6 @@ const getOrCreateZendeskConversation = async (
     appId,
     conversationCreateBody,
   );
-
-  if (customFieldValues) {
-    try {
-      // Convert "key: value" to "dataCapture.ticketField.key": value
-      const prefixedCustomFieldValues = Object.fromEntries(
-        Object.entries(customFieldValues).map(([key, value]) => {
-          return [`dataCapture.ticketField.${key}`, value];
-        }),
-      );
-
-      const switchboardActionsApiInstance =
-        new SunshineConversationsClient.SwitchboardActionsApi();
-      const passControlBody = new SunshineConversationsClient.PassControlBody();
-      passControlBody.setSwitchboardIntegration("zd-agentWorkspace");
-      passControlBody.setMetadata(
-        prefixedCustomFieldValues as Record<string, string | number | boolean>,
-      );
-      await switchboardActionsApiInstance.passControl(
-        appId,
-        conversation.id,
-        passControlBody,
-      );
-    } catch (error) {
-      console.error("Error passing control to zendesk", error);
-    }
-  }
 
   return conversation;
 };
@@ -194,7 +205,6 @@ export async function POST(req: NextRequest) {
       SunshineConversationsClient,
       userId,
       zendeskConversationsAppId,
-      customFieldValues,
     );
 
     const { id: conversationId } = conversation;
@@ -211,6 +221,15 @@ export async function POST(req: NextRequest) {
       zendeskConversationsAppId,
       messages,
     );
+
+    if (customFieldValues) {
+      await passControlToZendesk(
+        SunshineConversationsClient,
+        conversationId,
+        zendeskConversationsAppId,
+        customFieldValues,
+      );
+    }
 
     const token = jwt.sign(
       { scope: "appUser", userId, conversationId, isAuthenticated },
