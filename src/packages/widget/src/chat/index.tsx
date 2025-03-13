@@ -25,6 +25,7 @@ type Props = {
   horizontalPosition: "left" | "right";
   verticalPosition: "top" | "bottom";
   signedUserData?: string | null;
+  hideButton?: boolean | null;
   unsignedUserData?: Record<string, any> | null;
   unverifiedUserData?: Record<string, any> | null;
   customData?: Record<string, any> | null;
@@ -33,31 +34,39 @@ type Props = {
   showPoweredBy?: boolean;
 };
 
-const App = forwardRef<{ open: () => void; close: () => void }, Props>(
-  (props, ref) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const isWide = useMediaQuery("(min-width: 500px)");
-    const { iframeRef, iframeUrl, iframeStyle } = useIframeCommunication({
-      organizationId: props.organizationId,
-      agentId: props.agentId,
-      signedUserData: props.signedUserData,
-      unsignedUserData: props.unsignedUserData || props.unverifiedUserData,
-      customData: props.customData,
-      locale: props.locale,
-      isWide,
-      isOpen,
-      horizontalPosition: props.horizontalPosition,
-      verticalPosition: props.verticalPosition,
-      showPoweredBy: props.showPoweredBy,
-    });
+const App = forwardRef<
+  { open: () => void; close: () => void; hide: () => void; show: () => void },
+  Props
+>((props, ref) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isButtonHidden, setIsButtonHidden] = useState(
+    props.hideButton || false,
+  );
+  const isWide = useMediaQuery("(min-width: 500px)");
+  const { iframeRef, iframeUrl, iframeStyle } = useIframeCommunication({
+    organizationId: props.organizationId,
+    agentId: props.agentId,
+    signedUserData: props.signedUserData,
+    unsignedUserData: props.unsignedUserData || props.unverifiedUserData,
+    customData: props.customData,
+    locale: props.locale,
+    isWide,
+    isOpen,
+    horizontalPosition: props.horizontalPosition,
+    verticalPosition: props.verticalPosition,
+    showPoweredBy: props.showPoweredBy,
+  });
 
-    useImperativeHandle(ref, () => ({
-      open: () => setIsOpen(true),
-      close: () => setIsOpen(false),
-    }));
+  useImperativeHandle(ref, () => ({
+    open: () => setIsOpen(true),
+    close: () => setIsOpen(false),
+    hide: () => setIsButtonHidden(true),
+    show: () => setIsButtonHidden(false),
+  }));
 
-    return (
-      <>
+  return (
+    <>
+      {!isButtonHidden && (
         <ChatButton
           bgColor={props.bgColor}
           textColor={props.textColor}
@@ -67,16 +76,16 @@ const App = forwardRef<{ open: () => void; close: () => void }, Props>(
           isOpen={isOpen}
           onClick={() => setIsOpen(!isOpen)}
         />
-        <iframe
-          ref={iframeRef}
-          style={iframeStyle}
-          src={iframeUrl}
-          allow="clipboard-write"
-        />
-      </>
-    );
-  },
-);
+      )}
+      <iframe
+        ref={iframeRef}
+        style={iframeStyle}
+        src={iframeUrl}
+        allow="clipboard-write"
+      />
+    </>
+  );
+});
 
 const appRef = createRef();
 
@@ -86,6 +95,14 @@ export function open() {
 
 export function close() {
   appRef.current?.close();
+}
+
+export function hide() {
+  appRef.current?.hide();
+}
+
+export function show() {
+  appRef.current?.show();
 }
 
 type LoadProps = Partial<Omit<Props, "iframeUrl">> & {
@@ -101,8 +118,8 @@ type LoadProps = Partial<Omit<Props, "iframeUrl">> & {
   textColor?: string;
   locale?: string;
   showPoweredBy?: boolean;
-} & // This prevents mixing of old and new ID formats while supporting both patterns // 2. Both orgFriendlyId and agentFriendlyId are provided (legacy spec) // 1. Both organizationId and agentId are provided (new spec) OR // It enforces that either: // "orgFriendlyId" and "agentFriendlyId" to "organizationId" and "agentId". // This union type ensures backwards compatibility during the migration from the
-  (| {
+} & ( // This prevents mixing of old and new ID formats while supporting both patterns // 2. Both orgFriendlyId and agentFriendlyId are provided (legacy spec) // 1. Both organizationId and agentId are provided (new spec) OR // It enforces that either: // "orgFriendlyId" and "agentFriendlyId" to "organizationId" and "agentId". // This union type ensures backwards compatibility during the migration from the
+    | {
         organizationId: string;
         agentId: string;
         orgFriendlyId?: never;
@@ -124,6 +141,7 @@ export async function load({
   horizontalPosition = "right",
   verticalPosition = "bottom",
   locale,
+  hideButton = false,
   organizationId,
   orgFriendlyId,
   agentId,
@@ -147,6 +165,7 @@ export async function load({
       locale={locale}
       horizontalPosition={horizontalPosition}
       verticalPosition={verticalPosition}
+      hideButton={hideButton}
       signedUserData={signedUserData}
       unsignedUserData={unsignedUserData}
       customData={customData}
