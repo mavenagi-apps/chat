@@ -150,7 +150,7 @@ const createCustomFieldsMesage = (
       type: "text",
       text: `Custom fields:
 ${Object.entries(customFieldValues)
-  .map(([key, value]) => `${key}: ${value}`)
+  .map(([key, value]) => `${key}: ${String(value)}`)
   .join("\n")}
     `,
     },
