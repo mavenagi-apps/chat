@@ -2,8 +2,14 @@ import type { HandoffStrategy } from "./HandoffStrategy";
 import { ZendeskStrategy } from "./ZendeskStrategy";
 import { FrontStrategy } from "./FrontStrategy";
 import { SalesforceStrategy } from "./SalesforceStrategy";
-
-export type HandoffType = "zendesk" | "front" | "salesforce" | null | undefined;
+import { SalesforceMessagingStrategy } from "./SalesforceMessagingStrategy";
+export type HandoffType =
+  | "zendesk"
+  | "front"
+  | "salesforce"
+  | "salesforce-messaging"
+  | null
+  | undefined;
 
 export class HandoffStrategyFactory {
   static createStrategy(
@@ -17,6 +23,10 @@ export class HandoffStrategyFactory {
         return new FrontStrategy(configuration as ClientSafeHandoffConfig);
       case "salesforce":
         return new SalesforceStrategy(configuration as ClientSafeHandoffConfig);
+      case "salesforce-messaging":
+        return new SalesforceMessagingStrategy(
+          configuration as ClientSafeHandoffConfig,
+        );
       case null:
       case undefined:
       default:
