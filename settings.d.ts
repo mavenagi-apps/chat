@@ -73,6 +73,7 @@ declare global {
     availabilityCheckApiEmail?: string;
     availabilityCheckApiToken?: string;
     customFields?: CustomField[];
+    shouldIncludeCustomFieldsInHandoffMessage?: boolean;
   };
   type FrontHandoffConfiguration = BaseHandoffConfiguration & {
     type: "front";

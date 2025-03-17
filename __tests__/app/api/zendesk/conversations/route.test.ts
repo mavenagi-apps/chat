@@ -357,5 +357,54 @@ describe("POST /api/zendesk/conversations", () => {
       // Restore console.error
       console.error = originalConsoleError;
     });
+
+    it("should include custom fields message when shouldIncludeCustomFieldsInHandoffMessage is enabled", async () => {
+      // Mock withAppSettings to include the new configuration
+      vi.mocked(withAppSettings).mockImplementationOnce((req, handler) =>
+        handler(
+          req,
+          {
+            branding: {},
+            security: {},
+            misc: {
+              handoffConfiguration: {
+                type: "zendesk",
+                webhookId: "test-webhook-id",
+                webhookSecret: "test-webhook-secret",
+                subdomain: "test-subdomain",
+                apiKey: "test-key",
+                apiSecret: "test-secret",
+                shouldIncludeCustomFieldsInHandoffMessage: true,
+              } as ZendeskHandoffConfiguration,
+            },
+          } as ParsedAppSettings,
+          "test-org-id",
+          "test-agent-id",
+        ),
+      );
+
+      await POST(
+        createMockRequest({
+          customFieldValues: TEST_DATA.CUSTOM_FIELD_VALUES,
+        }) as unknown as NextRequest,
+      );
+
+      expect(postMessagesToZendeskConversation).toHaveBeenCalledWith(
+        expect.anything(),
+        TEST_DATA.CONVERSATION_ID,
+        TEST_DATA.USER_ID,
+        TEST_DATA.APP_ID,
+        expect.arrayContaining([
+          TEST_DATA.DEFAULT_MESSAGE,
+          expect.objectContaining({
+            author: { type: "business", userId: TEST_DATA.USER_ID },
+            content: {
+              type: "text",
+              text: expect.stringContaining("Custom fields:"),
+            },
+          }),
+        ]),
+      );
+    });
   });
 });
