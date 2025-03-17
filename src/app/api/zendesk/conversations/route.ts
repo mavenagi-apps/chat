@@ -137,7 +137,7 @@ const getOrCreateZendeskConversation = async (
  * @param customFieldValues - A record of custom field keys and their values
  * @returns A message object formatted for Zendesk's API with custom field values
  */
-const createCustomFieldsMesage = (
+const createCustomFieldsMessage = (
   userId: string,
   customFieldValues: Record<string, string | boolean | number | undefined>,
 ) => {
@@ -252,7 +252,7 @@ export async function POST(req: NextRequest) {
 
     // TODO: This is a temporary workaround that should be removed immediately when the root issue is resolved
     if (handoffConfiguration.shouldIncludeCustomFieldsInHandoffMessage) {
-      messages.push(createCustomFieldsMesage(userId, customFieldValues));
+      messages.push(createCustomFieldsMessage(userId, customFieldValues));
     }
 
     await postMessagesToZendeskConversation(
