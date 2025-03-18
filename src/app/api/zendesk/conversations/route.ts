@@ -129,6 +129,42 @@ const getOrCreateZendeskConversation = async (
   return conversation;
 };
 
+/**
+ * Creates a message containing custom field values for Zendesk handoff.
+ * This is a temporary workaround to display custom fields in the conversation.
+ *
+ * @param userId - The ID of the user who owns the conversation
+ * @param customFieldValues - A record of custom field keys and their values
+ * @returns A message object formatted for Zendesk's API with custom field values
+ */
+const createCustomFieldsMessage = (
+  userId: string,
+  customFieldValues: Record<string, string | boolean | number | undefined>,
+) => {
+  return {
+    author: {
+      type: "business",
+      userId,
+    },
+    content: {
+      type: "text",
+      text: `Custom fields:
+${Object.entries(customFieldValues)
+  .map(([key, value]) => `${key}: ${String(value)}`)
+  .join("\n")}
+    `,
+    },
+  };
+};
+
+/**
+ * Creates a message notifying Zendesk agents that the user is unauthenticated.
+ * This message is sent when a user without signed user data or email attempts to hand off.
+ *
+ * @param userId - The ID of the user who owns the conversation
+ * @param email - The email address the user is claiming to own
+ * @returns A message object formatted for Zendesk's API with authentication warning
+ */
 const createUnauthenticatedMessage = (userId: string, email: string) => ({
   author: {
     type: "business",
@@ -212,6 +248,11 @@ export async function POST(req: NextRequest) {
     const isAuthenticated = !!verifiedUserInfo;
     if (!isAuthenticated) {
       messages.push(createUnauthenticatedMessage(userId, email));
+    }
+
+    // TODO: This is a temporary workaround that should be removed immediately when the root issue is resolved
+    if (handoffConfiguration.shouldIncludeCustomFieldsInHandoffMessage) {
+      messages.push(createCustomFieldsMessage(userId, customFieldValues));
     }
 
     await postMessagesToZendeskConversation(
