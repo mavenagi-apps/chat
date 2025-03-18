@@ -80,25 +80,29 @@ declare global {
     host?: string;
     shiftNames?: string[];
   };
-  type SalesforceHandoffConfiguration = {
+  type SalesforceHandoffConfiguration = BaseHandoffConfiguration & {
     type: "salesforce";
     orgId: string;
     chatHostUrl: string;
     chatButtonId: string;
     deploymentId: string;
     eswLiveAgentDevName: string;
-    allowAnonymousHandoff?: boolean;
-    apiSecret: string;
-    surveyLink?: string;
     enableAvailabilityCheck?: boolean;
     availabilityFallbackMessage?: string;
     handoffTerminatingMessageText?: string;
+  };
+  type SalesforceMessagingHandoffConfiguration = BaseHandoffConfiguration & {
+    type: "salesforce-messaging";
+    organizationId: string;
+    deploymentId: string;
+    messagingUrl: string;
   };
 
   type HandoffConfiguration =
     | ZendeskHandoffConfiguration
     | FrontHandoffConfiguration
-    | SalesforceHandoffConfiguration;
+    | SalesforceHandoffConfiguration
+    | SalesforceMessagingHandoffConfiguration;
 
   interface ParsedAppSettings extends Omit<AppSettings, "misc"> {
     misc: AppSettings["misc"] & {
@@ -106,17 +110,19 @@ declare global {
     };
   }
 
-  type ClientSafeHandoffConfig = Pick<
-    HandoffConfiguration,
-    | "type"
-    | "surveyLink"
-    | "enableAvailabilityCheck"
-    | "allowAnonymousHandoff"
-    | "handoffTerminatingMessageText"
-  > &
-    Pick<ZendeskHandoffConfiguration, "customFields"> & {
-      availabilityFallbackMessage?: SalesforceHandoffConfiguration["availabilityFallbackMessage"];
-    };
+  type ClientSafeHandoffConfig = {
+    type:
+      | ZendeskHandoffConfiguration["type"]
+      | SalesforceHandoffConfiguration["type"]
+      | FrontHandoffConfiguration["type"]
+      | SalesforceMessagingHandoffConfiguration["type"];
+    surveyLink?: HandoffConfiguration["surveyLink"];
+    enableAvailabilityCheck?: HandoffConfiguration["enableAvailabilityCheck"];
+    allowAnonymousHandoff?: HandoffConfiguration["allowAnonymousHandoff"];
+    handoffTerminatingMessageText?: HandoffConfiguration["handoffTerminatingMessageText"];
+    customFields?: ZendeskHandoffConfiguration["customFields"];
+    availabilityFallbackMessage?: HandoffConfiguration["availabilityFallbackMessage"];
+  };
 
   interface ClientSafeAppSettings {
     branding: AppSettings["branding"];

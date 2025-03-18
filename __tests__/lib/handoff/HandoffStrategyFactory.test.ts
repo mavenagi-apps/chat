@@ -3,6 +3,7 @@ import { HandoffStrategyFactory } from "@/src/lib/handoff/HandoffStrategyFactory
 import { ZendeskStrategy } from "@/src/lib/handoff/ZendeskStrategy";
 import { FrontStrategy } from "@/src/lib/handoff/FrontStrategy";
 import { SalesforceStrategy } from "@/src/lib/handoff/SalesforceStrategy";
+import { SalesforceMessagingStrategy } from "@/src/lib/handoff/SalesforceMessagingStrategy";
 
 describe("HandoffStrategyFactory", () => {
   const salesforceConfig = {
@@ -14,25 +15,19 @@ describe("HandoffStrategyFactory", () => {
     eswLiveAgentDevName: "test-name",
     apiSecret: "test-secret",
     handoffTerminatingMessageText: "goodbye",
-  };
+  } as ClientSafeHandoffConfig;
 
   const zendeskConfig = {
     type: "zendesk" as const,
-    apiKey: "test-api-key",
-    apiSecret: "test-api-secret",
-    appId: "test-app-id",
-    webhookId: "test-webhook-id",
-    webhookSecret: "test-webhook-secret",
-    subdomain: "test-subdomain",
-  };
+  } as ClientSafeHandoffConfig;
 
   const frontConfig = {
     type: "front" as const,
-    apiKey: "test-api-key",
-    apiSecret: "test-api-secret",
-    appId: "test-app-id",
-    channelName: "test-channel",
-  };
+  } as ClientSafeHandoffConfig;
+
+  const salesforceMessagingConfig = {
+    type: "salesforce-messaging" as const,
+  } as ClientSafeHandoffConfig;
 
   it("creates a ZendeskStrategy for zendesk type", () => {
     const strategy = HandoffStrategyFactory.createStrategy("zendesk");
@@ -47,6 +42,13 @@ describe("HandoffStrategyFactory", () => {
   it("creates a SalesforceStrategy for salesforce type", () => {
     const strategy = HandoffStrategyFactory.createStrategy("salesforce");
     expect(strategy).toBeInstanceOf(SalesforceStrategy);
+  });
+
+  it("creates a SalesforceMessagingStrategy for salesforce-messaging type", () => {
+    const strategy = HandoffStrategyFactory.createStrategy(
+      "salesforce-messaging",
+    );
+    expect(strategy).toBeInstanceOf(SalesforceMessagingStrategy);
   });
 
   it("creates a ZendeskStrategy with configuration", () => {
@@ -71,6 +73,14 @@ describe("HandoffStrategyFactory", () => {
       salesforceConfig,
     );
     expect(strategy).toBeInstanceOf(SalesforceStrategy);
+  });
+
+  it("creates a SalesforceMessagingStrategy with configuration", () => {
+    const strategy = HandoffStrategyFactory.createStrategy(
+      "salesforce-messaging",
+      salesforceMessagingConfig,
+    );
+    expect(strategy).toBeInstanceOf(SalesforceMessagingStrategy);
   });
 
   it("returns null for null type", () => {
