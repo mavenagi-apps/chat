@@ -12,9 +12,11 @@ describe("SalesforceMessagingStrategy", () => {
 
   describe("properties", () => {
     it("should have required endpoints", () => {
-      expect(strategy.messagesEndpoint).toBe("/api/salesforce/messages");
+      expect(strategy.messagesEndpoint).toBe(
+        "/api/salesforce-messaging/messages",
+      );
       expect(strategy.conversationsEndpoint).toBe(
-        "/api/salesforce/conversations",
+        "/api/salesforce-messaging/conversations",
       );
     });
   });
