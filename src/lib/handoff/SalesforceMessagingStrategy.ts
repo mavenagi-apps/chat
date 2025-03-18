@@ -22,8 +22,10 @@ export class SalesforceMessagingStrategy implements HandoffStrategy<any> {
   }
 }
 
-export class SalesforceServerStrategy implements ServerHandoffStrategy {
-  constructor(private configuration: SalesforceHandoffConfiguration) {}
+export class SalesforceMessagingServerStrategy
+  implements ServerHandoffStrategy
+{
+  constructor(private configuration: SalesforceMessagingHandoffConfiguration) {}
 
   isLiveHandoffAvailable? = async () => {
     return true;

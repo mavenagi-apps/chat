@@ -2,6 +2,7 @@ import { FrontServerStrategy } from "./FrontServerStrategy";
 import type { ServerHandoffStrategy } from "./HandoffStrategy";
 import type { HandoffType } from "./HandoffStrategyFactory";
 import { SalesforceServerStrategy } from "./SalesforceStrategy";
+import { SalesforceMessagingServerStrategy } from "./SalesforceMessagingStrategy";
 import { ZendeskServerStrategy } from "./ZendeskStrategy";
 
 export class ServerHandoffStrategyFactory {
@@ -21,6 +22,10 @@ export class ServerHandoffStrategyFactory {
       case "salesforce":
         return new SalesforceServerStrategy(
           configuration as SalesforceHandoffConfiguration,
+        );
+      case "salesforce-messaging":
+        return new SalesforceMessagingServerStrategy(
+          configuration as SalesforceMessagingHandoffConfiguration,
         );
       case null:
       case undefined:
