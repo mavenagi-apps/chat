@@ -187,5 +187,3 @@ export async function POST(req: NextRequest) {
     }
   });
 }
-
-export const maxDuration = 900;
